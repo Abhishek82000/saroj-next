@@ -1,0 +1,8 @@
+/* Load order matters: tokens, then the base layer, then overlays, then pages. */
+@import "../styles/tokens.css";
+@import "../styles/base.css";
+@import "../styles/overlays.css";
+@import "../styles/shell.css";
+@import "../styles/home.css";
+@import "../styles/shop.css";
+@import "../styles/product.css";
