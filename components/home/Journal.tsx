@@ -2,15 +2,16 @@ import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Icon from "@/components/ui/Icon";
 
-const PIC = "https://picsum.photos/seed/";
+const BLOG_IMG = "https://www.sarojtextile.com/img/uploads/blogs/";
+const BLOG_URL = "https://www.sarojtextile.com/blog/";
 
 const posts = [
-  ["Field note", "Why blue pottery has no clay in it", "saroj-post-pottery",
-    "https://www.sarojtextile.com/blogs"],
-  ["Care", "What actually makes a block print bleed", "saroj-post-wash",
-    "https://www.sarojtextile.com/blogs"],
-  ["The counter", "Four metres, and what you can cut from it", "saroj-post-metres",
-    "https://www.sarojtextile.com/blogs"],
+  ["How to Identify Pure Cotton Fabric", "how-to-identify-pure-cotton-fabric", "1771871091.webp"],
+  ["A Guide to Finding the Perfect Online Fabric Store in India", "a-guide-to-finding-the-perfect-online-fabric-store-in-india", "1765299941.png"],
+  ["What makes Kalamkari Fabric special?", "what-makes-kalamkari-fabric-special", "1764345934.webp"],
+  ["Why You Should Invest in Jaipuri Cotton Fabric?", "why-you-should-invest-in-jaipuri-cotton-fabric", "1762371064.png"],
+  ["Everything You Need to Know About Rayon Fabrics", "everything-you-need-to-know-about-rayon-fabrics", "1759765622.png"],
+  ["5 Tips to Buy Pure Cotton Fabric", "5-tips-to-buy-pure-cotton-fabric", "1762400405.webp"],
 ];
 
 export default function Journal() {
@@ -21,13 +22,12 @@ export default function Journal() {
         <Reveal as="h2" delay={1} className="st-h2">The journal.</Reveal>
 
         <div className="st-journal">
-          {posts.map(([kind, title, seed, href], i) => (
-            <Reveal key={title} as="a" href={href} className="st-post" delay={(i + 1) as 1 | 2 | 3}>
+          {posts.map(([title, slug, image], i) => (
+            <Reveal key={slug} as="a" href={BLOG_URL + slug} className="st-post" delay={((i % 3) + 1) as 1 | 2 | 3}>
               <div className="st-post__ph ph">
-                <Photo src={`${PIC}${seed}/800/500`} alt={title} note={`PLACEHOLDER — ${title}`} sizes="380px" />
+                <Photo src={BLOG_IMG + image} alt={title} sizes="380px" />
               </div>
               <div className="st-post__body">
-                <span className="st-post__kind">{kind}</span>
                 <h3>{title}</h3>
                 <span className="st-post__more">Read it <Icon name="right" size={12} strokeWidth={2} /></span>
               </div>
