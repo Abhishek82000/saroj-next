@@ -64,11 +64,37 @@ export interface HomeTagSection {
   products: HomeApiProduct[];
 }
 
+/** One clip from the "video_products" list in GET /api/home. */
+export interface HomeVideoProduct {
+  product_id: number;
+  product_name: string;
+  product_price: string;
+  product_selling_price: string;
+  product_slug: string;
+  product_video_cdn: string;
+}
+
 export interface HomeApiResponse {
   success: boolean;
   data: {
     tag_show_home_page: HomeTagSection[];
+    video_products: HomeVideoProduct[];
   };
+}
+
+/** A single shoppable-reel card, as rendered by the Reels rail. */
+export interface Reel {
+  id: string;
+  video: string;
+  kind: "Fabric" | "Handicraft";
+  name: string;
+  price: number;
+  mrp: number;
+  unit: string;
+  image: string;
+  /** Catalogue slug when the piece has a page here; an outside URL otherwise. */
+  slug?: string;
+  href?: string;
 }
 
 export interface CartLine {

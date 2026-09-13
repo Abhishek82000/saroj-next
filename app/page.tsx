@@ -14,7 +14,7 @@ import Bulk from "@/components/home/Bulk";
 import Journal from "@/components/home/Journal";
 import Rail from "@/components/product/Rail";
 import JsonLd from "@/components/seo/JsonLd";
-import { apiProductToProduct, getHomeTagSections } from "@/lib/home";
+import { apiProductToProduct, buildReels, getHomeData } from "@/lib/home";
 import { products } from "@/lib/products";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 import { site } from "@/lib/site";
@@ -28,7 +28,9 @@ export const metadata: Metadata = pageMeta({
 
 export default async function HomePage() {
   const fresh = [...products].sort((a, b) => b.fresh - a.fresh).slice(0, 8);
-  const tagSections = await getHomeTagSections();
+  const homeData = await getHomeData();
+  const tagSections = homeData.tagSections;
+  const apiReels = buildReels(homeData);
 
   return (
     <main id="main">
@@ -51,7 +53,7 @@ export default async function HomePage() {
       ) : (
         <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />
       )}
-      <Reels />
+      <Reels items={apiReels} />
       <GiftBuilder />
       <FabricFan />
       <Making />

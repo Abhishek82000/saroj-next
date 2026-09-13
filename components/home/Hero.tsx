@@ -84,7 +84,7 @@ export default function Hero() {
           {swatches.map(([file, title, slug]) => (
             <Link key={file} href={`/product/${slug}`} className="st-swatch-item" title={title}>
               <span className="st-swatch ph">
-                <Photo src={CDN + file + ".webp"} alt={title} sizes="60px" />
+                <Photo src={CDN + file + ".webp"} alt={title} sizes="100px" />
               </span>
               <span className="st-swatch__label">{title}</span>
             </Link>

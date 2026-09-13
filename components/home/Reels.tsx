@@ -7,22 +7,9 @@ import Reveal from "@/components/ui/Reveal";
 import { useStore } from "@/components/shell/StoreProvider";
 import { bySlug } from "@/lib/products";
 import { inr } from "@/lib/site";
+import type { Reel } from "@/lib/types";
 
 const MP4 = "https://saroj-textile-store.b-cdn.net/products/";
-
-interface Reel {
-  id: string;
-  video: string;
-  kind: "Fabric" | "Handicraft";
-  name: string;
-  price: number;
-  mrp: number;
-  unit: string;
-  image: string;
-  /** Catalogue slug when the piece has a page here; an outside URL otherwise. */
-  slug?: string;
-  href?: string;
-}
 
 const reels: Reel[] = [
   {
@@ -76,8 +63,9 @@ const reels: Reel[] = [
  * Drape and glaze don't survive a still, so these are short clips shot on the
  * counter. Each one is buyable without leaving the rail.
  */
-export default function Reels() {
+export default function Reels({ items }: { items?: Reel[] }) {
   const rail = useRef<HTMLDivElement>(null);
+  const data = items && items.length > 0 ? items : reels;
 
   const nudge = (dir: 1 | -1) => {
     const el = rail.current;
@@ -108,7 +96,7 @@ export default function Reels() {
 
       <div className="st-wrap">
         <div className="st-reels" ref={rail}>
-          {reels.map((r) => <ReelCard key={r.id} reel={r} />)}
+          {data.map((r) => <ReelCard key={r.id} reel={r} />)}
         </div>
       </div>
     </section>
