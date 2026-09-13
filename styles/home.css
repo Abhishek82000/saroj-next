@@ -21,7 +21,7 @@
 .st-plates{ margin-top:clamp(34px,6vw,58px); perspective:1500px; display:grid; justify-items:center; }
 .st-plates__row{ display:grid; grid-template-columns:1fr 1.5fr 1fr; align-items:center;
                  gap:clamp(8px,2vw,26px); width:100%; transform-style:preserve-3d; will-change:transform; }
-.st-plate{ border-radius:14px; box-shadow:var(--shadow); transform-style:preserve-3d;
+.st-plate{ display:block; border-radius:14px; box-shadow:var(--shadow); transform-style:preserve-3d;
            transition:transform 1s var(--ease); will-change:transform; }
 .st-plate--l{ aspect-ratio:3/4; transform:translateZ(-90px) rotateY(16deg) translateY(16px); }
 .st-plate--c{ aspect-ratio:4/5; transform:translateZ(40px); border-radius:16px; }

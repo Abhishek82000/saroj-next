@@ -36,6 +36,41 @@ export interface Product {
   alsoBought?: string[];
 }
 
+/** One product as returned by GET /api/home, inside a tag section. */
+export interface HomeApiProduct {
+  id: number;
+  name: string;
+  slug: string;
+  price: string;
+  selling_price: string;
+  image: string;
+  image_alt: string | null;
+  moq: number;
+  stock: number;
+  inventory: number;
+  type: number;
+  label: string;
+  rating: string;
+  review_count: number;
+  style_type: number;
+  gallery: string[];
+}
+
+/** One row of the homepage rails, e.g. "New Arrivals" or "Best Seller". */
+export interface HomeTagSection {
+  id: number;
+  name: string;
+  slug: string;
+  products: HomeApiProduct[];
+}
+
+export interface HomeApiResponse {
+  success: boolean;
+  data: {
+    tag_show_home_page: HomeTagSection[];
+  };
+}
+
 export interface CartLine {
   id: string;
   name: string;

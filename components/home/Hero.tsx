@@ -4,21 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import Photo from "@/components/ui/Photo";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
-const PIC = "https://picsum.photos/seed/";
 
+/** The 3 featured categories — real category names, each linked to its best-selling product. */
 const plates = [
-  { cls: "st-plate--l", src: PIC + "saroj-pottery-a/600/800", cap: "Blue Pottery", alt: "Blue pottery pieces from Kot Jewar", note: "Blue pottery vases on a workshop ledge, side light" },
-  { cls: "st-plate--c", src: PIC + "saroj-hands-main/900/1125", cap: "The workshop, Jhotwara", alt: "An artisan at work in a Jaipur workshop", note: "Hero shot: artisan's hands mid-work, shallow depth of field" },
-  { cls: "st-plate--r", src: CDN + "63141785559833.webp", cap: "Ajrakh, on the bolt", alt: "Red over-dye Ajrakh block printed cotton", note: "Ajrakh bolt half-unrolled" },
+  { cls: "st-plate--l", src: CDN + "40661788078255.webp", cap: "Jaipur Cotton", alt: "Maroon base, cream paisley printed Jaipuri cotton fabric", note: "Best-selling Jaipuri cotton print", slug: "maroon-base-with-cream-paisley-printed-jaipuri-cotton-fabric" },
+  { cls: "st-plate--c", src: CDN + "63141785559833.webp", cap: "Ajrakh Collection", alt: "Red over-dye Ajrakh block printed cotton", note: "Ajrakh bolt half-unrolled" , slug: "red-over-dye-with-blue-block-printed-ajrakh-cotton-fabric" },
+  { cls: "st-plate--r", src: CDN + "94351785567420.webp", cap: "Kalamkari", alt: "Red vibrant multi-colour paisley Kalamkari print", note: "Kalamkari paisley, vibrant multi-colour", slug: "red-vibrant-multi-colour-paisley-kalamkari-print" },
 ];
 
+/** The remaining featured categories, each linked to its matching product. */
 const swatches = [
-  ["48621785565568", "Ajrakh", "teal-pastel-green-with-blue-ajrakh-printed-cotton-fabric"],
-  ["42621785568665", "Kalamkari", "teal-green-and-mustard-paisley-printed-kalamkari-cotton-fabric"],
-  ["81901780987621", "Jaipuri Cotton", "white-shade-base-with-butta-printed-cotton-fabric-3"],
-  ["13001785568370", "Indigo", "neavy-blue-base-indigo-printed-kalamkari-paisley-print"],
-  ["97721785569096", "Patola", "leaf-green-polka-patola-in-red-ajrakh-cotton-printed-fabric"],
-  ["12091782565773", "Flower Garden", "white-shade-base-with-floral-print-kalamkari-jaipuri-cotton-fabric"],
+  ["42621785568665", "Paisley Prints", "teal-green-and-mustard-paisley-printed-kalamkari-cotton-fabric"],
+  ["13001785568370", "Indigo Prints", "neavy-blue-base-indigo-printed-kalamkari-paisley-print"],
+  ["97721785569096", "Patola & Patch Prints", "leaf-green-polka-patola-in-red-ajrakh-cotton-printed-fabric"],
+  ["74021788077426", "Abstract Prints", "blace-base-with-abstract-white-jaal-printed-jaipuri-cotton-fabric"],
+  ["41911788077745", "Cotton Kantha", "white-base-with-red-and-yellow-block-printed-kantha-jaipuri-cotton-fabric"],
+  ["34411788077677", "Stripes and Checks", "white-and-blue-strips-with-block-printed-jaipuri-cotton-fabric"],
 ];
 
 export default function Hero() {
@@ -71,10 +72,10 @@ export default function Hero() {
         <div className="st-plates fade f4">
           <div className="st-plates__row" ref={row}>
             {plates.map((p) => (
-              <figure key={p.cls} className={`st-plate ${p.cls} ph`} style={{ margin: 0 }}>
+              <Link key={p.cls} href={`/product/${p.slug}`} className={`st-plate ${p.cls} ph`}>
                 <Photo src={p.src} alt={p.alt} note={p.note} priority sizes="(max-width:900px) 40vw, 340px" />
-                <figcaption className="st-plate__cap">{p.cap}</figcaption>
-              </figure>
+                <span className="st-plate__cap">{p.cap}</span>
+              </Link>
             ))}
           </div>
         </div>
