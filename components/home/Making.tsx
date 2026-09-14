@@ -13,29 +13,29 @@ const steps = [
 
 /** How a piece gets made, in the order it happens — so the numbers earn their place. */
 export default function Making() {
-  return (
-    <section className="st-sec" id="making" style={{ paddingBottom: "clamp(30px,5vw,54px)" }}>
-      <div className="st-wrap">
-        <Reveal className="st-eyebrow">From the lanes</Reveal>
-        <Reveal as="h2" delay={1} className="st-h2">How it’s made.</Reveal>
-      </div>
-      <div className="st-wrap">
-        <div className="st-rail">
-          {steps.map(([title, body, tag, seed], i) => (
-            <article className="st-step" key={title}>
-              <div className="st-step__ph ph">
-                <Photo src={`${PIC}${seed}/640/480`} alt={title} note={`PLACEHOLDER — ${title.toLowerCase()}`} sizes="320px" />
-                <span className="st-step__i">{i + 1}</span>
-              </div>
-              <div className="st-step__body">
-                <h3>{title}</h3>
-                <p>{body}</p>
-                <span className="st-step__tag">{tag}</span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  // return (
+  //   <section className="st-sec" id="making" style={{ paddingBottom: "clamp(30px,5vw,54px)" }}>
+  //     <div className="st-wrap">
+  //       <Reveal className="st-eyebrow">From the lanes</Reveal>
+  //       <Reveal as="h2" delay={1} className="st-h2">How it’s made.</Reveal>
+  //     </div>
+  //     <div className="st-wrap">
+  //       <div className="st-rail">
+  //         {steps.map(([title, body, tag, seed], i) => (
+  //           <article className="st-step" key={title}>
+  //             <div className="st-step__ph ph">
+  //               <Photo src={`${PIC}${seed}/640/480`} alt={title} note={`PLACEHOLDER — ${title.toLowerCase()}`} sizes="320px" />
+  //               <span className="st-step__i">{i + 1}</span>
+  //             </div>
+  //             <div className="st-step__body">
+  //               <h3>{title}</h3>
+  //               <p>{body}</p>
+  //               <span className="st-step__tag">{tag}</span>
+  //             </div>
+  //           </article>
+  //         ))}
+  //       </div>
+  //     </div>
+  //   </section>
+  // );
 }

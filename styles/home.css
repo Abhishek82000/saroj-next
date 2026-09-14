@@ -379,7 +379,7 @@
 .st-reels::-webkit-scrollbar{ display:none; }
 .st-reel{ flex:0 0 min(62vw,262px); scroll-snap-align:center; position:relative; aspect-ratio:9/16;
           border-radius:16px; overflow:hidden; background:linear-gradient(160deg,#16212B,#0B1116);
-          box-shadow:0 20px 40px -22px rgba(16,24,32,.5); opacity:.6; transform:scale(.94);
+          box-shadow:0 20px 40px -22px rgba(16,24,32,.5); transform:scale(.94);
           transition:opacity .55s var(--ease), transform .55s var(--ease), box-shadow .55s var(--ease); }
 .st-reel.live{ opacity:1; transform:scale(1); box-shadow:0 32px 56px -24px rgba(16,24,32,.6); }
 .st-reel video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }

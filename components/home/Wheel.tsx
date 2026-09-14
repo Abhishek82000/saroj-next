@@ -62,67 +62,67 @@ export default function Wheel() {
     spinTo(Math.round(angle.current / STEP));
   };
 
-  return (
-    <section className="st-sec" id="wheel">
-      <div className="st-wrap">
-        <div className="st-wheel-head">
-          <Reveal className="st-eyebrow mid">The Kaarigar Wheel</Reveal>
-          <Reveal as="h2" delay={1} className="st-h2">Six crafts.<br />One turn of the wheel.</Reveal>
-          <Reveal as="p" delay={2} className="st-lede" style={{ textAlign: "center" }}>
-            Every discipline we’ve taken on, and the lane in Jaipur it comes out of.
-          </Reveal>
-        </div>
+  // return (
+  //   <section className="st-sec" id="wheel">
+  //     <div className="st-wrap">
+  //       <div className="st-wheel-head">
+  //         <Reveal className="st-eyebrow mid">The Kaarigar Wheel</Reveal>
+  //         <Reveal as="h2" delay={1} className="st-h2">Six crafts.<br />One turn of the wheel.</Reveal>
+  //         <Reveal as="p" delay={2} className="st-lede" style={{ textAlign: "center" }}>
+  //           Every discipline we’ve taken on, and the lane in Jaipur it comes out of.
+  //         </Reveal>
+  //       </div>
 
-        <div className="st-stage" role="group" tabIndex={0}
-          aria-label="Craft categories, draggable carousel"
-          onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowRight") spinTo(Math.round(angle.current / STEP) + 1);
-            if (e.key === "ArrowLeft") spinTo(Math.round(angle.current / STEP) - 1);
-          }}>
-          <div className={`st-wheel${dragging ? " drag" : ""}`} ref={wheel}>
-            {faces.map((c, i) => {
-              const n = products.filter((p) => p.craft === c.key).length;
-              return (
-                <article className={`st-face${i === index ? " on" : ""}`} key={c.key}
-                  style={{ "--i": i } as React.CSSProperties}>
-                  <Link className="st-face__card" href={`/shop?craft=${c.key}`}
-                    style={{ display: "flex", flexDirection: "column" }}
-                    onClick={(e) => { if (drag.current.moved > 8) e.preventDefault(); }}>
-                    <div className="st-face__ph ph">
-                      <Photo src={c.image} alt={c.name} sizes="260px" />
-                    </div>
-                    <div className="st-face__body">
-                      <span className="st-face__num">{String(i + 1).padStart(2, "0")}</span>
-                      <h3 className="st-face__name">{c.name}</h3>
-                      <p className="st-face__hi st-dv">{c.hindi}</p>
-                      <p className="st-face__meta">{c.lane} · <b>{n} pieces</b></p>
-                    </div>
-                  </Link>
-                </article>
-              );
-            })}
-          </div>
-        </div>
+  //       <div className="st-stage" role="group" tabIndex={0}
+  //         aria-label="Craft categories, draggable carousel"
+  //         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+  //         onKeyDown={(e) => {
+  //           if (e.key === "ArrowRight") spinTo(Math.round(angle.current / STEP) + 1);
+  //           if (e.key === "ArrowLeft") spinTo(Math.round(angle.current / STEP) - 1);
+  //         }}>
+  //         <div className={`st-wheel${dragging ? " drag" : ""}`} ref={wheel}>
+  //           {faces.map((c, i) => {
+  //             const n = products.filter((p) => p.craft === c.key).length;
+  //             return (
+  //               <article className={`st-face${i === index ? " on" : ""}`} key={c.key}
+  //                 style={{ "--i": i } as React.CSSProperties}>
+  //                 <Link className="st-face__card" href={`/shop?craft=${c.key}`}
+  //                   style={{ display: "flex", flexDirection: "column" }}
+  //                   onClick={(e) => { if (drag.current.moved > 8) e.preventDefault(); }}>
+  //                   <div className="st-face__ph ph">
+  //                     <Photo src={c.image} alt={c.name} sizes="260px" />
+  //                   </div>
+  //                   <div className="st-face__body">
+  //                     <span className="st-face__num">{String(i + 1).padStart(2, "0")}</span>
+  //                     <h3 className="st-face__name">{c.name}</h3>
+  //                     <p className="st-face__hi st-dv">{c.hindi}</p>
+  //                     <p className="st-face__meta">{c.lane} · <b>{n} pieces</b></p>
+  //                   </div>
+  //                 </Link>
+  //               </article>
+  //             );
+  //           })}
+  //         </div>
+  //       </div>
 
-        <Reveal className="st-ctrl">
-          <button className="st-arrow" aria-label="Previous craft"
-            onClick={() => spinTo(Math.round(angle.current / STEP) - 1)}>
-            <Icon name="left" size={16} strokeWidth={1.8} />
-          </button>
-          <div className="st-dots">
-            {faces.map((c, i) => (
-              <button key={c.key} className={`st-dot${i === index ? " on" : ""}`}
-                aria-label={`Show ${c.name}`} onClick={() => spinTo(i)} />
-            ))}
-          </div>
-          <button className="st-arrow" aria-label="Next craft"
-            onClick={() => spinTo(Math.round(angle.current / STEP) + 1)}>
-            <Icon name="right" size={16} strokeWidth={1.8} />
-          </button>
-        </Reveal>
-        <Reveal as="p" className="st-hint">Drag · swipe · arrow keys</Reveal>
-      </div>
-    </section>
-  );
+  //       <Reveal className="st-ctrl">
+  //         <button className="st-arrow" aria-label="Previous craft"
+  //           onClick={() => spinTo(Math.round(angle.current / STEP) - 1)}>
+  //           <Icon name="left" size={16} strokeWidth={1.8} />
+  //         </button>
+  //         <div className="st-dots">
+  //           {faces.map((c, i) => (
+  //             <button key={c.key} className={`st-dot${i === index ? " on" : ""}`}
+  //               aria-label={`Show ${c.name}`} onClick={() => spinTo(i)} />
+  //           ))}
+  //         </div>
+  //         <button className="st-arrow" aria-label="Next craft"
+  //           onClick={() => spinTo(Math.round(angle.current / STEP) + 1)}>
+  //           <Icon name="right" size={16} strokeWidth={1.8} />
+  //         </button>
+  //       </Reveal>
+  //       <Reveal as="p" className="st-hint">Drag · swipe · arrow keys</Reveal>
+  //     </div>
+  //   </section>
+  // );
 }
