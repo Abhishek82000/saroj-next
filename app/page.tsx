@@ -36,7 +36,7 @@ export default async function HomePage() {
     <main id="main">
       <Hero />
       <CraftRoll />
-      <Wheel />
+      {/* <Wheel /> */}
       <TwoHouses />
       <VideoBanner />
       <Shelf />
