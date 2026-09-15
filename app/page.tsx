@@ -30,6 +30,7 @@ export default async function HomePage() {
   const fresh = [...products].sort((a, b) => b.fresh - a.fresh).slice(0, 8);
   const homeData = await getHomeData();
   const tagSections = homeData.tagSections;
+  const categorySections = homeData.categorySections;
   const apiReels = buildReels(homeData);
 
   return (
@@ -53,6 +54,15 @@ export default async function HomePage() {
       ) : (
         <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />
       )}
+      {categorySections.map((cat) => (
+        <Rail
+          key={cat.cat_id}
+          id={cat.cat_slug}
+          eyebrow="Off the kiln and off the loom"
+          heading={cat.cat_name}
+          items={cat.products.map(apiProductToProduct)}
+        />
+      ))}
       <Reels items={apiReels} />
       <GiftBuilder />
       <FabricFan />

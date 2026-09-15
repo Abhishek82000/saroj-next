@@ -1,28 +1,36 @@
 import { site } from "./site";
-import type { HomeApiProduct, HomeApiResponse, HomeTagSection, HomeVideoProduct, Product, Reel } from "./types";
+import type {
+  HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct, Product, Reel,
+} from "./types";
 
 export interface HomeData {
   tagSections: HomeTagSection[];
+  categorySections: HomeCategorySection[];
   videoProducts: HomeVideoProduct[];
 }
 
+const EMPTY_HOME_DATA: HomeData = { tagSections: [], categorySections: [], videoProducts: [] };
+
 /**
  * Everything the homepage pulls live from the storefront: the tag rails
- * ("New Arrivals", "Best Seller", ...) and the shoppable-reel clips. Fetched
+ * ("New Arrivals", "Best Seller", ...), the category rails ("Ajrakh
+ * Collection", "Jaipur Cotton", ...) and the shoppable-reel clips. Fetched
  * once per render and cached for a few minutes; returns empty lists on any
  * failure so the page can fall back to its static content instead of breaking.
  */
 export async function getHomeData(): Promise<HomeData> {
   try {
     const res = await fetch(`${site.url}/api/home`, { next: { revalidate: 300 } });
-    if (!res.ok) return { tagSections: [], videoProducts: [] };
+    if (!res.ok) return EMPTY_HOME_DATA;
     const json: HomeApiResponse = await res.json();
     return {
       tagSections: json.data?.tag_show_home_page ?? [],
+      // Some categories aren't stocked yet, so the API lists them with no products.
+      categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),
       videoProducts: json.data?.video_products ?? [],
     };
   } catch {
-    return { tagSections: [], videoProducts: [] };
+    return EMPTY_HOME_DATA;
   }
 }
 
@@ -49,11 +57,12 @@ export function apiProductToProduct(p: HomeApiProduct): Product {
 
 /**
  * video_products has no thumbnail of its own, so we borrow one from the tag
- * rails by product id where the clip's product also shows up there.
+ * and category rails by product id where the clip's product also shows up there.
  */
-export function buildReels({ tagSections, videoProducts }: HomeData): Reel[] {
+export function buildReels({ tagSections, categorySections, videoProducts }: HomeData): Reel[] {
   const imageById = new Map<number, string>();
   for (const tag of tagSections) for (const p of tag.products) imageById.set(p.id, p.image);
+  for (const cat of categorySections) for (const p of cat.products) imageById.set(p.id, p.image);
 
   return videoProducts.map((v) => {
     const price = Number(v.product_selling_price);

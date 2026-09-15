@@ -64,6 +64,14 @@ export interface HomeTagSection {
   products: HomeApiProduct[];
 }
 
+/** One row of the homepage rails grouped by storefront category, e.g. "Ajrakh Collection". */
+export interface HomeCategorySection {
+  cat_id: number;
+  cat_name: string;
+  cat_slug: string;
+  products: HomeApiProduct[];
+}
+
 /** One clip from the "video_products" list in GET /api/home. */
 export interface HomeVideoProduct {
   product_id: number;
@@ -78,6 +86,7 @@ export interface HomeApiResponse {
   success: boolean;
   data: {
     tag_show_home_page: HomeTagSection[];
+    category_show_home_page: HomeCategorySection[];
     video_products: HomeVideoProduct[];
   };
 }
