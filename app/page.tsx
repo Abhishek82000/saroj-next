@@ -56,7 +56,7 @@ export default async function HomePage() {
       <Reels items={apiReels} />
       <GiftBuilder />
       <FabricFan />
-      <Making />
+      {/* <Making /> */}
       <Voices />
       <Bulk />
       <Journal />

@@ -44,12 +44,11 @@ export default function GiftBuilder() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={cloths[cloth].img} alt={`${cloths[cloth].label} wrapping cloth`} />
             </div>
-            <div className="st-giftobj">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* <div className="st-giftobj">
               <img src={pieces[piece].img} alt={pieces[piece].label} />
             </div>
             <div className="st-gifttie" />
-            <div className={`st-giftseal ${seals[seal].kind}`}>{seals[seal].kind === "brass" ? "❋" : "✦"}</div>
+            <div className={`st-giftseal ${seals[seal].kind}`}>{seals[seal].kind === "brass" ? "❋" : "✦"}</div> */}
           </div>
         </div>
 
@@ -61,7 +60,7 @@ export default function GiftBuilder() {
             which cloth goes round it and how it’s tied shut.
           </Reveal>
 
-          <div style={{ marginTop: "2rem" }}>
+          {/* <div style={{ marginTop: "2rem" }}>
             <div className="st-giftrow">
               <div className="st-giftrow__lbl">What goes in <b>01</b></div>
               <div className="st-opts">
@@ -78,7 +77,6 @@ export default function GiftBuilder() {
               <div className="st-opts">
                 {cloths.map((c, i) => (
                   <button key={c.label} className={`st-opt${i === cloth ? " on" : ""}`} onClick={() => setCloth(i)}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <i><img src={c.img} alt="" /></i>{c.label}
                   </button>
                 ))}
@@ -107,7 +105,7 @@ export default function GiftBuilder() {
               })}>
               Add gift to cart
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
