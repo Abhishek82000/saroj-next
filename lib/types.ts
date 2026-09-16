@@ -130,9 +130,15 @@ export interface CommonFeaturedCategory {
   image: string;
 }
 
+/** The admin-editable business settings from GET /api/common — only the fields we use. */
+export interface CommonSettings {
+  site_website_marque: string;
+}
+
 export interface CommonApiResponse {
   success: boolean;
   data: {
+    settings: CommonSettings;
     menu: CommonMenuItem[];
     featured_categories: CommonFeaturedCategory[];
   };

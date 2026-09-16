@@ -56,6 +56,22 @@ export async function getNavMenu(): Promise<NavLink[]> {
 }
 
 /**
+ * The admin-set marquee text that scrolls above the header, fetched fresh
+ * every few minutes. Returns null on any failure so the ticker can fall back
+ * to its static messages instead of breaking.
+ */
+export async function getMarquee(): Promise<string | null> {
+  try {
+    const res = await fetch(`${site.url}/api/common`, { next: { revalidate: 300 } });
+    if (!res.ok) return null;
+    const json: CommonApiResponse = await res.json();
+    return json.data?.settings?.site_website_marque?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The homepage's featured-category tiles ("Ajrakh Collection", "Kalamkari",
  * ...), fetched fresh every few minutes. Returns [] on any failure so the
  * shelf can fall back to its static picks instead of breaking.
