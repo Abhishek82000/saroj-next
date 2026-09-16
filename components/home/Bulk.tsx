@@ -10,7 +10,7 @@ const cards = [
   ["03", "Corporate & export", "Repeatable runs with a signed-off sample before anything goes into production.",
     ["Sample first", "Export documentation", "Freight arranged"]],
 ];
-
+ 
 export default function Bulk() {
   return (
     <section className="st-sec st-bulk" id="bulk">
