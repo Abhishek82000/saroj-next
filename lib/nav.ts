@@ -15,13 +15,18 @@ const KNOWN_HREFS: Record<string, string> = {
   "Wholesale @80": "https://www.sarojtextile.com/wholesale-fabric",
 };
 
+/** A storefront category's own listing page, backed by GET /api/products?category=<slug>. */
+export function categoryHref(slug: string): string {
+  return `/category/${slug}`;
+}
+
 /**
- * There's no category listing page yet, so a leaf category falls back to a
- * text search for its name — the same trick the footer already uses for
- * "Ajrakh Collection" etc. Stripping the generic suffix gives the search a
- * better chance of matching real product names.
+ * Some menu entries aren't a real category (no slug to hand the products
+ * API), so they fall back to a text search for their name — the same trick
+ * the footer already uses for "Ajrakh Collection" etc. Stripping the generic
+ * suffix gives the search a better chance of matching real product names.
  */
-export function categoryHref(name: string): string {
+function searchHref(name: string): string {
   const q = name.replace(/\s+(collection|prints?)$/i, "").trim();
   return `/shop?q=${encodeURIComponent(q)}`;
 }
@@ -31,7 +36,7 @@ function buildLink(item: CommonMenuItem): NavLink {
   const cat = Array.isArray(item.categories) ? undefined : item.categories;
 
   const href = KNOWN_HREFS[item.name]
-    ?? (cat ? categoryHref(cat.cat_name) : children.length > 0 ? "/shop" : categoryHref(item.name));
+    ?? (cat ? categoryHref(cat.cat_slug) : children.length > 0 ? "/shop" : searchHref(item.name));
 
   return { id: item.id, label: item.name, href, children };
 }

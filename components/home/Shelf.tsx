@@ -36,7 +36,7 @@ export default function Shelf({ categories = [] }: { categories?: CommonFeatured
         <div className="st-shelf">
           {live.length > 0
             ? live.map((c, i) => (
-              <RevealLink key={c.id} href={categoryHref(c.name)}
+              <RevealLink key={c.id} href={categoryHref(c.slug)}
                 className={`st-tile ${tileMods[i] ?? ""}`.trim()} delay={(Math.min(i + 1, 4)) as 1 | 2 | 3 | 4}>
                 <div className="st-tile__ph ph">
                   <Photo src={c.image} alt={c.name} sizes="(max-width:840px) 50vw, 320px" />

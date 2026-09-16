@@ -72,6 +72,15 @@ export interface HomeCategorySection {
   products: HomeApiProduct[];
 }
 
+/** GET /api/products?category=<slug> — a single category's product listing. */
+export interface ProductsApiResponse {
+  success: boolean;
+  data: {
+    category?: CommonCategoryRef;
+    products: HomeApiProduct[];
+  };
+}
+
 /** One clip from the "video_products" list in GET /api/home. */
 export interface HomeVideoProduct {
   product_id: number;

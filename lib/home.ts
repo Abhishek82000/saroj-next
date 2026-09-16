@@ -1,6 +1,7 @@
 import { site } from "./site";
 import type {
-  HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct, Product, Reel,
+  HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct, Product,
+  ProductsApiResponse, Reel,
 } from "./types";
 
 export interface HomeData {
@@ -31,6 +32,32 @@ export async function getHomeData(): Promise<HomeData> {
     };
   } catch {
     return EMPTY_HOME_DATA;
+  }
+}
+
+export interface CategoryProducts {
+  name: string;
+  products: Product[];
+}
+
+const EMPTY_CATEGORY: CategoryProducts = { name: "", products: [] };
+
+/**
+ * One storefront category's product listing, for the page a category tile
+ * (the Shelf, the nav menu) links to. Returns an empty list on any failure
+ * so the page can show its "nothing here yet" state instead of breaking.
+ */
+export async function getCategoryProducts(slug: string): Promise<CategoryProducts> {
+  try {
+    const res = await fetch(`${site.url}/api/products?category=${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    if (!res.ok) return EMPTY_CATEGORY;
+    const json: ProductsApiResponse = await res.json();
+    return {
+      name: json.data?.category?.cat_name ?? "",
+      products: (json.data?.products ?? []).map(apiProductToProduct),
+    };
+  } catch {
+    return EMPTY_CATEGORY;
   }
 }
 
