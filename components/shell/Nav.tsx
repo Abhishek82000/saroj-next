@@ -29,8 +29,8 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* The mega-menu drops below the header at a fixed offset, so it needs the
-     header's real height — which changes when it shrinks on scroll. */
+  /* Dropdowns are fixed-position panels below the header, so they need its
+     real height — which changes when it shrinks on scroll. */
   useEffect(() => {
     const el = header.current;
     if (!el) return;
@@ -68,19 +68,19 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
       <Link className="st-brand" href="/"><b>Saroj Textile</b><span>Handicraft</span></Link>
       <nav aria-label="Primary">
         <ul className="st-links">
-          {items.map((l) => {
-            const mega = l.children.length > 6;
-            return (
-              <li key={l.id} className={l.children.length > 0 ? "has-children" : undefined}>
-                <Link href={l.href}>{l.label}</Link>
-                {l.children.length > 0 && (
-                  <div className={`st-dropdown${mega ? " st-dropdown--mega" : ""}`}>
-                    {l.children.map((c) => <Link key={c.id} href={c.href}>{c.label}</Link>)}
-                  </div>
-                )}
-              </li>
-            );
-          })}
+          {items.map((l) => (
+            <li key={l.id} className={l.children.length > 0 ? "has-children" : undefined}>
+              <Link href={l.href}>
+                {l.label}
+                {l.children.length > 0 && <Icon name="down" size={11} strokeWidth={2} />}
+              </Link>
+              {l.children.length > 0 && (
+                <div className="st-dropdown">
+                  {l.children.map((c) => <Link key={c.id} href={c.href}>{c.label}</Link>)}
+                </div>
+              )}
+            </li>
+          ))}
         </ul>
       </nav>
       <div className="st-tools">
