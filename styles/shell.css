@@ -16,10 +16,36 @@
 .st-brand span{ font-size:.54rem; letter-spacing:.22em; text-transform:uppercase; font-weight:700;
                 background:var(--cobalt); color:#fff; padding:.24em .62em; border-radius:999px; }
 .st-links{ display:none; gap:1.8rem; list-style:none; margin:0; padding:0; }
+.st-links>li{ position:relative; }
 .st-links a{ font-size:.69rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-2);
              position:relative; padding-block:.3rem; transition:color .3s; }
 .st-links a::after{ content:''; position:absolute; left:0; bottom:0; height:1px; width:0; background:var(--cobalt); transition:width .4s var(--ease); }
 .st-links a:hover{ color:var(--ink); } .st-links a:hover::after{ width:100%; }
+.st-links li.has-children>a::before{ content:''; display:inline-block; width:5px; height:5px; margin-left:.4em;
+             border-right:1.4px solid currentColor; border-bottom:1.4px solid currentColor; transform:translateY(-2px) rotate(45deg); }
+.st-dropdown{ position:absolute; top:100%; left:50%; transform:translateX(-50%) translateY(6px);
+              opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s var(--ease), transform .25s var(--ease);
+              background:var(--paper); border:1px solid var(--line-2); border-radius:12px; box-shadow:var(--shadow);
+              padding:.5rem; margin-top:.6rem; min-width:230px; max-height:min(60vh,480px); overflow-y:auto; z-index:90; }
+.st-links li.has-children:hover .st-dropdown,
+.st-links li.has-children:focus-within .st-dropdown{
+  opacity:1; visibility:visible; pointer-events:auto; transform:translateX(-50%) translateY(0); }
+.st-dropdown a{ display:block; font-size:.72rem; letter-spacing:.03em; text-transform:none; color:var(--ink-2);
+                padding:.5rem .65rem; border-radius:8px; white-space:nowrap; }
+.st-dropdown a::after{ display:none; }
+.st-dropdown a:hover{ background:var(--paper-2); color:var(--ink); }
+
+/* A big category list (Fabrics) gets a full-width panel instead of a narrow
+   card, so it needs to escape the trigger <li> and sit under the whole header. */
+.st-dropdown--mega{ position:fixed; left:0; right:0; top:var(--nav-h, 70px);
+                     display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:.15rem 2rem;
+                     border:none; border-radius:0; border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2);
+                     padding:1.5rem var(--pad); margin-top:0; min-width:0; max-height:none; overflow:visible; }
+.st-links li.has-children:hover .st-dropdown--mega,
+.st-links li.has-children:focus-within .st-dropdown--mega{ transform:translateY(0); }
+.st-dropdown--mega a{ font-size:.82rem; white-space:normal; padding:.4rem 0; border-radius:0; }
+.st-dropdown--mega a:hover{ background:none; color:var(--cobalt); }
+@media(max-width:900px){ .st-dropdown--mega{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
 .st-tools{ display:flex; align-items:center; gap:.4rem; }
 .st-icn{ width:40px; height:40px; display:grid; place-items:center; border-radius:50%;
          border:1px solid var(--line-2); background:transparent; color:var(--ink); transition:.3s var(--ease); }
@@ -35,6 +61,19 @@
 .st-drawer nav a:hover{ color:var(--cobalt); padding-left:.45rem; }
 .st-drawer nav a i{ font-style:normal; font-family:var(--b); font-size:.58rem; letter-spacing:.2em;
                     color:var(--cobalt); vertical-align:super; margin-left:.4rem; }
+
+.st-drawer__cats{ display:block; }
+.st-drawer__cats a{ font-family:inherit; font-size:.85rem; padding:.5rem 0; }
+.st-drawer__cats>a:last-of-type{ border-bottom:1px solid var(--line-2); }
+.st-drawer__cats details{ border-bottom:1px solid var(--line-2); }
+.st-drawer__cats summary{ display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+                           font-size:.85rem; padding:.5rem 0; cursor:pointer; list-style:none; }
+.st-drawer__cats summary::-webkit-details-marker{ display:none; }
+.st-drawer__cats summary::after{ content:'+'; color:var(--mute); font-size:1rem; }
+.st-drawer__cats details[open] summary::after{ content:'–'; }
+.st-drawer__cats details>div{ display:grid; gap:.1rem; padding:0 0 .6rem .9rem; }
+.st-drawer__cats details>div a{ font-size:.8rem; color:var(--mute); padding:.38rem 0; border-bottom:none; }
+.st-drawer__cats details>div a:hover{ color:var(--cobalt); padding-left:.3rem; }
 
 /* ---------- footer ---------- */
 .st-foot{ border-top:1px solid var(--line-2); background:var(--paper-2); padding:clamp(44px,7vw,70px) var(--pad) 0; }

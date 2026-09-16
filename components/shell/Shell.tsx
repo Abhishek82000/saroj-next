@@ -7,17 +7,20 @@ import Toast from "./Toast";
 import Footer from "./Footer";
 import WhatsApp from "./WhatsApp";
 import StoreProvider from "./StoreProvider";
+import { getNavMenu } from "@/lib/nav";
 
 /** Everything that wraps every page. Mounted once, in the root layout. */
-export default function Shell({ children }: { children: React.ReactNode }) {
+export default async function Shell({ children }: { children: React.ReactNode }) {
+  const navMenu = await getNavMenu();
+
   return (
     <StoreProvider>
       <Ticker />
-      <Nav />
+      <Nav navMenu={navMenu} />
       {children}
       <Footer />
       <WhatsApp />
-      <MenuDrawer />
+      <MenuDrawer navMenu={navMenu} />
       <CartDrawer />
       <SearchSheet />
       <Toast />

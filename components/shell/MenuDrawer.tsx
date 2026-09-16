@@ -3,6 +3,7 @@ import Link from "next/link";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import { useStore } from "./StoreProvider";
 import { site } from "@/lib/site";
+import type { NavLink } from "@/lib/nav";
 
 const items = [
   { href: "/shop", label: "Shop all", note: "Everything" },
@@ -16,7 +17,7 @@ const items = [
   { href: "/#bulk", label: "Bulk & gifting" },
 ];
 
-export default function MenuDrawer() {
+export default function MenuDrawer({ navMenu = [] }: { navMenu?: NavLink[] }) {
   const { menuOpen, setMenuOpen } = useStore();
   const close = () => setMenuOpen(false);
 
@@ -35,6 +36,25 @@ export default function MenuDrawer() {
           ))}
           <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale <i>₹80/m</i></a>
         </nav>
+
+        {navMenu.length > 0 && (
+          <nav className="st-drawer__cats" aria-label="Shop by category">
+            <span className="st-eyebrow" style={{ display: "block", marginTop: "1.7rem" }}>Shop by category</span>
+            {navMenu.map((l) => (
+              l.children.length > 0 ? (
+                <details key={l.id}>
+                  <summary>{l.label}</summary>
+                  <div>
+                    {l.children.map((c) => <Link key={c.id} href={c.href} onClick={close}>{c.label}</Link>)}
+                  </div>
+                </details>
+              ) : (
+                <Link key={l.id} href={l.href} onClick={close}>{l.label}</Link>
+              )
+            ))}
+          </nav>
+        )}
+
         <p className="st-foot__addr" style={{ marginTop: "1.5rem" }}>
           {site.address.street}, {site.address.city} {site.address.postalCode}<br />
           <a href={`tel:${site.phoneRaw}`} style={{ textDecoration: "underline" }}>{site.phone}</a>

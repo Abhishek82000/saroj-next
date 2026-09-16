@@ -15,6 +15,7 @@ import Journal from "@/components/home/Journal";
 import Rail from "@/components/product/Rail";
 import JsonLd from "@/components/seo/JsonLd";
 import { apiProductToProduct, buildReels, getHomeData } from "@/lib/home";
+import { getFeaturedCategories } from "@/lib/nav";
 import { products } from "@/lib/products";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 import { site } from "@/lib/site";
@@ -32,6 +33,7 @@ export default async function HomePage() {
   const tagSections = homeData.tagSections;
   const categorySections = homeData.categorySections;
   const apiReels = buildReels(homeData);
+  const featuredCategories = await getFeaturedCategories();
 
   return (
     <main id="main">
@@ -40,7 +42,7 @@ export default async function HomePage() {
       {/* <Wheel /> */}
       <TwoHouses />
       <VideoBanner />
-      <Shelf />
+      <Shelf categories={featuredCategories} />
       {tagSections.length > 0 ? (
         tagSections.map((tag) => (
           <Rail

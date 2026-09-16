@@ -3,20 +3,24 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
+import type { NavLink } from "@/lib/nav";
 
-const links = [
-  { href: "/shop", label: "Shop all" },
-  { href: "/#wheel", label: "Crafts" },
-  { href: "/#shelf", label: "The Shelf" },
-  { href: "/#gift", label: "The Wrap" },
-  { href: "/#cloth", label: "Fabrics" },
-  { href: "/#bulk", label: "Bulk" },
+/** Shown only if the live menu couldn't be fetched. */
+const fallback: NavLink[] = [
+  { id: -1, label: "Shop all", href: "/shop", children: [] },
+  { id: -2, label: "Crafts", href: "/#wheel", children: [] },
+  { id: -3, label: "The Shelf", href: "/#shelf", children: [] },
+  { id: -4, label: "The Wrap", href: "/#gift", children: [] },
+  { id: -5, label: "Fabrics", href: "/#cloth", children: [] },
+  { id: -6, label: "Bulk", href: "/#bulk", children: [] },
 ];
 
-export default function Nav() {
+export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
   const { count, pulse, setCartOpen, setSearchOpen, setMenuOpen } = useStore();
+  const items = navMenu.length > 0 ? navMenu : fallback;
   const [stuck, setStuck] = useState(false);
   const badge = useRef<HTMLSpanElement>(null);
+  const header = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 24);
@@ -24,6 +28,17 @@ export default function Nav() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /* The mega-menu drops below the header at a fixed offset, so it needs the
+     header's real height — which changes when it shrinks on scroll. */
+  useEffect(() => {
+    const el = header.current;
+    if (!el) return;
+    const setH = () => document.documentElement.style.setProperty("--nav-h", `${el.offsetHeight}px`);
+    setH();
+    window.addEventListener("resize", setH);
+    return () => window.removeEventListener("resize", setH);
+  }, [stuck]);
 
   /* Replay the bump keyframe each time something lands in the cart. */
   useEffect(() => {
@@ -49,11 +64,23 @@ export default function Nav() {
   }, [setSearchOpen]);
 
   return (
-    <header className={`st-nav${stuck ? " stuck" : ""}`}>
+    <header className={`st-nav${stuck ? " stuck" : ""}`} ref={header}>
       <Link className="st-brand" href="/"><b>Saroj Textile</b><span>Handicraft</span></Link>
       <nav aria-label="Primary">
         <ul className="st-links">
-          {links.map((l) => <li key={l.href}><Link href={l.href}>{l.label}</Link></li>)}
+          {items.map((l) => {
+            const mega = l.children.length > 6;
+            return (
+              <li key={l.id} className={l.children.length > 0 ? "has-children" : undefined}>
+                <Link href={l.href}>{l.label}</Link>
+                {l.children.length > 0 && (
+                  <div className={`st-dropdown${mega ? " st-dropdown--mega" : ""}`}>
+                    {l.children.map((c) => <Link key={c.id} href={c.href}>{c.label}</Link>)}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </nav>
       <div className="st-tools">

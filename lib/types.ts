@@ -106,6 +106,38 @@ export interface Reel {
   href?: string;
 }
 
+/** A leaf category reference inside a /api/common menu node ([] when there is none). */
+export interface CommonCategoryRef {
+  cat_id: number;
+  cat_name: string;
+  cat_slug: string;
+}
+
+/** One node of the site-wide nav tree from GET /api/common. */
+export interface CommonMenuItem {
+  id: number;
+  name: string;
+  order: number;
+  categories: CommonCategoryRef | [];
+  children: CommonMenuItem[];
+}
+
+/** One tile from the "featured_categories" list in GET /api/common. */
+export interface CommonFeaturedCategory {
+  id: number;
+  name: string;
+  slug: string;
+  image: string;
+}
+
+export interface CommonApiResponse {
+  success: boolean;
+  data: {
+    menu: CommonMenuItem[];
+    featured_categories: CommonFeaturedCategory[];
+  };
+}
+
 export interface CartLine {
   id: string;
   name: string;
