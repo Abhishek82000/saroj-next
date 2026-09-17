@@ -33,7 +33,7 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
       </Link>
 
       <span className={`st-card__kind${p.kind === "craft" ? " craft" : ""}`}>
-        {p.kind === "craft" ? "Handicraft" : "Fabric"}
+        {p.label || (p.kind === "craft" ? "Handicraft" : "Fabric")}
       </span>
       {off > 0 && <span className="st-card__off">{off}% off</span>}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import ProductCard from "./ProductCard";
@@ -32,9 +32,22 @@ export default function ShopListing({ q = "", craft = "", items, title: titlePro
   const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items);
   const [cols, setCols] = useState<"3" | "4">("3");
   const [drawer, setDrawer] = useState(false);
+  const sentinel = useRef<HTMLDivElement>(null);
 
   const list = f.results;
   const slice = list.slice(0, f.shown);
+
+  /* More of the list reveals itself as the sentinel below the grid nears the
+     viewport — no "load more" click needed. */
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) f.setShown((s) => Math.min(s + f.PAGE, list.length));
+    }, { rootMargin: "800px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [list.length, f.PAGE, f.setShown]);
 
   const title = titleProp ?? (f.state.q
     ? `Results for “${f.state.q}”`
@@ -159,10 +172,8 @@ export default function ShopListing({ q = "", craft = "", items, title: titlePro
                       <div className="st-more__bar">
                         <span className="st-more__fill" style={{ width: `${(f.shown / list.length) * 100}%` }} />
                       </div>
-                      <p>{f.shown} of {list.length}</p>
-                      <button type="button" className="st-btn" onClick={() => f.setShown(f.shown + f.PAGE)}>
-                        Load {Math.min(f.PAGE, list.length - f.shown)} more
-                      </button>
+                      <p>{f.shown} of {list.length} · more on scroll</p>
+                      <div ref={sentinel} aria-hidden="true" style={{ height: 1 }} />
                     </>
                   )}
                 </div>

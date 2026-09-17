@@ -34,6 +34,8 @@ export interface Product {
   specs?: { label: string; value: string; note: string }[];
   /** Slugs shown in the "people also bought" rail. */
   alsoBought?: string[];
+  /** The live API's own merchandising tag ("New", "Trending", ...), when it has one — overrides the generic Fabric/Handicraft badge. */
+  label?: string;
 }
 
 /** One product as returned by GET /api/home, inside a tag section. */
@@ -72,12 +74,39 @@ export interface HomeCategorySection {
   products: HomeApiProduct[];
 }
 
-/** GET /api/products?category=<slug> — a single category's product listing. */
+/** GET /api/products?category=<slug> — a single category's product listing, one page at a time. */
 export interface ProductsApiResponse {
   success: boolean;
   data: {
     category?: CommonCategoryRef;
     products: HomeApiProduct[];
+    pagination: { current_page: number; last_page: number; total: number };
+  };
+}
+
+/**
+ * GET /api/products/{slug} — a single product's own page. Unlike the listing
+ * endpoints, this one carries no price, stock or MRP for the product itself
+ * (checked across several products, all missing it the same way) — only
+ * name, photos, SEO meta and a `related_products` list that DOES have prices.
+ */
+export interface ProductDetailApiProduct {
+  id: number;
+  name: string;
+  slug: string;
+  image: string;
+  meta_title: string;
+  meta_description: string;
+  gallery: string[];
+  rating: number;
+  review_count: number;
+}
+
+export interface ProductDetailApiResponse {
+  success: boolean;
+  data: {
+    product: ProductDetailApiProduct;
+    related_products: HomeApiProduct[];
   };
 }
 

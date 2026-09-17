@@ -1,7 +1,7 @@
 import { site } from "./site";
 import type {
   HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct, Product,
-  ProductsApiResponse, Reel,
+  ProductDetailApiResponse, ProductsApiResponse, Reel,
 } from "./types";
 
 export interface HomeData {
@@ -42,19 +42,39 @@ export interface CategoryProducts {
 
 const EMPTY_CATEGORY: CategoryProducts = { name: "", products: [] };
 
+const fetchCategoryPage = (slug: string, page: number) =>
+  fetch(`${site.url}/api/products?category=${encodeURIComponent(slug)}&page=${page}`, { next: { revalidate: 300 } });
+
 /**
- * One storefront category's product listing, for the page a category tile
- * (the Shelf, the nav menu) links to. Returns an empty list on any failure
- * so the page can show its "nothing here yet" state instead of breaking.
+ * One storefront category's full product listing, for the page a category
+ * tile (the Shelf, the nav menu) links to. The API paginates at 24 a page,
+ * so this fetches page 1 to learn the true total, then pulls every
+ * remaining page in parallel — otherwise a 151-piece collection like Ajrakh
+ * would silently show only its first 24. Returns an empty list on any
+ * failure so the page can show its "nothing here yet" state instead of breaking.
  */
 export async function getCategoryProducts(slug: string): Promise<CategoryProducts> {
   try {
-    const res = await fetch(`${site.url}/api/products?category=${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
-    if (!res.ok) return EMPTY_CATEGORY;
-    const json: ProductsApiResponse = await res.json();
+    const first = await fetchCategoryPage(slug, 1);
+    if (!first.ok) return EMPTY_CATEGORY;
+    const firstJson: ProductsApiResponse = await first.json();
+    const products = [...(firstJson.data?.products ?? [])];
+    const lastPage = firstJson.data?.pagination?.last_page ?? 1;
+
+    if (lastPage > 1) {
+      const rest = await Promise.all(
+        Array.from({ length: lastPage - 1 }, (_, i) => fetchCategoryPage(slug, i + 2)),
+      );
+      for (const res of rest) {
+        if (!res.ok) continue;
+        const json: ProductsApiResponse = await res.json();
+        products.push(...(json.data?.products ?? []));
+      }
+    }
+
     return {
-      name: json.data?.category?.cat_name ?? "",
-      products: (json.data?.products ?? []).map(apiProductToProduct),
+      name: firstJson.data?.category?.cat_name ?? "",
+      products: products.map(apiProductToProduct),
     };
   } catch {
     return EMPTY_CATEGORY;
@@ -79,7 +99,62 @@ export function apiProductToProduct(p: HomeApiProduct): Product {
     images: [{ src: p.image, note: p.image_alt ?? "" }],
     fresh: p.id,
     sold: 0,
+    label: p.label || undefined,
   };
+}
+
+export interface ApiProductDetail {
+  product: Product;
+  related: Product[];
+}
+
+/**
+ * A single product's own page, backed by GET /api/products/{slug}. That
+ * endpoint has no price/stock for the product itself, so we backfill both by
+ * checking the home rails and category listings for the same product id —
+ * if it isn't found there either, price/stock stay unknown and the page
+ * shows no buy box rather than a fake ₹0. Returns null on any failure (or if
+ * the slug genuinely doesn't exist) so the page can 404 instead of breaking.
+ */
+export async function getProductDetail(slug: string): Promise<ApiProductDetail | null> {
+  try {
+    const res = await fetch(`${site.url}/api/products/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    if (!res.ok) return null;
+    const json: ProductDetailApiResponse = await res.json();
+    const d = json.data?.product;
+    if (!d) return null;
+
+    const home = await getHomeData();
+    const byId = new Map<number, HomeApiProduct>();
+    for (const tag of home.tagSections) for (const p of tag.products) byId.set(p.id, p);
+    for (const cat of home.categorySections) for (const p of cat.products) byId.set(p.id, p);
+    const priced = byId.get(d.id);
+
+    const images = [d.image, ...(d.gallery ?? [])].filter(Boolean).map((src) => ({ src, note: d.name }));
+
+    const product: Product = {
+      slug: d.slug,
+      name: d.name,
+      short: d.name,
+      kind: "fabric",
+      craft: "",
+      material: "",
+      unit: "metre",
+      price: priced ? Number(priced.selling_price) : 0,
+      mrp: priced && Number(priced.price) > Number(priced.selling_price) ? Number(priced.price) : 0,
+      // Unpriced means "we don't actually know" — treated as out of stock so
+      // the buy box can't check someone out at a fabricated ₹0.
+      stock: !priced ? "out" : priced.stock <= 0 ? "out" : priced.stock < 10 ? "low" : "in",
+      images: images.length > 0 ? images : [{ src: d.image, note: d.name }],
+      fresh: d.id,
+      sold: 0,
+      label: priced?.label || undefined,
+    };
+
+    return { product, related: (json.data?.related_products ?? []).map(apiProductToProduct) };
+  } catch {
+    return null;
+  }
 }
 
 /**

@@ -32,6 +32,8 @@ export default function BuyBox({ p }: { p: Product }) {
   const total = p.price * qty;
   const saved = !!favs[p.slug];
   const out = p.stock === "out";
+  /** A live-storefront product whose price we couldn't find anywhere — never show a fake ₹0. */
+  const priceUnknown = p.price <= 0;
 
   useEffect(() => {
     const el = addRef.current;
@@ -70,10 +72,16 @@ export default function BuyBox({ p }: { p: Product }) {
   return (
     <>
       <div className="st-price">
-        <b>{inr(p.price)}</b>
-        {p.mrp > 0 && <s>{inr(p.mrp)}</s>}
-        {off > 0 && <em>{off}% off</em>}
-        <small>{unitLabel(p.unit)} · inclusive of all taxes</small>
+        {priceUnknown ? (
+          <small>Price unavailable right now — check back shortly, or ask us on WhatsApp.</small>
+        ) : (
+          <>
+            <b>{inr(p.price)}</b>
+            {p.mrp > 0 && <s>{inr(p.mrp)}</s>}
+            {off > 0 && <em>{off}% off</em>}
+            <small>{unitLabel(p.unit)} · inclusive of all taxes</small>
+          </>
+        )}
       </div>
 
       <div className="st-live">
@@ -83,12 +91,12 @@ export default function BuyBox({ p }: { p: Product }) {
 
       <hr className="st-rule" />
 
-      {p.cut ? (
+      {priceUnknown ? null : p.cut ? (
         <CutPicker p={p} value={qty} onChange={setQty} onOpenGuide={() => setGuide(true)} />
       ) : (
         <div className="st-cut">
           <div className="st-cut__row">
-            <span className="st-step">
+            <span className="st-stepper">
               <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1} aria-label="One fewer">−</button>
               <input type="number" min={1} value={qty} aria-label="Quantity"
                 onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))} />
@@ -102,7 +110,7 @@ export default function BuyBox({ p }: { p: Product }) {
 
       <div className="st-buy">
         <button ref={addRef} type="button" className="st-btn st-btn--solid" disabled={out} onClick={addThis}>
-          {out ? "Sold out" : `Add to cart · ${inr(total)}`}
+          {priceUnknown ? "Currently unavailable" : out ? "Sold out" : `Add to cart · ${inr(total)}`}
         </button>
         <button type="button" className={`st-heart${saved ? " on" : ""}`} aria-pressed={saved}
           aria-label="Save to wishlist" onClick={() => toggleFav(p.slug)}>

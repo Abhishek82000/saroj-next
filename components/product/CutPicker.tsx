@@ -37,7 +37,7 @@ export default function CutPicker({
 
       <div className="st-cut">
         <div className="st-cut__row">
-          <span className="st-step">
+          <span className="st-stepper">
             <button type="button" onClick={() => set(value - cut.step)} disabled={value <= cut.min} aria-label="Half a metre less">−</button>
             <input type="number" inputMode="decimal" min={cut.min} max={cut.max} step={cut.step}
               value={live} aria-label="Length in metres"
