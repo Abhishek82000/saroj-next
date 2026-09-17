@@ -14,7 +14,7 @@ export interface FilterState {
   q: string;
 }
 
-export type SortKey = "new" | "pop" | "lo" | "hi" | "off";
+export type SortKey = "best_selling" | "new_arrival" | "high_low" | "low_high";
 
 export const emptyFilters = (q = "", craft: string[] = []): FilterState => ({
   craft, material: [], avail: [], deal: [], min: null, max: null, q,
@@ -27,12 +27,20 @@ export const emptyFilters = (q = "", craft: string[] = []): FilterState => ({
  *
  * `items` defaults to the full static catalogue (the /shop page); a category
  * page passes its own live list so the same filters/sort/paging work there.
+ *
+ * `sortLocally: false` (a category page, whose live list has no real
+ * `sold`/`fresh` data client-side) trusts the order `items` already arrived
+ * in — the API was asked to sort it — instead of re-sorting in the browser.
  */
-export function useShopFilters(initial: FilterState, items: Product[] = products) {
+export function useShopFilters(
+  initial: FilterState, items: Product[] = products,
+  opts: { initialSort?: SortKey; sortLocally?: boolean } = {},
+) {
   const [state, setState] = useState<FilterState>(initial);
-  const [sort, setSort] = useState<SortKey>("new");
+  const [sort, setSort] = useState<SortKey>(opts.initialSort ?? "best_selling");
   const [shown, setShown] = useState(12);
   const PAGE = 12;
+  const sortLocally = opts.sortLocally ?? true;
 
   const passes = useCallback((p: Product, skip?: keyof FilterState) => {
     if (skip !== "craft" && state.craft.length && !state.craft.includes(p.craft)) return false;
@@ -49,15 +57,16 @@ export function useShopFilters(initial: FilterState, items: Product[] = products
   }, [state]);
 
   const results = useMemo(() => {
+    const filtered = items.filter((p) => passes(p));
+    if (!sortLocally) return filtered;
     const by: Record<SortKey, (a: Product, b: Product) => number> = {
-      new: (a, b) => b.fresh - a.fresh,
-      pop: (a, b) => b.sold - a.sold,
-      lo: (a, b) => a.price - b.price,
-      hi: (a, b) => b.price - a.price,
-      off: (a, b) => discount(b) - discount(a),
+      new_arrival: (a, b) => b.fresh - a.fresh,
+      best_selling: (a, b) => b.sold - a.sold,
+      high_low: (a, b) => b.price - a.price,
+      low_high: (a, b) => a.price - b.price,
     };
-    return items.filter((p) => passes(p)).sort(by[sort]);
-  }, [items, passes, sort]);
+    return filtered.sort(by[sort]);
+  }, [items, passes, sort, sortLocally]);
 
   const counts = useCallback((key: keyof FilterState, value: string) =>
     items.filter((p) => {

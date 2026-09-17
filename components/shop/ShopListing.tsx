@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
@@ -10,17 +11,19 @@ import { emptyFilters, useShopFilters, type SortKey } from "./useShopFilters";
 import { crafts, craftBy } from "@/lib/crafts";
 import { products } from "@/lib/products";
 import { inr } from "@/lib/site";
-import type { Product } from "@/lib/types";
+import type { CommonCategoryRef, Product, ProductsApiTag, SaleProduct } from "@/lib/types";
 
 const sorts: [SortKey, string][] = [
-  ["new", "Newest first"],
-  ["pop", "Most bought"],
-  ["lo", "Price · low to high"],
-  ["hi", "Price · high to low"],
-  ["off", "Biggest saving"],
+  ["best_selling", "Best Selling"],
+  ["new_arrival", "New Arrival"],
+  ["high_low", "Price, high to low"],
+  ["low_high", "Price, low to high"],
 ];
 
-export default function ShopListing({ q = "", craft = "", items, title: titleProp, lede, showCraftFacets = true }: {
+export default function ShopListing({
+  q = "", craft = "", items, title: titleProp, lede, showCraftFacets = true,
+  categories, currentSlug, sort: liveSort, tags, priceRange, saleProducts,
+}: {
   q?: string;
   craft?: string;
   /** A single storefront category's own live list, in place of the static catalogue. */
@@ -28,14 +31,35 @@ export default function ShopListing({ q = "", craft = "", items, title: titlePro
   title?: string;
   lede?: string;
   showCraftFacets?: boolean;
+  /** A category page's live sidebar facets — every storefront category, its tags,
+      the live price range and a few reduced-price picks. Absent on the plain /shop page. */
+  categories?: CommonCategoryRef[];
+  currentSlug?: string;
+  /** The category page's current API sort order — present only there, since that
+      listing is sorted server-side rather than re-sorted in the browser. */
+  sort?: SortKey;
+  tags?: ProductsApiTag[];
+  priceRange?: { min: number; max: number } | null;
+  saleProducts?: SaleProduct[];
 }) {
-  const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items);
+  const router = useRouter();
+  /** A category page's list arrives already sorted by the API (it has the
+      real sold/new-arrival data the static catalogue's `sold`/`fresh` proxy
+      fields don't) — so it just gets filtered here, not re-sorted. */
+  const isLiveSort = currentSlug != null;
+  const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items, {
+    initialSort: liveSort, sortLocally: !isLiveSort,
+  });
   const [cols, setCols] = useState<"3" | "4">("3");
   const [drawer, setDrawer] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
 
   const list = f.results;
   const slice = list.slice(0, f.shown);
+  /** True when the source list itself (a category's live products) is empty —
+      as opposed to filters narrowing a non-empty list down to nothing — so the
+      empty state doesn't tell someone to "clear filters" they never set. */
+  const sourceEmpty = (items ?? products).length === 0;
 
   /* More of the list reveals itself as the sentinel below the grid nears the
      viewport — no "load more" click needed. */
@@ -74,6 +98,7 @@ export default function ShopListing({ q = "", craft = "", items, title: titlePro
     onPrice: f.setPrice,
     showCraft: showCraftFacets,
     showMaterial: showCraftFacets,
+    categories, currentSlug, tags, priceRange, saleProducts,
   };
 
   return (
@@ -137,8 +162,14 @@ export default function ShopListing({ q = "", craft = "", items, title: titlePro
                     </svg>
                   </button>
                 </div>
-                <select className="st-sel" value={f.sort} aria-label="Sort products"
-                  onChange={(e) => f.setSort(e.target.value as SortKey)}>
+                <select className="st-sel" value={isLiveSort ? (liveSort ?? "best_selling") : f.sort}
+                  aria-label="Sort products"
+                  onChange={(e) => {
+                    const v = e.target.value as SortKey;
+                    if (isLiveSort) router.push(`/shop/${currentSlug}?sort=${v}`);
+                    else f.setSort(v);
+                  }}>
+                  <option value="" disabled>Sort Filter</option>
                   {sorts.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
                 </select>
               </div>
@@ -154,10 +185,19 @@ export default function ShopListing({ q = "", craft = "", items, title: titlePro
             {list.length === 0 ? (
               <div className="st-empty">
                 <h2 style={{ fontFamily: "var(--d)", fontWeight: 400, fontSize: "clamp(1.4rem,5vw,1.9rem)", margin: "0 0 .55rem" }}>
-                  Nothing matches that yet
+                  {sourceEmpty ? "Nothing on the counter here yet" : "Nothing matches that yet"}
                 </h2>
-                <p>Loosen one filter and the shelf fills back up. Most people start with a craft, then a price.</p>
-                <button type="button" className="st-btn st-btn--solid" onClick={f.clear}>Clear the filters</button>
+                {sourceEmpty ? (
+                  <>
+                    <p>This collection is empty for now — check back soon, or see what else is on the counter.</p>
+                    <Link href="/shop" className="st-btn st-btn--solid">Browse everything</Link>
+                  </>
+                ) : (
+                  <>
+                    <p>Loosen one filter and the shelf fills back up. Most people start with a craft, then a price.</p>
+                    <button type="button" className="st-btn st-btn--solid" onClick={f.clear}>Clear the filters</button>
+                  </>
+                )}
               </div>
             ) : (
               <>

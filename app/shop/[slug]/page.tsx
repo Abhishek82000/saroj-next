@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import JsonLd from "@/components/seo/JsonLd";
-import { getCategoryProducts } from "@/lib/home";
+import { getCategoryProducts, type ProductsApiSort } from "@/lib/home";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
 type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<{ sort?: string }>;
+
+const SORTS: ProductsApiSort[] = ["best_selling", "new_arrival", "high_low", "low_high"];
+const toSort = (v?: string): ProductsApiSort => (SORTS as string[]).includes(v ?? "") ? (v as ProductsApiSort) : "best_selling";
 
 /** "ajrakh-collection" -> "Ajrakh Collection", used until the live name loads. */
 function titleFromSlug(slug: string): string {
@@ -30,9 +34,10 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  * /shop listing (filters, sort, density, paging) with the craft/material
  * facets hidden — a single category has no crafts to narrow by.
  */
-export default async function CategoryPage({ params }: { params: Params }) {
+export default async function CategoryPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { slug } = await params;
-  const { name, products } = await getCategoryProducts(slug);
+  const sort = toSort((await searchParams).sort);
+  const { name, products, categories, tags, priceRange, saleProducts } = await getCategoryProducts(slug, sort);
   const title = name || titleFromSlug(slug);
 
   return (
@@ -42,6 +47,12 @@ export default async function CategoryPage({ params }: { params: Params }) {
         title={title}
         lede={`Every piece in the ${title} collection, cut to any length from one metre.`}
         showCraftFacets={false}
+        categories={categories}
+        currentSlug={slug}
+        sort={sort}
+        tags={tags}
+        priceRange={priceRange}
+        saleProducts={saleProducts}
       />
 
       <JsonLd data={graph([

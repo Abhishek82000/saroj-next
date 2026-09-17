@@ -1,7 +1,9 @@
+import { getFeaturedCategories } from "./nav";
 import { site } from "./site";
 import type {
-  HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct, Product,
-  ProductDetailApiResponse, ProductsApiResponse, Reel,
+  CommonCategoryRef, HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
+  Product, ProductDetailApiResponse, ProductsApiResponse, ProductsApiSaleProduct, ProductsApiTag,
+  Reel, SaleProduct,
 } from "./types";
 
 export interface HomeData {
@@ -38,12 +40,56 @@ export async function getHomeData(): Promise<HomeData> {
 export interface CategoryProducts {
   name: string;
   products: Product[];
+  /** Every storefront category, for the "Product categories" sidebar list. */
+  categories: CommonCategoryRef[];
+  tags: ProductsApiTag[];
+  priceRange: { min: number; max: number } | null;
+  /** A handful of reduced-price picks for the sidebar's "Recommended" rail. */
+  saleProducts: SaleProduct[];
 }
 
-const EMPTY_CATEGORY: CategoryProducts = { name: "", products: [] };
+const EMPTY_CATEGORY: CategoryProducts = {
+  name: "", products: [], categories: [], tags: [], priceRange: null, saleProducts: [],
+};
 
-const fetchCategoryPage = (slug: string, page: number) =>
-  fetch(`${site.url}/api/products?category=${encodeURIComponent(slug)}&page=${page}`, { next: { revalidate: 300 } });
+/** The four sort orders the storefront API understands for GET /api/products. */
+export type ProductsApiSort = "best_selling" | "new_arrival" | "high_low" | "low_high";
+
+const fetchCategoryPage = (slug: string, page: number, sort: ProductsApiSort) =>
+  fetch(`${site.url}/api/products?category=${encodeURIComponent(slug)}&page=${page}&sort=${sort}`, { next: { revalidate: 300 } });
+
+type SidebarFacets = Pick<CategoryProducts, "categories" | "tags" | "priceRange" | "saleProducts">;
+const EMPTY_FACETS: SidebarFacets = { categories: [], tags: [], priceRange: null, saleProducts: [] };
+
+/**
+ * A handful of storefront categories are listed in the nav/menu but 404 when
+ * actually queried (broken on the storefront's own backend) — that request
+ * then has no sidebar data at all. categoryList and tagsList are the same
+ * across every category (checked: identical 33-entry list, identical two
+ * tags on both Ajrakh and Jaipur Cotton) and saleProducts is a general
+ * "recommended" pool rather than a strict per-category one, so borrowing all
+ * four facets from any known-working category — the first featured one —
+ * keeps the whole sidebar intact instead of only "Product categories".
+ */
+async function fallbackFacets(sort: ProductsApiSort): Promise<SidebarFacets> {
+  try {
+    const featured = await getFeaturedCategories();
+    const anchor = featured[0]?.slug;
+    if (!anchor) return EMPTY_FACETS;
+    const res = await fetchCategoryPage(anchor, 1, sort);
+    if (!res.ok) return EMPTY_FACETS;
+    const json: ProductsApiResponse = await res.json();
+    const pr = json.data?.price_range;
+    return {
+      categories: json.data?.categoryList ?? [],
+      tags: json.data?.tagsList ?? [],
+      priceRange: pr ? { min: Number(pr.min), max: Number(pr.max) } : null,
+      saleProducts: (json.data?.saleProducts ?? []).map(apiSaleProductToSaleProduct),
+    };
+  } catch {
+    return EMPTY_FACETS;
+  }
+}
 
 /**
  * One storefront category's full product listing, for the page a category
@@ -53,17 +99,17 @@ const fetchCategoryPage = (slug: string, page: number) =>
  * would silently show only its first 24. Returns an empty list on any
  * failure so the page can show its "nothing here yet" state instead of breaking.
  */
-export async function getCategoryProducts(slug: string): Promise<CategoryProducts> {
+export async function getCategoryProducts(slug: string, sort: ProductsApiSort = "best_selling"): Promise<CategoryProducts> {
   try {
-    const first = await fetchCategoryPage(slug, 1);
-    if (!first.ok) return EMPTY_CATEGORY;
+    const first = await fetchCategoryPage(slug, 1, sort);
+    if (!first.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
     const firstJson: ProductsApiResponse = await first.json();
     const products = [...(firstJson.data?.products ?? [])];
     const lastPage = firstJson.data?.pagination?.last_page ?? 1;
 
     if (lastPage > 1) {
       const rest = await Promise.all(
-        Array.from({ length: lastPage - 1 }, (_, i) => fetchCategoryPage(slug, i + 2)),
+        Array.from({ length: lastPage - 1 }, (_, i) => fetchCategoryPage(slug, i + 2, sort)),
       );
       for (const res of rest) {
         if (!res.ok) continue;
@@ -72,13 +118,39 @@ export async function getCategoryProducts(slug: string): Promise<CategoryProduct
       }
     }
 
+    const pr = firstJson.data?.price_range;
+    const categories = firstJson.data?.categoryList ?? [];
+    const tags = firstJson.data?.tagsList ?? [];
+    const saleProducts = (firstJson.data?.saleProducts ?? []).map(apiSaleProductToSaleProduct);
+    // A category that 200s but ships none of its own sidebar data (seen on a
+    // few live slugs) gets the same borrowed facets as an outright 404.
+    const needsFallback = categories.length === 0 && tags.length === 0 && saleProducts.length === 0;
+    const fallback = needsFallback ? await fallbackFacets(sort) : null;
+
     return {
       name: firstJson.data?.category?.cat_name ?? "",
       products: products.map(apiProductToProduct),
+      categories: fallback?.categories ?? categories,
+      tags: fallback?.tags ?? tags,
+      priceRange: fallback?.priceRange ?? (pr ? { min: Number(pr.min), max: Number(pr.max) } : null),
+      saleProducts: fallback?.saleProducts ?? saleProducts,
     };
   } catch {
-    return EMPTY_CATEGORY;
+    return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
   }
+}
+
+/** Turns an /api/products "saleProducts" entry into a sidebar-ready pick. */
+function apiSaleProductToSaleProduct(p: ProductsApiSaleProduct): SaleProduct {
+  const price = Number(p.product_selling_price);
+  const mrp = Number(p.product_price);
+  return {
+    name: p.product_name,
+    slug: p.product_slug,
+    image: p.product_image_cdn || p.product_image,
+    price,
+    mrp: mrp > price ? mrp : 0,
+  };
 }
 
 /** Turns an /api/home product into the shape Rail and the product cards expect. */

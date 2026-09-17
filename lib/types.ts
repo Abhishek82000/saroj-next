@@ -74,12 +74,35 @@ export interface HomeCategorySection {
   products: HomeApiProduct[];
 }
 
+/** One entry of the "tagsList" sidebar facet in GET /api/products. */
+export interface ProductsApiTag {
+  tag_id: number;
+  tag_name: string;
+  tag_slug: string;
+}
+
+/** One card of the "saleProducts" rail in GET /api/products. */
+export interface ProductsApiSaleProduct {
+  product_name: string;
+  product_price: string;
+  product_selling_price: string;
+  product_image: string;
+  product_slug: string;
+  product_image_cdn: string;
+}
+
 /** GET /api/products?category=<slug> — a single category's product listing, one page at a time. */
 export interface ProductsApiResponse {
   success: boolean;
   data: {
     category?: CommonCategoryRef;
+    /** Every storefront category, for the "Product categories" sidebar list. */
+    categoryList?: CommonCategoryRef[];
+    tagsList?: ProductsApiTag[];
+    price_range?: { min: string; max: string };
     products: HomeApiProduct[];
+    /** A handful of reduced-price picks for the "Recommended" sidebar rail. */
+    saleProducts?: ProductsApiSaleProduct[];
     pagination: { current_page: number; last_page: number; total: number };
   };
 }
@@ -180,6 +203,15 @@ export interface CommonApiResponse {
     menu: CommonMenuItem[];
     featured_categories: CommonFeaturedCategory[];
   };
+}
+
+/** A category sidebar's "Recommended" pick — lighter than Product, no stock/craft data. */
+export interface SaleProduct {
+  name: string;
+  slug: string;
+  image: string;
+  price: number;
+  mrp: number;
 }
 
 export interface CartLine {
