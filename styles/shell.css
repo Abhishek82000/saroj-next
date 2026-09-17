@@ -15,7 +15,9 @@
 .st-brand b{ font-family:var(--d); font-size:1.14rem; font-weight:400; letter-spacing:.04em; }
 .st-brand span{ font-size:.54rem; letter-spacing:.22em; text-transform:uppercase; font-weight:700;
                 background:var(--cobalt); color:#fff; padding:.24em .62em; border-radius:999px; }
+.st-nav nav{ display:flex; align-self:stretch; }
 .st-links{ display:none; gap:1.8rem; list-style:none; margin:0; padding:0; }
+.st-links li{ display:flex; align-items:center; }
 .st-links a{ font-size:.69rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-2);
              position:relative; padding-block:.3rem; transition:color .3s; display:inline-flex; align-items:center; gap:.3em; }
 .st-links a::after{ content:''; position:absolute; left:0; bottom:0; height:1px; width:0; background:var(--cobalt); transition:width .4s var(--ease); }
@@ -27,21 +29,28 @@
 /* Every dropdown is the same full-width panel under the header, however many
    items it holds. It's positioned absolute against .st-nav (the nearest
    positioned ancestor, since it's sticky) rather than the trigger <li>, so it
-   spans the whole nav and always sits flush below it — no JS height math. */
-.st-dropdown{ position:absolute; left:0; right:0; top:100%;
-              display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:.15rem 2rem;
-              background:var(--paper); border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); box-shadow:var(--shadow);
-              padding:1.5rem var(--pad); max-height:none; overflow:visible;
-              opacity:0; visibility:hidden; pointer-events:none; transform:translateY(-6px);
-              transition:opacity .25s var(--ease), transform .25s var(--ease); z-index:90; }
+   spans the whole nav and always sits flush below it — no JS height math.
+   .st-dropdown itself is an invisible hit-box that starts right at the link's
+   bottom edge (padding-top eats the nav bar's own bottom padding) so the
+   pointer never crosses a dead zone on the way down; .st-dropdown__panel
+   carries all the visible chrome and keeps its on-screen position. */
+.st-dropdown{ position:absolute; left:0; right:0; top:calc(100% - .9rem); padding-top:.9rem;
+              opacity:0; visibility:hidden; pointer-events:none;
+              transition:opacity .25s var(--ease); z-index:90; }
 .st-links li.has-children:hover .st-dropdown,
 .st-links li.has-children:focus-within .st-dropdown{
-  opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0); }
-.st-dropdown a{ display:block; font-size:.82rem; letter-spacing:.03em; text-transform:none; color:var(--ink-2);
+  opacity:1; visibility:visible; pointer-events:auto; }
+.st-dropdown__panel{ display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:.15rem 2rem;
+              background:var(--paper); border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); box-shadow:var(--shadow);
+              padding:1.5rem var(--pad); max-height:none; overflow:visible;
+              transform:translateY(-6px); transition:transform .25s var(--ease); }
+.st-links li.has-children:hover .st-dropdown__panel,
+.st-links li.has-children:focus-within .st-dropdown__panel{ transform:translateY(0); }
+.st-dropdown__panel a{ display:block; font-size:.82rem; letter-spacing:.03em; text-transform:none; color:var(--ink-2);
                 white-space:normal; padding:.4rem 0; }
-.st-dropdown a::after{ display:none; }
-.st-dropdown a:hover{ background:none; color:var(--cobalt); }
-@media(max-width:900px){ .st-dropdown{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
+.st-dropdown__panel a::after{ display:none; }
+.st-dropdown__panel a:hover{ background:none; color:var(--cobalt); }
+@media(max-width:900px){ .st-dropdown__panel{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
 .st-tools{ display:flex; align-items:center; gap:.4rem; }
 .st-icn{ width:40px; height:40px; display:grid; place-items:center; border-radius:50%;
          border:1px solid var(--line-2); background:transparent; color:var(--ink); transition:.3s var(--ease); }

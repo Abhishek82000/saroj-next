@@ -64,7 +64,9 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
               </Link>
               {l.children.length > 0 && (
                 <div className="st-dropdown">
-                  {l.children.map((c) => <Link key={c.id} href={c.href}>{c.label}</Link>)}
+                  <div className="st-dropdown__panel">
+                    {l.children.map((c) => <Link key={c.id} href={c.href}>{c.label}</Link>)}
+                  </div>
                 </div>
               )}
             </li>
