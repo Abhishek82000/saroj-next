@@ -24,7 +24,7 @@ export default function Voices() {
   const a = reviews.slice(0, 3);
   const b = reviews.slice(3);
   return (
-    <section className="st-voices">
+    <section className="st-voices" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-voices__head st-wrap">
         <Reveal className="st-eyebrow">What came back</Reveal>
         <Reveal as="h2" delay={1} className="st-h2">Voices.</Reveal>

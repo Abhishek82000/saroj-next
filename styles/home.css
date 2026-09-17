@@ -117,8 +117,8 @@
 .st-tile:hover{ box-shadow:0 30px 52px -20px rgba(16,24,32,.45); }
 .st-tile:hover img{ transform:scale(1.07); }
 .st-tile__ph{ aspect-ratio:4/5; }
-.st-tile__body{ padding:.8rem .85rem 1rem; }
-.st-tile__name{ font-family:var(--d); font-size:.98rem; line-height:1.2; display:block; }
+.st-tile__body{ padding:.50rem .85rem 0.50rem;color:var(--cobalt);text-align: center; }
+.st-tile__name{ font-family:var(--d); font-size:1.6rem; line-height:1.2; display:block; }
 .st-tile__row{ display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin-top:.35rem; }
 .st-tile__price{ font-size:.86rem; font-weight:700; color:var(--cobalt); }
 .st-tile__unit{ font-size:.56rem; letter-spacing:.15em; text-transform:uppercase; color:var(--mute); }
@@ -126,7 +126,7 @@
                  text-transform:uppercase; font-weight:700; background:var(--lac); color:#fff; padding:.3em .65em; border-radius:99px; }
 @media(min-width:840px){
   .st-tile--wide{ grid-column:span 2; } .st-tile--wide .st-tile__ph{ aspect-ratio:16/10; }
-  .st-tile--tall{ grid-row:span 2; } .st-tile--tall .st-tile__ph{ aspect-ratio:auto; flex:1; min-height:0; }
+  .st-tile--tall{ grid-row:span 1; } .st-tile--tall .st-tile__ph{ aspect-ratio:auto; flex:1; min-height:0; }
 }
 
 /* ============================================================

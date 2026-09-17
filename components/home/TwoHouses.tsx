@@ -29,7 +29,7 @@ const houses = [
 /** The two sides of the business, side by side. */
 export default function TwoHouses() {
   return (
-    <section className="st-sec">
+    <section className="st-sec" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-wrap">
         <Reveal className="st-eyebrow">Under one roof</Reveal>
         <Reveal as="h2" delay={1} className="st-h2">Two houses,<br />one hand.</Reveal>

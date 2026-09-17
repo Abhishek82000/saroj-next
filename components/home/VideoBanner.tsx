@@ -75,7 +75,7 @@ export default function VideoBanner() {
   };
 
   return (
-    <section className="st-vbanner" id="film" ref={section}>
+    <section className="st-vbanner" style={{paddingBlock:"clamp(28px,5vw,54px)"}} id="film" ref={section}>
       <div className="st-vbanner__frame">
         {failed ? (
           <p style={{

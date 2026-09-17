@@ -39,7 +39,7 @@ export default function Footer() {
       <div className="st-wrap">
         <div className="st-foot__grid">
           <div>
-            <Link className="st-brand" href="/"><b>Saroj Textile</b><span>Handicraft</span></Link>
+            <Link className="st-brand" href="/"><img width={80} src="https://www.sarojtextile.com/public/img/uploads/settings/1758459499.png" alt="Saroj Textile" /></Link>
             <p className="st-foot__addr" style={{ marginTop: ".9rem" }}>
               {site.address.street}, {site.address.city} {site.address.postalCode}<br />
               <a href={`tel:${site.phoneRaw}`}>{site.phone}</a><br />

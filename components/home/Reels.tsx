@@ -74,7 +74,7 @@ export default function Reels({ items }: { items?: Reel[] }) {
   };
 
   return (
-    <section className="st-sec" id="reels" style={{ paddingBottom: "clamp(30px,5vw,54px)" }}>
+    <section className="st-sec" id="reels" style={{ paddingBlock: "clamp(30px,5vw,54px)" }}>
       <div className="st-wrap st-railhead">
         <div>
           <Reveal className="st-eyebrow">See it move</Reveal>
@@ -184,7 +184,7 @@ function ReelCard({ reel }: { reel: Reel }) {
               qty: reel.unit === "metre" ? 2.5 : 1,
               href: reel.slug ? link : undefined,
             })}>
-            Add
+            Add to Cart
           </button>
         </div>
       </div>

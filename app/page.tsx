@@ -39,10 +39,6 @@ export default async function HomePage() {
     <main id="main">
       <Hero />
       <CraftRoll />
-      {/* <Wheel /> */}
-      <TwoHouses />
-      <VideoBanner />
-      <Shelf categories={featuredCategories} />
       {tagSections.length > 0 ? (
         tagSections.map((tag) => (
           <Rail
@@ -56,6 +52,7 @@ export default async function HomePage() {
       ) : (
         <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />
       )}
+      <Shelf categories={featuredCategories} />
       {categorySections.map((cat) => (
         <Rail
           key={cat.cat_id}
@@ -65,6 +62,9 @@ export default async function HomePage() {
           items={cat.products.map(apiProductToProduct)}
         />
       ))}
+      {/* <Wheel /> */}
+      <TwoHouses />
+      <VideoBanner />
       <Reels items={apiReels} />
       <GiftBuilder />
       <FabricFan />

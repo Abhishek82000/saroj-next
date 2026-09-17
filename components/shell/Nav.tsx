@@ -53,7 +53,7 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
 
   return (
     <header className={`st-nav${stuck ? " stuck" : ""}`}>
-      <Link className="st-brand" href="/"><b>Saroj Textile</b><span>Handicraft</span></Link>
+      <Link className="st-brand" href="/"><img width={80} src="https://www.sarojtextile.com/public/img/uploads/settings/1758459499.png" alt="Saroj Textile" /></Link>
       <nav aria-label="Primary">
         <ul className="st-links">
           {items.map((l) => (
