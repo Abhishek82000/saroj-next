@@ -16,7 +16,7 @@ const posts = [
 
 export default function Journal() {
   return (
-    <section className="st-sec">
+    <section className="st-sec" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-wrap">
         <Reveal className="st-eyebrow">From the workshop</Reveal>
         <Reveal as="h2" delay={1} className="st-h2">The journal.</Reveal>

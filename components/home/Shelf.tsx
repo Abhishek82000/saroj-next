@@ -20,10 +20,10 @@ const layout: [string, string][] = [
 const tileMods = ["st-tile--wide", "st-tile--tall", "", "", ""];
 
 export default function Shelf({ categories = [] }: { categories?: CommonFeaturedCategory[] }) {
-  const live = categories.slice(0, 5);
+  const live = categories.slice(0, 7);
 
   return (
-    <section className="st-sec" id="shelf">
+    <section className="st-sec" style={{paddingBlock:"clamp(28px,5vw,54px)"}} id="shelf">
       <div className="st-wrap">
         <Reveal className="st-eyebrow">{live.length > 0 ? "Shop by collection" : "Opening selection"}</Reveal>
         <Reveal as="h2" delay={1} className="st-h2">The first shelf.</Reveal>
@@ -69,11 +69,11 @@ export default function Shelf({ categories = [] }: { categories?: CommonFeatured
               );
             })}
         </div>
-
+{/* 
         <Reveal className="row-gap stack-4">
           <Link href="/shop" className="st-btn st-btn--solid">See everything on the counter</Link>
           <Link href="/#making" className="st-btn">How they’re made</Link>
-        </Reveal>
+        </Reveal> */}
       </div>
     </section>
   );
