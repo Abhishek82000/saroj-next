@@ -37,7 +37,7 @@ export function useShopFilters(
   opts: { initialSort?: SortKey; sortLocally?: boolean } = {},
 ) {
   const [state, setState] = useState<FilterState>(initial);
-  const [sort, setSort] = useState<SortKey>(opts.initialSort ?? "best_selling");
+  const [sort, setSort] = useState<SortKey>(opts.initialSort ?? "new_arrival");
   const [shown, setShown] = useState(12);
   const PAGE = 12;
   const sortLocally = opts.sortLocally ?? true;

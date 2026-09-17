@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import JsonLd from "@/components/seo/JsonLd";
-import { getCategoryProducts, type ProductsApiSort } from "@/lib/home";
+import { getTagProducts, type ProductsApiSort } from "@/lib/home";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
 type Params = Promise<{ slug: string }>;
@@ -10,34 +10,33 @@ type SearchParams = Promise<{ sort?: string }>;
 const SORTS: ProductsApiSort[] = ["best_selling", "new_arrival", "high_low", "low_high"];
 const toSort = (v?: string): ProductsApiSort => (SORTS as string[]).includes(v ?? "") ? (v as ProductsApiSort) : "new_arrival";
 
-/** "ajrakh-collection" -> "Ajrakh Collection", used until the live name loads. */
+/** "best-seller" -> "Best Seller", used until the live name loads. */
 function titleFromSlug(slug: string): string {
   return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const { name } = await getCategoryProducts(slug);
+  const { name } = await getTagProducts(slug);
   const title = name || titleFromSlug(slug);
 
   return pageMeta({
     title,
     description: `${title} at the Saroj Textile counter in Jaipur — hand block printed cotton and handicraft from six Jaipur lanes.`,
-    path: `/shop/${slug}`,
+    path: `/shop/tag/${slug}`,
   });
 }
 
 /**
- * A single storefront category, e.g. /shop/ajrakh-collection — the page
- * a category tile on the home page (the Shelf, the nav menu) links to.
- * Products come live from GET /api/products?category=<slug>. Reuses the
- * /shop listing (filters, sort, density, paging) with the craft/material
- * facets hidden — a single category has no crafts to narrow by.
+ * A single storefront tag, e.g. /shop/tag/best-seller — the page the
+ * sidebar's "Tags" links point to. Products come live from
+ * GET /api/products?tag=<slug>. Reuses the /shop listing the same way the
+ * category page does, craft/material facets hidden.
  */
-export default async function CategoryPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
+export default async function TagPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { slug } = await params;
   const sort = toSort((await searchParams).sort);
-  const { name, products, categories, tags, priceRange, saleProducts } = await getCategoryProducts(slug, sort);
+  const { name, products, categories, tags, priceRange, saleProducts } = await getTagProducts(slug, sort);
   const title = name || titleFromSlug(slug);
 
   return (
@@ -45,19 +44,19 @@ export default async function CategoryPage({ params, searchParams }: { params: P
       <ShopListing
         items={products}
         title={title}
-        lede={`Every piece in the ${title} collection, cut to any length from one metre.`}
+        lede={`Every piece tagged ${title}, cut to any length from one metre.`}
         showCraftFacets={false}
         categories={categories}
-        currentSlug={slug}
         sort={sort}
         tags={tags}
+        currentTag={slug}
         priceRange={priceRange}
         saleProducts={saleProducts}
       />
 
       <JsonLd data={graph([
-        breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path: `/shop/${slug}` }]),
-        itemListLd(products, `/shop/${slug}`),
+        breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path: `/shop/tag/${slug}` }]),
+        itemListLd(products, `/shop/tag/${slug}`),
       ])} />
     </main>
   );

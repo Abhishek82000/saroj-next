@@ -55,8 +55,17 @@ const EMPTY_CATEGORY: CategoryProducts = {
 /** The four sort orders the storefront API understands for GET /api/products. */
 export type ProductsApiSort = "best_selling" | "new_arrival" | "high_low" | "low_high";
 
+/** GET /api/products takes either ?category=<slug> or ?tag=<slug> — never both. */
+type Listing = { category: string } | { tag: string };
+
+const fetchListingPage = (by: Listing, page: number, sort: ProductsApiSort) => {
+  const key = "category" in by ? "category" : "tag";
+  const slug = "category" in by ? by.category : by.tag;
+  return fetch(`${site.url}/api/products?${key}=${encodeURIComponent(slug)}&page=${page}&sort=${sort}`, { next: { revalidate: 300 } });
+};
+/** Kept for the fallback fetch below, which only ever anchors on a category. */
 const fetchCategoryPage = (slug: string, page: number, sort: ProductsApiSort) =>
-  fetch(`${site.url}/api/products?category=${encodeURIComponent(slug)}&page=${page}&sort=${sort}`, { next: { revalidate: 300 } });
+  fetchListingPage({ category: slug }, page, sort);
 
 type SidebarFacets = Pick<CategoryProducts, "categories" | "tags" | "priceRange" | "saleProducts">;
 const EMPTY_FACETS: SidebarFacets = { categories: [], tags: [], priceRange: null, saleProducts: [] };
@@ -92,16 +101,17 @@ async function fallbackFacets(sort: ProductsApiSort): Promise<SidebarFacets> {
 }
 
 /**
- * One storefront category's full product listing, for the page a category
- * tile (the Shelf, the nav menu) links to. The API paginates at 24 a page,
- * so this fetches page 1 to learn the true total, then pulls every
- * remaining page in parallel — otherwise a 151-piece collection like Ajrakh
- * would silently show only its first 24. Returns an empty list on any
- * failure so the page can show its "nothing here yet" state instead of breaking.
+ * One storefront listing's full product list — either a category (the Shelf,
+ * the nav menu) or a tag (the sidebar's "Tags" links) — page a category
+ * tile links to. The API paginates at 24 a page, so this fetches page 1 to
+ * learn the true total, then pulls every remaining page in parallel —
+ * otherwise a 151-piece collection like Ajrakh would silently show only its
+ * first 24. Returns an empty list on any failure so the page can show its
+ * "nothing here yet" state instead of breaking.
  */
-export async function getCategoryProducts(slug: string, sort: ProductsApiSort = "best_selling"): Promise<CategoryProducts> {
+async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: ProductsApiResponse) => string): Promise<CategoryProducts> {
   try {
-    const first = await fetchCategoryPage(slug, 1, sort);
+    const first = await fetchListingPage(by, 1, sort);
     if (!first.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
     const firstJson: ProductsApiResponse = await first.json();
     const products = [...(firstJson.data?.products ?? [])];
@@ -109,7 +119,7 @@ export async function getCategoryProducts(slug: string, sort: ProductsApiSort = 
 
     if (lastPage > 1) {
       const rest = await Promise.all(
-        Array.from({ length: lastPage - 1 }, (_, i) => fetchCategoryPage(slug, i + 2, sort)),
+        Array.from({ length: lastPage - 1 }, (_, i) => fetchListingPage(by, i + 2, sort)),
       );
       for (const res of rest) {
         if (!res.ok) continue;
@@ -122,13 +132,13 @@ export async function getCategoryProducts(slug: string, sort: ProductsApiSort = 
     const categories = firstJson.data?.categoryList ?? [];
     const tags = firstJson.data?.tagsList ?? [];
     const saleProducts = (firstJson.data?.saleProducts ?? []).map(apiSaleProductToSaleProduct);
-    // A category that 200s but ships none of its own sidebar data (seen on a
+    // A listing that 200s but ships none of its own sidebar data (seen on a
     // few live slugs) gets the same borrowed facets as an outright 404.
     const needsFallback = categories.length === 0 && tags.length === 0 && saleProducts.length === 0;
     const fallback = needsFallback ? await fallbackFacets(sort) : null;
 
     return {
-      name: firstJson.data?.category?.cat_name ?? "",
+      name: name(firstJson),
       products: products.map(apiProductToProduct),
       categories: fallback?.categories ?? categories,
       tags: fallback?.tags ?? tags,
@@ -138,6 +148,15 @@ export async function getCategoryProducts(slug: string, sort: ProductsApiSort = 
   } catch {
     return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
   }
+}
+
+export function getCategoryProducts(slug: string, sort: ProductsApiSort = "new_arrival"): Promise<CategoryProducts> {
+  return getListingProducts({ category: slug }, sort, (j) => j.data?.category?.cat_name ?? "");
+}
+
+/** A tag's own listing, for the sidebar's "Tags" links (e.g. Best Seller, New Arrivals). */
+export function getTagProducts(slug: string, sort: ProductsApiSort = "new_arrival"): Promise<CategoryProducts> {
+  return getListingProducts({ tag: slug }, sort, (j) => j.data?.tag?.name ?? "");
 }
 
 /** Turns an /api/products "saleProducts" entry into a sidebar-ready pick. */

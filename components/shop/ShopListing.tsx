@@ -22,7 +22,7 @@ const sorts: [SortKey, string][] = [
 
 export default function ShopListing({
   q = "", craft = "", items, title: titleProp, lede, showCraftFacets = true,
-  categories, currentSlug, sort: liveSort, tags, priceRange, saleProducts,
+  categories, currentSlug, currentTag, sort: liveSort, tags, priceRange, saleProducts,
 }: {
   q?: string;
   craft?: string;
@@ -35,7 +35,9 @@ export default function ShopListing({
       the live price range and a few reduced-price picks. Absent on the plain /shop page. */
   categories?: CommonCategoryRef[];
   currentSlug?: string;
-  /** The category page's current API sort order — present only there, since that
+  /** Set instead of currentSlug on a tag page (/shop/tag/<slug>). */
+  currentTag?: string;
+  /** The category/tag page's current API sort order — present only there, since that
       listing is sorted server-side rather than re-sorted in the browser. */
   sort?: SortKey;
   tags?: ProductsApiTag[];
@@ -43,10 +45,11 @@ export default function ShopListing({
   saleProducts?: SaleProduct[];
 }) {
   const router = useRouter();
-  /** A category page's list arrives already sorted by the API (it has the
-      real sold/new-arrival data the static catalogue's `sold`/`fresh` proxy
-      fields don't) — so it just gets filtered here, not re-sorted. */
-  const isLiveSort = currentSlug != null;
+  /** A category or tag page's list arrives already sorted by the API (it has
+      the real sold/new-arrival data the static catalogue's `sold`/`fresh`
+      proxy fields don't) — so it just gets filtered here, not re-sorted. */
+  const isLiveSort = currentSlug != null || currentTag != null;
+  const liveHref = currentTag != null ? `/shop/tag/${currentTag}` : `/shop/${currentSlug}`;
   const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items, {
     initialSort: liveSort, sortLocally: !isLiveSort,
   });
@@ -98,7 +101,7 @@ export default function ShopListing({
     onPrice: f.setPrice,
     showCraft: showCraftFacets,
     showMaterial: showCraftFacets,
-    categories, currentSlug, tags, priceRange, saleProducts,
+    categories, currentSlug, currentTag, tags, priceRange, saleProducts,
   };
 
   return (
@@ -166,7 +169,7 @@ export default function ShopListing({
                   aria-label="Sort products"
                   onChange={(e) => {
                     const v = e.target.value as SortKey;
-                    if (isLiveSort) router.push(`/shop/${currentSlug}?sort=${v}`);
+                    if (isLiveSort) router.push(`${liveHref}?sort=${v}`);
                     else f.setSort(v);
                   }}>
                   <option value="" disabled>Sort Filter</option>

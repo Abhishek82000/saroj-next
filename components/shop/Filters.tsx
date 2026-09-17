@@ -18,6 +18,7 @@ export interface FilterProps {
   categories?: CommonCategoryRef[];
   currentSlug?: string;
   tags?: ProductsApiTag[];
+  currentTag?: string;
   priceRange?: { min: number; max: number } | null;
   saleProducts?: SaleProduct[];
 }
@@ -80,7 +81,7 @@ function Check({ checked, label, count, onChange }: {
 /** Rendered twice — in the desktop rail and inside the mobile drawer. */
 export default function Filters({
   state, counts, onToggle, onPrice, showCraft = true, showMaterial = true,
-  categories, currentSlug, tags, priceRange, saleProducts,
+  categories, currentSlug, tags, currentTag, priceRange, saleProducts,
 }: FilterProps) {
   return (
     <>
@@ -101,7 +102,10 @@ export default function Filters({
         <Group title="Tags">
           <div className="st-catlist">
             {tags.map((t) => (
-              <Link key={t.tag_id} href={`/shop?q=${encodeURIComponent(t.tag_name)}`}>{t.tag_name}</Link>
+              <Link key={t.tag_id} href={`/shop/tag/${t.tag_slug}`}
+                className={t.tag_slug === currentTag ? "on" : undefined}>
+                {t.tag_name}
+              </Link>
             ))}
           </div>
         </Group>

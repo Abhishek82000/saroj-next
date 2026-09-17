@@ -95,7 +95,9 @@ export interface ProductsApiSaleProduct {
 export interface ProductsApiResponse {
   success: boolean;
   data: {
-    category?: CommonCategoryRef;
+    category?: CommonCategoryRef | null;
+    /** Present instead of `category` when the listing was fetched by ?tag=<slug>. */
+    tag?: { id: number; name: string; slug: string } | null;
     /** Every storefront category, for the "Product categories" sidebar list. */
     categoryList?: CommonCategoryRef[];
     tagsList?: ProductsApiTag[];
