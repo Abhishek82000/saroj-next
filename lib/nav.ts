@@ -17,7 +17,7 @@ const KNOWN_HREFS: Record<string, string> = {
 
 /** A storefront category's own listing page, backed by GET /api/products?category=<slug>. */
 export function categoryHref(slug: string): string {
-  return `/category/${slug}`;
+  return `/shop/${slug}`;
 }
 
 /**

@@ -7,7 +7,7 @@ const columns = [
     links: [
       ["/shop?craft=fabric", "All fabric"],
       ["/product/maroon-base-with-cream-paisley-printed-jaipuri-cotton-fabric", "Jaipuri Cotton"],
-      ["/shop?q=ajrakh", "Ajrakh Collection"],
+      ["/shop/ajrakh-collection", "Ajrakh Collection"],
       ["/shop?q=kalamkari", "Kalamkari"],
       ["/shop?q=paisley", "Paisley Prints"],
     ],

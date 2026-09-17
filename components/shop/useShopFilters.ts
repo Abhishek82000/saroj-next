@@ -24,8 +24,11 @@ export const emptyFilters = (q = "", craft: string[] = []): FilterState => ({
  * All the listing state in one hook: filters, sort and paging.
  * `skip` lets a facet count itself against every *other* active filter,
  * which is what makes the numbers next to each checkbox honest.
+ *
+ * `items` defaults to the full static catalogue (the /shop page); a category
+ * page passes its own live list so the same filters/sort/paging work there.
  */
-export function useShopFilters(initial: FilterState) {
+export function useShopFilters(initial: FilterState, items: Product[] = products) {
   const [state, setState] = useState<FilterState>(initial);
   const [sort, setSort] = useState<SortKey>("new");
   const [shown, setShown] = useState(12);
@@ -53,18 +56,18 @@ export function useShopFilters(initial: FilterState) {
       hi: (a, b) => b.price - a.price,
       off: (a, b) => discount(b) - discount(a),
     };
-    return products.filter((p) => passes(p)).sort(by[sort]);
-  }, [passes, sort]);
+    return items.filter((p) => passes(p)).sort(by[sort]);
+  }, [items, passes, sort]);
 
   const counts = useCallback((key: keyof FilterState, value: string) =>
-    products.filter((p) => {
+    items.filter((p) => {
       if (!passes(p, key)) return false;
       if (key === "craft") return p.craft === value;
       if (key === "material") return p.material === value;
       if (key === "avail") return p.stock === value;
       if (key === "deal") return discount(p) > 0;
       return true;
-    }).length, [passes]);
+    }).length, [items, passes]);
 
   const toggle = useCallback((key: "craft" | "material" | "avail" | "deal", value: string) => {
     setShown(PAGE);

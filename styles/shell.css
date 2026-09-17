@@ -25,8 +25,10 @@
 .st-links li.has-children:focus-within>a>svg{ transform:rotate(180deg); }
 
 /* Every dropdown is the same full-width panel under the header, however many
-   items it holds — it escapes the trigger <li> so it can span the whole nav. */
-.st-dropdown{ position:fixed; left:0; right:0; top:var(--nav-h, 70px);
+   items it holds. It's positioned absolute against .st-nav (the nearest
+   positioned ancestor, since it's sticky) rather than the trigger <li>, so it
+   spans the whole nav and always sits flush below it — no JS height math. */
+.st-dropdown{ position:absolute; left:0; right:0; top:100%;
               display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:.15rem 2rem;
               background:var(--paper); border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); box-shadow:var(--shadow);
               padding:1.5rem var(--pad); max-height:none; overflow:visible;

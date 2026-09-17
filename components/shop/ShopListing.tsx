@@ -10,6 +10,7 @@ import { emptyFilters, useShopFilters, type SortKey } from "./useShopFilters";
 import { crafts, craftBy } from "@/lib/crafts";
 import { products } from "@/lib/products";
 import { inr } from "@/lib/site";
+import type { Product } from "@/lib/types";
 
 const sorts: [SortKey, string][] = [
   ["new", "Newest first"],
@@ -19,21 +20,29 @@ const sorts: [SortKey, string][] = [
   ["off", "Biggest saving"],
 ];
 
-export default function ShopListing({ q = "", craft = "" }: { q?: string; craft?: string }) {
-  const f = useShopFilters(emptyFilters(q, craft ? [craft] : []));
+export default function ShopListing({ q = "", craft = "", items, title: titleProp, lede, showCraftFacets = true }: {
+  q?: string;
+  craft?: string;
+  /** A single storefront category's own live list, in place of the static catalogue. */
+  items?: Product[];
+  title?: string;
+  lede?: string;
+  showCraftFacets?: boolean;
+}) {
+  const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items);
   const [cols, setCols] = useState<"3" | "4">("3");
   const [drawer, setDrawer] = useState(false);
 
   const list = f.results;
   const slice = list.slice(0, f.shown);
 
-  const title = f.state.q
+  const title = titleProp ?? (f.state.q
     ? `Results for “${f.state.q}”`
     : f.state.craft.length === 1
       ? craftBy[f.state.craft[0]].name
       : f.state.craft.length > 1
         ? "Selected crafts"
-        : "Everything on the counter";
+        : "Everything on the counter");
 
   const chips: { key: string; label: string; onDrop: () => void }[] = [
     ...(f.state.q ? [{ key: "q", label: `“${f.state.q}”`, onDrop: () => f.drop("q") }] : []),
@@ -50,6 +59,8 @@ export default function ShopListing({ q = "", craft = "" }: { q?: string; craft?
     counts: f.counts,
     onToggle: f.toggle,
     onPrice: f.setPrice,
+    showCraft: showCraftFacets,
+    showMaterial: showCraftFacets,
   };
 
   return (
@@ -62,32 +73,33 @@ export default function ShopListing({ q = "", craft = "" }: { q?: string; craft?
           </nav>
           <h1>{title}</h1>
           <p>
-            Handicraft from six Jaipur lanes and the cotton it sits beside.
-            Fabric is priced by the metre, handicraft by the piece.
+            {lede ?? "Handicraft from six Jaipur lanes and the cotton it sits beside. Fabric is priced by the metre, handicraft by the piece."}
           </p>
         </div>
       </div>
 
-      <div className="st-wrap">
-        <div className="st-crafts" role="group" aria-label="Filter by craft">
-          <button type="button" className={`st-craft${f.state.craft.length ? "" : " on"}`}
-            onClick={() => f.pickCraft("")}>
-            <span>Everything<small>{products.length} pieces</small></span>
-          </button>
-          {crafts.map((c) => {
-            const n = products.filter((p) => p.craft === c.key).length;
-            const on = f.state.craft.length === 1 && f.state.craft[0] === c.key;
-            return (
-              <button type="button" key={c.key} className={`st-craft${on ? " on" : ""}`}
-                onClick={() => f.pickCraft(c.key)}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <i><img src={c.image} alt="" loading="lazy" /></i>
-                <span>{c.name}<small>{c.lane} · {n}</small></span>
-              </button>
-            );
-          })}
+      {showCraftFacets && (
+        <div className="st-wrap">
+          <div className="st-crafts" role="group" aria-label="Filter by craft">
+            <button type="button" className={`st-craft${f.state.craft.length ? "" : " on"}`}
+              onClick={() => f.pickCraft("")}>
+              <span>Everything<small>{products.length} pieces</small></span>
+            </button>
+            {crafts.map((c) => {
+              const n = products.filter((p) => p.craft === c.key).length;
+              const on = f.state.craft.length === 1 && f.state.craft[0] === c.key;
+              return (
+                <button type="button" key={c.key} className={`st-craft${on ? " on" : ""}`}
+                  onClick={() => f.pickCraft(c.key)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <i><img src={c.image} alt="" loading="lazy" /></i>
+                  <span>{c.name}<small>{c.lane} · {n}</small></span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="st-wrap">
         <div className="st-plp__grid">

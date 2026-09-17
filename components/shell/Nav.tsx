@@ -20,7 +20,6 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
   const items = navMenu.length > 0 ? navMenu : fallback;
   const [stuck, setStuck] = useState(false);
   const badge = useRef<HTMLSpanElement>(null);
-  const header = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 24);
@@ -28,17 +27,6 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  /* Dropdowns are fixed-position panels below the header, so they need its
-     real height — which changes when it shrinks on scroll. */
-  useEffect(() => {
-    const el = header.current;
-    if (!el) return;
-    const setH = () => document.documentElement.style.setProperty("--nav-h", `${el.offsetHeight}px`);
-    setH();
-    window.addEventListener("resize", setH);
-    return () => window.removeEventListener("resize", setH);
-  }, [stuck]);
 
   /* Replay the bump keyframe each time something lands in the cart. */
   useEffect(() => {
@@ -64,7 +52,7 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
   }, [setSearchOpen]);
 
   return (
-    <header className={`st-nav${stuck ? " stuck" : ""}`} ref={header}>
+    <header className={`st-nav${stuck ? " stuck" : ""}`}>
       <Link className="st-brand" href="/"><b>Saroj Textile</b><span>Handicraft</span></Link>
       <nav aria-label="Primary">
         <ul className="st-links">

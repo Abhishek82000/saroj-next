@@ -8,6 +8,9 @@ export interface FilterProps {
   counts: (key: keyof FilterState, value: string) => number;
   onToggle: (key: "craft" | "material" | "avail" | "deal", value: string) => void;
   onPrice: (key: "min" | "max", value: string) => void;
+  /** A single-category listing has no craft/material facets to offer. */
+  showCraft?: boolean;
+  showMaterial?: boolean;
 }
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
@@ -34,24 +37,28 @@ function Check({ checked, label, count, onChange }: {
 }
 
 /** Rendered twice — in the desktop rail and inside the mobile drawer. */
-export default function Filters({ state, counts, onToggle, onPrice }: FilterProps) {
+export default function Filters({ state, counts, onToggle, onPrice, showCraft = true, showMaterial = true }: FilterProps) {
   return (
     <>
-      <Group title="Craft">
-        {crafts.map((c) => (
-          <Check key={c.key} label={c.name} count={counts("craft", c.key)}
-            checked={state.craft.includes(c.key)} onChange={() => onToggle("craft", c.key)} />
-        ))}
-      </Group>
-
-      <Group title="Material">
-        {materials
-          .filter((m) => counts("material", m) > 0 || state.material.includes(m))
-          .map((m) => (
-            <Check key={m} label={m} count={counts("material", m)}
-              checked={state.material.includes(m)} onChange={() => onToggle("material", m)} />
+      {showCraft && (
+        <Group title="Craft">
+          {crafts.map((c) => (
+            <Check key={c.key} label={c.name} count={counts("craft", c.key)}
+              checked={state.craft.includes(c.key)} onChange={() => onToggle("craft", c.key)} />
           ))}
-      </Group>
+        </Group>
+      )}
+
+      {showMaterial && (
+        <Group title="Material">
+          {materials
+            .filter((m) => counts("material", m) > 0 || state.material.includes(m))
+            .map((m) => (
+              <Check key={m} label={m} count={counts("material", m)}
+                checked={state.material.includes(m)} onChange={() => onToggle("material", m)} />
+            ))}
+        </Group>
+      )}
 
       <Group title="Price">
         <div className="st-range">
