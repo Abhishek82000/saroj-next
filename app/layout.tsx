@@ -49,7 +49,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={`${display.variable} ${body.variable} ${devanagari.variable}`}>
+    <html lang="en-IN" data-scroll-behavior="smooth"
+      className={`${display.variable} ${body.variable} ${devanagari.variable}`}>
       <head>
         {/* Product photography is on BunnyCDN, so warm the connection early. */}
         <link rel="preconnect" href="https://saroj-textile-store.b-cdn.net" />

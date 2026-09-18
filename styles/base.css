@@ -64,3 +64,38 @@ button{ font-family:inherit; }
 .ph-fallback{ position:absolute; inset:0; display:grid; place-items:center; padding:1rem;
               text-align:center; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
               color:var(--mute); }
+
+/* A static content page's own HTML (Privacy Policy, Terms, ...) — typography
+   for whatever tags the storefront's rich-text editor happens to emit. */
+.st-richtext{ color:var(--ink-2); font-size:.95rem; overflow-wrap:anywhere; }
+.st-richtext p{ margin:0 0 1.1em; }
+.st-richtext h1,.st-richtext h2,.st-richtext h3,.st-richtext h4{
+  font-family:var(--d); font-weight:400; color:var(--ink); line-height:1.2; margin:1.6em 0 .6em; }
+.st-richtext h1{ font-size:1.7rem; } .st-richtext h2{ font-size:1.4rem; }
+.st-richtext h3{ font-size:1.15rem; } .st-richtext h4{ font-size:1rem; }
+.st-richtext ul,.st-richtext ol{ margin:0 0 1.1em; padding-left:1.3em; }
+.st-richtext li{ margin-bottom:.4em; }
+.st-richtext a{ color:var(--cobalt); text-decoration:underline; text-underline-offset:.15em; }
+.st-richtext strong,.st-richtext b{ color:var(--ink); font-weight:600; }
+.st-richtext table{ width:100%; border-collapse:collapse; margin:0 0 1.1em; font-size:.88em; }
+.st-richtext th,.st-richtext td{ border:1px solid var(--line-2); padding:.5em .7em; text-align:left; }
+.st-richtext img{ max-width:100%; border-radius:10px; margin:.5em 0; }
+.st-richtext hr{ border:0; border-top:1px solid var(--line-2); margin:1.8em 0; }
+
+/* A static page's two-up layout: the policy text in a card, a "still have
+   a question" card beside it — so a plain legal page still looks like it
+   belongs to the rest of the storefront instead of a bare text dump. */
+.st-static__grid{ display:grid; gap:1.4rem; padding:0 0 clamp(60px,9vw,100px); align-items:start; }
+.st-static__grid>*{ min-width:0; }
+@media(min-width:900px){ .st-static__grid{ grid-template-columns:1fr 260px; gap:2.4rem; } }
+.st-static__card{ border:1px solid var(--line-2); border-radius:18px; background:#fff;
+                   padding:clamp(24px,4vw,40px); max-width:100%; overflow-x:auto; }
+.st-static__help{ border:1px solid var(--line-2); border-radius:18px; background:var(--paper-2);
+                   padding:1.6rem 1.4rem; text-align:center; position:sticky; top:100px; }
+.st-static__help svg{ color:var(--cobalt); margin:0 auto .7rem; }
+.st-static__help h2{ font-family:var(--d); font-weight:400; font-size:1.15rem; margin:0 0 .5rem; }
+.st-static__help p{ color:var(--mute); font-size:.82rem; margin:0 0 1.2rem; }
+.st-static__help .st-btn{ width:100%; }
+.st-static__tel{ display:block; margin-top:.9rem; font-size:.78rem; font-weight:600; color:var(--ink);
+                  transition:color .25s; }
+.st-static__tel:hover{ color:var(--cobalt); }

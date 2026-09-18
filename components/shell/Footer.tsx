@@ -15,10 +15,10 @@ const columns = [
   {
     title: "Help",
     links: [
-      ["https://www.sarojtextile.com/return-policy", "Returns & exchanges"],
-      ["https://www.sarojtextile.com/refund-policy", "Refund policy"],
-      ["https://www.sarojtextile.com/privacy-policy", "Privacy policy"],
-      ["https://www.sarojtextile.com/terms-conditions", "Terms & conditions"],
+      ["/return-policy", "Returns & exchanges"],
+      ["/refund-policy", "Refund policy"],
+      ["/privacy-policy", "Privacy policy"],
+      ["/terms-conditions", "Terms & conditions"],
     ],
   },
   {

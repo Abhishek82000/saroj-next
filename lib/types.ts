@@ -226,3 +226,19 @@ export interface CartLine {
   step: number;
   href?: string;
 }
+
+/**
+ * GET /api/page-data/<slug> — a static content page (Privacy Policy, Terms,
+ * Return Policy, ...). Only the header/footer/breadcrumb come from this app;
+ * `page_content` is the storefront's own rich-text HTML for the middle.
+ */
+export interface PageDataApiResponse {
+  status: string;
+  message: string;
+  data: {
+    page_id: number;
+    page_name: string;
+    page_url: string;
+    page_content: string;
+  } | null;
+}
