@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Photo from "@/components/ui/Photo";
-import ProductCard from "@/components/shop/ProductCard";
+import Rail from "@/components/product/Rail";
 import JsonLd from "@/components/seo/JsonLd";
 import { getBlogPost } from "@/lib/blogs";
 import { breadcrumbLd, graph, pageMeta } from "@/lib/seo";
@@ -64,15 +64,7 @@ export default async function BlogPostPage({ params }: { params: Params }) {
       </div>
 
       {post.related.length > 0 && (
-        <section className="st-sec" style={{ paddingBlock: "clamp(30px,5vw,54px)" }}>
-          <div className="st-wrap">
-            <span className="st-eyebrow">You might also like</span>
-            <h2 className="st-h2" style={{ fontSize: "clamp(1.6rem,5vw,2.2rem)" }}>From the counter.</h2>
-            <div className="st-grid" data-cols="4" style={{ marginTop: "1.4rem" }}>
-              {post.related.slice(0, 4).map((p) => <ProductCard key={p.slug} p={p} />)}
-            </div>
-          </div>
-        </section>
+        <Rail eyebrow="You might also like" heading="From the counter." items={post.related} />
       )}
 
       <JsonLd data={graph([

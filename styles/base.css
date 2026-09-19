@@ -36,6 +36,9 @@ button{ font-family:inherit; }
 .st-btn:hover,.st-btn:focus-visible{ color:var(--paper); border-color:transparent; }
 .st-btn:hover::after,.st-btn:focus-visible::after{ transform:translateY(0); }
 .st-btn:active{ transform:scale(.97); }
+.st-btn:disabled{ opacity:.55; cursor:not-allowed; }
+.st-btn:disabled:hover,.st-btn:disabled:focus-visible{ color:var(--fg); border-color:var(--bd); }
+.st-btn:disabled::after{ display:none; }
 .st-btn--solid{ --bg:var(--ink); --fg:var(--paper); --bd:transparent; }
 .st-btn--solid::after{ background:var(--cobalt); }
 .st-btn--solid:hover{ color:#fff; }

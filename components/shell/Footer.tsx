@@ -25,7 +25,7 @@ const columns = [
     title: "The house",
     links: [
       ["https://www.sarojtextile.com/about", "Our story"],
-      ["https://www.sarojtextile.com/faq", "FAQs"],
+      ["/faq", "FAQs"],
       ["/blog", "Blog"],
       ["https://www.sarojtextile.com/wholesale-fabric", "Wholesale @ ₹80"],
       ["/contact", "Contact"],

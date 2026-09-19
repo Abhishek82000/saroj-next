@@ -19,6 +19,7 @@ export interface BlogSummary {
   image: string;
   date: string;
   category?: string;
+  featured: boolean;
 }
 
 function toSummary(p: BlogApiPost): BlogSummary {
@@ -30,6 +31,7 @@ function toSummary(p: BlogApiPost): BlogSummary {
     image: BLOG_IMG(p.blog_image),
     date: p.blog_date,
     category: p.categories?.category_name,
+    featured: p.blog_featured === 1,
   };
 }
 

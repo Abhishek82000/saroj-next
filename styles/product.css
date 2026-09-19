@@ -218,6 +218,11 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
                         transform:rotate(45deg); transition:transform .35s var(--ease); }
 .st-faq details[open] summary::after{ transform:rotate(-135deg); }
 .st-faq p{ margin:0; padding:0 2.2rem 1.15rem 0; color:var(--mute); font-size:.88rem; font-weight:300; max-width:72ch; }
+/* /faq's answers come as their own HTML, so the same look applies one level deeper. */
+.st-faq__body{ padding:0 2.2rem 1.15rem 0; color:var(--mute); font-size:.88rem; font-weight:300; max-width:72ch; }
+.st-faq__body p{ padding:0; margin:0 0 .8em; }
+.st-faq__body p:last-child{ margin-bottom:0; }
+.st-faq__body a{ color:var(--cobalt); text-decoration:underline; text-underline-offset:.15em; }
 
 /* ---------- related rails ---------- */
 .st-railhead{ display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; flex-wrap:wrap; }

@@ -158,9 +158,10 @@ export const itemListLd = (items: Product[], path: string) => ({
   })),
 });
 
-export const faqLd = () => ({
+/** Defaults to the static fallback list; /faq passes the live one instead. */
+export const faqLd = (items: [string, string][] = faq) => ({
   "@type": "FAQPage",
-  mainEntity: faq.map(([q, a]) => ({
+  mainEntity: items.map(([q, a]) => ({
     "@type": "Question",
     name: q,
     acceptedAnswer: { "@type": "Answer", text: a },

@@ -298,3 +298,26 @@ export interface BlogDetailApiResponse {
     related_products: BlogApiRelatedProduct[];
   };
 }
+
+/** POST /api/contact-process — the Contact page's message form. 201 on
+    success; 422 with a field-keyed `errors` map when validation fails. */
+export interface ContactProcessApiResponse {
+  success: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+/** GET /api/faqs — the flat list backing /faq and the FAQPage JSON-LD. */
+export interface FaqApiPost {
+  faq_id: number;
+  faq_title: string;
+  /** Rich-text HTML, usually just a <p> or two. */
+  faq_description: string;
+  faq_status: number;
+  faq_featured: number;
+}
+
+export interface FaqsApiResponse {
+  success: boolean;
+  data: { faqs: FaqApiPost[] };
+}
