@@ -366,7 +366,9 @@
 /* a single post's own page */
 .st-post__date{ color:var(--mute); font-size:.78rem; margin:.6rem 0 0; }
 .st-blog__hero{ aspect-ratio:16/8; border-radius:18px; margin-top:clamp(18px,3vw,28px); }
-.st-blog__body{ max-width:70ch; margin:0 auto; padding:clamp(24px,4vw,38px) 0 0; }
+/* Same width as the hero image above it — narrowing this to a reading
+   column looked mismatched next to the full-bleed photo. */
+.st-blog__body{ padding:clamp(24px,4vw,38px) 0 0; }
 
 /* ============================================================
    VIDEO BANNER — frame opens out as you scroll
