@@ -270,6 +270,8 @@ export interface BlogApiPost {
 export interface BlogsListApiResponse {
   success: boolean;
   data: {
+    /** Present instead of null when the listing was fetched by ?category=<slug>. */
+    category: { id: number; name: string; slug: string } | null;
     blogs: BlogApiPost[];
     pagination: { current_page: number; last_page: number; total: number };
     categories: BlogApiCategory[];

@@ -36,22 +36,28 @@ function toSummary(p: BlogApiPost): BlogSummary {
 export interface BlogList {
   posts: BlogSummary[];
   categories: BlogApiCategory[];
+  /** The active category's own name, when one was requested. */
+  activeCategory: string | null;
   page: number;
   lastPage: number;
 }
 
-const EMPTY_LIST: BlogList = { posts: [], categories: [], page: 1, lastPage: 1 };
+const EMPTY_LIST: BlogList = { posts: [], categories: [], activeCategory: null, page: 1, lastPage: 1 };
 
-/** The journal's listing, for /blog and the homepage teaser. Returns an
-    empty list on any failure so the page can show its own empty state. */
-export async function getBlogList(page = 1): Promise<BlogList> {
+/** The journal's listing, for /blog and the homepage teaser. `category` is
+    a category_slug from the "categories" facet, e.g. "cotton" — narrows
+    the list to just that category's posts. Returns an empty list on any
+    failure so the page can show its own empty state. */
+export async function getBlogList(page = 1, category?: string): Promise<BlogList> {
   try {
-    const res = await fetch(`${site.url}/api/blogs?page=${page}`, { next: { revalidate: 300 } });
+    const q = category ? `&category=${encodeURIComponent(category)}` : "";
+    const res = await fetch(`${site.url}/api/blogs?page=${page}${q}`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY_LIST;
     const json: BlogsListApiResponse = await res.json();
     return {
       posts: (json.data?.blogs ?? []).map(toSummary),
       categories: json.data?.categories ?? [],
+      activeCategory: json.data?.category?.name ?? null,
       page: json.data?.pagination?.current_page ?? 1,
       lastPage: json.data?.pagination?.last_page ?? 1,
     };
