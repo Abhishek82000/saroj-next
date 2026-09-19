@@ -14,6 +14,7 @@ import Bulk from "@/components/home/Bulk";
 import Journal from "@/components/home/Journal";
 import Rail from "@/components/product/Rail";
 import JsonLd from "@/components/seo/JsonLd";
+import { getBlogList } from "@/lib/blogs";
 import { apiProductToProduct, buildReels, getHomeData } from "@/lib/home";
 import { getFeaturedCategories } from "@/lib/nav";
 import { products } from "@/lib/products";
@@ -34,6 +35,7 @@ export default async function HomePage() {
   const categorySections = homeData.categorySections;
   const apiReels = buildReels(homeData);
   const featuredCategories = await getFeaturedCategories();
+  const { posts: journalPosts } = await getBlogList();
 
   return (
     <main id="main">
@@ -71,7 +73,7 @@ export default async function HomePage() {
       {/* <Making /> */}
       <Voices />
       <Bulk />
-      <Journal />
+      <Journal posts={journalPosts} />
 
       <JsonLd data={graph([
         breadcrumbLd([{ name: "Home", path: "/" }]),

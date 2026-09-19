@@ -19,7 +19,9 @@ export async function getStaticPage(slug: string): Promise<StaticPage | null> {
     const res = await fetch(`${site.url}/api/page-data/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json: PageDataApiResponse = await res.json();
-    if (json.status !== "success" || !json.data) return null;
+    // A page can 200 with a name but no body (e.g. Contact, which this app
+    // renders with its own dedicated route instead) — nothing to show here.
+    if (json.status !== "success" || !json.data || !json.data.page_content) return null;
     return { name: json.data.page_name, html: json.data.page_content };
   } catch {
     return null;

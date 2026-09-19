@@ -317,9 +317,19 @@
 .st-post__body{ padding:1rem 1.1rem 1.25rem; display:flex; flex-direction:column; flex:1; }
 .st-post__kind{ font-size:.56rem; letter-spacing:.2em; text-transform:uppercase; color:var(--cobalt); font-weight:700; }
 .st-post h3{ font-family:var(--d); font-size:1.16rem; margin:.5rem 0 0; line-height:1.24; }
+.st-post__excerpt{ color:var(--mute); font-size:.82rem; line-height:1.5; margin:.5rem 0 0; font-weight:300; }
 .st-post__more{ margin-top:auto; padding-top:1rem; font-size:.6rem; letter-spacing:.2em;
                 text-transform:uppercase; font-weight:700; color:var(--ink-2); display:flex; align-items:center; gap:.4rem; }
 .st-post:hover .st-post__more{ color:var(--cobalt); }
+
+/* /blog listing's simple prev/next pager */
+.st-pager{ display:flex; align-items:center; justify-content:center; gap:1.2rem;
+           margin-top:clamp(34px,5vw,50px); font-size:.72rem; color:var(--mute); }
+
+/* a single post's own page */
+.st-post__date{ color:var(--mute); font-size:.78rem; margin:.6rem 0 0; }
+.st-blog__hero{ aspect-ratio:16/8; border-radius:18px; margin-top:clamp(18px,3vw,28px); }
+.st-blog__body{ max-width:70ch; margin:0 auto; padding:clamp(24px,4vw,38px) 0 0; }
 
 /* ============================================================
    VIDEO BANNER — frame opens out as you scroll

@@ -239,6 +239,60 @@ export interface PageDataApiResponse {
     page_id: number;
     page_name: string;
     page_url: string;
-    page_content: string;
+    /** null on pages this app renders with its own dedicated route instead (Contact). */
+    page_content: string | null;
   } | null;
+}
+
+/** A blog's category, shared by the list and detail endpoints. */
+export interface BlogApiCategory {
+  category_id: number;
+  category_name: string;
+  category_slug: string;
+  blogs_count?: number;
+}
+
+/** One post as returned by both GET /api/blogs and GET /api/blogs/<slug>. */
+export interface BlogApiPost {
+  blog_id: number;
+  blog_name: string;
+  blog_slug: string;
+  blog_short_description: string | null;
+  blog_desc: string;
+  blog_meta_desc: string | null;
+  blog_image: string | null;
+  blog_date: string;
+  blog_featured: number;
+  categories?: BlogApiCategory;
+}
+
+/** GET /api/blogs?page=<n> — the journal's listing, one page at a time. */
+export interface BlogsListApiResponse {
+  success: boolean;
+  data: {
+    blogs: BlogApiPost[];
+    pagination: { current_page: number; last_page: number; total: number };
+    categories: BlogApiCategory[];
+  };
+}
+
+/** One entry of a blog post's "related_products" — its own product shape,
+    distinct from HomeApiProduct's field names. */
+export interface BlogApiRelatedProduct {
+  product_id: number;
+  product_name: string;
+  product_slug: string;
+  product_price: string;
+  product_selling_price: string;
+  product_image_cdn: string;
+  product_stock: number;
+}
+
+/** GET /api/blogs/<slug> — a single post plus a few related products. */
+export interface BlogDetailApiResponse {
+  success: boolean;
+  data: {
+    blog: BlogApiPost;
+    related_products: BlogApiRelatedProduct[];
+  };
 }

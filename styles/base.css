@@ -99,3 +99,21 @@ button{ font-family:inherit; }
 .st-static__tel{ display:block; margin-top:.9rem; font-size:.78rem; font-weight:600; color:var(--ink);
                   transition:color .25s; }
 .st-static__tel:hover{ color:var(--cobalt); }
+
+/* /contact */
+.st-contact__grid{ display:grid; gap:1.4rem; padding:clamp(20px,3vw,32px) 0 0; align-items:start; }
+@media(min-width:820px){ .st-contact__grid{ grid-template-columns:280px 1fr; gap:2.2rem; } }
+.st-contact__grid>*{ min-width:0; }
+.st-contact__info{ display:grid; gap:.7rem; align-content:start; }
+.st-contact__card{ display:flex; align-items:flex-start; gap:.8rem; border:1px solid var(--line-2);
+                    border-radius:14px; background:#fff; padding:1rem 1.1rem; transition:border-color .25s, transform .25s var(--ease); }
+a.st-contact__card:hover{ border-color:var(--cobalt); transform:translateY(-2px); }
+.st-contact__card svg{ color:var(--cobalt); flex:none; margin-top:.1rem; }
+.st-contact__card b{ display:block; font-size:.82rem; font-weight:600; color:var(--ink); }
+.st-contact__card p{ margin:.2rem 0 0; font-size:.78rem; color:var(--mute); line-height:1.4; }
+.st-contact__form h2{ font-family:var(--d); font-weight:400; font-size:1.4rem; margin:0; }
+.st-contact__form .st-field{ margin-top:1.1rem; }
+.st-contact__form .st-btn{ margin-top:.4rem; }
+.st-contact__map{ aspect-ratio:16/6; border-radius:18px; margin:clamp(24px,4vw,36px) 0 clamp(50px,8vw,90px); }
+.st-contact__map iframe{ width:100%; height:100%; border:0; }
+@media(max-width:640px){ .st-contact__map{ aspect-ratio:4/3; } }
