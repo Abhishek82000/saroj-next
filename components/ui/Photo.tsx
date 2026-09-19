@@ -27,6 +27,6 @@ export default function Photo({
 
   return (
     <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={className}
-      onError={() => setFailed(true)} style={{ objectFit: "cover" }} />
+      onError={() => setFailed(true)} style={{ objectFit: "fill" }} />
   );
 }

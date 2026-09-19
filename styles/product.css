@@ -2,7 +2,7 @@
 /* ---------- crumb ---------- */
 .st-crumb{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
            font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute);
-           padding:clamp(14px,3vw,24px) var(--pad) 0; }
+           padding:clamp(14px,3vw,0) var(--pad) 0; }
 .st-crumb a{ transition:color .3s; }
 .st-crumb a:hover{ color:var(--cobalt); }
 .st-crumb b{ color:var(--ink-2); font-weight:400; }
