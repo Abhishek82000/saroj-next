@@ -13,7 +13,7 @@ const cards = [
  
 export default function Bulk() {
   return (
-    <section className="st-sec st-bulk" id="bulk">
+    <section className="st-sec st-bulk" id="bulk" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-wrap">
         <Reveal className="st-eyebrow">Larger orders</Reveal>
         <Reveal as="h2" delay={1} className="st-h2">Bulk &amp; gifting.</Reveal>

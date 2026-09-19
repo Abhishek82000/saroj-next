@@ -36,7 +36,7 @@ export default function GiftBuilder() {
   const summary = `${pieces[piece].label}, wrapped in ${cloths[cloth].label}, ${seals[seal].label}`;
 
   return (
-    <section className="st-sec st-gift" id="gift">
+    <section className="st-sec st-gift" id="gift" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-wrap st-gift__grid">
         <div className="st-giftstage">
           <div className="st-giftbox">

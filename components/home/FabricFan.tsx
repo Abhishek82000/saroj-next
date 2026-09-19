@@ -21,7 +21,7 @@ export default function FabricFan() {
   const current = bolts[active];
 
   return (
-    <section className="st-sec st-cloth" id="cloth">
+    <section className="st-sec st-cloth" id="cloth" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-wrap st-cloth__grid">
         <div>
           <Reveal className="st-eyebrow">House one, still standing</Reveal>
