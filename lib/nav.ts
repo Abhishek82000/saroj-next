@@ -12,7 +12,7 @@ export interface NavLink {
 const KNOWN_HREFS: Record<string, string> = {
   Home: "/",
   Fabrics: "/shop?craft=fabric",
-  "Wholesale @80": "https://www.sarojtextile.com/wholesale-fabric",
+  "Wholesale @80": "/wholesale-fabric",
 };
 
 /** A storefront category's own listing page, backed by GET /api/products?category=<slug>. */

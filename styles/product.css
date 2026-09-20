@@ -302,3 +302,8 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
               place-items:center; padding:clamp(16px,4vw,50px); cursor:zoom-out; }
 .st-lightbox.on{ display:grid; }
 .st-lightbox img{ max-width:100%; max-height:88vh; object-fit:contain; border-radius:10px; }
+
+.st-prod__gst{ font-style:normal; margin-left:.35rem; font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+
+.st-whnote{ margin:.7rem 0 0; font-size:.74rem; color:var(--mute); }
+.st-whnote b{ color:var(--cobalt); font-weight:700; }

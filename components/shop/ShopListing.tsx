@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useStore } from "@/components/shell/StoreProvider";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
@@ -45,11 +46,12 @@ export default function ShopListing({
   saleProducts?: SaleProduct[];
 }) {
   const router = useRouter();
+  const { href } = useStore();
   /** A category or tag page's list arrives already sorted by the API (it has
       the real sold/new-arrival data the static catalogue's `sold`/`fresh`
       proxy fields don't) — so it just gets filtered here, not re-sorted. */
   const isLiveSort = currentSlug != null || currentTag != null;
-  const liveHref = currentTag != null ? `/shop/tag/${currentTag}` : `/shop/${currentSlug}`;
+  const liveHref = href(currentTag != null ? `/shop/tag/${currentTag}` : `/shop/${currentSlug}`);
   const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items, {
     initialSort: liveSort, sortLocally: !isLiveSort,
   });

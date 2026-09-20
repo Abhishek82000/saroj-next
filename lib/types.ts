@@ -36,6 +36,17 @@ export interface Product {
   alsoBought?: string[];
   /** The live API's own merchandising tag ("New", "Trending", ...), when it has one — overrides the generic Fabric/Handicraft badge. */
   label?: string;
+  /** Trade terms for this piece. Absent when it isn't sold wholesale. */
+  wholesale?: WholesaleRate;
+}
+
+/** What a piece costs in wholesale mode — GST is charged on top of `price`. */
+export interface WholesaleRate {
+  price: number;
+  /** Struck-through list price. 0 when there is no reduction. */
+  mrp: number;
+  /** Smallest quantity a wholesale order line may hold, in `unit`s. */
+  minQty: number;
 }
 
 /** One product as returned by GET /api/home, inside a tag section. */
@@ -225,6 +236,8 @@ export interface CartLine {
   qty: number;
   step: number;
   href?: string;
+  /** Set on wholesale lines: the smallest quantity the line may be cut down to. */
+  minQty?: number;
 }
 
 /**
@@ -320,4 +333,53 @@ export interface FaqApiPost {
 export interface FaqsApiResponse {
   success: boolean;
   data: { faqs: FaqApiPost[] };
+}
+
+/** A wholesale-home banner. `slider_category` is set when the banner leads somewhere. */
+export interface WholesaleApiSlide {
+  slider_id: number;
+  slider_name: string;
+  slider_image: string;
+  slider_image_mobile: string | null;
+  slider_url: string | null;
+  slider_category: number | null;
+  category: CommonCategoryRef | null;
+}
+
+/** A category as GET /api/wholesale-page-data describes it — fuller than CommonCategoryRef. */
+export interface WholesaleApiCategory extends CommonCategoryRef {
+  cat_heading: string | null;
+  cat_short_desc: string | null;
+  cat_cdn_url: string;
+  cat_banner_cdn: string;
+}
+
+export interface WholesaleApiTestimonial {
+  testimonial_id: number;
+  testimonial_name: string;
+  testimonial_rating: number;
+  testimonial_desc: string;
+  testimonial_status: number;
+}
+
+/** Rail products here arrive with no price at all — `price` and `selling_price` are null. */
+export type WholesaleApiProduct = Omit<HomeApiProduct, "price" | "selling_price" | "style_type"> & {
+  price: string | null;
+  selling_price: string | null;
+  style_type: number | null;
+};
+
+/** GET /api/wholesale-page-data — everything the wholesale front page shows. */
+export interface WholesalePageApiResponse {
+  success: boolean;
+  data: {
+    top_slider: WholesaleApiSlide[];
+    /** Prefix for the banners' image filenames. */
+    slider_image: string;
+    category_high: WholesaleApiCategory[];
+    category_rayon: WholesaleApiCategory[];
+    category_list: WholesaleApiCategory[];
+    testimonials: WholesaleApiTestimonial[];
+    category_show_home_page: { cat_id: number; cat_name: string; cat_slug: string; products: WholesaleApiProduct[] }[];
+  };
 }
