@@ -59,8 +59,8 @@ export default async function BlogPostPage({ params }: { params: Params }) {
         </div>
       )}
 
-      <div className="st-wrap">
-        <article className="st-richtext st-blog__body" dangerouslySetInnerHTML={{ __html: post.html }} />
+      <div className="st-wrap" style={{ paddingTop:"0" }}>
+        <article className="st-richtext" dangerouslySetInnerHTML={{ __html: post.html }} />
       </div>
 
       {post.related.length > 0 && (

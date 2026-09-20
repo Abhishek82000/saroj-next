@@ -2,7 +2,7 @@
   "name": "saroj-textile",
   "version": "1.0.0",
   "private": true,
-  "description": "Saroj Textile storefront \u2014 Jaipur handicraft and hand block printed cotton.",
+  "description": "Saroj Textile storefront — Jaipur handicraft and hand block printed cotton.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,6 +11,8 @@
     "dev:lan": "next dev -H 0.0.0.0"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8",
     "next": "^16.3.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

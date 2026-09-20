@@ -23,7 +23,7 @@ button{ font-family:inherit; }
 .st-lede{ color:var(--mute); font-weight:300; font-size:clamp(.95rem,3.4vw,1.08rem); max-width:46ch; margin:1.05rem 0 0; }
 .st-dv{ font-family:var(--dv); }
 .st-sec{ padding:var(--sec-y) var(--pad); position:relative; }
-.st-wrap{ max-width:1280px; margin-inline:auto; width:100%; }
+.st-wrap{ max-width:1280px; margin-inline:auto; width:100%;}
 
 .st-btn{ --bg:transparent; --fg:var(--ink); --bd:var(--line);
   display:inline-flex; align-items:center; justify-content:center; gap:.6em;

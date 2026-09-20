@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Marcellus, Manrope, Tiro_Devanagari_Hindi } from "next/font/google";
 import Shell from "@/components/shell/Shell";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import JsonLd from "@/components/seo/JsonLd";
 import { graph, organizationLd, websiteLd } from "@/lib/seo";
 import { site } from "@/lib/site";
