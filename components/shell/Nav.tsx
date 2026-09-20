@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
+import AccountMenu from "./AccountMenu";
 import type { NavLink } from "@/lib/nav";
 
 /** Shown only if the live menu couldn't be fetched. */
@@ -16,7 +17,7 @@ const fallback: NavLink[] = [
 ];
 
 export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
-  const { count, pulse, setCartOpen, setSearchOpen, setMenuOpen } = useStore();
+  const { count, pulse, setCartOpen, setSearchOpen, setMenuOpen, href, mode, navItem } = useStore();
   const items = navMenu.length > 0 ? navMenu : fallback;
   const [stuck, setStuck] = useState(false);
   const badge = useRef<HTMLSpanElement>(null);
@@ -53,32 +54,36 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
 
   return (
     <header className={`st-nav${stuck ? " stuck" : ""}`}>
-      <Link className="st-brand" href="/"><img width={80} src="https://www.sarojtextile.com/public/img/uploads/settings/1758459499.png" alt="Saroj Textile" /></Link>
+      <Link className="st-brand" href={href("/")}><img width={80} src="https://www.sarojtextile.com/public/img/uploads/settings/1758459499.png" alt="Saroj Textile" /></Link>
       <nav aria-label="Primary">
         <ul className="st-links">
-          {items.map((l) => (
+          {items.map((l) => {
+            const item = navItem(l);
+            return (
             <li key={l.id} className={l.children.length > 0 ? "has-children" : undefined}>
-              <Link href={l.href}>
-                {l.label}
+              <Link href={item.href}>
+                {item.label}
                 {l.children.length > 0 && <Icon name="down" size={11} strokeWidth={2} />}
               </Link>
               {l.children.length > 0 && (
                 <div className="st-dropdown">
                   <div className="st-dropdown__panel">
-                    {l.children.map((c) => <Link key={c.id} href={c.href}>{c.label}</Link>)}
+                    {l.children.map((c) => <Link key={c.id} href={href(c.href)}>{c.label}</Link>)}
                   </div>
                 </div>
               )}
             </li>
-          ))}
+            );
+          })}
         </ul>
       </nav>
       <div className="st-tools">
         <button className="st-icn" onClick={() => setSearchOpen(true)} aria-label="Search the counter">
           <Icon name="search" />
         </button>
+        <AccountMenu />
         <button className="st-icn" onClick={() => setCartOpen(true)}
-          aria-label={`Cart, ${count} ${count === 1 ? "item" : "items"}`}>
+          aria-label={`${mode === "wholesale" ? "Wholesale cart" : "Cart"}, ${count} ${count === 1 ? "item" : "items"}`}>
           <Icon name="cart" />
           <span ref={badge} className={`st-count${count ? " on" : ""}`} aria-hidden="true">
             {count > 99 ? "99+" : count}

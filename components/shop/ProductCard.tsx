@@ -6,6 +6,7 @@ import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { discount } from "@/lib/products";
 import { inr, unitLabel } from "@/lib/site";
+import { priced } from "@/lib/wholesale";
 import { craftBy } from "@/lib/crafts";
 import type { Product } from "@/lib/types";
 
@@ -16,18 +17,16 @@ const stockLine: Record<string, string> = {
 };
 
 export default function ProductCard({ p, priority }: { p: Product; priority?: boolean }) {
-  const { add, favs, toggleFav } = useStore();
+  const { addProduct, favs, toggleFav, mode, user, href } = useStore();
   const [added, setAdded] = useState(false);
-  const off = discount(p);
+  const view = priced(p, mode === "wholesale");
+  const off = discount(view.wholesale ? { ...p, price: view.price, mrp: view.mrp } : p);
   const out = p.stock === "out";
   const saved = !!favs[p.slug];
 
-  /** Fabric goes in at a sensible starting cut; a piece goes in as one. */
-  const startingQty = p.cut ? 2.5 : 1;
-
   return (
     <article className="st-card in" data-id={p.slug}>
-      <Link className="st-card__ph ph" href={`/product/${p.slug}`} aria-label={p.name}>
+      <Link className="st-card__ph ph" href={href(`/product/${p.slug}`)} aria-label={p.name}>
         <Photo src={p.images[0].src} alt={p.name} note={p.images[0].note} priority={priority}
           sizes="(max-width:640px) 50vw, (max-width:1000px) 33vw, 260px" />
       </Link>
@@ -44,8 +43,9 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
 
       <button type="button" className="st-card__add" disabled={out}
         onClick={() => {
-          add({ id: p.slug, name: p.name, price: p.price, unit: p.unit, image: p.images[0].src,
-                step: p.cut?.step ?? 1, qty: startingQty, href: `/product/${p.slug}` });
+          addProduct(p);
+          /* A wholesale add waits for login, so don't claim it's in the cart yet. */
+          if (view.wholesale && !user) return;
           setAdded(true);
           setTimeout(() => setAdded(false), 1600);
         }}>
@@ -56,9 +56,9 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
         <span className="st-card__craft">{craftBy[p.craft]?.name}</span>
         <h3 className="st-card__n">{p.name}</h3>
         <span className="st-card__p">
-          <b>{inr(p.price)}</b>
-          {p.mrp > 0 && <s>{inr(p.mrp)}</s>}
-          <em>{unitLabel(p.unit)}</em>
+          <b>{inr(view.price)}</b>
+          {view.mrp > 0 && <s>{inr(view.mrp)}</s>}
+          <em>{unitLabel(p.unit)}{view.wholesale ? " · +GST" : ""}</em>
         </span>
         <span className={`st-card__stock ${p.stock}`}>{stockLine[p.stock]}</span>
       </div>

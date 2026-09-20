@@ -7,6 +7,7 @@ import Reveal from "@/components/ui/Reveal";
 import { useStore } from "@/components/shell/StoreProvider";
 import { discount } from "@/lib/products";
 import { inr } from "@/lib/site";
+import { priced } from "@/lib/wholesale";
 import type { Product } from "@/lib/types";
 
 /** Horizontal product scroller, used under the product detail and on the home page. */
@@ -14,7 +15,7 @@ export default function Rail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
   const rail = useRef<HTMLDivElement>(null);
-  const { add } = useStore();
+  const { addProduct, mode, href } = useStore();
 
   const nudge = (dir: 1 | -1) => {
     const el = rail.current;
@@ -38,24 +39,24 @@ export default function Rail({
       <div className="st-wrap">
         <div className="st-shoprail" ref={rail}>
           {items.map((p) => {
-            const off = discount(p);
+            const view = priced(p, mode === "wholesale");
+            /* A piece the API sent without a price shows no price — never a made-up ₹0. */
+            const known = view.price > 0;
+            const off = known ? discount(view.wholesale ? { ...p, price: view.price, mrp: view.mrp } : p) : 0;
             return (
               <div className="st-prod" key={p.slug}>
-                <Link href={`/product/${p.slug}`} className="st-prod__ph ph" aria-label={p.name}>
+                <Link href={href(`/product/${p.slug}`)} className="st-prod__ph ph" aria-label={p.name}>
                   <Photo src={p.images[0].src} alt={p.name} note={p.images[0].note} sizes="232px" />
                 </Link>
                 {off > 0 && <span className="st-prod__off">{off}% off</span>}
                 <div className="st-prod__body">
-                  <Link href={`/product/${p.slug}`} className="st-prod__name">{p.name}</Link>
-                  <span className="st-prod__price"><b>{inr(p.price)}</b>{p.mrp > 0 && <s>{inr(p.mrp)}</s>}</span>
+                  <Link href={href(`/product/${p.slug}`)} className="st-prod__name">{p.name}</Link>
+                  {known && <span className="st-prod__price"><b>{inr(view.price)}</b>{view.mrp > 0 && <s>{inr(view.mrp)}</s>}{view.wholesale && <em className="st-prod__gst">+GST</em>}</span>}
                 </div>
-                <button type="button" className="st-quick" aria-label={`Add ${p.name} to cart`}
-                  onClick={() => add({
-                    id: p.slug, name: p.name, price: p.price, unit: p.unit, image: p.images[0].src,
-                    step: p.cut?.step ?? 1, qty: p.cut ? 2.5 : 1, href: `/product/${p.slug}`,
-                  })}>
+                {known && <button type="button" className="st-quick" aria-label={`Add ${p.name} to cart`}
+                  onClick={() => addProduct(p)}>
                   <Icon name="plus" size={15} strokeWidth={2} />
-                </button>
+                </button>}
               </div>
             );
           })}

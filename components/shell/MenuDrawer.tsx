@@ -18,7 +18,7 @@ const items = [
 ];
 
 export default function MenuDrawer({ navMenu = [] }: { navMenu?: NavLink[] }) {
-  const { menuOpen, setMenuOpen } = useStore();
+  const { menuOpen, setMenuOpen, user, openLogin, logout, href, navItem, mode } = useStore();
   const close = () => setMenuOpen(false);
 
   return (
@@ -28,13 +28,22 @@ export default function MenuDrawer({ navMenu = [] }: { navMenu?: NavLink[] }) {
         <DrawerClose onClose={close} label="Close menu" />
       </div>
       <div className="drawer__body">
+        <div className="st-drawer__acct">
+          {user ? (
+            <p>Hi, <b>{user.name.split(" ")[0]}</b> · <button type="button" onClick={() => { logout(); close(); }}>Log out</button></p>
+          ) : (
+            <p><button type="button" onClick={() => { close(); openLogin(); }}>Log in or register</button> for wholesale and saved pieces.</p>
+          )}
+        </div>
         <nav>
           {items.map((i) => (
-            <Link key={i.href} href={i.href} onClick={close}>
+            <Link key={i.href} href={href(i.href)} onClick={close}>
               {i.label}{i.note ? <i>{i.note}</i> : null}
             </Link>
           ))}
-          <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale <i>₹80/m</i></a>
+          <Link href={navItem({ label: "Wholesale", href: "/wholesale-fabric" }).href} onClick={close}>
+            {mode === "wholesale" ? "Retail" : <>Wholesale <i>₹80/m</i></>}
+          </Link>
         </nav>
 
         {navMenu.length > 0 && (
@@ -45,11 +54,11 @@ export default function MenuDrawer({ navMenu = [] }: { navMenu?: NavLink[] }) {
                 <details key={l.id}>
                   <summary>{l.label}</summary>
                   <div>
-                    {l.children.map((c) => <Link key={c.id} href={c.href} onClick={close}>{c.label}</Link>)}
+                    {l.children.map((c) => <Link key={c.id} href={href(c.href)} onClick={close}>{c.label}</Link>)}
                   </div>
                 </details>
               ) : (
-                <Link key={l.id} href={l.href} onClick={close}>{l.label}</Link>
+                <Link key={l.id} href={navItem(l).href} onClick={close}>{navItem(l).label}</Link>
               )
             ))}
           </nav>

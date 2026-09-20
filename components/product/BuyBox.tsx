@@ -9,6 +9,7 @@ import CutPicker from "./CutPicker";
 import Tabs from "./Tabs";
 import { coupons, makes } from "@/lib/content";
 import { discount } from "@/lib/products";
+import { priced, wholesaleNote } from "@/lib/wholesale";
 import { inr, site, unitLabel } from "@/lib/site";
 import { craftBy } from "@/lib/crafts";
 import type { Product } from "@/lib/types";
@@ -19,7 +20,7 @@ import type { Product } from "@/lib/types";
  * sticky bar that takes over once the real button scrolls away.
  */
 export default function BuyBox({ p }: { p: Product }) {
-  const { add, favs, toggleFav, say } = useStore();
+  const { addProduct, favs, toggleFav, say, mode, user } = useStore();
   const [qty, setQty] = useState(p.cut ? 3 : 1);
   const [guide, setGuide] = useState(false);
   const [ask, setAsk] = useState(false);
@@ -28,8 +29,14 @@ export default function BuyBox({ p }: { p: Product }) {
   const [copied, setCopied] = useState<string | null>(null);
   const addRef = useRef<HTMLButtonElement>(null);
 
-  const off = discount(p);
-  const total = p.price * qty;
+  const view = priced(p, mode === "wholesale");
+  /** The piece as it's sold in the current mode: trade rate and minimum length in wholesale. */
+  const shown: Product = view.wholesale
+    ? { ...p, price: view.price, mrp: view.mrp, cut: p.cut && { ...p.cut, min: Math.max(p.cut.min, view.minQty) } }
+    : p;
+  const minQty = view.wholesale ? view.minQty : 1;
+  const off = discount(shown);
+  const total = shown.price * qty;
   const saved = !!favs[p.slug];
   const out = p.stock === "out";
   /** A live-storefront product whose price we couldn't find anywhere — never show a fake ₹0. */
@@ -46,11 +53,10 @@ export default function BuyBox({ p }: { p: Product }) {
     return () => io.disconnect();
   }, []);
 
-  const addThis = () =>
-    add({
-      id: p.slug, name: p.name, price: p.price, unit: p.unit, image: p.images[0].src,
-      step: p.cut?.step ?? 1, qty, href: `/product/${p.slug}`,
-    });
+  /* Switching to wholesale lifts a too-short length up to the trade minimum. */
+  useEffect(() => { setQty((q) => Math.max(q, minQty)); }, [minQty]);
+
+  const addThis = () => addProduct(p, qty);
 
   const copy = async (code: string) => {
     try { await navigator.clipboard?.writeText(code); } catch { /* clipboard blocked — the code is on screen anyway */ }
@@ -76,13 +82,19 @@ export default function BuyBox({ p }: { p: Product }) {
           <small>Price unavailable right now — check back shortly, or ask us on WhatsApp.</small>
         ) : (
           <>
-            <b>{inr(p.price)}</b>
-            {p.mrp > 0 && <s>{inr(p.mrp)}</s>}
+            <b>{inr(shown.price)}</b>
+            {shown.mrp > 0 && <s>{inr(shown.mrp)}</s>}
             {off > 0 && <em>{off}% off</em>}
-            <small>{unitLabel(p.unit)} · inclusive of all taxes</small>
+            <small>{unitLabel(p.unit)} · {view.wholesale ? "GST extra" : "inclusive of all taxes"}</small>
           </>
         )}
       </div>
+      {view.wholesale && (
+        <p className="st-whnote">
+          <b>{wholesaleNote}</b>
+          {user ? "" : " — you’ll log in with an OTP when you add to cart."}
+        </p>
+      )}
 
       <div className="st-live">
         <span><i /> Selling fast — <b>4 people</b> have this in their carts</span>
@@ -92,18 +104,18 @@ export default function BuyBox({ p }: { p: Product }) {
       <hr className="st-rule" />
 
       {priceUnknown ? null : p.cut ? (
-        <CutPicker p={p} value={qty} onChange={setQty} onOpenGuide={() => setGuide(true)} />
+        <CutPicker p={shown} value={qty} onChange={setQty} onOpenGuide={() => setGuide(true)} />
       ) : (
         <div className="st-cut">
           <div className="st-cut__row">
             <span className="st-stepper">
-              <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1} aria-label="One fewer">−</button>
-              <input type="number" min={1} value={qty} aria-label="Quantity"
-                onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))} />
+              <button type="button" onClick={() => setQty(Math.max(minQty, qty - 1))} disabled={qty <= minQty} aria-label="One fewer">−</button>
+              <input type="number" min={minQty} value={qty} aria-label="Quantity"
+                onChange={(e) => setQty(Math.max(minQty, parseInt(e.target.value, 10) || minQty))} />
               <button type="button" onClick={() => setQty(qty + 1)} aria-label="One more">+</button>
             </span>
             <span className="st-cut__unit">{p.unit}</span>
-            <span className="st-cut__sum"><b>{inr(total)}</b><small>{p.price} × {qty}</small></span>
+            <span className="st-cut__sum"><b>{inr(total)}</b><small>{shown.price} × {qty}</small></span>
           </div>
         </div>
       )}
@@ -120,7 +132,9 @@ export default function BuyBox({ p }: { p: Product }) {
 
       <div className="st-trust">
         <div><Icon name="truck" size={17} /><b>{site.delivery.domestic}</b><small>to your door</small></div>
-        <div><Icon name="shield" size={17} /><b>Free over {inr(site.freeShippingOver)}</b><small>shipping</small></div>
+        {view.wholesale
+          ? <div><Icon name="shield" size={17} /><b>GST invoice</b><small>on every order</small></div>
+          : <div><Icon name="shield" size={17} /><b>Free over {inr(site.freeShippingOver)}</b><small>shipping</small></div>}
         <div><Icon name="lock" size={17} /><b>Safe checkout</b><small>UPI, cards, COD</small></div>
       </div>
 

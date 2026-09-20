@@ -27,7 +27,7 @@ const columns = [
       ["https://www.sarojtextile.com/about", "Our story"],
       ["/faq", "FAQs"],
       ["/blog", "Blog"],
-      ["https://www.sarojtextile.com/wholesale-fabric", "Wholesale @ ₹80"],
+      ["/wholesale-fabric", "Wholesale @ ₹80"],
       ["/contact", "Contact"],
     ],
   },
