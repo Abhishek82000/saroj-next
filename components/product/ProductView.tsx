@@ -53,7 +53,7 @@ export default function ProductView({
             )}
             <BuyBox p={p} detail={detail} />
           </div>
-        </div>
+        </div>  
       </section>
 
       <ProductTabs p={p} reviews={detail?.reviews} faqs={detail?.faqs} />
