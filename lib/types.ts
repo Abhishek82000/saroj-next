@@ -36,6 +36,10 @@ export interface Product {
   alsoBought?: string[];
   /** Present only when the product came from the Laravel API. */
   live?: LiveProduct;
+  /** The live API's own merchandising tag ("New", "Trending", ...), when it has one. */
+  label?: string;
+  /** Trade terms for this piece. Absent when the wholesale feed gave none. */
+  wholesale?: WholesaleRate;
 }
 
 export interface CartLine {
@@ -47,6 +51,8 @@ export interface CartLine {
   qty: number;
   step: number;
   href?: string;
+  /** Set on wholesale lines: the smallest quantity the line may be cut down to. */
+  minQty?: number;
 }
 
 /* ============================================================
@@ -171,5 +177,306 @@ export interface ProductDetail {
     estimate: string;
     free_shipping_above: number | null;
     minimum: string | null;
+  };
+}
+
+/* ---------- storefront API shapes (home, nav, blog, wholesale, ...) ---------- */
+
+export interface WholesaleRate {
+  price: number;
+  /** Struck-through list price. 0 when there is no reduction. */
+  mrp: number;
+  /** Smallest quantity a wholesale order line may hold, in `unit`s. */
+  minQty: number;
+}
+
+export interface HomeApiProduct {
+  id: number;
+  name: string;
+  slug: string;
+  price: string;
+  selling_price: string;
+  image: string;
+  image_alt: string | null;
+  moq: number;
+  stock: number;
+  inventory: number;
+  type: number;
+  label: string;
+  rating: string;
+  review_count: number;
+  style_type: number;
+  gallery: string[];
+}
+
+export interface HomeTagSection {
+  id: number;
+  name: string;
+  slug: string;
+  products: HomeApiProduct[];
+}
+
+export interface HomeCategorySection {
+  cat_id: number;
+  cat_name: string;
+  cat_slug: string;
+  products: HomeApiProduct[];
+}
+
+export interface ProductsApiTag {
+  tag_id: number;
+  tag_name: string;
+  tag_slug: string;
+}
+
+export interface ProductsApiSaleProduct {
+  product_name: string;
+  product_price: string;
+  product_selling_price: string;
+  product_image: string;
+  product_slug: string;
+  product_image_cdn: string;
+}
+
+export interface ProductsApiResponse {
+  success: boolean;
+  data: {
+    category?: CommonCategoryRef | null;
+    /** Present instead of `category` when the listing was fetched by ?tag=<slug>. */
+    tag?: { id: number; name: string; slug: string } | null;
+    /** Every storefront category, for the "Product categories" sidebar list. */
+    categoryList?: CommonCategoryRef[];
+    tagsList?: ProductsApiTag[];
+    price_range?: { min: string; max: string };
+    products: HomeApiProduct[];
+    /** A handful of reduced-price picks for the "Recommended" sidebar rail. */
+    saleProducts?: ProductsApiSaleProduct[];
+    pagination: { current_page: number; last_page: number; total: number };
+  };
+}
+
+export interface ProductDetailApiProduct {
+  id: number;
+  name: string;
+  slug: string;
+  image: string;
+  meta_title: string;
+  meta_description: string;
+  gallery: string[];
+  rating: number;
+  review_count: number;
+}
+
+export interface ProductDetailApiResponse {
+  success: boolean;
+  data: {
+    product: ProductDetailApiProduct;
+    related_products: HomeApiProduct[];
+  };
+}
+
+export interface HomeVideoProduct {
+  product_id: number;
+  product_name: string;
+  product_price: string;
+  product_selling_price: string;
+  product_slug: string;
+  product_video_cdn: string;
+}
+
+export interface HomeApiResponse {
+  success: boolean;
+  data: {
+    tag_show_home_page: HomeTagSection[];
+    category_show_home_page: HomeCategorySection[];
+    video_products: HomeVideoProduct[];
+  };
+}
+
+export interface Reel {
+  id: string;
+  video: string;
+  kind: "Fabric" | "Handicraft";
+  name: string;
+  price: number;
+  mrp: number;
+  unit: string;
+  image: string;
+  /** Catalogue slug when the piece has a page here; an outside URL otherwise. */
+  slug?: string;
+  href?: string;
+}
+
+export interface CommonCategoryRef {
+  cat_id: number;
+  cat_name: string;
+  cat_slug: string;
+}
+
+export interface CommonMenuItem {
+  id: number;
+  name: string;
+  order: number;
+  categories: CommonCategoryRef | [];
+  children: CommonMenuItem[];
+}
+
+export interface CommonFeaturedCategory {
+  id: number;
+  name: string;
+  slug: string;
+  image: string;
+}
+
+export interface CommonSettings {
+  site_website_marque: string;
+}
+
+export interface CommonApiResponse {
+  success: boolean;
+  data: {
+    settings: CommonSettings;
+    menu: CommonMenuItem[];
+    featured_categories: CommonFeaturedCategory[];
+  };
+}
+
+export interface SaleProduct {
+  name: string;
+  slug: string;
+  image: string;
+  price: number;
+  mrp: number;
+}
+
+export interface PageDataApiResponse {
+  status: string;
+  message: string;
+  data: {
+    page_id: number;
+    page_name: string;
+    page_url: string;
+    /** null on pages this app renders with its own dedicated route instead (Contact). */
+    page_content: string | null;
+  } | null;
+}
+
+export interface BlogApiCategory {
+  category_id: number;
+  category_name: string;
+  category_slug: string;
+  blogs_count?: number;
+}
+
+export interface BlogApiPost {
+  blog_id: number;
+  blog_name: string;
+  blog_slug: string;
+  blog_short_description: string | null;
+  blog_desc: string;
+  blog_meta_desc: string | null;
+  blog_image: string | null;
+  blog_date: string;
+  blog_featured: number;
+  categories?: BlogApiCategory;
+}
+
+export interface BlogsListApiResponse {
+  success: boolean;
+  data: {
+    /** Present instead of null when the listing was fetched by ?category=<slug>. */
+    category: { id: number; name: string; slug: string } | null;
+    blogs: BlogApiPost[];
+    pagination: { current_page: number; last_page: number; total: number };
+    categories: BlogApiCategory[];
+  };
+}
+
+/** One entry of a blog post's "related_products" — its own product shape,
+    distinct from HomeApiProduct's field names. */
+
+export interface BlogApiRelatedProduct {
+  product_id: number;
+  product_name: string;
+  product_slug: string;
+  product_price: string;
+  product_selling_price: string;
+  product_image_cdn: string;
+  product_stock: number;
+}
+
+export interface BlogDetailApiResponse {
+  success: boolean;
+  data: {
+    blog: BlogApiPost;
+    related_products: BlogApiRelatedProduct[];
+  };
+}
+
+/** POST /api/contact-process — the Contact page's message form. 201 on
+    success; 422 with a field-keyed `errors` map when validation fails. */
+
+export interface ContactProcessApiResponse {
+  success: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+export interface FaqApiPost {
+  faq_id: number;
+  faq_title: string;
+  /** Rich-text HTML, usually just a <p> or two. */
+  faq_description: string;
+  faq_status: number;
+  faq_featured: number;
+}
+
+export interface FaqsApiResponse {
+  success: boolean;
+  data: { faqs: FaqApiPost[] };
+}
+
+export interface WholesaleApiSlide {
+  slider_id: number;
+  slider_name: string;
+  slider_image: string;
+  slider_image_mobile: string | null;
+  slider_url: string | null;
+  slider_category: number | null;
+  category: CommonCategoryRef | null;
+}
+
+export interface WholesaleApiCategory extends CommonCategoryRef {
+  cat_heading: string | null;
+  cat_short_desc: string | null;
+  cat_cdn_url: string;
+  cat_banner_cdn: string;
+}
+
+export interface WholesaleApiTestimonial {
+  testimonial_id: number;
+  testimonial_name: string;
+  testimonial_rating: number;
+  testimonial_desc: string;
+  testimonial_status: number;
+}
+
+export type WholesaleApiProduct = Omit<HomeApiProduct, "price" | "selling_price" | "style_type"> & {
+  price: string | null;
+  selling_price: string | null;
+  style_type: number | null;
+};
+
+export interface WholesalePageApiResponse {
+  success: boolean;
+  data: {
+    top_slider: WholesaleApiSlide[];
+    /** Prefix for the banners' image filenames. */
+    slider_image: string;
+    category_high: WholesaleApiCategory[];
+    category_rayon: WholesaleApiCategory[];
+    category_list: WholesaleApiCategory[];
+    testimonials: WholesaleApiTestimonial[];
+    category_show_home_page: { cat_id: number; cat_name: string; cat_slug: string; products: WholesaleApiProduct[] }[];
   };
 }

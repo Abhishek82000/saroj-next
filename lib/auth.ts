@@ -148,6 +148,7 @@ export async function verifyOtp(mobile: string, otp: string, token: string): Pro
   }
   const r = await call("verify-otp", { mobile, otp, token });
   if (!r.ok) return r;
+  if (process.env.NODE_ENV !== "production") console.info("[auth] verify-otp response", r.json);
   const next = tokenOf(r.json) ?? token;
   const flag = loginFlag(r.json);
   /* No login_status at all? Fall back to the web flow's wording ("new_register"). */

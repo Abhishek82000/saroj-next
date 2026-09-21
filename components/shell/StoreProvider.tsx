@@ -56,6 +56,10 @@ interface Store {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  /** True once the saved cart, favourites and login have been read from this device. */
+  hydrated: boolean;
+  /** Edit the signed-in user's name/email (kept on this device). */
+  updateUser: (patch: Partial<Pick<User, "name" | "email">>) => void;
   loginOpen: boolean;
   /** Why the login modal opened ("Log in to add wholesale products to cart"). */
   loginReason: string | null;
@@ -198,6 +202,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     next?.();
   }, [say]);
 
+  const updateUser = useCallback((patch: Partial<Pick<User, "name" | "email">>) => setUser((u) => (u ? { ...u, ...patch } : u)), []);
+
   const logout = useCallback(() => {
     setUser(null);
     setWh({ owner: null, lines: [] });
@@ -261,7 +267,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     otherCount,
     shortOfFreeShipping: Math.max(0, site.freeShippingOver - retailSubtotal),
     addProduct,
-    user, login, logout, loginOpen, loginReason, openLogin, closeLogin, withLogin,
+    user, login, logout, hydrated, updateUser, loginOpen, loginReason, openLogin, closeLogin, withLogin,
     mode, switchMode, href, navItem,
     favs, toggleFav,
     recent, remember,

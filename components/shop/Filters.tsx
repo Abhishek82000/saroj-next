@@ -91,7 +91,7 @@ export default function Filters({
         <Group title="Product categories">
           <div className="st-catlist st-catlist--scroll">
             {categories.map((c) => (
-              <Link key={c.cat_id} href={href(`/shop/${c.cat_slug}`)}
+              <Link key={c.cat_id} href={href(`/shop/${c.cat_slug}`)} scroll={false}
                 className={c.cat_slug === currentSlug ? "on" : undefined}>
                 {c.cat_name}
               </Link>
@@ -104,7 +104,7 @@ export default function Filters({
         <Group title="Tags">
           <div className="st-catlist">
             {tags.map((t) => (
-              <Link key={t.tag_id} href={`/shop/tag/${t.tag_slug}`}
+              <Link key={t.tag_id} href={href(`/shop/${t.tag_slug}`)} scroll={false}
                 className={t.tag_slug === currentTag ? "on" : undefined}>
                 {t.tag_name}
               </Link>
