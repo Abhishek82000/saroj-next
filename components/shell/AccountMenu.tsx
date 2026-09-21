@@ -1,23 +1,16 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
 
-/** The header's account control: a login button when logged out, and once
-    logged in a small menu with who you are and log out. */
-export default function AccountMenu() {
-  const { user, openLogin, logout } = useStore();
-  const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
+/** The first letter of a name — or nothing, for an account that is still
+    only a mobile number (no name came back from the API). */
+export const initialOf = (name: string) => (/^[\p{L}]/u.test(name.trim()) ? name.trim()[0].toUpperCase() : "");
 
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false); };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
-  }, [open]);
+/** The header's account control: a login button when logged out, and once
+    logged in a round avatar with the name's first letter that opens /account. */
+export default function AccountMenu() {
+  const { user, openLogin } = useStore();
 
   if (!user) {
     return (
@@ -27,22 +20,10 @@ export default function AccountMenu() {
     );
   }
 
+  const letter = initialOf(user.name);
   return (
-    <div className="st-acct" ref={root}>
-      <button className="st-icn st-icn--on" onClick={() => setOpen((o) => !o)}
-        aria-expanded={open} aria-haspopup="menu" aria-label={`Account — ${user.name}`}>
-        {user.name.trim()[0]?.toUpperCase() ?? "•"}
-      </button>
-      {open && (
-        <div className="st-acct__menu" role="menu">
-          <div className="st-acct__who">
-            <b>{user.name}</b>
-            <small>+91 {user.mobile}</small>
-            <small>{user.email}</small>
-          </div>
-          <button type="button" role="menuitem" onClick={() => { logout(); setOpen(false); }}>Log out</button>
-        </div>
-      )}
-    </div>
+    <Link href="/account" className="st-icn st-icn--on" aria-label={`My account — ${user.name}`}>
+      {letter || <Icon name="user" />}
+    </Link>
   );
 }
