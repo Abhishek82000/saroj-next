@@ -400,3 +400,31 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-cut__row{ flex-wrap:wrap; }
 .st-qty-step input{ width:clamp(52px,7ch,86px); }
 .st-pdtabs{ padding:0 var(--pad) clamp(40px,6vw,72px); }
+
+/* The rails' add-to-cart: a full-width button at the foot of the card, always visible. */
+.st-prod__add{ margin:0 .75rem .75rem; border:0; border-radius:99px; background:var(--ink); color:#fff; cursor:pointer;
+               padding:.72em 1em; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; font-weight:700; transition:.3s var(--ease); }
+.st-prod__add:hover{ background:var(--cobalt); }
+
+/* Rail arrows sit in the gutters at the slider's left/right ends (over the photos on small screens). */
+.st-railwrap{ position:relative; }
+.st-arrow--side{ position:absolute; top:105px; z-index:2; width:44px; height:44px; background:var(--paper); box-shadow:0 4px 14px rgba(0,0,0,.14); }
+.st-arrow--prev{ left:8px; }
+.st-arrow--next{ right:8px; }
+.st-arrow--side:hover{ transform:scale(1.07); }
+@media (min-width:900px){
+  .st-railwrap{ padding-inline:56px; }
+  .st-railwrap .st-shoprail{ margin-inline:-8px; padding-inline:8px; }
+  .st-arrow--prev{ left:0; }
+  .st-arrow--next{ right:0; }
+}
+@media (max-width:640px){ .st-arrow--side{ width:36px; height:36px; top:80px; } }
+
+/* Journal teaser: one auto-sliding row of post cards. */
+.st-journal--rail{ display:flex; gap:.9rem; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; -ms-overflow-style:none;
+                   padding:clamp(30px,5vw,48px) var(--pad) 1.4rem; margin-inline:calc(var(--pad) * -1); }
+.st-journal--rail::-webkit-scrollbar{ display:none; }
+.st-journal--rail .st-post{ flex:0 0 min(80vw,380px); scroll-snap-align:start; }
+.st-arrow--post{ top:170px; }
+@media (min-width:900px){ .st-railwrap .st-journal--rail{ margin-inline:-8px; padding-inline:8px; } }
+@media (max-width:640px){ .st-arrow--post{ top:110px; } }

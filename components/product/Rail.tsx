@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useRef } from "react";
 import Photo from "@/components/ui/Photo";
+import { useAutoRail } from "@/components/ui/useAutoRail";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
 import { useStore } from "@/components/shell/StoreProvider";
@@ -14,14 +14,8 @@ import type { Product } from "@/lib/types";
 export default function Rail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
-  const rail = useRef<HTMLDivElement>(null);
   const { addProduct, mode, href } = useStore();
-
-  const nudge = (dir: 1 | -1) => {
-    const el = rail.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.8), behavior: "smooth" });
-  };
+  const { rail, nudge, hold } = useAutoRail(items.length);
 
   return (
     <section className="st-sec" id={id} style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
@@ -30,14 +24,17 @@ export default function Rail({
           <Reveal className="st-eyebrow">{eyebrow}</Reveal>
           <Reveal as="h2" delay={1} className="st-h2">{heading}</Reveal>
         </div>
-        <Reveal delay={2} className="row-gap">
-          <button className="st-arrow" onClick={() => nudge(-1)} aria-label="Scroll left"><Icon name="left" size={16} strokeWidth={1.8} /></button>
-          <button className="st-arrow" onClick={() => nudge(1)} aria-label="Scroll right"><Icon name="right" size={16} strokeWidth={1.8} /></button>
-        </Reveal>
       </div>
 
       <div className="st-wrap">
-        <div className="st-shoprail" ref={rail}>
+        <div className="st-railwrap">
+        <button className="st-arrow st-arrow--side st-arrow--prev" onClick={() => nudge(-1)} aria-label="Scroll left"><Icon name="left" size={16} strokeWidth={1.8} /></button>
+        <button className="st-arrow st-arrow--side st-arrow--next" onClick={() => nudge(1)} aria-label="Scroll right"><Icon name="right" size={16} strokeWidth={1.8} /></button>
+        <div
+          className="st-shoprail"
+          ref={rail}
+          {...hold}
+        >
           {items.map((p) => {
             const view = priced(p, mode === "wholesale");
             /* A piece the API sent without a price shows no price — never a made-up ₹0. */
@@ -53,13 +50,12 @@ export default function Rail({
                   <Link href={href(`/product/${p.slug}`)} className="st-prod__name">{p.name}</Link>
                   {known && <span className="st-prod__price"><b>{inr(view.price)}</b>{view.mrp > 0 && <s>{inr(view.mrp)}</s>}{view.wholesale && <em className="st-prod__gst">+GST</em>}</span>}
                 </div>
-                {known && mode !== "wholesale" && <button type="button" className="st-quick" aria-label={`Add ${p.name} to cart`}
-                  onClick={() => addProduct(p)}>
-                  <Icon name="plus" size={15} strokeWidth={2} />
-                </button>}
+                {known && mode !== "wholesale" && <button type="button" className="st-prod__add" aria-label={`Add ${p.name} to cart`}
+                  onClick={() => addProduct(p)}>Add to cart</button>}
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </section>
