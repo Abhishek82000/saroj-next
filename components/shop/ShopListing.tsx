@@ -36,7 +36,7 @@ export default function ShopListing({
       the live price range and a few reduced-price picks. Absent on the plain /shop page. */
   categories?: CommonCategoryRef[];
   currentSlug?: string;
-  /** Set instead of currentSlug on a tag page (/shop/tag/<slug>). */
+  /** Set instead of currentSlug on a tag page (/shop/<slug>). */
   currentTag?: string;
   /** The category/tag page's current API sort order — present only there, since that
       listing is sorted server-side rather than re-sorted in the browser. */
@@ -51,7 +51,7 @@ export default function ShopListing({
       the real sold/new-arrival data the static catalogue's `sold`/`fresh`
       proxy fields don't) — so it just gets filtered here, not re-sorted. */
   const isLiveSort = currentSlug != null || currentTag != null;
-  const liveHref = href(currentTag != null ? `/shop/tag/${currentTag}` : `/shop/${currentSlug}`);
+  const liveHref = href(`/shop/${currentTag ?? currentSlug}`);
   const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items, {
     initialSort: liveSort, sortLocally: !isLiveSort,
   });
@@ -171,7 +171,7 @@ export default function ShopListing({
                   aria-label="Sort products"
                   onChange={(e) => {
                     const v = e.target.value as SortKey;
-                    if (isLiveSort) router.push(`${liveHref}?sort=${v}`);
+                    if (isLiveSort) router.push(`${liveHref}?sort=${v}`, { scroll: false });
                     else f.setSort(v);
                   }}>
                   <option value="" disabled>Sort Filter</option>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import JsonLd from "@/components/seo/JsonLd";
 import { categoryPrices, withRates } from "@/lib/wholesalePrices";
-import { getCategoryProducts, type ProductsApiSort } from "@/lib/home";
+import { getCategoryProducts, getTagProducts, type ProductsApiSort } from "@/lib/home";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
 type Params = Promise<{ slug: string }>;
@@ -16,9 +16,18 @@ function titleFromSlug(slug: string): string {
   return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** /shop/<slug> is a category — or, when no category has that slug, a tag
+    (/shop/best-seller), so tag pages live at the same short address. */
+async function resolveListing(slug: string, sort?: ProductsApiSort) {
+  const category = await getCategoryProducts(slug, sort);
+  if (category.name) return { ...category, tag: false };
+  const tag = await getTagProducts(slug, sort);
+  return tag.name ? { ...tag, tag: true } : { ...category, tag: false };
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const { name } = await getCategoryProducts(slug);
+  const { name } = await resolveListing(slug);
   const title = name || titleFromSlug(slug);
 
   return pageMeta({
@@ -38,7 +47,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export async function CategoryView({ params, searchParams, wholesale }: { params: Params; searchParams: SearchParams; wholesale?: boolean }) {
   const { slug } = await params;
   const sort = toSort((await searchParams).sort);
-  const listing = await getCategoryProducts(slug, sort);
+  const listing = await resolveListing(slug, sort);
   const { name, categories, tags, priceRange, saleProducts } = listing;
   /* Wholesale pages carry the wholesale rates, when the storefront has them. */
   const products = wholesale ? withRates(listing.products, await categoryPrices(slug)) : listing.products;
@@ -49,10 +58,13 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
       <ShopListing
         items={products}
         title={title}
-        lede={`Every piece in the ${title} collection, cut to any length from one metre.`}
+        lede={listing.tag
+          ? `Every piece tagged ${title}, cut to any length from one metre.`
+          : `Every piece in the ${title} collection, cut to any length from one metre.`}
         showCraftFacets={false}
         categories={categories}
-        currentSlug={slug}
+        currentSlug={listing.tag ? undefined : slug}
+        currentTag={listing.tag ? slug : undefined}
         sort={sort}
         tags={tags}
         priceRange={priceRange}
