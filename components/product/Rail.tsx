@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
@@ -17,11 +17,26 @@ export default function Rail({
   const rail = useRef<HTMLDivElement>(null);
   const { addProduct, mode, href } = useStore();
 
+  const paused = useRef(false);
+
   const nudge = (dir: 1 | -1) => {
     const el = rail.current;
     if (!el) return;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    const atStart = el.scrollLeft <= 4;
+    /* Wrap around so the auto-slide (and the arrows) never get stuck at an edge. */
+    if (dir === 1 && atEnd) return el.scrollTo({ left: 0, behavior: "smooth" });
+    if (dir === -1 && atStart) return el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
     el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.8), behavior: "smooth" });
   };
+
+  /* Auto-slide every few seconds; pauses while hovered/touched/focused and for reduced-motion users. */
+  useEffect(() => {
+    if (items.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => { if (!paused.current && !document.hidden) nudge(1); }, 3500);
+    return () => clearInterval(t);
+  }, [items.length]);
 
   return (
     <section className="st-sec" id={id} style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
@@ -37,7 +52,16 @@ export default function Rail({
       </div>
 
       <div className="st-wrap">
-        <div className="st-shoprail" ref={rail}>
+        <div
+          className="st-shoprail"
+          ref={rail}
+          onMouseEnter={() => { paused.current = true; }}
+          onMouseLeave={() => { paused.current = false; }}
+          onTouchStart={() => { paused.current = true; }}
+          onTouchEnd={() => { setTimeout(() => { paused.current = false; }, 4000); }}
+          onFocus={() => { paused.current = true; }}
+          onBlur={() => { paused.current = false; }}
+        >
           {items.map((p) => {
             const view = priced(p, mode === "wholesale");
             /* A piece the API sent without a price shows no price — never a made-up ₹0. */
