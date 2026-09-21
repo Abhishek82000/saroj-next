@@ -61,14 +61,10 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       {categoryRails.map((cat) => (
         <Rail key={cat.id} id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
       ))}
-      <TwoHouses />
       <VideoBanner />
       <Reels items={apiReels} />
-      <GiftBuilder />
-      <FabricFan />
       <Voices />
       <Bulk />
-      <Journal posts={journalPosts} />
 
       <JsonLd data={graph([
         breadcrumbLd(isWholesale
