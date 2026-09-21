@@ -208,3 +208,5 @@
   .st-card{ opacity:1 !important; transform:none !important; }
   .st-line{ animation:none !important; }
 }
+.st-card__n a{ color:inherit; text-decoration:none; transition:color .2s var(--ease); }
+.st-card__n a:hover{ color:var(--cobalt); text-decoration:underline; text-underline-offset:.15em; }

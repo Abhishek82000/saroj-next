@@ -54,7 +54,7 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
 
       <div className="st-card__body">
         <span className="st-card__craft">{craftBy[p.craft]?.name}</span>
-        <h3 className="st-card__n">{p.name}</h3>
+        <h3 className="st-card__n"><Link href={href(`/product/${p.slug}`)}>{p.name}</Link></h3>
         {view.price > 0 && (
           <span className="st-card__p">
             <b>{inr(view.price)}</b>
