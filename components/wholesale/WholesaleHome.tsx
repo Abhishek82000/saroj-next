@@ -83,6 +83,8 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
       {page.more.length > 0 && (
         <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
           <div className="st-wrap">
+            <Reveal className="st-eyebrow">Also in the book</Reveal>
+            <Reveal as="h2" delay={1} className="st-h2">More to explore.</Reveal>
             <div className="st-whf__grid">{page.more.map((c, i) => <Feature key={c.id} c={c} i={i} />)}</div>
           </div>
         </section>
