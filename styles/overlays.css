@@ -23,12 +23,12 @@
 .x{ width:34px; height:34px; flex:none; display:grid; place-items:center; border-radius:50%;
     border:1px solid var(--line-2); background:transparent; color:var(--ink-2); cursor:pointer;
     transition:.3s var(--ease); }
-.x:hover{ background:var(--ink); color:var(--paper); border-color:transparent; }
+.x:hover{ background:#000!important; color:var(--paper); border-color:transparent; }
 .x svg{ width:15px; height:15px; }
 
 .modal{ position:fixed; inset:0; z-index:130; display:grid; place-items:center;
         padding:clamp(12px,4vw,40px); overflow-y:auto; }
-.modal__box{ position:relative; width:min(100%,640px); max-height:88vh; display:flex; flex-direction:column;
+.modal__box{ position:relative; width:min(100%,600px); max-height:88vh; display:flex; flex-direction:column;
              background:var(--paper); border:1px solid var(--line-2); border-radius:18px; overflow:hidden;
              box-shadow:0 40px 80px -40px rgba(16,24,32,.6);
              opacity:0; transform:translateY(14px) scale(.985);
@@ -36,8 +36,8 @@
 .modal.in .modal__box{ opacity:1; transform:none; }
 .modal__head{ display:flex; align-items:center; justify-content:space-between; gap:1rem;
               padding:1.1rem clamp(16px,4vw,24px); flex:none; }
-.modal__body{ padding:0 clamp(16px,4vw,24px) clamp(18px,4vw,26px); overflow-y:auto; }
-
+.modal__body{ padding:0 clamp(16px,4vw,24px) clamp(18px,4vw,26px);display: flex;justify-content: center;}
+.st-login{width:70%;}
 .lightbox{ position:fixed; inset:0; z-index:140; background:rgba(10,16,22,.94); display:grid;
            place-items:center; padding:clamp(16px,4vw,50px); cursor:zoom-out;
            opacity:0; transition:opacity .3s var(--ease); }
