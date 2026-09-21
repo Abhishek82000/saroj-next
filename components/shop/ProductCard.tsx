@@ -41,17 +41,6 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
         <Icon name="heart" size={14} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
       </button>
 
-      {view.wholesale ? null : (
-        <button type="button" className="st-card__add" disabled={out}
-          onClick={() => {
-            addProduct(p);
-            setAdded(true);
-            setTimeout(() => setAdded(false), 1600);
-          }}>
-          {out ? "Sold out" : added ? "In your cart" : "Add to cart"}
-        </button>
-      )}
-
       <div className="st-card__body">
         <span className="st-card__craft">{craftBy[p.craft]?.name}</span>
         <h3 className="st-card__n"><Link href={href(`/product/${p.slug}`)}>{p.name}</Link></h3>
@@ -64,6 +53,16 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
         )}
         <span className={`st-card__stock ${p.stock}`}>{stockLine[p.stock]}</span>
       </div>
+      {view.wholesale ? null : (
+        <button type="button" className="st-card__add" disabled={out}
+          onClick={() => {
+            addProduct(p);
+            setAdded(true);
+            setTimeout(() => setAdded(false), 1600);
+          }}>
+          {out ? "Sold out" : added ? "In your cart" : "Add to cart"}
+        </button>
+      )}
     </article>
   );
 }

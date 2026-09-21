@@ -240,7 +240,7 @@
 /* quick-add pill dropped onto the existing home rail cards */
 .st-quick{ position:absolute; right:.5rem; bottom:.5rem; z-index:4; width:32px; height:32px;
            border-radius:50%; border:0; background:var(--ink); color:var(--paper); cursor:pointer;
-           display:grid; place-items:center; opacity:0; transform:translateY(6px) scale(.9);
+           display:grid; place-items:center; opacity:1;
            transition:.35s var(--ease); }
 .st-prod:hover .st-quick,.st-quick:focus-visible{ opacity:1; transform:none; }
 .st-quick:hover{ background:var(--cobalt); }
