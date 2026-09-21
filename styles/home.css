@@ -5,7 +5,7 @@
 .st-hero__title{ font-family:var(--d); font-weight:400; margin:.55rem 0 0;
                  font-size:clamp(2.7rem,12.5vw,7.2rem); line-height:.92; letter-spacing:-.03em; }
 .st-hero__title .ln{ display:block; overflow:hidden; }
-.st-hero__title .ln>span{ display:block; transform:translateY(102%); opacity:0;
+.st-hero__title .ln>span{ display:block; transform:translateY(102%); opacity:0; 
                           transition:transform 1.05s var(--ease), opacity .75s ease; }
 .lit .st-hero__title .ln>span{ transform:none; opacity:1; }
 .lit .st-hero__title .ln:nth-child(2)>span{ transition-delay:.1s; }
