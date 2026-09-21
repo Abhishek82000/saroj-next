@@ -52,7 +52,7 @@ export default function ProductView({
             )}
             <BuyBox p={p} detail={detail} />
           </div>
-        </div>
+        </div>  
       </section>
 
       {p.specs && (
