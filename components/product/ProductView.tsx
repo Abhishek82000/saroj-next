@@ -2,6 +2,7 @@ import Link from "next/link";
 import Gallery from "./Gallery";
 import BuyBox from "./BuyBox";
 import Rail from "./Rail";
+import ProductTabs from "./ProductTabs";
 import RecentlyViewed from "./RecentlyViewed";
 import JsonLd from "@/components/seo/JsonLd";
 import { craftBy } from "@/lib/crafts";
@@ -54,6 +55,8 @@ export default function ProductView({
           </div>
         </div>
       </section>
+
+      <ProductTabs p={p} reviews={detail?.reviews} faqs={detail?.faqs} />
 
       {p.specs && (
         <section className="st-spec">

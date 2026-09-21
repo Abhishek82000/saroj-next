@@ -7,7 +7,6 @@ import Modal from "@/components/ui/Modal";
 import Portal from "@/components/ui/Portal";
 import { useStore } from "@/components/shell/StoreProvider";
 import CutPicker from "./CutPicker";
-import Tabs from "./Tabs";
 import VariantPicker, { type VariantState } from "./VariantPicker";
 import LiveViewers from "./LiveViewers";
 import Countdown from "./Countdown";
@@ -47,7 +46,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
   const [variant, setVariant] = useState<VariantState | null>(null);
   const [guide, setGuide] = useState(false);
   const [ask, setAsk] = useState(false);
-  const [review, setReview] = useState(false);
   const [stick, setStick] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const addRef = useRef<HTMLButtonElement>(null);
@@ -282,10 +280,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
         <button type="button" onClick={share}><Icon name="share" size={14} strokeWidth={1.6} /> Share</button>
       </div>
 
-      <section className="st-sec" style={{ padding: "clamp(40px,6vw,72px) 0 0" }}>
-        <Tabs p={p} reviews={detail?.reviews} faqs={detail?.faqs} onWriteReview={() => setReview(true)} />
-      </section>
-
       {/* ---------- sticky bar ---------- */}
       {mode !== "enquiry" && (
         <Portal>
@@ -328,10 +322,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       <Modal open={ask} onClose={() => setAsk(false)} title="Ask about this">
         <AskForm onSent={() => { setAsk(false); say("Sent — usually answered the same day"); }} say={say} />
       </Modal>
-
-      <Modal open={review} onClose={() => setReview(false)} title="Write a review">
-        <ReviewForm onSent={() => { setReview(false); say("Thanks — posting once we’ve read it"); }} say={say} />
-      </Modal>
     </>
   );
 }
@@ -362,7 +352,7 @@ function AskForm({ onSent, say }: { onSent: () => void; say: (m: string) => void
   );
 }
 
-function ReviewForm({ onSent, say }: { onSent: () => void; say: (m: string) => void }) {
+export function ReviewForm({ onSent, say }: { onSent: () => void; say: (m: string) => void }) {
   const [score, setScore] = useState(0);
   const [hover, setHover] = useState(0);
   const [text, setText] = useState("");

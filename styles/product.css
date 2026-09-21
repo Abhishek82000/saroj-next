@@ -399,3 +399,4 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
    squeeze the stepper. */
 .st-cut__row{ flex-wrap:wrap; }
 .st-qty-step input{ width:clamp(52px,7ch,86px); }
+.st-pdtabs{ padding:0 var(--pad) clamp(40px,6vw,72px); }
