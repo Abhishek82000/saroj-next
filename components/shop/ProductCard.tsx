@@ -10,12 +10,6 @@ import { priced } from "@/lib/wholesale";
 import { craftBy } from "@/lib/crafts";
 import type { Product } from "@/lib/types";
 
-const stockLine: Record<string, string> = {
-  in: "Ready to ship",
-  low: "Only a few left",
-  out: "Back at the next firing",
-};
-
 export default function ProductCard({ p, priority }: { p: Product; priority?: boolean }) {
   const { addProduct, favs, toggleFav, mode, href } = useStore();
   const [added, setAdded] = useState(false);
@@ -51,7 +45,6 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
             <em>{unitLabel(p.unit)}{view.wholesale ? " · +GST" : ""}</em>
           </span>
         )}
-        <span className={`st-card__stock ${p.stock}`}>{stockLine[p.stock]}</span>
       </div>
       {view.wholesale ? null : (
         <button type="button" className="st-card__add" disabled={out}
