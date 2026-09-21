@@ -3,10 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import Portal from "@/components/ui/Portal";
 import { useTransition } from "@/components/ui/useMounted";
-import { useStore } from "@/components/shell/StoreProvider";
 import type { Product } from "@/lib/types";
-import { discount } from "@/lib/products";
-import { priced } from "@/lib/wholesale";
 
 /** Sticky photo column with hover zoom, thumbnails and a click-through lightbox. */
 export default function Gallery({ p }: { p: Product }) {
@@ -17,10 +14,9 @@ export default function Gallery({ p }: { p: Product }) {
   const [broken, setBroken] = useState<Record<number, true>>({});
   const { render, shown } = useTransition(light, 320);
   const shot = p.images[i];
-  const { mode } = useStore();
-  const view = priced(p, mode === "wholesale");
-  /* The badge quotes the same saving as the price next to it, in either mode. */
-  const off = discount(view.wholesale ? { ...p, price: view.price, mrp: view.mrp } : p);
+  // A CMS label ("New", "Trending") when the product came from the API,
+  // otherwise the catalogue's own freshness flag.
+  const label = p.live?.label ?? (p.fresh > 30 ? "New" : null);
 
   return (
     <div className="st-gal">
@@ -45,9 +41,12 @@ export default function Gallery({ p }: { p: Product }) {
             style={{ objectFit: "cover", transformOrigin: origin, transform: zoom ? "scale(2)" : undefined,
                      transition: zoom ? "transform .12s linear" : "transform .5s var(--ease)" }} />
         )}
+        {/* No discount pill here on purpose. It would be frozen at the default
+            variation's price while the one in the buy box — inches away, and
+            correct — follows the chosen variant, so the two disagreed. The
+            label doesn't vary by variant, so it stays. */}
         <div className="st-gal__flag">
-          {p.fresh > 30 && <span className="new">New</span>}
-          {off > 0 && <span className="off">{off}% off</span>}
+          {label && <span className="new">{label}</span>}
         </div>
         <span className="st-gal__hint">Hover to zoom · click to open</span>
       </figure>

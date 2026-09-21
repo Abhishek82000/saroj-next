@@ -2,7 +2,7 @@
 /* ---------- crumb ---------- */
 .st-crumb{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
            font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute);
-           padding:clamp(14px,3vw,0) var(--pad) 0; }
+           padding:clamp(14px,3vw,24px) var(--pad) 0; }
 .st-crumb a{ transition:color .3s; }
 .st-crumb a:hover{ color:var(--cobalt); }
 .st-crumb b{ color:var(--ink-2); font-weight:400; }
@@ -74,15 +74,18 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 
 .st-cut{ margin-top:.95rem; border:1px solid var(--line); border-radius:16px; background:#fff; overflow:hidden; }
 .st-cut__row{ display:flex; align-items:center; gap:1rem; padding:1rem 1.1rem; }
-.st-stepper{ display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:99px; flex:none; }
-.st-stepper button{ width:38px; height:38px; border:0; background:transparent; color:var(--ink);
+/* Named away from the home page's .st-step process card, which is a column
+   flex box — its flex-direction was leaking in and stacking this vertically. */
+.st-qty-step{ display:inline-flex; flex-direction:row; align-items:center;
+              border:1px solid var(--line); border-radius:99px; flex:0 0 auto; }
+.st-qty-step button{ width:38px; height:38px; border:0; background:transparent; color:var(--ink);
                  font-size:1.1rem; line-height:1; cursor:pointer; border-radius:99px; transition:.25s var(--ease); }
-.st-stepper button:hover:not(:disabled){ background:var(--ink); color:var(--paper); }
-.st-stepper button:disabled{ opacity:.28; cursor:not-allowed; }
-.st-stepper input{ width:62px; border:0; background:transparent; text-align:center; padding:0;
+.st-qty-step button:hover:not(:disabled){ background:var(--ink); color:var(--paper); }
+.st-qty-step button:disabled{ opacity:.28; cursor:not-allowed; }
+.st-qty-step input{ width:62px; border:0; background:transparent; text-align:center; padding:0;
                 font-family:var(--d); font-size:1.2rem; color:var(--ink); }
-.st-stepper input:focus{ outline:none; }
-.st-stepper input::-webkit-outer-spin-button,.st-stepper input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.st-qty-step input:focus{ outline:none; }
+.st-qty-step input::-webkit-outer-spin-button,.st-qty-step input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 .st-cut__unit{ font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); }
 .st-cut__sum{ margin-left:auto; text-align:right; }
 .st-cut__sum b{ font-family:var(--d); font-weight:400; font-size:1.5rem; line-height:1; display:block; }
@@ -218,11 +221,6 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
                         transform:rotate(45deg); transition:transform .35s var(--ease); }
 .st-faq details[open] summary::after{ transform:rotate(-135deg); }
 .st-faq p{ margin:0; padding:0 2.2rem 1.15rem 0; color:var(--mute); font-size:.88rem; font-weight:300; max-width:72ch; }
-/* /faq's answers come as their own HTML, so the same look applies one level deeper. */
-.st-faq__body{ padding:0 2.2rem 1.15rem 0; color:var(--mute); font-size:.88rem; font-weight:300; max-width:72ch; }
-.st-faq__body p{ padding:0; margin:0 0 .8em; }
-.st-faq__body p:last-child{ margin-bottom:0; }
-.st-faq__body a{ color:var(--cobalt); text-decoration:underline; text-underline-offset:.15em; }
 
 /* ---------- related rails ---------- */
 .st-railhead{ display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
@@ -276,7 +274,7 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 }
 
 /* ---------- modals, toast, lightbox ---------- */
-.st-modal .modal__box{ background:#f6f6f6; border:0; border-radius:18px; }
+.st-modal .modal__box{ background:var(--paper); border:1px solid var(--line-2); border-radius:18px; }
 .st-modal .modal__head{ border-bottom:1px solid var(--line-2); }
 .st-modal h5{ font-family:var(--d); font-weight:400; font-size:1.5rem; margin:0; }
 .st-sizetable{ width:100%; border-collapse:collapse; font-size:.84rem; }
@@ -303,7 +301,101 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-lightbox.on{ display:grid; }
 .st-lightbox img{ max-width:100%; max-height:88vh; object-fit:contain; border-radius:10px; }
 
-.st-prod__gst{ font-style:normal; margin-left:.35rem; font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+/* ============================================================
+   Live storefront additions — badges, promo clock, variant
+   pickers, cross-sell line, enquiry block, written reviews.
+   ============================================================ */
 
-.st-whnote{ margin:.7rem 0 0; font-size:.74rem; color:var(--mute); }
-.st-whnote b{ color:var(--cobalt); font-weight:700; }
+.st-pd__badges{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .9rem; margin-top:.9rem; }
+.st-pd__label{ font-size:.55rem; letter-spacing:.18em; text-transform:uppercase; font-weight:700;
+               background:var(--teal); color:#fff; padding:.34em .8em; border-radius:99px; }
+.st-pd__hot{ font-size:.75rem; color:var(--ink-2); }
+.st-pd__hot b{ color:var(--lac); font-weight:700; }
+
+.st-pd__rating{ display:inline-flex; align-items:baseline; gap:.4rem; margin-top:.7rem;
+                font-size:.78rem; color:var(--ink-2); }
+.st-pd__rating b{ font-size:.95rem; color:var(--ink); }
+.st-pd__rating span{ color:var(--mute); border-bottom:1px solid var(--line); }
+.st-pd__rating:hover span{ color:var(--cobalt); border-color:currentColor; }
+
+/* --- category promo clock --- */
+.st-promo{ margin-top:1.1rem; border:1px solid var(--line); border-radius:14px;
+           background:var(--paper-2); padding:.95rem 1.1rem; }
+.st-promo__head{ margin:0 0 .6rem; font-size:.57rem; letter-spacing:.24em;
+                 text-transform:uppercase; font-weight:700; color:var(--lac); }
+.st-promo__clock{ display:flex; gap:.5rem; }
+.st-promo__clock span{ display:grid; justify-items:center; min-width:52px; padding:.45rem .3rem;
+                       background:#fff; border-radius:10px; border:1px solid var(--line-2); }
+.st-promo__clock b{ font-family:var(--d); font-weight:400; font-size:1.35rem; line-height:1;
+                    font-variant-numeric:tabular-nums; }
+.st-promo__clock small{ font-size:.52rem; letter-spacing:.16em; text-transform:uppercase;
+                        color:var(--mute); margin-top:.25rem; }
+.st-promo__note{ margin:.75rem 0 0; font-size:.78rem; color:var(--ink-2); }
+.st-promo__code{ margin:.4rem 0 0; font-size:.72rem; color:var(--mute); }
+.st-promo__code code{ font-family:var(--b); font-weight:700; letter-spacing:.16em; color:var(--cobalt);
+                      background:#fff; border-radius:6px; padding:.24em .55em; }
+
+/* --- variant pickers --- */
+.st-variants{ display:grid; gap:1.2rem; margin-bottom:1.4rem; }
+.st-variant__lbl{ font-size:.6rem; letter-spacing:.22em; text-transform:uppercase;
+                  font-weight:700; color:var(--mute); margin-bottom:.6rem; }
+.st-variant__lbl span{ color:var(--ink); }
+.st-variant__opts{ display:flex; flex-wrap:wrap; gap:.5rem; }
+
+.st-swatch{ width:34px; height:34px; border-radius:50%; padding:3px; cursor:pointer;
+            border:1px solid var(--line); background:transparent; transition:.3s var(--ease); }
+.st-swatch span{ display:block; width:100%; height:100%; border-radius:50%; }
+.st-swatch:hover{ transform:translateY(-2px); }
+.st-swatch.on{ border-color:var(--cobalt); box-shadow:0 0 0 1px var(--cobalt); }
+
+.st-sizebtn{ min-width:46px; border:1px solid var(--line); background:transparent; cursor:pointer;
+             border-radius:10px; padding:.55em .9em; font-size:.78rem; color:var(--ink-2);
+             transition:.3s var(--ease); }
+.st-sizebtn:hover{ border-color:var(--cobalt); color:var(--cobalt); }
+.st-sizebtn.on{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
+
+.st-imgswatch{ width:74px; border:1px solid var(--line); border-radius:12px; background:transparent;
+               padding:.3rem; cursor:pointer; display:grid; gap:.3rem; justify-items:center;
+               transition:.3s var(--ease); }
+.st-imgswatch img,.st-imgswatch__none{ width:100%; aspect-ratio:1; object-fit:cover;
+                                       border-radius:8px; background:var(--paper-2); display:block; }
+.st-imgswatch small{ font-size:.58rem; line-height:1.2; text-align:center; color:var(--mute); }
+.st-imgswatch:hover{ transform:translateY(-2px); border-color:var(--cobalt); }
+.st-imgswatch.on{ border-color:var(--cobalt); box-shadow:0 0 0 1px var(--cobalt); }
+.st-imgswatch.on small{ color:var(--ink); }
+
+.st-variant__busy,.st-variant__warn{ font-size:.72rem; margin:.2rem 0 0; }
+.st-variant__busy{ color:var(--mute); }
+.st-variant__warn{ color:var(--lac); }
+
+/* --- retail ⇄ wholesale --- */
+.st-crosslink{ margin:1rem 0 0; font-size:.78rem; color:var(--ink-2); }
+.st-crosslink a{ color:var(--cobalt); border-bottom:1px solid currentColor; font-weight:600; }
+
+/* --- enquiry-only products --- */
+.st-enquire{ border:1px dashed var(--line); border-radius:16px; background:var(--paper-2);
+             padding:1.1rem 1.2rem; }
+.st-enquire p{ margin:0 0 1rem; font-size:.85rem; color:var(--ink-2); font-weight:300; }
+.st-enquire .st-btn{ width:100%; }
+
+/* --- written reviews --- */
+.st-rev__list{ display:grid; gap:.8rem; }
+.st-revitem{ background:#fff; border-radius:14px; padding:1rem 1.1rem;
+             box-shadow:0 12px 26px -20px rgba(16,24,32,.35); }
+.st-revitem__top{ display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.st-revitem__ago{ font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+.st-revitem h4{ font-family:var(--d); font-weight:400; font-size:1.05rem; margin:.5rem 0 .3rem; }
+.st-revitem p{ margin:0; font-size:.86rem; color:var(--ink-2); font-weight:300; line-height:1.55; }
+.st-revitem__img{ margin-top:.7rem; width:96px; height:96px; object-fit:cover; border-radius:10px; }
+.st-revitem__verified{ display:inline-block; margin-top:.7rem; font-size:.55rem; letter-spacing:.16em;
+                       text-transform:uppercase; font-weight:700; color:var(--teal); }
+
+.st-faq__body{ padding:0 2.2rem 1.15rem 0; color:var(--mute); font-size:.88rem; font-weight:300; max-width:72ch; }
+.st-faq__body p{ margin:0 0 .6rem; }
+
+/* Wholesale minimums are two and three digits, which was wrapping the
+   stepper into a circle. Keep it on one line and let the row wrap instead. */
+/* Wholesale minimums run to three digits, so let the row wrap rather than
+   squeeze the stepper. */
+.st-cut__row{ flex-wrap:wrap; }
+.st-qty-step input{ width:clamp(52px,7ch,86px); }

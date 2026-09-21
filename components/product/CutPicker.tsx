@@ -37,7 +37,7 @@ export default function CutPicker({
 
       <div className="st-cut">
         <div className="st-cut__row">
-          <span className="st-stepper">
+          <span className="st-qty-step">
             <button type="button" onClick={() => set(value - cut.step)} disabled={value <= cut.min} aria-label="Half a metre less">−</button>
             <input type="number" inputMode="decimal" min={cut.min} max={cut.max} step={cut.step}
               value={live} aria-label="Length in metres"
@@ -81,6 +81,9 @@ export default function CutPicker({
         ))}
       </div>
 
+      {/* Nothing to nudge toward when you're already on the wholesale page,
+          or when this product has no trade rate. */}
+      {cut.wholesale > 0 && cut.wholesale < p.price && (
       <div className="st-whole">
         <p>
           {value >= site.wholesaleFrom
@@ -89,6 +92,7 @@ export default function CutPicker({
         </p>
         <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale</a>
       </div>
+      )}
     </>
   );
 }

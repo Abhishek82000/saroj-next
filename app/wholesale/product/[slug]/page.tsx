@@ -7,15 +7,9 @@ import { productMeta } from "@/lib/product-page";
 type Params = Promise<{ slug: string }>;
 
 /**
- * /wholesale-fabric/product/<slug> — the same page in wholesale mode.
- *
- * The shared body lives in components/product/ProductView, NOT in the retail
- * page.tsx. A route file can only export `default` plus Next's own config
- * names (generateMetadata, generateStaticParams, dynamic, revalidate…), so it
- * can never be imported from as a module of components.
- *
- * Never prerendered: trade pricing moves more often than retail, and it sits
- * behind a sign-in anyway.
+ * Wholesale mirrors the retail page: same components, same layout, different
+ * price columns and a minimum order. It is never prerendered — trade pricing
+ * moves more often than retail and is gated behind a sign-in anyway.
  */
 export const dynamic = "force-dynamic";
 
