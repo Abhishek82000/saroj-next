@@ -45,13 +45,12 @@ export default function Rail({
           <Reveal className="st-eyebrow">{eyebrow}</Reveal>
           <Reveal as="h2" delay={1} className="st-h2">{heading}</Reveal>
         </div>
-        <Reveal delay={2} className="row-gap">
-          <button className="st-arrow" onClick={() => nudge(-1)} aria-label="Scroll left"><Icon name="left" size={16} strokeWidth={1.8} /></button>
-          <button className="st-arrow" onClick={() => nudge(1)} aria-label="Scroll right"><Icon name="right" size={16} strokeWidth={1.8} /></button>
-        </Reveal>
       </div>
 
       <div className="st-wrap">
+        <div className="st-railwrap">
+        <button className="st-arrow st-arrow--side st-arrow--prev" onClick={() => nudge(-1)} aria-label="Scroll left"><Icon name="left" size={16} strokeWidth={1.8} /></button>
+        <button className="st-arrow st-arrow--side st-arrow--next" onClick={() => nudge(1)} aria-label="Scroll right"><Icon name="right" size={16} strokeWidth={1.8} /></button>
         <div
           className="st-shoprail"
           ref={rail}
@@ -82,6 +81,7 @@ export default function Rail({
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </section>
