@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: `${site.name} — ${site.tagline}`, description: site.description,
   },
   twitter: { card: "summary_large_image" },
-  icons: { icon: "/favicon.svg", apple: "/favicon.svg" },
+  icons: { icon: "/favicon.webp", apple: "/favicon.webp" },
   manifest: "/manifest.webmanifest",
 };
 
