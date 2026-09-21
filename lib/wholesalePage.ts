@@ -1,6 +1,7 @@
 import { apiProductToProduct } from "./home";
 import { site } from "./site";
 import { WHOLESALE_HOME } from "./wholesale";
+import { homePrices, withRates } from "./wholesalePrices";
 import type { Product, WholesaleApiCategory, WholesalePageApiResponse } from "./types";
 
 export interface WholesaleSlide { id: number; alt: string; image: string; mobileImage: string; href: string | null }
@@ -43,8 +44,9 @@ const toCollection = (c: WholesaleApiCategory): WholesaleCollection => ({
  * rail per category. Returns null on any failure so /wholesale-fabric can fall
  * back to its plain explainer.
  *
- * The rail products come with no price (`price`/`selling_price` are null), so
- * they map to price 0 — "unknown", which the cards and rails leave unpriced.
+ * The rail products currently come with no price (`price`/`selling_price` are
+ * null), so they stay unpriced; once the feed sends one it becomes the piece's
+ * wholesale rate.
  */
 export async function getWholesalePage(): Promise<WholesalePage | null> {
   try {
@@ -52,6 +54,7 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
     if (!res.ok) return null;
     const { data: d }: WholesalePageApiResponse = await res.json();
     if (!d) return null;
+    const rates = await homePrices();
 
     return {
       slides: (d.top_slider ?? []).map((s) => ({
@@ -71,7 +74,12 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
         .filter((s) => s.products.length > 0)
         .map((s) => ({
           id: s.cat_id, slug: s.cat_slug, name: s.cat_name,
-          items: s.products.map((p) => apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 })),
+          items: withRates(s.products.map((p) => {
+            const item = apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 });
+            const price = Number(p.selling_price ?? p.price);
+            /* The feed's own trade price, when it sends one — it currently sends none. */
+            return price > 0 ? { ...item, wholesale: { price, mrp: Number(p.price) > price ? Number(p.price) : 0, minQty: p.moq || 10 } } : item;
+          }), rates),
         })),
     };
   } catch {

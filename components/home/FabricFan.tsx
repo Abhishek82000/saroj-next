@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/components/ui/SiteLink";
 import { useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import { bySlug } from "@/lib/products";

@@ -53,7 +53,7 @@ export default function Rail({
                   <Link href={href(`/product/${p.slug}`)} className="st-prod__name">{p.name}</Link>
                   {known && <span className="st-prod__price"><b>{inr(view.price)}</b>{view.mrp > 0 && <s>{inr(view.mrp)}</s>}{view.wholesale && <em className="st-prod__gst">+GST</em>}</span>}
                 </div>
-                {known && <button type="button" className="st-quick" aria-label={`Add ${p.name} to cart`}
+                {known && mode !== "wholesale" && <button type="button" className="st-quick" aria-label={`Add ${p.name} to cart`}
                   onClick={() => addProduct(p)}>
                   <Icon name="plus" size={15} strokeWidth={2} />
                 </button>}

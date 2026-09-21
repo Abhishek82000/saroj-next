@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import JsonLd from "@/components/seo/JsonLd";
+import { categoryPrices, withRates } from "@/lib/wholesalePrices";
 import { getCategoryProducts, type ProductsApiSort } from "@/lib/home";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
@@ -34,10 +35,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  * /shop listing (filters, sort, density, paging) with the craft/material
  * facets hidden — a single category has no crafts to narrow by.
  */
-export default async function CategoryPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
+export async function CategoryView({ params, searchParams, wholesale }: { params: Params; searchParams: SearchParams; wholesale?: boolean }) {
   const { slug } = await params;
   const sort = toSort((await searchParams).sort);
-  const { name, products, categories, tags, priceRange, saleProducts } = await getCategoryProducts(slug, sort);
+  const listing = await getCategoryProducts(slug, sort);
+  const { name, categories, tags, priceRange, saleProducts } = listing;
+  /* Wholesale pages carry the wholesale rates, when the storefront has them. */
+  const products = wholesale ? withRates(listing.products, await categoryPrices(slug)) : listing.products;
   const title = name || titleFromSlug(slug);
 
   return (
@@ -61,4 +65,8 @@ export default async function CategoryPage({ params, searchParams }: { params: P
       ])} />
     </main>
   );
+}
+
+export default function CategoryPage(props: { params: Params; searchParams: SearchParams }) {
+  return CategoryView(props);
 }

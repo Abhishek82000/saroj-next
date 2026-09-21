@@ -20,7 +20,7 @@ import type { Product } from "@/lib/types";
  * sticky bar that takes over once the real button scrolls away.
  */
 export default function BuyBox({ p }: { p: Product }) {
-  const { addProduct, favs, toggleFav, say, mode, user } = useStore();
+  const { addProduct, favs, toggleFav, say, mode } = useStore();
   const [qty, setQty] = useState(p.cut ? 3 : 1);
   const [guide, setGuide] = useState(false);
   const [ask, setAsk] = useState(false);
@@ -40,7 +40,9 @@ export default function BuyBox({ p }: { p: Product }) {
   const saved = !!favs[p.slug];
   const out = p.stock === "out";
   /** A live-storefront product whose price we couldn't find anywhere — never show a fake ₹0. */
-  const priceUnknown = p.price <= 0;
+  const priceUnknown = shown.price <= 0;
+  /** Wholesale mode is browse-only: no cart, so no quantity picker or buy button. */
+  const browseOnly = view.wholesale;
 
   useEffect(() => {
     const el = addRef.current;
@@ -79,7 +81,7 @@ export default function BuyBox({ p }: { p: Product }) {
     <>
       <div className="st-price">
         {priceUnknown ? (
-          <small>Price unavailable right now — check back shortly, or ask us on WhatsApp.</small>
+          <small>{browseOnly ? "Wholesale price on request — ask us on WhatsApp." : "Price unavailable right now — check back shortly, or ask us on WhatsApp."}</small>
         ) : (
           <>
             <b>{inr(shown.price)}</b>
@@ -89,12 +91,7 @@ export default function BuyBox({ p }: { p: Product }) {
           </>
         )}
       </div>
-      {view.wholesale && (
-        <p className="st-whnote">
-          <b>{wholesaleNote}</b>
-          {user ? "" : " — you’ll log in with an OTP when you add to cart."}
-        </p>
-      )}
+      {view.wholesale && <p className="st-whnote"><b>{wholesaleNote}</b></p>}
 
       <div className="st-live">
         <span><i /> Selling fast — <b>4 people</b> have this in their carts</span>
@@ -103,7 +100,7 @@ export default function BuyBox({ p }: { p: Product }) {
 
       <hr className="st-rule" />
 
-      {priceUnknown ? null : p.cut ? (
+      {priceUnknown || browseOnly ? null : p.cut ? (
         <CutPicker p={shown} value={qty} onChange={setQty} onOpenGuide={() => setGuide(true)} />
       ) : (
         <div className="st-cut">
@@ -121,9 +118,15 @@ export default function BuyBox({ p }: { p: Product }) {
       )}
 
       <div className="st-buy">
-        <button ref={addRef} type="button" className="st-btn st-btn--solid" disabled={out} onClick={addThis}>
-          {priceUnknown ? "Currently unavailable" : out ? "Sold out" : `Add to cart · ${inr(total)}`}
-        </button>
+        {browseOnly ? (
+          <a className="st-btn st-btn--solid" href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(`Wholesale enquiry: ${p.name}`)}`}>
+            Enquire on WhatsApp
+          </a>
+        ) : (
+          <button ref={addRef} type="button" className="st-btn st-btn--solid" disabled={out} onClick={addThis}>
+            {priceUnknown ? "Currently unavailable" : out ? "Sold out" : `Add to cart · ${inr(total)}`}
+          </button>
+        )}
         <button type="button" className={`st-heart${saved ? " on" : ""}`} aria-pressed={saved}
           aria-label="Save to wishlist" onClick={() => toggleFav(p.slug)}>
           <Icon name="heart" size={19} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
@@ -162,7 +165,7 @@ export default function BuyBox({ p }: { p: Product }) {
 
       {/* ---------- sticky buy bar ---------- */}
       <Portal>
-        <div className={`st-stick${stick && !out ? " on" : ""}`}>
+        <div className={`st-stick${stick && !out && !browseOnly ? " on" : ""}`}>
           <div className="st-stick__ph">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={p.images[0].src} alt="" />

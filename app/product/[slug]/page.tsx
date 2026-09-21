@@ -6,6 +6,7 @@ import BuyBox from "@/components/product/BuyBox";
 import Rail from "@/components/product/Rail";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProductDetail } from "@/lib/home";
+import { productPrice } from "@/lib/wholesalePrices";
 import { alsoBought, discount, getProduct, products, sameCraft } from "@/lib/products";
 import { craftBy } from "@/lib/crafts";
 import { breadcrumbLd, faqLd, graph, pageMeta, productLd } from "@/lib/seo";
@@ -54,11 +55,14 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   });
 }
 
-export default async function ProductPage({ params }: { params: Params }) {
+export async function ProductView({ params, wholesale }: { params: Params; wholesale?: boolean }) {
   const { slug } = await params;
   const resolved = await resolveProduct(slug);
   if (!resolved) notFound();
-  const { product: p, related: apiRelated } = resolved;
+  const { product: found, related: apiRelated } = resolved;
+  /* Wholesale pages carry the wholesale rate, when the storefront has one. */
+  const rate = wholesale ? await productPrice(slug) : null;
+  const p: Product = rate ? { ...found, wholesale: rate } : found;
 
   // A live-storefront product carries no craft key, so it falls back to the
   // generic "Fabric" craft — same lane every fabric on this site is in.
@@ -125,4 +129,8 @@ export default async function ProductPage({ params }: { params: Params }) {
       ])} />
     </main>
   );
+}
+
+export default function ProductPage(props: { params: Params }) {
+  return ProductView(props);
 }

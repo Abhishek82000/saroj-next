@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/SiteLink";
 import RevealLink from "@/components/ui/RevealLink";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";

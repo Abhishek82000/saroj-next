@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { useStore } from "@/components/shell/StoreProvider";
 
 /**
  * A Next link that scroll-reveals itself. Separate from <Reveal> because a
@@ -10,6 +11,7 @@ export default function RevealLink({
   href, className = "", delay, children, ...rest
 }: { href: string; className?: string; delay?: 1 | 2 | 3 | 4; children: React.ReactNode } & Record<string, unknown>) {
   const el = useRef<HTMLAnchorElement>(null);
+  const { href: modeHref } = useStore();
 
   useEffect(() => {
     const node = el.current;
@@ -26,5 +28,5 @@ export default function RevealLink({
     return () => io.disconnect();
   }, []);
 
-  return <Link ref={el} href={href} className={`rv ${className}`.trim()} data-d={delay} {...rest}>{children}</Link>;
+  return <Link ref={el} href={modeHref(href)} className={`rv ${className}`.trim()} data-d={delay} {...rest}>{children}</Link>;
 }

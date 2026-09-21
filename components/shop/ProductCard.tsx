@@ -17,7 +17,7 @@ const stockLine: Record<string, string> = {
 };
 
 export default function ProductCard({ p, priority }: { p: Product; priority?: boolean }) {
-  const { addProduct, favs, toggleFav, mode, user, href } = useStore();
+  const { addProduct, favs, toggleFav, mode, href } = useStore();
   const [added, setAdded] = useState(false);
   const view = priced(p, mode === "wholesale");
   const off = discount(view.wholesale ? { ...p, price: view.price, mrp: view.mrp } : p);
@@ -41,25 +41,27 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
         <Icon name="heart" size={14} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
       </button>
 
-      <button type="button" className="st-card__add" disabled={out}
-        onClick={() => {
-          addProduct(p);
-          /* A wholesale add waits for login, so don't claim it's in the cart yet. */
-          if (view.wholesale && !user) return;
-          setAdded(true);
-          setTimeout(() => setAdded(false), 1600);
-        }}>
-        {out ? "Sold out" : added ? "In your cart" : "Add to cart"}
-      </button>
+      {view.wholesale ? null : (
+        <button type="button" className="st-card__add" disabled={out}
+          onClick={() => {
+            addProduct(p);
+            setAdded(true);
+            setTimeout(() => setAdded(false), 1600);
+          }}>
+          {out ? "Sold out" : added ? "In your cart" : "Add to cart"}
+        </button>
+      )}
 
       <div className="st-card__body">
         <span className="st-card__craft">{craftBy[p.craft]?.name}</span>
         <h3 className="st-card__n">{p.name}</h3>
-        <span className="st-card__p">
-          <b>{inr(view.price)}</b>
-          {view.mrp > 0 && <s>{inr(view.mrp)}</s>}
-          <em>{unitLabel(p.unit)}{view.wholesale ? " · +GST" : ""}</em>
-        </span>
+        {view.price > 0 && (
+          <span className="st-card__p">
+            <b>{inr(view.price)}</b>
+            {view.mrp > 0 && <s>{inr(view.mrp)}</s>}
+            <em>{unitLabel(p.unit)}{view.wholesale ? " · +GST" : ""}</em>
+          </span>
+        )}
         <span className={`st-card__stock ${p.stock}`}>{stockLine[p.stock]}</span>
       </div>
     </article>
