@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Modal from "@/components/ui/Modal";
 import { useStore } from "./StoreProvider";
 import {
@@ -9,6 +10,7 @@ import {
 type Step = "mobile" | "otp" | "register";
 const OTP_LEN = 4;
 const RESEND_AFTER = 30;
+const BANNER = "https://saroj-textile-store.b-cdn.net/media/90941782542541.webp";
 
 /**
  * Login / Register in one modal, the way the storefront does it: mobile →
@@ -101,21 +103,24 @@ export default function LoginModal() {
     if (e.key === "Backspace" && !digits[i] && i > 0) boxes.current[i - 1]?.focus();
   };
 
-  const title = step === "register" ? "Almost there" : "Log in or register";
+  const heading = step === "register" ? "Almost there" : step === "otp" ? "Verify your number" : "Login/Register";
 
   return (
-    <Modal open={loginOpen} onClose={closeLogin} title={title}>
+    <Modal open={loginOpen} onClose={closeLogin} title="Log in or register" banner={
+      /* The storefront's own login banner, which leads to the wholesale page. */
+      // eslint-disable-next-line @next/next/no-img-element
+      <Link href="/wholesale-fabric" onClick={closeLogin}>
+        <img src={BANNER} alt="Our exclusive wholesale fabrics — minimum 10 m, starting @80" />
+      </Link>}>
       <div className="st-login">
+        <h3 className="st-login__h">{heading}</h3>
         {loginReason && step === "mobile" && <p className="st-login__why">{loginReason}</p>}
 
         {step === "mobile" && (
           <>
-            <p className="st-lede" style={{ margin: 0 }}>
-              Enter your mobile number and we’ll send an OTP. New here? You’ll be registered in one more step.
-            </p>
-            <label className="st-field" style={{ marginTop: "1.1rem" }}><span>Mobile number</span>
-              <input type="tel" inputMode="numeric" maxLength={10} autoFocus value={mobile} placeholder="95879 86226"
-                onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+            <label className="st-field st-field--bare">
+              <input type="tel" inputMode="numeric" maxLength={10} autoFocus value={mobile} placeholder="Enter Mobile Number *"
+                aria-label="Mobile number" onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
                 onKeyDown={(e) => { if (e.key === "Enter") send(); }} /></label>
             <button type="button" className="st-btn st-btn--solid w-full" disabled={busy} onClick={send}>
               {busy ? "Sending…" : "Send OTP"}

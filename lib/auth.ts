@@ -74,14 +74,32 @@ async function call(path: string, body: object): Promise<{ ok: true; json: ApiBo
   }
 }
 
+/** First non-empty string under a key matching `re`, searching the response
+    breadth-first a few levels deep — the profile may sit under `user`, `data`,
+    `data.user`, and may call its fields `name` or `user_name`. */
+function findString(root: unknown, re: RegExp): string | undefined {
+  let level: unknown[] = [root];
+  for (let depth = 0; depth < 4 && level.length; depth++) {
+    const next: unknown[] = [];
+    for (const node of level) {
+      if (!node || typeof node !== "object" || Array.isArray(node)) continue;
+      for (const [k, v] of Object.entries(node)) {
+        if (typeof v === "string" && v.trim() && re.test(k)) return v.trim();
+        if (v && typeof v === "object") next.push(v);
+      }
+    }
+    level = next;
+  }
+  return undefined;
+}
+
 /** The signed-in user from whatever shape the API answers with. Fields it
     doesn't send fall back to what the visitor typed, or the mobile number. */
 function userFrom(json: ApiBody, mobile: string, typed?: { name: string; email: string }, fallbackToken?: string): User {
-  const u = json.user ?? json.data?.user;
   return {
     mobile,
-    name: u?.name || typed?.name || mobile,
-    email: u?.email || typed?.email || "",
+    name: findString(json, /^(user_?|customer_?|full_?)?name$/i) || typed?.name || mobile,
+    email: findString(json, /^(user_?|customer_?)?e-?mail$/i) || typed?.email || "",
     token: tokenOf(json) ?? fallbackToken,
   };
 }

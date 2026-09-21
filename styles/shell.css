@@ -280,3 +280,13 @@
 .st-cart__other{ display:block; width:100%; text-align:left; border:0; border-bottom:1px solid var(--line-2);
                  background:var(--paper-2); padding:.7rem 1.2rem; cursor:pointer; font-size:.74rem; color:var(--ink-2); }
 .st-cart__other u{ color:var(--cobalt); text-underline-offset:.15em; }
+
+/* Login modal: banner across the top, centred heading and full-width fields */
+.st-modal .modal__banner{ position:relative; flex:none; background:var(--paper-2); }
+.st-modal .modal__banner img{ display:block; width:100%; height:auto; }
+.st-modal .modal__banner .x{ position:absolute; top:12px; right:12px; background:#fff; border-color:transparent; }
+.st-login__h{ margin:1.2rem 0 1.1rem; text-align:center; font-family:var(--d); font-weight:400; font-size:clamp(1.7rem,5vw,2.3rem); color:var(--ink); }
+.st-login .st-field input{ height:56px; font-size:1rem; }
+.st-login .st-btn{ height:52px; border-radius:6px; }
+.st-login .st-lede{ text-align:center; }
+.st-field--bare{ margin:0 0 .9rem; }

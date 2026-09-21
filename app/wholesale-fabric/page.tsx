@@ -64,7 +64,7 @@ export default async function WholesalePage() {
     <main id="main">
       {page && page.slides.length > 0 && <WholesaleHero slides={page.slides} />}
 
-      <div className="st-plp__head">
+      {/* <div className="st-plp__head">
         <div className="st-wrap">
           <nav className="st-crumb" aria-label="Breadcrumb">
             <Link href="/">Home</Link><span aria-hidden="true">/</span><span>Wholesale</span>
@@ -85,7 +85,7 @@ export default async function WholesalePage() {
           ))}
         </div>
         <WholesaleActions />
-      </div>
+      </div> */}
 
       {page && page.collections.length > 0 && (
         <section className="st-wh__sec">
