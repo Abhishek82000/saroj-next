@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HomeSections from "@/components/home/HomeSections";
+import WholesaleHome from "@/components/wholesale/WholesaleHome";
 import { getWholesalePage } from "@/lib/wholesalePage";
 import { WHOLESALE_HOME, WHOLESALE_MIN_METRES } from "@/lib/wholesale";
 import { site } from "@/lib/site";
@@ -12,10 +13,11 @@ export const metadata: Metadata = pageMeta({
 });
 
 /**
- * /wholesale-fabric — the same page as the retail home, in wholesale mode:
- * banners and category rails from GET /api/wholesale-page-data, prices only
- * from that feed, and no add-to-cart.
+ * /wholesale-fabric — its own page, built from GET /api/wholesale-page-data;
+ * prices only from that feed, and no add-to-cart. If the feed is down it falls
+ * back to the shared home sections' wholesale-mode explainer.
  */
 export default async function WholesalePage() {
-  return <HomeSections wholesale={await getWholesalePage()} />;
+  const page = await getWholesalePage();
+  return page ? <WholesaleHome page={page} /> : <HomeSections wholesale={null} />;
 }

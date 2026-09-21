@@ -1,0 +1,125 @@
+import Link from "next/link";
+import Photo from "@/components/ui/Photo";
+import Reveal from "@/components/ui/Reveal";
+import Rail from "@/components/product/Rail";
+import WholesaleHero from "@/components/wholesale/WholesaleHero";
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbLd, graph } from "@/lib/seo";
+import { site } from "@/lib/site";
+import { WHOLESALE_HOME, WHOLESALE_MIN_METRES } from "@/lib/wholesale";
+import type { WholesaleCollection, WholesalePage } from "@/lib/wholesalePage";
+
+const shop = (slug: string) => `${WHOLESALE_HOME}/shop/${slug}`;
+
+const TERMS: [string, string][] = [
+  [`${WHOLESALE_MIN_METRES} m`, "Minimum order, any print"],
+  ["Cut to length", "Mixed prints allowed"],
+  ["GST invoice", "Trade rates, GST extra"],
+  ["Jaipur", "Dispatched from the source"],
+];
+
+function Feature({ c, i }: { c: WholesaleCollection; i: number }) {
+  return (
+    <Reveal as="div" delay={((i % 3) + 1) as 1 | 2 | 3} className="st-whf">
+      <Link href={shop(c.slug)} className="st-whf__link">
+        <div className="st-whf__ph ph"><Photo src={c.banner} alt={c.heading} sizes="(min-width:900px) 50vw, 100vw" /></div>
+        <div className="st-whf__body">
+          <h3>{c.heading}</h3>
+          {c.blurb && <p>{c.blurb}</p>}
+          <span className="st-whf__more">Shop wholesale &rarr;</span>
+        </div>
+      </Link>
+    </Reveal>
+  );
+}
+
+/**
+ * The wholesale front page. Its own layout — trade terms, featured collections,
+ * every category, a rail per category, buyers' words and an enquiry line —
+ * built entirely from GET /api/wholesale-page-data (see getWholesalePage).
+ */
+export default function WholesaleHome({ page }: { page: WholesalePage }) {
+  return (
+    <main id="main" className="st-whome">
+      {page.slides.length > 0 && <WholesaleHero slides={page.slides} />}
+
+      <section className="st-whterms">
+        <div className="st-wrap st-whterms__row">
+          {TERMS.map(([t, s]) => <div key={t}><b>{t}</b><span>{s}</span></div>)}
+        </div>
+      </section>
+
+      {page.collections.length > 0 && (
+        <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
+          <div className="st-wrap">
+            <Reveal className="st-eyebrow">Trade collections</Reveal>
+            <Reveal as="h2" delay={1} className="st-h2">Buy by the bolt.</Reveal>
+            <div className="st-whf__grid">{page.collections.map((c, i) => <Feature key={c.id} c={c} i={i} />)}</div>
+          </div>
+        </section>
+      )}
+
+      {page.categories.length > 0 && (
+        <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
+          <div className="st-wrap">
+            <Reveal className="st-eyebrow">Every category</Reveal>
+            <Reveal as="h2" delay={1} className="st-h2">Shop by fabric.</Reveal>
+            <div className="st-whcats">
+              {page.categories.map((c) => (
+                <Link key={c.id} href={shop(c.slug)} className="st-whcat">
+                  <span className="st-whcat__ph ph"><Photo src={c.image} alt={c.name} sizes="160px" /></span>
+                  <span className="st-whcat__name">{c.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {page.rails.map((r) => (
+        <Rail key={r.id} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
+      ))}
+
+      {page.more.length > 0 && (
+        <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
+          <div className="st-wrap">
+            <div className="st-whf__grid">{page.more.map((c, i) => <Feature key={c.id} c={c} i={i} />)}</div>
+          </div>
+        </section>
+      )}
+
+      {page.testimonials.length > 0 && (
+        <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
+          <div className="st-wrap">
+            <Reveal className="st-eyebrow">Repeat buyers</Reveal>
+            <Reveal as="h2" delay={1} className="st-h2">In their words.</Reveal>
+            <div className="st-whquotes">
+              {page.testimonials.slice(0, 6).map((t) => (
+                <figure key={t.id} className="st-whquote">
+                  <div className="st-voice__stars" aria-label={`${t.rating} stars`}>{"★".repeat(t.rating)}{"☆".repeat(Math.max(0, 5 - t.rating))}</div>
+                  <blockquote><p>{t.quote}</p></blockquote>
+                  <figcaption>{t.name}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="st-sec st-whcta">
+        <div className="st-wrap st-whcta__box">
+          <div>
+            <h2 className="st-h2">Planning a larger order?</h2>
+            <p>Tell us the prints and metres and we&rsquo;ll send trade rates the same day.</p>
+          </div>
+          <div className="st-whcta__btns">
+            <a href={`https://wa.me/${site.whatsapp}`} className="st-btn st-btn--light">WhatsApp the counter</a>
+            <Link href="/contact" className="st-btn st-btn--light">Contact us</Link>
+          </div>
+        </div>
+      </section>
+
+      <JsonLd data={graph([breadcrumbLd([{ name: "Home", path: "/" }, { name: "Wholesale", path: WHOLESALE_HOME }])])} />
+    </main>
+  );
+}
