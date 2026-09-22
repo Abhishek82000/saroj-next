@@ -222,13 +222,25 @@ export async function getMe(token: string, mobile: string): Promise<{ ok: true; 
   return r.ok ? { ok: true, user: userFrom(r.json, mobile, undefined, token) } : r;
 }
 
-/** A GET under /api/auth/, Bearer-authenticated, for callers outside this
-    file (lib/orders.ts and whatever joins it) — the same logged-in pattern
-    as `me`, confirmed live for order-view too (no header: 401 "Unauthenticated",
-    regardless of the id, so it's gated purely on the token). Returns the raw
-    JSON; each caller shapes it into its own type, since none of these
-    payloads have been seen with a real, valid token yet. */
-export async function authedGet(path: string, token: string): Promise<{ ok: true; json: Record<string, unknown> } | Failure> {
-  const r = await call(path, { method: "GET", token });
+/** A call under /api/auth/, Bearer-authenticated, for callers outside this
+    file (lib/orders.ts, lib/wishlist.ts and whatever joins them) — the same
+    logged-in pattern as `me`, confirmed live for order-view too (no header:
+    401 "Unauthenticated", regardless of the id, so it's gated purely on the
+    token). `query`, where a caller passes one (a POST-as-toggle, say), goes
+    as query params the same way send-otp/verify-otp take theirs — not a JSON
+    body. Returns the raw JSON; each caller shapes it into its own type,
+    since none of these payloads have been seen with a real, valid token yet. */
+export async function authedCall(
+  path: string,
+  token: string,
+  opts: { method?: "GET" | "POST"; query?: Record<string, string> } = {},
+): Promise<{ ok: true; json: Record<string, unknown> } | Failure> {
+  const r = await call(path, { method: opts.method ?? "GET", token, query: opts.query });
   return r.ok ? { ok: true, json: r.json as unknown as Record<string, unknown> } : r;
+}
+
+/** The GET case of `authedCall` — kept as its own name since every existing
+    caller (lib/orders.ts) already spells it this way. */
+export async function authedGet(path: string, token: string): Promise<{ ok: true; json: Record<string, unknown> } | Failure> {
+  return authedCall(path, token, { method: "GET" });
 }

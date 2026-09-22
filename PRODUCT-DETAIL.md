@@ -122,7 +122,10 @@ trusting anything cached in the page.
 - **Review submission** validates and closes. Needs
   `frontend.products.reviewProccess` as a JSON endpoint, including the image
   upload.
-- **Wishlist** is local only. `addtofav` needs an API equivalent.
+- **Wishlist** now also syncs to `/api/auth/wishlist` (see `lib/wishlist.ts`)
+  on top of the local `saroj.favs` list, but the request shape is a guess —
+  untested against a real account. Check live and fix the field name/verb
+  if the backend disagrees.
 - **Sign-in gate** links to `NEXT_PUBLIC_LOGIN_URL`. If Next and Laravel don't
   share a session, `requires_login` will always be true — that needs Sanctum
   stateful cookies or a token handed to the Next app.

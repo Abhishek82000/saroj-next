@@ -6,6 +6,7 @@ import type { CartLine, Product } from "@/lib/types";
 import type { User } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate } from "@/lib/wholesale";
+import { getWishlist, toggleWishlistRemote } from "@/lib/wishlist";
 
 /** Retail shows the ordinary catalogue; wholesale shows trade rates, GST extra.
     Which one is on is decided by the URL — everything under /wholesale-fabric and
@@ -124,6 +125,21 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const [hydrated, setHydrated] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  /** Fire-and-forget: pulls the saved slugs from GET /api/auth/wishlist and
+      unions them into local `favs`, so a piece saved on another device shows
+      up here too. Never blocks or surfaces an error — the local list is
+      already the source of truth for what the UI shows. */
+  const syncWishlist = useCallback((token: string) => {
+    getWishlist(token).then((r) => {
+      if (!r.ok) return;
+      setFavs((prev) => {
+        const next = { ...prev };
+        for (const slug of r.slugs) next[slug] = true;
+        return next;
+      });
+    });
+  }, []);
+
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
     setRetail(safe.read<CartLine[]>(CART_KEY, []));
@@ -131,9 +147,12 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setRecent(safe.read<string[]>(RECENT_KEY, []));
     const saved = safe.read<User | null>(USER_KEY, null);
     setUser(saved);
-    if (saved) setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
+    if (saved) {
+      setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
+      if (saved.token) syncWishlist(saved.token);
+    }
     setHydrated(true);
-  }, []);
+  }, [syncWishlist]);
 
   useEffect(() => { if (hydrated) safe.write(CART_KEY, retail); }, [hydrated, retail]);
   useEffect(() => { if (hydrated && wh.owner) safe.write(wholesaleCartKey(wh.owner), wh.lines); }, [hydrated, wh]);
@@ -195,12 +214,13 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setUser(u);
     /* Set before the pending action runs, so a wholesale add lands in this account's cart. */
     setWh({ owner: u.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(u.mobile), []) });
+    if (u.token) syncWishlist(u.token);
     setLoginOpen(false);
     say(`Welcome, ${u.name.split(" ")[0]}`);
     const next = pending.current;
     pending.current = null;
     next?.();
-  }, [say]);
+  }, [say, syncWishlist]);
 
   const updateUser = useCallback((patch: Partial<Pick<User, "name" | "email">>) => setUser((u) => (u ? { ...u, ...patch } : u)), []);
 
@@ -244,8 +264,12 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
         else { next[slug] = true; say("Saved for later"); }
         return next;
       });
+      /* Fire-and-forget: mirrors the flip server-side. The local state above
+         is what the UI shows either way — see lib/wishlist.ts for why this
+         call's shape is still a best guess. */
+      if (user?.token) toggleWishlistRemote(user.token, slug);
     });
-  }, [say, withLogin]);
+  }, [say, withLogin, user]);
 
   const remember = useCallback((q: string) => {
     const term = q.trim();
