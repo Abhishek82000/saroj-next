@@ -48,7 +48,7 @@ export default function Rail({
                 {off > 0 && <span className="st-prod__off">{off}% off</span>}
                 <div className="st-prod__body">
                   <Link href={href(`/product/${p.slug}`)} className="st-prod__name">{p.name}</Link>
-                  {known && <span className="st-prod__price"><b>{inr(view.price)}</b>{view.mrp > 0 && <s>{inr(view.mrp)}</s>}{view.wholesale && <em className="st-prod__gst">+GST</em>}</span>}
+                  {known && <span className="st-prod__price"><b>{inr(view.price)}</b>{view.mrp > 0 && <s>{inr(view.mrp)}</s>}</span>}
                 </div>
                 {known && mode !== "wholesale" && <button type="button" className="st-prod__add" aria-label={`Add ${p.name} to cart`}
                   onClick={() => addProduct(p)}>Add to cart</button>}

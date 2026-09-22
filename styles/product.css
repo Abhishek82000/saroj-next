@@ -408,7 +408,7 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 
 /* Rail arrows sit in the gutters at the slider's left/right ends (over the photos on small screens). */
 .st-railwrap{ position:relative; }
-.st-arrow--side{ position:absolute; top:105px; z-index:2; width:44px; height:44px; background:var(--paper); box-shadow:0 4px 14px rgba(0,0,0,.14); }
+.st-arrow--side{ position:absolute; top:50%; z-index:2; width:44px; height:44px; background:var(--paper); box-shadow:0 4px 14px rgba(0,0,0,.14); }
 .st-arrow--prev{ left:8px; }
 .st-arrow--next{ right:8px; }
 .st-arrow--side:hover{ transform:scale(1.07); }
@@ -418,7 +418,7 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
   .st-arrow--prev{ left:0; }
   .st-arrow--next{ right:0; }
 }
-@media (max-width:640px){ .st-arrow--side{ width:36px; height:36px; top:80px; } }
+@media (max-width:640px){ .st-arrow--side{ width:36px; height:36px; top:50%; } }
 
 /* Journal teaser: one auto-sliding row of post cards. */
 .st-journal--rail{ display:flex; gap:.9rem; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; -ms-overflow-style:none;
