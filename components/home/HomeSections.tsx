@@ -65,6 +65,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       <Reels items={apiReels} />
       <Voices />
       <Bulk />
+      <Journal posts={journalPosts} />
 
       <JsonLd data={graph([
         breadcrumbLd(isWholesale

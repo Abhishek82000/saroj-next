@@ -118,10 +118,6 @@ export default function Shelf({ categories = [] }: { categories?: CommonFeatured
             </RevealLink>
           ))}
         </div>
-
-        <Reveal>
-          <Link href="/shop" className="st-shelf__more">See everything on the counter</Link>
-        </Reveal>
       </div>
     </section>
   );
