@@ -2,7 +2,6 @@ import Link from "next/link";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Rail from "@/components/product/Rail";
-import BoltFan from "@/components/wholesale/BoltFan";
 import WholesaleHero from "@/components/wholesale/WholesaleHero";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph } from "@/lib/seo";
@@ -98,23 +97,7 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
         </section>
       )}
 
-      {page.testimonials.length > 0 && (
-        <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
-          <div className="st-wrap">
-            <Reveal className="st-eyebrow">Repeat buyers</Reveal>
-            <Reveal as="h2" delay={1} className="st-h2">In their words.</Reveal>
-            <div className="st-whquotes">
-              {page.testimonials.slice(0, 6).map((t) => (
-                <figure key={t.id} className="st-whquote">
-                  <div className="st-voice__stars" aria-label={`${t.rating} stars`}>{"★".repeat(t.rating)}{"☆".repeat(Math.max(0, 5 - t.rating))}</div>
-                  <blockquote><p>{t.quote}</p></blockquote>
-                  <figcaption>{t.name}</figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <Voices />
 
       <section className="st-sec st-whcta">
         <div className="st-wrap st-whcta__box">
