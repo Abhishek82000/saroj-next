@@ -469,3 +469,32 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-whcta__box .st-h2{ color:var(--paper); margin:0 0 .5rem; }
 .st-whcta__box p{ margin:0; opacity:.75; }
 .st-whcta__btns{ display:flex; flex-wrap:wrap; gap:.7rem; }
+
+/* ---------- BoltFan: hover-to-unfold collections row ---------- */
+.st-openbolt__head{ display:flex; flex-wrap:wrap; gap:1rem 2.5rem; align-items:flex-end; justify-content:space-between; }
+.st-openbolt__head .st-eyebrow{ color:var(--lac); }
+.st-openbolt__head .st-h2 em{ color:var(--lac); font-style:italic; }
+.st-openbolt__head .st-lede{ margin-top:0; text-align:right; }
+@media(max-width:700px){ .st-openbolt__head .st-lede{ text-align:left; } }
+
+.st-openbolt{ display:flex; gap:.5rem; height:clamp(360px,44vw,460px); margin-top:clamp(28px,4vw,44px); }
+.st-openbolt__item{ position:relative; flex:1 1 0; min-width:0; overflow:hidden; border-radius:16px;
+                     display:block; color:#fff; text-decoration:none; background:var(--ink);
+                     transition:flex-grow .6s var(--ease); }
+.st-openbolt__item.on{ flex-grow:3.6; }
+.st-openbolt__ph{ position:absolute; inset:0; }
+.st-openbolt__ph img{ transition:transform 1.1s var(--ease), opacity .7s ease; }
+.st-openbolt__item:hover .st-openbolt__ph img{ transform:scale(1.05); }
+.st-openbolt__item::after{ content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(0deg,rgba(9,13,17,.78) 0%,rgba(9,13,17,.15) 45%,rgba(9,13,17,.05) 100%); }
+.st-openbolt__num{ position:absolute; z-index:2; top:14px; left:16px; font-family:var(--d); font-size:1.05rem; opacity:.85; }
+.st-openbolt__label{ position:absolute; z-index:2; left:16px; right:16px; bottom:14px; display:flex; flex-direction:column; gap:.4rem; }
+.st-openbolt__label b{ font-family:var(--d); font-weight:400; line-height:1.16; font-size:1.1rem; }
+.st-openbolt__label small{ font-size:.78rem; line-height:1.5; opacity:.78; font-weight:300;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.st-openbolt__item:not(.on) .st-openbolt__label b{ writing-mode:vertical-rl; transform:rotate(180deg);
+  white-space:nowrap; font-size:.86rem; letter-spacing:.02em; }
+@media(max-width:700px){
+  .st-openbolt{ height:340px; }
+  .st-openbolt__item.on{ flex-grow:2.2; }
+}

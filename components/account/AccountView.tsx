@@ -6,6 +6,7 @@ import Icon from "@/components/ui/Icon";
 import { initialOf } from "@/components/shell/AccountMenu";
 import { useStore } from "@/components/shell/StoreProvider";
 import { isValidEmail } from "@/lib/auth";
+import { getOrder, getOrders, type Order } from "@/lib/orders";
 import { site } from "@/lib/site";
 
 const TABS = [
@@ -18,6 +19,67 @@ type Tab = (typeof TABS)[number]["key"];
 const isTab = (v: string | null): v is Tab => TABS.some((t) => t.key === v);
 
 const titleOf = (slug: string) => slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+/**
+ * GET /api/auth/orders, Bearer-authenticated — see lib/orders.ts for why its
+ * fields are read defensively rather than trusted: a real success response,
+ * from a real account's token, hasn't been seen yet. Expanding a row fetches
+ * that order's own detail (GET /api/auth/order-view/<id>) the same way.
+ */
+function OrdersTab({ token }: { token?: string }) {
+  const [state, setState] = useState<{ loading: boolean; error: string; orders: Order[] }>({ loading: true, error: "", orders: [] });
+  const [open, setOpen] = useState<string | null>(null);
+  const [detail, setDetail] = useState<Record<string, Order | undefined>>({});
+
+  useEffect(() => {
+    if (!token) { setState({ loading: false, error: "", orders: [] }); return; }
+    let live = true;
+    setState((s) => ({ ...s, loading: true, error: "" }));
+    getOrders(token).then((r) => {
+      if (!live) return;
+      setState(r.ok ? { loading: false, error: "", orders: r.orders } : { loading: false, error: r.message, orders: [] });
+    });
+    return () => { live = false; };
+  }, [token]);
+
+  const toggle = (o: Order) => {
+    const next = open === o.id ? null : o.id;
+    setOpen(next);
+    if (next && token && !detail[o.id]) {
+      getOrder(token, o.id).then((r) => { if (r.ok) setDetail((d) => ({ ...d, [o.id]: r.order })); });
+    }
+  };
+
+  if (!token) return <p className="st-account__empty">Log in again to see your orders.</p>;
+  if (state.loading) return <p className="st-account__empty">Loading your orders…</p>;
+  if (state.error) return <p className="st-account__empty">Couldn&rsquo;t load your orders — {state.error}</p>;
+  if (state.orders.length === 0) return <p className="st-account__empty">No orders yet. Once you place one, its status shows up here.</p>;
+
+  return (
+    <div className="st-orders">
+      {state.orders.map((o) => {
+        const d = detail[o.id];
+        return (
+          <div className="st-order" key={o.id}>
+            <button type="button" className="st-order__row" onClick={() => toggle(o)} aria-expanded={open === o.id}>
+              <span><b>Order #{o.id}</b>{o.placedAt && <small>{o.placedAt}</small>}</span>
+              {o.status && <em>{o.status}</em>}
+              {o.total && <b>{o.total}</b>}
+              <Icon name="down" size={16} strokeWidth={1.8} className="st-order__chev" />
+            </button>
+            {open === o.id && (
+              <div className="st-order__detail">
+                {d
+                  ? <pre>{JSON.stringify(d.raw, null, 2)}</pre>
+                  : <p className="st-account__empty">Loading detail…</p>}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function Account() {
   const { user, hydrated, openLogin, logout, updateUser, favs, say } = useStore();
@@ -112,7 +174,7 @@ function Account() {
             : <ul className="st-account__list">{favSlugs.map((s) => (
                 <li key={s}><Link href={`/product/${s}`}>{titleOf(s)}</Link></li>))}</ul>)}
 
-          {tab === "orders" && <p className="st-account__empty">No orders yet. Once you place one, its status shows up here.</p>}
+          {tab === "orders" && <OrdersTab token={user.token} />}
         </section>
       </div>
     </div>

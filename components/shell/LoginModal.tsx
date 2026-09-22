@@ -4,8 +4,9 @@ import Link from "next/link";
 import Modal from "@/components/ui/Modal";
 import { useStore } from "./StoreProvider";
 import {
-  isValidEmail, isValidMobile, registerUser, sendOtp, verifyOtp,
+  getMe, isValidEmail, isValidMobile, registerUser, sendOtp, verifyOtp,
 } from "@/lib/auth";
+import type { User } from "@/lib/auth";
 
 type Step = "mobile" | "otp" | "register";
 const OTP_LEN = 4;
@@ -18,7 +19,7 @@ const BANNER = "https://saroj-textile-store.b-cdn.net/media/90941782542541.webp"
  * action that needs an account — see `withLogin` in the store.
  */
 export default function LoginModal() {
-  const { loginOpen, loginReason, closeLogin, login } = useStore();
+  const { loginOpen, loginReason, closeLogin, login, updateUser } = useStore();
   const [step, setStep] = useState<Step>("mobile");
   const [mobile, setMobile] = useState("");
   const [digits, setDigits] = useState<string[]>(Array(OTP_LEN).fill(""));
@@ -46,6 +47,15 @@ export default function LoginModal() {
 
   useEffect(() => { if (step === "otp") boxes.current[0]?.focus(); }, [step]);
 
+  /** Fire-and-forget: GET /api/auth/me with the session's Bearer token, once
+      logged in, so name/email settle to the server's own record rather than
+      whatever verify-otp or register happened to echo back. Never blocks or
+      surfaces an error — login has already succeeded by the time this runs. */
+  const refreshProfile = (u: User) => {
+    if (!u.token) return;
+    getMe(u.token, u.mobile).then((r) => { if (r.ok) updateUser({ name: r.user.name, email: r.user.email }); });
+  };
+
   const send = async () => {
     setError("");
     if (!isValidMobile(mobile)) return setError("Enter a valid 10-digit mobile number.");
@@ -66,7 +76,7 @@ export default function LoginModal() {
     const r = await verifyOtp(mobile, code, otpToken);
     setBusy(false);
     if (!r.ok) { setDigits(Array(OTP_LEN).fill("")); boxes.current[0]?.focus(); return setError(r.message); }
-    if (r.state === "existing") return login(r.user);
+    if (r.state === "existing") { login(r.user); refreshProfile(r.user); return; }
     setOtpToken(r.token);
     setStep("register");
   };
@@ -84,6 +94,7 @@ export default function LoginModal() {
       return setError(r.message);
     }
     login(r.user);
+    refreshProfile(r.user);
   };
 
   const onDigit = (i: number, v: string) => {

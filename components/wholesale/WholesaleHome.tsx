@@ -2,6 +2,7 @@ import Link from "next/link";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Rail from "@/components/product/Rail";
+import BoltFan from "@/components/wholesale/BoltFan";
 import WholesaleHero from "@/components/wholesale/WholesaleHero";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph } from "@/lib/seo";
@@ -51,10 +52,17 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
 
       {page.collections.length > 0 && (
         <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
+          <div className="st-wrap st-openbolt__head">
+            <div>
+              <Reveal className="st-eyebrow">The collections</Reveal>
+              <Reveal as="h2" delay={1} className="st-h2">Open a <em>bolt.</em></Reveal>
+            </div>
+            <Reveal as="p" delay={2} className="st-lede">
+              {page.collections.length} collections, each from its own region. Hover to unfold one.
+            </Reveal>
+          </div>
           <div className="st-wrap">
-            <Reveal className="st-eyebrow">Trade collections</Reveal>
-            <Reveal as="h2" delay={1} className="st-h2">Buy by the bolt.</Reveal>
-            <div className="st-whf__grid">{page.collections.map((c, i) => <Feature key={c.id} c={c} i={i} />)}</div>
+            <BoltFan collections={page.collections} />
           </div>
         </section>
       )}
