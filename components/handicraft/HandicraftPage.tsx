@@ -24,8 +24,8 @@ const COLUMN_IMAGES = [
   "62201785562941", "2201780380811", "16601783765066",
 ].map((id) => CDN + id + ".webp");
 
-const PLATES: HcPlate[] = homePlates.map((p) => ({ href: `/product/${p.slug}`, src: p.src, cap: p.cap, alt: p.alt }));
-const SWATCHES: HcSwatch[] = homeSwatches.map(([file, title, slug]) => ({ href: `/product/${slug}`, src: CDN + file + ".webp", title }));
+const PLATES: HcPlate[] = homePlates.map((p) => ({ href: `/shop/${p.slug}`, src: p.src, cap: p.cap, alt: p.alt }));
+const SWATCHES: HcSwatch[] = homeSwatches.map(([file, title, slug]) => ({ href: `/shop/${slug}`, src: CDN + file + ".webp", title }));
 const PLATE_CLS = ["hc-plate--l", "hc-plate--c", "hc-plate--r"];
 
 const ROLL: { t: string; cls?: string }[] = [
@@ -365,56 +365,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         </div>
         <div className="hero__scroll" aria-hidden="true"><span>Scroll</span><span className="l" /></div>
       </section>
-
-      {/* ================= HERO ================= */}
-      <section className="hc-hero" id="hero">
-        <div className="hc-wrap">
-          <div className="hc-hero__type">
-            <div className="hc-eyebrow fade f1">A second house opens · Jaipur</div>
-            <h1 className="hc-hero__title">
-              <span className="ln"><span>Woven, then</span></span>
-              <span className="ln"><span>Fired &amp; <em>ढाला</em></span></span>
-            </h1>
-            <p className="hc-hero__sub fade f2">
-              The lanes that print our Ajrakh also throw the pottery and beat the brass.{" "}
-              <b>Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
-            </p>
-            <div className="hc-hero__cta fade f3">
-              <Link href="/shop?craft=pottery" className="hc-btn hc-btn--solid">Shop handicraft</Link>
-              <a href="#cloth" className="hc-btn">Fabrics, as always</a>
-            </div>
-          </div>
-
-          <div className="hc-plates fade f4">
-            <div className="hc-plates__row" id="platesRow">
-              {plates.map((p, i) => (
-                <Link key={PLATE_CLS[i]} href={p.href} className={`hc-plate ${PLATE_CLS[i]} ph`} data-swap={p.alt}>
-                  <img src={p.src} alt={p.alt} />
-                  <span className="hc-plate__cap">{p.cap}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="hc-hero__strip fade f4">
-            {swatches.map((s) => (
-              <Link key={s.href} href={s.href} className="hc-swatch ph" title={s.title}>
-                <img src={s.src} alt={s.title} loading="lazy" />
-              </Link>
-            ))}
-          </div>
-
-          <p className="hc-hero__note fade f4">Six crafts · 212 pieces · one counter in Jhotwara</p>
-        </div>
-      </section>
-
-      <div className="hc-roll" aria-hidden="true">
-        <ul>
-          {[...ROLL, ...ROLL].map((r, i) => <li key={i} className={r.cls}>{r.t}</li>)}
-        </ul>
-      </div>
-
-      {/* ================= WHEEL ================= */}
+{/* ================= WHEEL ================= */}
       <section className="hc-sec" id="wheel">
         <div className="hc-wrap">
           <div className="hc-wheel-head">
@@ -469,6 +420,58 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           <p className="hc-hint rv">Drag · swipe · arrow keys</p>
         </div>
       </section>
+      {/* ================= HERO ================= */}
+      <section className="hc-hero" id="hero">
+        <div className="hc-wrap">
+          <div className="hc-hero__type">
+            <div className="hc-eyebrow fade f1">A second house opens · Jaipur</div>
+            <h1 className="hc-hero__title">
+              <span className="ln"><span>Woven, then</span></span>
+              <span className="ln"><span>Fired &amp; <em>ढाला</em></span></span>
+            </h1>
+            <p className="hc-hero__sub fade f2">
+              The lanes that print our Ajrakh also throw the pottery and beat the brass.{" "}
+              <b>Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
+            </p>
+            <div className="hc-hero__cta fade f3">
+              <Link href="/shop?craft=pottery" className="hc-btn hc-btn--solid">Shop handicraft</Link>
+              <a href="#cloth" className="hc-btn">Fabrics, as always</a>
+            </div>
+          </div>
+
+          <div className="hc-plates fade f4">
+            <div className="hc-plates__row" id="platesRow">
+              {plates.map((p, i) => (
+                <Link key={PLATE_CLS[i]} href={p.href} className={`hc-plate ${PLATE_CLS[i]} ph`} data-swap={p.alt}>
+                  <img src={p.src} alt={p.alt} />
+                  <span className="hc-plate__cap">{p.cap}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="hc-hero__strip fade f4">
+            {swatches.map((s) => (
+              <Link key={s.href} href={s.href} className="hc-swatch-item" title={s.title}>
+                <span className="hc-swatch ph">
+                  <img src={s.src} alt={s.title} loading="lazy" />
+                </span>
+                <span className="hc-swatch__label">{s.title}</span>
+              </Link>
+            ))}
+          </div>
+
+          <p className="hc-hero__note fade f4">Six crafts · 212 pieces · one counter in Jhotwara</p>
+        </div>
+      </section>
+
+      <div className="hc-roll" aria-hidden="true">
+        <ul>
+          {[...ROLL, ...ROLL].map((r, i) => <li key={i} className={r.cls}>{r.t}</li>)}
+        </ul>
+      </div>
+
+      
 
       {/* ================= VIDEO BANNER ================= */}
       <section className="hc-vbanner" id="film">
