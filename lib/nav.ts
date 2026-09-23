@@ -13,7 +13,16 @@ const KNOWN_HREFS: Record<string, string> = {
   Home: "/",
   Fabrics: "/#",
   "Wholesale @80": "/wholesale-fabric",
+  Handicraft: "/handicraft",
+  Handicrafts: "/handicraft",
 };
+
+/** Menu names come from the storefront admin, so match them loosely. */
+function knownHref(name: string | undefined): string | undefined {
+  const key = (name ?? "").trim().toLowerCase();
+  const hit = Object.keys(KNOWN_HREFS).find((k) => k.toLowerCase() === key);
+  return hit ? KNOWN_HREFS[hit] : undefined;
+}
 
 /** A storefront category's own listing page, backed by GET /api/products?category=<slug>. */
 export function categoryHref(slug: string): string {
@@ -35,7 +44,7 @@ function buildLink(item: CommonMenuItem): NavLink {
   const children = (item.children ?? []).map(buildLink);
   const cat = Array.isArray(item.categories) ? undefined : item.categories;
 
-  const href = KNOWN_HREFS[item.name]
+  const href = knownHref(item.name)
     ?? (cat ? categoryHref(cat.cat_slug) : children.length > 0 ? "/shop" : searchHref(item.name));
 
   return { id: item.id, label: item.name, href, children };
@@ -137,7 +146,8 @@ function asObject<T>(value: T | []): T | null {
  */
 export function resolveHref(item: CommonMenuItem): string {
   if (!item) return "/shop";
-  if (KNOWN_HREFS[item.name]) return KNOWN_HREFS[item.name];
+  const known = knownHref(item.name);
+  if (known) return known;
 
   const category = asObject(item.categories);
   if (category?.cat_slug) return categoryHref(category.cat_slug);

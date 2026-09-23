@@ -17,7 +17,7 @@ function getImage(item: CommonMenuItem): string | null {
  */
 const fallback = [
   { id: -1, name: "Shop all", link: "/shop", categories: [], children: [] },
-  { id: -2, name: "Crafts", link: "/#wheel", categories: [], children: [] },
+  { id: -2, name: "Handicraft", link: "/handicraft", categories: [], children: [] },
   { id: -3, name: "The Shelf", link: "/#shelf", categories: [], children: [] },
   { id: -4, name: "The Wrap", link: "/#gift", categories: [], children: [] },
   { id: -5, name: "Fabrics", link: "/#cloth", categories: [], children: [] },
