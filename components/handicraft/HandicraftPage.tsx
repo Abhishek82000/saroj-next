@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { plates, swatches } from "@/components/home/Hero";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 const PIC = "https://picsum.photos/seed/";
@@ -13,15 +14,6 @@ const COLUMNS = [
   ["12091782565773", "47691780986642", "94351785567420"],
   ["47191782732714", "71911780379169", "8731780988074"],
   ["62201785562941", "2201780380811", "16601783765066"],
-];
-
-const SWATCHES = [
-  { slug: "ajrakh-collection", title: "Ajrakh", img: "48621785565568", alt: "Teal and blue Ajrakh printed cotton" },
-  { slug: "kalamkari", title: "Kalamkari", img: "42621785568665", alt: "Teal green and mustard Kalamkari cotton" },
-  { slug: "jaipur-cotton", title: "Jaipuri Cotton", img: "81901780987621", alt: "White base butta printed cotton" },
-  { slug: "indigo", title: "Indigo", img: "13001785568370", alt: "Navy indigo Kalamkari paisley print" },
-  { slug: "patola-prints", title: "Patola", img: "97721785569096", alt: "Leaf green polka patola printed cotton" },
-  { slug: "flower-garden-collection", title: "Flower Garden", img: "12091782565773", alt: "White base floral Kalamkari Jaipuri cotton" },
 ];
 
 const ROLL: { t: string; cls?: string }[] = [
@@ -408,25 +400,19 @@ export default function HandicraftPage() {
 
           <div className="hc-plates fade f4">
             <div className="hc-plates__row" id="platesRow">
-              <figure className="hc-plate hc-plate--l ph m-0" data-swap="Blue pottery vases on a workshop ledge, side light">
-                <img src={PIC + "saroj-pottery-a/600/800"} alt="Blue pottery pieces from Kot Jewar" width={600} height={800} />
-                <figcaption className="hc-plate__cap">Blue Pottery</figcaption>
-              </figure>
-              <figure className="hc-plate hc-plate--c ph m-0" data-swap="Hero shot: artisan's hands mid-work, shallow depth of field">
-                <img src={PIC + "saroj-hands-main/900/1125"} alt="An artisan at work in a Jaipur workshop" width={900} height={1125} />
-                <figcaption className="hc-plate__cap">The workshop, Jhotwara</figcaption>
-              </figure>
-              <figure className="hc-plate hc-plate--r ph m-0" data-swap="Ajrakh bolt half-unrolled">
-                <img src={CDN + "63141785559833.webp"} alt="Red over-dye Ajrakh block printed cotton" width={600} height={800} />
-                <figcaption className="hc-plate__cap">Ajrakh, on the bolt</figcaption>
-              </figure>
+              {plates.map((p) => (
+                <Link key={p.cls} href={`/product/${p.slug}`} className={`hc-plate ${p.cls.replace("st-", "hc-")} ph`} data-swap={p.note}>
+                  <img src={p.src} alt={p.alt} />
+                  <span className="hc-plate__cap">{p.cap}</span>
+                </Link>
+              ))}
             </div>
           </div>
 
           <div className="hc-hero__strip fade f4">
-            {SWATCHES.map((s) => (
-              <Link key={s.slug} href={`/shop/${s.slug}`} className="hc-swatch ph" title={s.title}>
-                <img src={CDN + s.img + ".webp"} alt={s.alt} loading="lazy" />
+            {swatches.map(([file, title, slug]) => (
+              <Link key={file} href={`/product/${slug}`} className="hc-swatch ph" title={title}>
+                <img src={CDN + file + ".webp"} alt={title} loading="lazy" />
               </Link>
             ))}
           </div>

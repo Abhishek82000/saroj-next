@@ -6,14 +6,14 @@ import Photo from "@/components/ui/Photo";
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 
 /** The 3 featured categories — real category names, each linked to its best-selling product. */
-const plates = [
+export const plates = [
   { cls: "st-plate--l", src: CDN + "40661788078255.webp", cap: "Jaipur Cotton", alt: "Maroon base, cream paisley printed Jaipuri cotton fabric", note: "Best-selling Jaipuri cotton print", slug: "maroon-base-with-cream-paisley-printed-jaipuri-cotton-fabric" },
   { cls: "st-plate--c", src: CDN + "63141785559833.webp", cap: "Ajrakh Collection", alt: "Red over-dye Ajrakh block printed cotton", note: "Ajrakh bolt half-unrolled" , slug: "red-over-dye-with-blue-block-printed-ajrakh-cotton-fabric" },
   { cls: "st-plate--r", src: CDN + "94351785567420.webp", cap: "Kalamkari", alt: "Red vibrant multi-colour paisley Kalamkari print", note: "Kalamkari paisley, vibrant multi-colour", slug: "red-vibrant-multi-colour-paisley-kalamkari-print" },
 ];
 
 /** The remaining featured categories, each linked to its matching product. */
-const swatches = [
+export const swatches = [
   ["42621785568665", "Paisley Prints", "teal-green-and-mustard-paisley-printed-kalamkari-cotton-fabric"],
   ["13001785568370", "Indigo Prints", "neavy-blue-base-indigo-printed-kalamkari-paisley-print"],
   ["97721785569096", "Patola & Patch Prints", "leaf-green-polka-patola-in-red-ajrakh-cotton-printed-fabric"],

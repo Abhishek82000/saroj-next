@@ -22,6 +22,7 @@ const fallback = [
   { id: -4, name: "The Wrap", link: "/#gift", categories: [], children: [] },
   { id: -5, name: "Fabrics", link: "/#cloth", categories: [], children: [] },
   { id: -6, name: "Bulk", link: "/#bulk", categories: [], children: [] },
+  { id: -7, name: "Wholesale @80", link: "/wholesale-fabric", categories: [], children: [] },
 ] as unknown as CommonMenuItem[];
 
 export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
