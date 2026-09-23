@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Handicraft — Saroj Textile | Jaipur</title>
+<meta name="description" content="The hand behind our cloth now works in clay, brass and enamel. Jaipur handicraft alongside the fabric house Saroj Textile has always been.">
+<meta name="theme-color" content="#F1F3F2">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://saroj-textile-store.b-cdn.net">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Manrope:wght@300;400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+/* ============================================================
+   SAROJ TEXTILE — HANDICRAFT  ·  LIGHT / PORCELAIN  ·  v2
+   ============================================================ */
+:root{
+  --paper:#fff4f4; --paper-2:#f9e2e2; --paper-3:#DCE3E2;
+  --ink:#101820; --ink-2:#3A4750; --mute:#6C7A82;
+  --cobalt:#C0392E; --teal:#891226; --lac:#C0392E; --ochre:#A87A2A;
+  --line:rgba(16,24,32,.12); --line-2:rgba(16,24,32,.07);
+
+  --d:'Marcellus','Times New Roman',serif;
+  --b:'Manrope',system-ui,-apple-system,sans-serif;
+  --dv:'Tiro Devanagari Hindi',serif;
+
+  --pad:clamp(18px,5vw,64px);
+  --sec-y:clamp(35px,12vw,70px);
+  --ease:cubic-bezier(.22,.68,.24,1);
+  --shadow:0 24px 50px -18px rgba(16,24,32,.28);
+}
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--b);
+      font-size:16px; line-height:1.62; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+img{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; }
+:focus-visible{ outline:2px solid var(--cobalt); outline-offset:3px; border-radius:2px; }
+::selection{ background:var(--cobalt); color:#fff; }
+
+.ph{ position:relative; overflow:hidden; background:linear-gradient(150deg,var(--paper-2),var(--paper-3)); }
+.ph img{ width:100%; height:100%; object-fit:cover; transition:transform 1.1s var(--ease), opacity .7s ease; }
+.ph img[data-loading]{ opacity:0; }
+
+.st-eyebrow{ font-size:.63rem; letter-spacing:.32em; text-transform:uppercase; font-weight:700;
+             color:var(--cobalt); display:flex; align-items:center; gap:.7em; }
+.st-eyebrow::before{ content:''; width:26px; height:1px; background:currentColor; opacity:.6; flex:none; }
+.st-eyebrow.mid{ justify-content:center; }
+.st-eyebrow.mid::after{ content:''; width:26px; height:1px; background:currentColor; opacity:.6; flex:none; }
+.st-h2{ font-family:var(--d); font-weight:400; line-height:1.02; letter-spacing:-.018em;
+        font-size:clamp(2.05rem,8vw,4rem); margin:.32em 0 0; }
+.st-lede{ color:var(--mute); font-weight:300; font-size:clamp(.95rem,3.4vw,1.08rem); max-width:46ch; margin:1.05rem 0 0; }
+.st-dv{ font-family:var(--dv); }
+.st-sec{ padding:var(--sec-y) var(--pad); position:relative; }
+.st-wrap{ max-width:1280px; margin-inline:auto; width:100%; }
+
+.st-btn{ --bg:transparent; --fg:var(--ink); --bd:var(--line);
+  display:inline-flex; align-items:center; justify-content:center; gap:.6em;
+  padding:.92em 1.7em; border:1px solid var(--bd); background:var(--bg); color:var(--fg);
+  font-size:.71rem; letter-spacing:.19em; text-transform:uppercase; font-weight:700;
+  border-radius:999px; position:relative; overflow:hidden; isolation:isolate; cursor:pointer;
+  transition:color .45s var(--ease), border-color .45s var(--ease), transform .3s var(--ease); }
+.st-btn::after{ content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--ink);
+                transform:translateY(101%); transition:transform .5s var(--ease); }
+.st-btn:hover,.st-btn:focus-visible{ color:var(--paper); border-color:transparent; }
+.st-btn:hover::after,.st-btn:focus-visible::after{ transform:translateY(0); }
+.st-btn:active{ transform:scale(.97); }
+.st-btn--solid{ --bg:var(--ink); --fg:var(--paper); --bd:transparent; }
+.st-btn--solid::after{ background:var(--cobalt); }
+.st-btn--solid:hover{ color:#fff; }
+.st-btn--light{ --fg:#fff; --bd:rgba(255,255,255,.42); }
+.st-btn--light::after{ background:#fff; }
+.st-btn--light:hover{ color:var(--ink); }
+
+/* ---------- hero ---------- */
+.st-hero{ padding:var(--sec-y) var(--pad); position:relative; overflow:hidden; }
+.st-hero__type{ position:relative; z-index:4; text-align:center; display:grid; justify-items:center; }
+.st-hero__title{ font-family:var(--d); font-weight:400; margin:.55rem 0 0;
+                 font-size:clamp(2.7rem,12.5vw,7.2rem); line-height:.92; letter-spacing:-.03em; }
+.st-hero__title .ln{ display:block; overflow:hidden; }
+.st-hero__title .ln>span{ display:block; transform:translateY(102%); opacity:0;
+                          transition:transform 1.05s var(--ease), opacity .75s ease; }
+.lit .st-hero__title .ln>span{ transform:none; opacity:1; }
+.lit .st-hero__title .ln:nth-child(2)>span{ transition-delay:.1s; }
+.st-hero__title em{ font-style:italic; font-family:var(--dv); font-size:.72em; color:var(--cobalt); }
+.st-hero__sub{ color:var(--mute); font-weight:300; max-width:52ch; margin:1.25rem 0 0; font-size:clamp(.95rem,3.5vw,1.1rem); }
+.st-hero__sub b{ font-weight:500; color:var(--ink); }
+.st-hero__cta{ display:flex; flex-wrap:wrap; gap:.65rem; justify-content:center; margin-top:1.8rem; }
+.fade{ opacity:0; transform:translateY(20px); transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.lit .fade{ opacity:1; transform:none; }
+.lit .fade.f1{ transition-delay:.45s; } .lit .fade.f2{ transition-delay:.6s; }
+.lit .fade.f3{ transition-delay:.75s; } .lit .fade.f4{ transition-delay:.9s; }
+
+.st-plates{ margin-top:clamp(34px,6vw,58px); perspective:1500px; display:grid; justify-items:center; }
+.st-plates__row{ display:grid; grid-template-columns:1fr 1.5fr 1fr; align-items:center;
+                 gap:clamp(8px,2vw,26px); width:100%; transform-style:preserve-3d; will-change:transform; }
+.st-plate{ border-radius:14px; box-shadow:var(--shadow); transform-style:preserve-3d;
+           transition:transform 1s var(--ease); will-change:transform; }
+.st-plate--l{ aspect-ratio:3/4; transform:translateZ(-90px) rotateY(16deg) translateY(16px); }
+.st-plate--c{ aspect-ratio:4/5; transform:translateZ(40px); border-radius:16px; }
+.st-plate--r{ aspect-ratio:3/4; transform:translateZ(-90px) rotateY(-16deg) translateY(16px); }
+.st-plate__cap{ position:absolute; left:10px; bottom:10px; z-index:3; font-size:.55rem;
+                letter-spacing:.18em; text-transform:uppercase; font-weight:700;
+                background:rgba(255,255,255,.92); color:var(--ink); padding:.32em .7em; border-radius:99px; }
+.st-hero__strip{ display:flex; gap:.5rem; justify-content:center; margin-top:clamp(22px,4vw,34px); flex-wrap:wrap; }
+.st-swatch{ width:clamp(46px,11vw,60px); aspect-ratio:1; border-radius:10px; overflow:hidden;
+            box-shadow:0 8px 18px -8px rgba(16,24,32,.4); transition:transform .45s var(--ease); border:2px solid transparent; }
+.st-swatch:hover{ transform:translateY(-6px) scale(1.06); border-color:var(--cobalt); }
+.st-hero__note{ display:flex; align-items:center; justify-content:center; gap:.7rem; margin-top:1.4rem;
+                font-size:.6rem; letter-spacing:.22em; text-transform:uppercase; color:var(--mute); }
+.st-hero__note::before,.st-hero__note::after{ content:''; width:clamp(20px,6vw,54px); height:1px; background:var(--line); }
+
+/* ---------- craft roll ---------- */
+.st-roll{ border-block:1px solid var(--line-2); background:var(--paper-2); padding:clamp(13px,2.6vw,18px) 0; overflow:hidden; }
+.st-roll ul{ display:flex; gap:2.2rem; list-style:none; margin:0; padding:0; white-space:nowrap; animation:slide 34s linear infinite; }
+.st-roll li{ font-family:var(--d); font-size:clamp(1rem,3.8vw,1.5rem); color:var(--ink-2); display:flex; align-items:center; gap:2.2rem; }
+.st-roll li::after{ content:'✦'; font-size:.5em; color:var(--cobalt); }
+.st-roll li.hi{ color:var(--cobalt); }
+.st-roll:hover ul{ animation-play-state:paused; }
+
+/* ---------- wheel ---------- */
+.st-wheel-head{ text-align:center; display:grid; justify-items:center; }
+.st-stage{ margin-top:clamp(32px,6vw,54px); perspective:1300px; perspective-origin:50% 44%;
+           touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; }
+.st-stage:active{ cursor:grabbing; }
+.st-wheel{ position:relative; height:clamp(360px,78vw,440px); transform-style:preserve-3d;
+           transition:transform .85s var(--ease); margin-inline:auto; width:min(100%,780px); }
+.st-wheel.drag{ transition:none; }
+.st-face{ position:absolute; top:0; left:50%; width:var(--fw); height:100%;
+          margin-left:calc(var(--fw) / -2); transform-style:preserve-3d; backface-visibility:hidden; }
+.st-face__card{ height:100%; border-radius:16px; overflow:hidden; background:#fff;
+                box-shadow:0 20px 40px -18px rgba(16,24,32,.35); display:flex; flex-direction:column;
+                opacity:.5; transition:opacity .5s, box-shadow .5s, outline-color .5s;
+                outline:1px solid var(--line-2); outline-offset:-1px; }
+.st-face.on .st-face__card{ opacity:1; box-shadow:0 34px 60px -20px rgba(16,24,32,.45); outline-color:var(--cobalt); }
+.st-face__ph{ flex:1; min-height:0; }
+.st-face.on .st-face__ph img{ transform:scale(1.05); }
+.st-face__body{ padding:.95rem 1rem 1.15rem; }
+.st-face__num{ font-size:.56rem; letter-spacing:.28em; color:var(--cobalt); font-weight:700; }
+.st-face__name{ font-family:var(--d); font-size:clamp(1.16rem,4.4vw,1.42rem); margin:.2rem 0 0; line-height:1.12; }
+.st-face__hi{ font-family:var(--dv); font-size:.82rem; color:var(--mute); margin:0; }
+.st-face__meta{ font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); margin:.5rem 0 0; }
+.st-face__meta b{ color:var(--teal); font-weight:700; }
+.st-ctrl{ display:flex; align-items:center; justify-content:center; gap:1rem; margin-top:clamp(24px,5vw,36px); }
+.st-dots{ display:flex; gap:.5rem; }
+.st-dot{ width:7px; height:7px; border-radius:50%; border:0; padding:0; background:var(--line); transition:.4s var(--ease); cursor:pointer; }
+.st-dot.on{ background:var(--cobalt); width:24px; border-radius:99px; }
+.st-arrow{ width:44px; height:44px; border-radius:50%; border:1px solid var(--line); background:transparent;
+           color:var(--ink); display:grid; place-items:center; cursor:pointer; transition:.35s var(--ease); }
+.st-arrow:hover{ background:var(--ink); color:var(--paper); border-color:transparent; transform:scale(1.07); }
+.st-hint{ text-align:center; font-size:.6rem; letter-spacing:.22em; text-transform:uppercase; color:var(--mute); margin-top:.9rem; }
+
+/* ══ HERO — drifting fabric columns ══ */
+.hero{position:relative;z-index:2;height:100vh;min-height:620px;overflow:hidden;background:var(--ink)}
+.hero__cols{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:12px;z-index:0}
+.hcol{overflow:hidden}
+.hcol__in{display:flex;flex-direction:column;gap:12px;animation:driftUp 46s linear infinite;will-change:transform}
+.hcol:nth-child(2) .hcol__in{animation:driftDown 58s linear infinite}
+.hcol:nth-child(3) .hcol__in{animation:driftUp 52s linear infinite}
+.hcol:nth-child(4) .hcol__in{animation:driftDown 64s linear infinite}
+.hcol:nth-child(5) .hcol__in{animation:driftUp 50s linear infinite}
+.hcol img{width:100%;aspect-ratio:3/4;object-fit:cover;filter:brightness(.88) saturate(1.02)}
+@keyframes driftUp{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes driftDown{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+.hero__scrim{position:absolute;inset:0;z-index:1;background:
+  radial-gradient(ellipse 120% 80% at 50% 50%,rgba(21,19,13,.42),rgba(21,19,13,.86));}
+.hero__content{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;color:#ece5d6;padding:0 22px}
+.hero__ey{font-family:var(--f-mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#d6d0c4;margin-bottom:26px}
+.hero h1{font-family:var(--f-serif);font-weight:500;font-size:clamp(52px,10vw,168px);line-height:.86;letter-spacing:-.02em}
+.hero h1 .italic{color:#ece5d6}
+.hero__cta{margin-top:42px;display:flex;gap:24px;flex-wrap:wrap;justify-content:center;align-items:center}
+.hero__scroll{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#d6d0c4;
+  display:flex;flex-direction:column;align-items:center;gap:10px}
+.hero__scroll .l{width:1px;height:40px;background:linear-gradient(#d6d0c4,transparent);position:relative;overflow:hidden}
+.hero__scroll .l::after{content:"";position:absolute;top:-40px;left:0;width:1px;height:40px;background:#ece5d6;animation:scrollLine 2.2s var(--ease) infinite}
+@keyframes scrollLine{to{top:40px}}
+@media(max-width:1080px){
+  .hero__cols{grid-template-columns:repeat(3,1fr)}
+  .hcol:nth-child(4),.hcol:nth-child(5){display:none}
+}
+@media(max-width:760px){
+  .hero__cols{grid-template-columns:repeat(2,1fr)}.hcol:nth-child(3){display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.2s!important}
+  .js .rv{opacity:1;transform:none}.js .maskrow>*{transform:none}.js .clip{clip-path:none}
+  .hcol__in{transform:translateY(-25%)}
+}
+/* ---------- fabric fan ---------- */
+.st-cloth{ background:var(--ink); color:var(--paper); border-block:1px solid var(--line-2); overflow:hidden; }
+.st-cloth .st-eyebrow{ color:#f08f8f; }
+.st-cloth .st-lede{ color:rgba(241,243,242,.62); }
+.st-cloth__grid{ display:grid; gap:clamp(38px,7vw,58px); align-items:center; }
+@media(min-width:980px){ .st-cloth__grid{ grid-template-columns:.9fr 1.1fr; gap:3.2rem; } }
+.st-fan{ perspective:1200px; height:clamp(360px,80vw,470px); position:relative; display:grid; place-items:center; }
+.st-fan__inner{ position:relative; width:min(100%,440px); height:100%; transform-style:preserve-3d; }
+.st-bolt{ position:absolute; left:50%; bottom:5%; width:clamp(102px,26vw,134px); height:clamp(250px,56vw,336px);
+          margin-left:calc(clamp(102px,26vw,134px) / -2); border-radius:10px; transform-origin:50% 100%;
+          cursor:pointer; border:0; padding:0; overflow:hidden; touch-action:manipulation;
+          box-shadow:0 26px 44px -18px rgba(0,0,0,.75); background:#22303A;
+          transition:transform .8s var(--ease), box-shadow .5s, opacity .55s ease; }
+.st-bolt img{ width:100%; height:100%; object-fit:cover; pointer-events:none; }
+.st-bolt::after{ content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(100deg, rgba(255,255,255,.26), transparent 32%, rgba(0,0,0,.42)); }
+.st-bolt__lbl{ position:absolute; left:50%; bottom:12px; translate:-50% 0; z-index:3; pointer-events:none;
+               font-size:.54rem; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
+               background:#fff; color:var(--ink); padding:.32em .7em; border-radius:99px; white-space:nowrap;
+               opacity:0; transition:opacity .4s; }
+.st-bolt.on{ box-shadow:0 40px 62px -20px rgba(0,0,0,.85); z-index:9; }
+.st-bolt.on .st-bolt__lbl{ opacity:1; }
+
+/* FIX: readout is a sibling outside the preserve-3d context, so it used to eat clicks */
+.st-fan__out{ position:absolute; left:0; top:0; z-index:10; max-width:190px; pointer-events:none;
+              border-left:2px solid #f08f8f; padding-left:.85rem; }
+.st-fan__out h4{ font-family:var(--d); font-size:1.28rem; margin:0; line-height:1.14; }
+.st-fan__out p{ font-size:.74rem; color:rgba(241,243,242,.6); margin:.3rem 0 0; }
+.st-fan__out b{ display:block; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:#f08f8f; margin-top:.5rem; }
+
+/* explicit, keyboard-reachable control for the fan */
+.st-fantabs{ display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; margin-top:1.2rem; }
+.st-fantab{ border:1px solid rgba(255,255,255,.24); background:transparent; color:rgba(241,243,242,.78);
+            border-radius:999px; padding:.45em 1em; font-size:.65rem; letter-spacing:.12em;
+            text-transform:uppercase; font-weight:600; cursor:pointer; transition:.35s var(--ease); }
+.st-fantab:hover{ border-color:#f08f8f; color:#fff; }
+.st-fantab.on{ background:#fff; border-color:#fff; color:var(--ink); }
+.st-cloth__stats{ display:flex; flex-wrap:wrap; gap:1.4rem 2.4rem; margin-top:2rem; }
+.st-cloth__stats span{ display:block; font-family:var(--d); font-size:1.7rem; line-height:1; }
+.st-cloth__stats small{ font-size:.58rem; letter-spacing:.19em; text-transform:uppercase; color:rgba(241,243,242,.5); }
+.st-cloth__cta{ display:flex; flex-wrap:wrap; gap:.65rem; margin-top:2rem; }
+
+/* ---------- making rail ---------- */
+.st-rail{ display:flex; gap:.9rem; overflow-x:auto; scroll-snap-type:x mandatory; perspective:1100px;
+          padding:clamp(28px,5vw,46px) var(--pad) 1.4rem; margin-inline:calc(var(--pad) * -1);
+          scrollbar-width:none; -ms-overflow-style:none; }
+.st-rail::-webkit-scrollbar{ display:none; }
+.st-step{ flex:0 0 min(76vw,320px); scroll-snap-align:center; border-radius:16px; overflow:hidden; background:#fff;
+          box-shadow:0 18px 36px -18px rgba(16,24,32,.34); transform-style:preserve-3d; will-change:transform;
+          display:flex; flex-direction:column; }
+.st-step__ph{ aspect-ratio:4/3; position:relative; }
+.st-step__i{ position:absolute; left:.75rem; top:.75rem; z-index:3; font-family:var(--d); font-size:.8rem;
+             background:rgba(255,255,255,.94); color:var(--ink); width:30px; height:30px; border-radius:50%;
+             display:grid; place-items:center; }
+.st-step__body{ padding:1.05rem 1.1rem 1.3rem; }
+.st-step h4{ font-family:var(--d); font-size:1.24rem; margin:0; }
+.st-step p{ color:var(--mute); font-size:.86rem; font-weight:300; margin:.55rem 0 0; }
+.st-step__tag{ display:block; margin-top:.9rem; font-size:.58rem; letter-spacing:.18em;
+               text-transform:uppercase; color:var(--cobalt); font-weight:700; }
+
+/* ============================================================
+   VOICES — review wall
+   ============================================================ */
+.st-voices{ overflow:hidden; padding-block:var(--sec-y); }
+.st-voices__head{ padding-inline:var(--pad); }
+.st-vrow{ display:flex; gap:.75rem; width:max-content; margin-top:1.6rem; }
+.st-vrow--a{ animation:slide 46s linear infinite; }
+.st-vrow--b{ animation:slide 52s linear infinite reverse; margin-top:.75rem; }
+.st-voices:hover .st-vrow{ animation-play-state:paused; }
+.st-voice{ width:min(72vw,300px); background:#fff; border-radius:14px; padding:1.1rem 1.15rem;
+           box-shadow:0 12px 26px -18px rgba(16,24,32,.34); flex:none; }
+.st-voice__stars{ color:var(--ochre); font-size:.72rem; letter-spacing:.16em; }
+.st-voice p{ font-size:.87rem; color:var(--ink-2); margin:.55rem 0 0; line-height:1.5; }
+.st-voice__who{ display:flex; align-items:center; gap:.55rem; margin-top:.85rem; }
+.st-voice__ini{ width:28px; height:28px; border-radius:50%; background:var(--paper-2); color:var(--cobalt);
+                display:grid; place-items:center; font-size:.66rem; font-weight:700; flex:none; }
+.st-voice__who b{ font-size:.72rem; font-weight:600; }
+.st-voice__who small{ font-size:.58rem; color:var(--mute); letter-spacing:.1em; text-transform:uppercase; }
+
+/* ============================================================
+   VIDEO BANNER — frame opens out as you scroll
+   ============================================================ */
+.st-vbanner{ position:relative; padding:0; --p:0; }
+.st-vbanner__frame{
+  position:relative; overflow:hidden; background:#0B1116;
+  height:clamp(430px,78vh,720px);
+  margin-inline:calc((1 - var(--p)) * var(--pad));
+  border-radius:calc((1 - var(--p)) * 26px);
+  box-shadow:0 40px 80px -40px rgba(16,24,32,.6);
+}
+.st-vbanner__vid{ position:absolute; left:0; top:-9%; width:100%; height:118%;
+                  object-fit:cover; will-change:transform; }
+.st-vbanner__frame::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(to top, rgba(8,13,18,.9) 0%, rgba(8,13,18,.42) 42%, rgba(8,13,18,.18) 72%, rgba(8,13,18,.5) 100%);
+}
+.st-vbanner__in{
+  position:absolute; inset:0; z-index:3; display:flex; flex-direction:column;
+  justify-content:flex-end; padding:clamp(22px,5vw,54px); color:#fff;
+}
+.st-vbanner__eyebrow{ font-size:.6rem; letter-spacing:.3em; text-transform:uppercase;
+                      font-weight:700; color:#f08f8f; display:flex; align-items:center; gap:.6rem; }
+.st-vbanner__eyebrow i{ font-style:normal; width:7px; height:7px; border-radius:50%;
+                        background:#E05A4A; flex:none; animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.35; transform:scale(.8); } }
+.st-vbanner h2{ font-family:var(--d); font-weight:400; line-height:1.02; letter-spacing:-.02em;
+                font-size:clamp(2rem,7.6vw,4.2rem); margin:.5rem 0 0; max-width:16ch; }
+.st-vbanner p{ font-size:clamp(.9rem,3.3vw,1.02rem); font-weight:300;
+               color:rgba(255,255,255,.72); margin:.9rem 0 0; max-width:44ch; }
+.st-vbanner__chips{ display:flex; flex-wrap:wrap; gap:.45rem; margin-top:1.3rem; }
+.st-vbanner__chips span{ font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
+                         padding:.46em .95em; border:1px solid rgba(255,255,255,.34);
+                         border-radius:999px; color:rgba(255,255,255,.9); }
+.st-vbanner__ctrl{ position:absolute; right:clamp(16px,4vw,34px); top:clamp(16px,4vw,34px);
+                   z-index:4; display:flex; gap:.45rem; }
+.st-vctrl{ width:42px; height:42px; border-radius:50%; border:1px solid rgba(255,255,255,.34);
+           background:rgba(8,13,18,.42); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+           color:#fff; display:grid; place-items:center; cursor:pointer; transition:.35s var(--ease); }
+.st-vctrl:hover{ background:#fff; color:var(--ink); border-color:#fff; transform:scale(1.07); }
+.st-vctrl svg{ width:16px; height:16px; }
+.st-vctrl .ico-pause,.st-vctrl .ico-on{ display:none; }
+.st-vctrl.is-playing .ico-play{ display:none; } .st-vctrl.is-playing .ico-pause{ display:block; }
+.st-vctrl.is-on .ico-off{ display:none; } .st-vctrl.is-on .ico-on{ display:block; }
+.st-vbanner__cap{ position:absolute; left:clamp(16px,4vw,34px); top:clamp(16px,4vw,34px); z-index:4;
+                  font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700;
+                  color:rgba(255,255,255,.8); border:1px solid rgba(255,255,255,.28);
+                  border-radius:99px; padding:.36em .85em; }
+
+.st-wa{ position:fixed; right:16px; bottom:16px; z-index:70; width:52px; height:52px; border-radius:50%;
+        background:#1FA855; color:#fff; display:grid; place-items:center;
+        box-shadow:0 14px 26px -10px rgba(31,168,85,.75); transition:transform .35s var(--ease); }
+.st-wa:hover{ transform:scale(1.1) rotate(6deg); }
+.st-wa svg{ width:26px; height:26px; }
+
+.rv{ opacity:0; transform:translateY(28px); transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.rv.in{ opacity:1; transform:none; }
+.rv[data-d="1"]{ transition-delay:.09s; } .rv[data-d="2"]{ transition-delay:.18s; }
+.rv[data-d="3"]{ transition-delay:.27s; } .rv[data-d="4"]{ transition-delay:.36s; }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  html{ scroll-behavior:auto; }
+  .rv,.fade,.st-hero__title .ln>span{ opacity:1 !important; transform:none !important; }
+}
+
+/* ============================================================
+   v4 · SHELL — view router · search sheet · cart drawer
+   Same tokens as above. Nothing new invented.
+   ============================================================ */
+.view{ display:none; }
+.view.on{ display:block; }
+
+/* --- toast --- */
+.st-toast{ position:fixed; left:50%; bottom:20px; z-index:200; translate:-50% 0;
+           background:var(--ink); color:var(--paper); border-radius:99px; padding:.72em 1.35em;
+           font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; font-weight:700;
+           box-shadow:var(--shadow); pointer-events:none; opacity:0; transform:translateY(14px);
+           transition:opacity .35s var(--ease), transform .35s var(--ease); max-width:90vw; }
+.st-toast.on{ opacity:1; transform:none; }
+
+/* quick-add pill dropped onto the existing home rail cards */
+.st-quick{ position:absolute; right:.5rem; bottom:.5rem; z-index:4; width:32px; height:32px;
+           border-radius:50%; border:0; background:var(--ink); color:var(--paper); cursor:pointer;
+           display:grid; place-items:center; opacity:0; transform:translateY(6px) scale(.9);
+           transition:.35s var(--ease); }
+.st-prod:hover .st-quick,.st-quick:focus-visible{ opacity:1; transform:none; }
+.st-quick:hover{ background:var(--cobalt); }
+.st-quick svg{ width:15px; height:15px; }
+@media(hover:none){ .st-quick{ opacity:1; transform:none; } }
+
+/* ============================================================
+   v4 · PRODUCT LISTING — /shop
+   ============================================================ */
+.st-crumb{ display:flex; align-items:center; gap:.5rem; font-size:.58rem; letter-spacing:.2em;
+           text-transform:uppercase; color:var(--mute); }
+.st-crumb a{ transition:color .3s; }
+.st-crumb a:hover{ color:var(--cobalt); }
+
+.st-plp__head{ padding:clamp(22px,4vw,38px) var(--pad) clamp(16px,3vw,26px); }
+.st-plp__head h1{ font-family:var(--d); font-weight:400; line-height:1.02; letter-spacing:-.018em;
+                  font-size:clamp(2.1rem,8vw,3.9rem); margin:.5rem 0 0; }
+.st-plp__head p{ color:var(--mute); font-weight:300; max-width:52ch; margin:.85rem 0 0;
+                 font-size:clamp(.93rem,3.3vw,1.05rem); }
+
+/* craft strip — doubles as a one-tap category filter */
+.st-crafts{ display:flex; gap:.45rem; overflow-x:auto; scrollbar-width:none;
+            padding:clamp(18px,3vw,26px) var(--pad) 0; margin-inline:0; }
+.st-crafts::-webkit-scrollbar{ display:none; }
+.st-craft{ flex:none; border:1px solid var(--line); background:transparent; border-radius:14px;
+           padding:.55rem .8rem .6rem; cursor:pointer; display:flex; align-items:center; gap:.6rem;
+           transition:.35s var(--ease); }
+.st-craft:hover{ border-color:var(--cobalt); transform:translateY(-2px); }
+.st-craft.on{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
+.st-craft i{ font-style:normal; width:34px; height:34px; border-radius:9px; overflow:hidden; flex:none; background:var(--paper-2); }
+.st-craft i img{ width:100%; height:100%; object-fit:cover; }
+.st-craft span{ display:block; font-size:.76rem; line-height:1.2; white-space:nowrap; }
+.st-craft small{ display:block; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase;
+                 color:var(--mute); margin-top:.15rem; }
+.st-craft.on small{ color:rgba(241,243,242,.6); }
+
+.st-plp__grid{ display:grid; gap:clamp(18px,3vw,30px);
+               padding:clamp(20px,3vw,32px) var(--pad) clamp(50px,8vw,90px); }
+@media(min-width:1000px){ .st-plp__grid{ grid-template-columns:236px 1fr; gap:2.6rem; } }
+
+.st-filters{ display:none; }
+@media(min-width:1000px){
+  .st-filters{ display:block; align-self:start; position:sticky; top:88px;
+               max-height:calc(100vh - 110px); overflow-y:auto; padding-right:.5rem; }
+}
+.st-fg{ border-bottom:1px solid var(--line-2); padding:1rem 0; }
+.st-fg:first-child{ padding-top:0; }
+.st-fg__h{ display:flex; align-items:center; justify-content:space-between; gap:1rem; width:100%;
+           border:0; background:transparent; padding:0; cursor:pointer; color:var(--ink);
+           font-size:.59rem; letter-spacing:.22em; text-transform:uppercase; font-weight:700; }
+.st-fg__h svg{ width:13px; height:13px; color:var(--mute); transition:transform .35s var(--ease); flex:none; }
+.st-fg.shut .st-fg__h svg{ transform:rotate(-90deg); }
+.st-fg__b{ display:grid; gap:.55rem; margin-top:.95rem; }
+.st-fg.shut .st-fg__b{ display:none; }
+
+.st-chk{ display:flex; align-items:center; gap:.6rem; cursor:pointer; font-size:.82rem;
+         color:var(--ink-2); transition:color .25s; }
+.st-chk:hover{ color:var(--ink); }
+.st-chk input{ position:absolute; opacity:0; width:0; height:0; }
+.st-chk i{ width:16px; height:16px; border:1px solid var(--line); border-radius:5px; flex:none;
+           display:grid; place-items:center; transition:border-color .25s var(--ease); }
+.st-chk i::after{ content:''; width:8px; height:8px; border-radius:2px; background:var(--cobalt);
+                  transform:scale(0); transition:transform .25s var(--ease); }
+.st-chk input:checked+i{ border-color:var(--cobalt); }
+.st-chk input:checked+i::after{ transform:scale(1); }
+.st-chk input:focus-visible+i{ outline:2px solid var(--cobalt); outline-offset:2px; }
+.st-chk.off{ opacity:.38; cursor:not-allowed; }
+.st-chk.off:hover{ color:var(--ink-2); }
+.st-chk small{ margin-left:auto; font-size:.62rem; color:var(--mute); font-variant-numeric:tabular-nums; }
+
+.st-range{ display:flex; align-items:center; gap:.5rem; }
+.st-range input{ width:100%; min-width:0; border:1px solid var(--line); border-radius:9px; background:#fff;
+                 padding:.52em .7em; font-family:var(--b); font-size:.78rem; color:var(--ink); }
+.st-range input:focus{ outline:none; border-color:var(--cobalt); }
+.st-range span{ color:var(--mute); font-size:.75rem; flex:none; }
+
+.st-bar{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.6rem;
+         padding-bottom:.95rem; border-bottom:1px solid var(--line-2); margin-bottom:clamp(14px,2.5vw,22px); }
+.st-bar__n{ font-size:.7rem; color:var(--mute); }
+.st-bar__n b{ color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums; }
+.st-bar__r{ display:flex; align-items:center; gap:.45rem; }
+.st-sel{ border:1px solid var(--line); border-radius:99px; background:transparent; color:var(--ink);
+         padding:.62em 2.3em .62em 1.1em; cursor:pointer; appearance:none; -webkit-appearance:none;
+         font-family:var(--b); font-size:.63rem; letter-spacing:.14em; text-transform:uppercase; font-weight:700;
+         background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236C7A82' stroke-width='2'><path d='m6 9 6 6 6-6'/></svg>");
+         background-repeat:no-repeat; background-position:right .85em center; background-size:11px;
+         transition:border-color .3s var(--ease); }
+.st-sel:hover{ border-color:var(--ink); }
+.st-filterbtn{ display:inline-flex; }
+@media(min-width:1000px){ .st-filterbtn{ display:none; } }
+.st-filterbtn b{ background:var(--cobalt); color:#fff; border-radius:99px; padding:.1em .5em; font-size:.9em; }
+.st-dense{ display:none; align-items:center; gap:2px; border:1px solid var(--line); border-radius:99px; padding:3px; }
+@media(min-width:900px){ .st-dense{ display:inline-flex; } }
+.st-dense button{ width:31px; height:27px; border:0; background:transparent; color:var(--mute);
+                  border-radius:99px; cursor:pointer; display:grid; place-items:center; transition:.25s var(--ease); }
+.st-dense button.on{ background:var(--ink); color:var(--paper); }
+.st-dense svg{ width:13px; height:13px; }
+
+.st-active{ display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1.1rem; }
+.st-active:empty{ display:none; }
+.st-active button{ display:inline-flex; align-items:center; gap:.55em; cursor:pointer;
+                   border:1px solid var(--cobalt); color:var(--cobalt); background:transparent;
+                   border-radius:99px; padding:.42em .8em .42em 1em; font-size:.68rem;
+                   transition:.3s var(--ease); }
+.st-active button:hover{ background:var(--cobalt); color:#fff; }
+.st-active button i{ font-style:normal; opacity:.65; font-size:1.05em; line-height:1; }
+.st-active .clr{ border-color:var(--line); color:var(--mute); padding-inline:1em; }
+.st-active .clr:hover{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
+
+.st-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:.65rem; }
+@media(min-width:640px){ .st-grid{ gap:.9rem; } }
+@media(min-width:900px){
+  .st-grid[data-cols="3"]{ grid-template-columns:repeat(3,1fr); }
+  .st-grid[data-cols="4"]{ grid-template-columns:repeat(4,1fr); }
+}
+.st-card{ position:relative; background:#fff; border-radius:13px; overflow:hidden;
+          display:flex; flex-direction:column; opacity:0; transform:translateY(14px);
+          box-shadow:0 12px 26px -18px rgba(16,24,32,.32);
+          transition:opacity .55s var(--ease), transform .55s var(--ease), box-shadow .45s var(--ease); }
+.st-card.in{ opacity:1; transform:none; }
+.st-card.in:hover{ transform:translateY(-5px); box-shadow:0 28px 46px -22px rgba(16,24,32,.42); }
+.st-card__ph{ aspect-ratio:4/5; position:relative; display:block; }
+.st-card:hover .st-card__ph img{ transform:scale(1.06); }
+.st-card__kind{ position:absolute; top:.55rem; left:.55rem; z-index:3; font-size:.5rem; letter-spacing:.16em;
+                text-transform:uppercase; font-weight:700; padding:.28em .6em; border-radius:99px;
+                background:rgba(255,255,255,.94); color:var(--ink); }
+.st-card__kind.craft{ background:var(--teal); color:#fff; }
+.st-card__off{ position:absolute; top:.55rem; right:.55rem; z-index:3; font-size:.5rem; letter-spacing:.1em;
+               font-weight:700; padding:.28em .55em; border-radius:99px; background:var(--lac); color:#fff; }
+.st-card__fav{ position:absolute; top:2.2rem; right:.5rem; z-index:4; width:29px; height:29px; border-radius:50%;
+               border:0; background:rgba(255,255,255,.94); color:var(--ink-2); cursor:pointer;
+               display:grid; place-items:center; opacity:0; transform:translateY(-5px);
+               transition:.32s var(--ease); }
+.st-card:hover .st-card__fav,.st-card__fav.on,.st-card__fav:focus-visible{ opacity:1; transform:none; }
+.st-card__fav:hover{ color:var(--lac); }
+.st-card__fav.on{ color:var(--lac); }
+.st-card__fav svg{ width:14px; height:14px; }
+.st-card__add{ position:absolute; left:.5rem; right:.5rem; bottom:.5rem; z-index:4; border:0;
+               border-radius:99px; background:var(--ink); color:var(--paper); cursor:pointer;
+               padding:.72em 1em; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase;
+               font-weight:700; opacity:0; transform:translateY(8px); transition:.32s var(--ease); }
+.st-card:hover .st-card__add,.st-card__add:focus-visible{ opacity:1; transform:none; }
+.st-card__add:hover{ background:var(--cobalt); }
+.st-card__add:disabled{ background:var(--paper-3); color:var(--mute); cursor:not-allowed; }
+@media(hover:none){ .st-card__add,.st-card__fav{ opacity:1; transform:none; } }
+.st-card__body{ padding:.75rem .8rem .95rem; display:flex; flex-direction:column; flex:1; }
+.st-card__craft{ font-size:.53rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700; color:var(--cobalt); }
+.st-card__n{ font-size:.81rem; line-height:1.38; color:var(--ink-2); margin:.34rem 0 0;
+             display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.st-card__p{ margin-top:auto; padding-top:.6rem; display:flex; align-items:baseline; gap:.4rem; flex-wrap:wrap; }
+.st-card__p b{ font-size:.92rem; }
+.st-card__p s{ font-size:.7rem; color:var(--mute); }
+.st-card__p em{ font-style:normal; font-size:.54rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+.st-card__stock{ font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--teal); margin-top:.42rem; }
+.st-card__stock.low{ color:var(--ochre); }
+.st-card__stock.out{ color:var(--mute); }
+
+.st-empty{ text-align:center; padding:clamp(46px,10vw,86px) 1.2rem;
+           border:1px dashed var(--line); border-radius:18px; }
+.st-empty h3{ font-family:var(--d); font-weight:400; font-size:clamp(1.4rem,5vw,1.9rem); margin:0 0 .55rem; }
+.st-empty p{ color:var(--mute); font-size:.92rem; margin:0 auto 1.5rem; max-width:40ch; }
+
+.st-more{ display:grid; justify-items:center; gap:.75rem; margin-top:clamp(26px,4vw,42px); }
+.st-more p{ margin:0; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); }
+.st-more__bar{ width:min(100%,220px); height:2px; background:var(--paper-3); border-radius:99px; overflow:hidden; }
+.st-more__fill{ height:100%; background:var(--cobalt); transition:width .6s var(--ease); }
+
+
+@media (prefers-reduced-motion: reduce){
+  .st-card{ opacity:1 !important; transform:none !important; }
+  .st-line{ animation:none !important; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="st-toast" id="toast" role="status" aria-live="polite"></div>
+
+<main class="view on" id="homeView" data-view="home">
+<section class="hero" id="top">
+  <div class="hero__cols" aria-hidden="true">
+    <div class="hcol"><div class="hcol__in">
+      <img src="https://saroj-textile-store.b-cdn.net/products/48621785565568.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/711785564464.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/97721785569096.webp" alt="">
+      <img src="https://saroj-textile-store.b-cdn.net/products/48621785565568.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/711785564464.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/97721785569096.webp" alt="">
+    </div></div>
+    <div class="hcol"><div class="hcol__in">
+      <img src="https://saroj-textile-store.b-cdn.net/products/42621785568665.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/13001785568370.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/67951785568205.webp" alt="">
+      <img src="https://saroj-textile-store.b-cdn.net/products/42621785568665.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/13001785568370.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/67951785568205.webp" alt="">
+    </div></div>
+    <div class="hcol"><div class="hcol__in">
+      <img src="https://saroj-textile-store.b-cdn.net/products/12091782565773.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/47691780986642.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/94351785567420.webp" alt="">
+      <img src="https://saroj-textile-store.b-cdn.net/products/12091782565773.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/47691780986642.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/94351785567420.webp" alt="">
+    </div></div>
+    <div class="hcol"><div class="hcol__in">
+      <img src="https://saroj-textile-store.b-cdn.net/products/47191782732714.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/71911780379169.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/8731780988074.webp" alt="">
+      <img src="https://saroj-textile-store.b-cdn.net/products/47191782732714.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/71911780379169.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/8731780988074.webp" alt="">
+    </div></div>
+    <div class="hcol"><div class="hcol__in">
+      <img src="https://saroj-textile-store.b-cdn.net/products/62201785562941.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/2201780380811.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/16601783765066.webp" alt="">
+      <img src="https://saroj-textile-store.b-cdn.net/products/62201785562941.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/2201780380811.webp" alt=""><img src="https://saroj-textile-store.b-cdn.net/products/16601783765066.webp" alt="">
+    </div></div>
+  </div>
+  <div class="hero__scrim"></div>
+  <div class="hero__content">
+    <div class="hero__ey rv">Saroj Textile · Jaipur · Est. Block &amp; Dye</div>
+    <h1>
+      <span class="maskrow"><span>The craft</span></span>
+      <span class="maskrow"><span>of <span class="italic">Jaipur.</span></span></span>
+    </h1>
+  </div>
+  <div class="hero__scroll" aria-hidden="true"><span>Scroll</span><span class="l"></span></div>
+</section>
+<!-- ================= HERO ================= -->
+<section class="st-hero" id="hero">
+  <div class="st-wrap">
+    <div class="st-hero__type">
+      <div class="st-eyebrow fade f1">A second house opens · Jaipur</div>
+      <h1 class="st-hero__title">
+        <span class="ln"><span>Woven, then</span></span>
+        <span class="ln"><span>Fired &amp; <em>ढाला</em></span></span>
+      </h1>
+      <p class="st-hero__sub fade f2">
+        The lanes that print our Ajrakh also throw the pottery and beat the brass.
+        <b>Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
+      </p>
+      <div class="st-hero__cta fade f3">
+        <a href="#/shop?craft=pottery" class="st-btn st-btn--solid">Shop handicraft</a>
+        <a href="#cloth" class="st-btn">Fabrics, as always</a>
+      </div>
+    </div>
+
+    <div class="st-plates fade f4">
+      <div class="st-plates__row" id="platesRow">
+        <figure class="st-plate st-plate--l ph m-0" data-swap="Blue pottery vases on a workshop ledge, side light">
+          <img src="https://picsum.photos/seed/saroj-pottery-a/600/800" alt="Blue pottery pieces from Kot Jewar" width="600" height="800">
+          <figcaption class="st-plate__cap">Blue Pottery</figcaption>
+        </figure>
+        <figure class="st-plate st-plate--c ph m-0" data-swap="Hero shot: artisan's hands mid-work, shallow depth of field">
+          <img src="https://picsum.photos/seed/saroj-hands-main/900/1125" alt="An artisan at work in a Jaipur workshop" width="900" height="1125">
+          <figcaption class="st-plate__cap">The workshop, Jhotwara</figcaption>
+        </figure>
+        <figure class="st-plate st-plate--r ph m-0" data-swap="Ajrakh bolt half-unrolled">
+          <img src="https://saroj-textile-store.b-cdn.net/products/63141785559833.webp" alt="Red over-dye Ajrakh block printed cotton" width="600" height="800">
+          <figcaption class="st-plate__cap">Ajrakh, on the bolt</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="st-hero__strip fade f4">
+      <a href="https://www.sarojtextile.com/shop/ajrakh-collection" class="st-swatch ph" title="Ajrakh">
+        <img src="https://saroj-textile-store.b-cdn.net/products/48621785565568.webp" alt="Teal and blue Ajrakh printed cotton" loading="lazy"></a>
+      <a href="https://www.sarojtextile.com/shop/kalamkari" class="st-swatch ph" title="Kalamkari">
+        <img src="https://saroj-textile-store.b-cdn.net/products/42621785568665.webp" alt="Teal green and mustard Kalamkari cotton" loading="lazy"></a>
+      <a href="https://www.sarojtextile.com/shop/jaipur-cotton" class="st-swatch ph" title="Jaipuri Cotton">
+        <img src="https://saroj-textile-store.b-cdn.net/products/81901780987621.webp" alt="White base butta printed cotton" loading="lazy"></a>
+      <a href="https://www.sarojtextile.com/shop/indigo" class="st-swatch ph" title="Indigo">
+        <img src="https://saroj-textile-store.b-cdn.net/products/13001785568370.webp" alt="Navy indigo Kalamkari paisley print" loading="lazy"></a>
+      <a href="https://www.sarojtextile.com/shop/patola-prints" class="st-swatch ph" title="Patola">
+        <img src="https://saroj-textile-store.b-cdn.net/products/97721785569096.webp" alt="Leaf green polka patola printed cotton" loading="lazy"></a>
+      <a href="https://www.sarojtextile.com/shop/flower-garden-collection" class="st-swatch ph" title="Flower Garden">
+        <img src="https://saroj-textile-store.b-cdn.net/products/12091782565773.webp" alt="White base floral Kalamkari Jaipuri cotton" loading="lazy"></a>
+    </div>
+
+    <p class="st-hero__note fade f4">Six crafts · 212 pieces · one counter in Jhotwara</p>
+  </div>
+</section>
+
+<div class="st-roll" aria-hidden="true">
+  <ul id="craftRoll">
+    <li class="hi">Blue Pottery</li><li class="st-dv">मीनाकारी</li><li>Bagru Block</li>
+    <li class="hi">Lac &amp; Brass</li><li class="st-dv">संगमरमर जाली</li><li>Kathputli</li>
+  </ul>
+</div>
+
+<!-- ================= WHEEL ================= -->
+<section class="st-sec" id="wheel">
+  <div class="st-wrap">
+    <div class="st-wheel-head">
+      <div class="st-eyebrow mid rv">The Kaarigar Wheel</div>
+      <h2 class="st-h2 rv" data-d="1">Six crafts.<br>One turn of the wheel.</h2>
+      <p class="st-lede rv" data-d="2" style="text-align:center">Every discipline we've taken on, and the lane in Jaipur it comes out of.</p>
+    </div>
+
+    <div class="st-stage rv" data-d="2" id="stage" role="group" aria-label="Craft categories, draggable carousel" tabindex="0">
+      <div class="st-wheel" id="wheelEl">
+        <article class="st-face"><div class="st-face__card">
+          <div class="st-face__ph ph" data-swap="Blue pottery vase, cobalt floral, plain backdrop">
+            <img src="https://picsum.photos/seed/saroj-craft-pottery/700/900" alt="Blue pottery from Kot Jewar" loading="lazy"></div>
+          <div class="st-face__body"><span class="st-face__num">01</span>
+            <h3 class="st-face__name">Blue Pottery</h3><p class="st-face__hi st-dv">नीली मिट्टी</p>
+            <p class="st-face__meta">Kot Jewar · <b>46 pieces</b></p></div>
+        </div></article>
+
+        <article class="st-face"><div class="st-face__card">
+          <div class="st-face__ph ph" data-swap="Meenakari enamel plate, macro, raking light">
+            <img src="https://picsum.photos/seed/saroj-craft-meena/700/900" alt="Meenakari enamel work" loading="lazy"></div>
+          <div class="st-face__body"><span class="st-face__num">02</span>
+            <h3 class="st-face__name">Meenakari</h3><p class="st-face__hi st-dv">मीनाकारी</p>
+            <p class="st-face__meta">Johari Bazaar · <b>28 pieces</b></p></div>
+        </div></article>
+
+        <article class="st-face"><div class="st-face__card">
+          <div class="st-face__ph ph" data-swap="Wooden Bagru blocks stacked, or a block mid-stamp">
+            <img src="https://saroj-textile-store.b-cdn.net/products/48561785562288.webp" alt="Mustard and dark block Ajrakh print" loading="lazy"></div>
+          <div class="st-face__body"><span class="st-face__num">03</span>
+            <h3 class="st-face__name">Bagru Block</h3><p class="st-face__hi st-dv">बगरू छपाई</p>
+            <p class="st-face__meta">Bagru village · <b>63 pieces</b></p></div>
+        </div></article>
+
+        <article class="st-face"><div class="st-face__card">
+          <div class="st-face__ph ph" data-swap="Brass vessels or lac bangle stack, warm light">
+            <img src="https://picsum.photos/seed/saroj-craft-brass/700/900" alt="Lac and brass work from Tripolia Bazaar" loading="lazy"></div>
+          <div class="st-face__body"><span class="st-face__num">04</span>
+            <h3 class="st-face__name">Lac &amp; Brass</h3><p class="st-face__hi st-dv">लाख और पीतल</p>
+            <p class="st-face__meta">Tripolia Bazaar · <b>34 pieces</b></p></div>
+        </div></article>
+
+        <article class="st-face"><div class="st-face__card">
+          <div class="st-face__ph ph" data-swap="Carved marble jali screen, backlit so the lattice reads">
+            <img src="https://picsum.photos/seed/saroj-craft-marble/700/900" alt="Carved marble jali" loading="lazy"></div>
+          <div class="st-face__body"><span class="st-face__num">05</span>
+            <h3 class="st-face__name">Marble Jali</h3><p class="st-face__hi st-dv">संगमरमर जाली</p>
+            <p class="st-face__meta">Kishanpole · <b>19 pieces</b></p></div>
+        </div></article>
+
+        <article class="st-face"><div class="st-face__card">
+          <div class="st-face__ph ph" data-swap="Kathputli puppets hung in a row against a plain wall">
+            <img src="https://picsum.photos/seed/saroj-craft-puppet/700/900" alt="Kathputli puppets" loading="lazy"></div>
+          <div class="st-face__body"><span class="st-face__num">06</span>
+            <h3 class="st-face__name">Kathputli</h3><p class="st-face__hi st-dv">कठपुतली</p>
+            <p class="st-face__meta">Shilpgram · <b>22 pieces</b></p></div>
+        </div></article>
+      </div>
+    </div>
+
+    <div class="st-ctrl rv">
+      <button class="st-arrow" id="prev" aria-label="Previous craft">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="st-dots" id="dots"></div>
+      <button class="st-arrow" id="next" aria-label="Next craft">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <p class="st-hint rv">Drag · swipe · arrow keys</p>
+  </div>
+</section>
+<!-- ================= VIDEO BANNER ================= -->
+<section class="st-vbanner" id="film">
+  <div class="st-vbanner__frame" id="vFrame">
+
+    <video class="st-vbanner__vid" id="vBanner"
+           data-src="https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4"
+           data-swap="Replace with workshop footage: the wheel turning, brush on a pot, kiln door opening. 12–20s, no cuts, ambient sound."
+           muted loop playsinline preload="none" aria-label="Fabric moving on the bolt"></video>
+
+    <span class="st-vbanner__cap">Jhotwara · 06:40</span>
+
+    <div class="st-vbanner__ctrl">
+      <button class="st-vctrl" id="vPlay" aria-label="Play or pause the film">
+        <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>
+        <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+      </button>
+      <button class="st-vctrl" id="vMute" aria-label="Turn sound on or off">
+        <svg class="ico-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m17 9 4 6M21 9l-4 6"/></svg>
+        <svg class="ico-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M17 8a6 6 0 0 1 0 8"/></svg>
+      </button>
+    </div>
+
+    <div class="st-vbanner__in">
+      <div class="st-vbanner__eyebrow"><i></i> Filmed at the workshop</div>
+      <h2>Six-forty in the morning, before the heat.</h2>
+      <p>The quartz is mixed while it's still cool enough to work. By nine the brushes are out. Nothing on this page was made anywhere else.</p>
+      <div class="st-vbanner__chips">
+        <span>No stock footage</span><span>Same lanes as our cloth</span><span>42 families</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ================= FABRIC HOUSE ================= -->
+<section class="st-sec st-cloth" id="cloth">
+  <div class="st-wrap st-cloth__grid">
+    <div>
+      <div class="st-eyebrow rv">The house that built this</div>
+      <h2 class="st-h2 rv" data-d="1">Still, and always,<br>cloth.</h2>
+      <p class="st-lede rv" data-d="2">Handicraft is the new wing. The looms are the load-bearing wall. Pick a bolt — every one is on the shelf today, retail or wholesale.</p>
+      <div class="st-cloth__stats rv" data-d="2">
+        <div><span>21</span><small>Collections</small></div>
+        <div><span>₹80</span><small>Wholesale / metre</small></div>
+        <div><span>576</span><small>Reviews</small></div>
+      </div>
+      <div class="st-cloth__cta rv" data-d="3">
+        <a href="https://www.sarojtextile.com/shop/jaipur-cotton" class="st-btn st-btn--light">Shop fabrics</a>
+        <a href="https://www.sarojtextile.com/wholesale-fabric" class="st-btn st-btn--light">Wholesale from ₹80</a>
+      </div>
+    </div>
+
+    <div class="rv" data-d="2">
+      <div class="st-fan">
+        <div class="st-fan__out" aria-live="polite">
+          <h4 id="fanName">Ajrakh</h4>
+          <p id="fanDesc">Resist-printed in indigo and madder, both sides, sixteen steps.</p>
+          <b id="fanPrice">from ₹150 / m</b>
+        </div>
+
+        <div class="st-fan__inner" id="fanInner">
+          <button class="st-bolt" data-name="Ajrakh" data-desc="Resist-printed in indigo and madder, both sides, sixteen steps." data-price="from ₹150 / m" aria-label="Show Ajrakh">
+            <img src="https://saroj-textile-store.b-cdn.net/products/63141785559833.webp" alt="Red over-dye Ajrakh block printed cotton" loading="lazy">
+            <span class="st-bolt__lbl">Ajrakh</span></button>
+          <button class="st-bolt" data-name="Jaipuri Cotton" data-desc="Sanganeri butti and jaal on soft mill cotton. The everyday one." data-price="from ₹129 / m" aria-label="Show Jaipuri Cotton">
+            <img src="https://saroj-textile-store.b-cdn.net/products/47691780986642.webp" alt="Pink base jaal printed Jaipuri cotton" loading="lazy">
+            <span class="st-bolt__lbl">Jaipuri Cotton</span></button>
+          <button class="st-bolt" data-name="Kalamkari" data-desc="Pen-drawn paisley and vine, vegetable dyed. Colour holds after wash." data-price="from ₹160 / m" aria-label="Show Kalamkari">
+            <img src="https://saroj-textile-store.b-cdn.net/products/94351785567420.webp" alt="Red multicolour paisley Kalamkari print" loading="lazy">
+            <span class="st-bolt__lbl">Kalamkari</span></button>
+          <button class="st-bolt" data-name="Patola" data-desc="Polka and patch patola, printed on pure cotton for everyday suits." data-price="from ₹160 / m" aria-label="Show Patola">
+            <img src="https://saroj-textile-store.b-cdn.net/products/97721785569096.webp" alt="Leaf green polka patola printed cotton" loading="lazy">
+            <span class="st-bolt__lbl">Patola</span></button>
+          <button class="st-bolt" data-name="Indigo" data-desc="Dabu mud-resist over natural indigo. Deepens with every wash." data-price="from ₹150 / m" aria-label="Show Indigo">
+            <img src="https://saroj-textile-store.b-cdn.net/products/2201780380811.webp" alt="Indigo blue base bindu and stripes Ajrakh print" loading="lazy">
+            <span class="st-bolt__lbl">Indigo</span></button>
+        </div>
+      </div>
+
+      <div class="st-fantabs" id="fanTabs"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MAKING ================= -->
+<section class="st-sec" id="making">
+  <div class="st-wrap">
+    <div class="st-eyebrow rv">Four stages, in order</div>
+    <h2 class="st-h2 rv" data-d="1">From earth<br>to shelf.</h2>
+    <p class="st-lede rv" data-d="2">Nothing here is moulded in a factory. This is the actual route a piece takes before it reaches your door.</p>
+  </div>
+  <div class="st-wrap">
+    <div class="st-rail" id="rail">
+      <article class="st-step">
+        <div class="st-step__ph ph" data-swap="Quartz paste being kneaded — hands and material, close">
+          <span class="st-step__i">I</span><img src="https://picsum.photos/seed/saroj-make-clay/800/600" alt="Quartz paste prepared by hand" loading="lazy"></div>
+        <div class="st-step__body"><h4>Quartz, not clay</h4>
+          <span class="st-step__tag">300</span></div>
+      </article>
+      <article class="st-step">
+        <div class="st-step__ph ph" data-swap="Brush painting a motif freehand, over-the-shoulder crop">
+          <span class="st-step__i">II</span><img src="https://picsum.photos/seed/saroj-make-paint/800/600" alt="Motif painted freehand with a fine brush" loading="lazy"></div>
+        <div class="st-step__body"><h4>The hand decides</h4>
+          
+          <span class="st-step__tag">400</span></div>
+      </article>
+      <article class="st-step">
+        <div class="st-step__ph ph" data-swap="Kiln mouth open, pieces going in — warm light">
+          <span class="st-step__i">III</span><img src="https://picsum.photos/seed/saroj-make-kiln/800/600" alt="Pieces loaded into the kiln" loading="lazy"></div>
+        <div class="st-step__body"><h4>Fire, then enamel</h4>
+          <span class="st-step__tag">450</span></div>
+      </article>
+      <article class="st-step">
+        <div class="st-step__ph ph" data-swap="A pot being wrapped in an Ajrakh offcut — signature shot, shoot it properly">
+          <span class="st-step__i">IV</span><img src="https://saroj-textile-store.b-cdn.net/products/711785564464.webp" alt="Leaf green tree jaal Ajrakh cotton used as wrapping" loading="lazy"></div>
+        <div class="st-step__body"><h4>Wrapped in our own cloth</h4>
+          <span class="st-step__tag">350</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VOICES ================= -->
+<section class="st-voices">
+  <div class="st-wrap st-voices__head">
+    <div class="st-eyebrow rv">576 reviews, cloth side</div>
+    <h2 class="st-h2 rv" data-d="1">What they said<br>about the cloth.</h2>
+    <p class="st-lede rv" data-d="2">The handicraft reviews start now. These are from the years that got us here.</p>
+  </div>
+
+  <div class="st-vrow st-vrow--a" id="vrowA" aria-hidden="true">
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Fabric quality is very good — loved the kurta fabrics.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">SS</span><div><b>Santosh Selam</b><br><small>Verified buyer</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Excellent communication, and outstanding fabrics.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">TP</span><div><b>Tarun P.</b><br><small>Verified buyer</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Well packed parcel, and the quality beat what I expected.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">SU</span><div><b>Suhana</b><br><small>Verified buyer</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>My customer loved it. Please add more rayon prints.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">SO</span><div><b>Sonam</b><br><small>Reseller</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Quality was just awesome, well beyond what I expected.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">AI</span><div><b>Amutha Indraraj</b><br><small>Verified buyer</small></div></div></div>
+  </div>
+
+  <div class="st-vrow st-vrow--b" id="vrowB" aria-hidden="true">
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Excellent quality — so soft and flowy.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">KS</span><div><b>Keerthana S.</b><br><small>Verified buyer</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Loved the colour and the texture. Very elegant.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">DR</span><div><b>Divya R.</b><br><small>Verified buyer</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Super soft cotton — ideal for our weather.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">LT</span><div><b>Lakshmi T.</b><br><small>Verified buyer</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Stitched a dress from this fabric and it turned out lovely.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">DL</span><div><b>Devi L.</b><br><small>Verified buyer</small></div></div></div>
+    <div class="st-voice"><div class="st-voice__stars">★★★★★</div><p>Prints are beautiful, and the colours stay after washing.</p>
+      <div class="st-voice__who"><span class="st-voice__ini">AP</span><div><b>Anitha P.</b><br><small>Verified buyer</small></div></div></div>
+  </div>
+</section>
+
+</main>
+
+<a class="st-wa" href="https://wa.me/919587986226" aria-label="WhatsApp the workshop">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4a9.8 9.8 0 0 0 4.68 1.2c5.44 0 9.84-4.4 9.84-9.84S17.48 2 12.04 2Zm5.72 13.9c-.24.68-1.4 1.3-1.94 1.34-.5.06-1.12.08-1.8-.12-.42-.12-.96-.3-1.64-.6-2.9-1.26-4.78-4.18-4.92-4.38-.14-.2-1.18-1.56-1.18-2.98 0-1.42.74-2.12 1-2.4.26-.28.56-.36.76-.36h.54c.18 0 .42-.06.66.5.24.58.82 2 .9 2.14.06.14.1.3.02.48-.1.2-.14.32-.28.48l-.42.5c-.14.14-.28.3-.12.58.16.28.72 1.18 1.54 1.92 1.06.94 1.94 1.24 2.22 1.38.28.14.44.12.6-.08.16-.2.7-.8.88-1.08.18-.28.36-.24.6-.14.24.08 1.54.72 1.8.86.26.14.44.2.5.32.06.1.06.66-.18 1.34Z"/></svg>
+</a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $  = function(s,c){ return (c||document).querySelector(s); };
+  var $$ = function(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
+  var INR = function(n){ return '₹' + n.toLocaleString('en-IN'); };
+
+  /* seamless loops */
+  ['craftRoll','vrowA','vrowB'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.innerHTML += el.innerHTML;
+  });
+
+  /* image fade-in + readable fallback */
+  $$('.ph img').forEach(function(img){
+    if(!img.complete) img.setAttribute('data-loading','');
+    img.addEventListener('load', function(){ img.removeAttribute('data-loading'); });
+    img.addEventListener('error', function(){
+      img.removeAttribute('data-loading'); img.style.display = 'none';
+      var host = img.closest('.ph');
+      if(host && !host.querySelector('.ph-fallback')){
+        var s = document.createElement('span');
+        s.className = 'ph-fallback';
+        s.textContent = host.dataset.swap || img.alt || 'Photo';
+        s.style.cssText = 'position:absolute;inset:0;display:grid;place-items:center;padding:1rem;text-align:center;'+
+                          'font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#6C7A82;';
+        host.appendChild(s);
+      }
+    });
+  });
+
+  requestAnimationFrame(function(){ setTimeout(function(){ $('#hero').classList.add('lit'); }, 100); });
+
+  /* reveal */
+  (function(){
+    var items = $$('.rv');
+    if(!('IntersectionObserver' in window) || RM){ items.forEach(function(e){ e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function(en){
+      en.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {threshold:.13, rootMargin:'0px 0px -7% 0px'});
+    items.forEach(function(e){ io.observe(e); });
+  })();
+
+  /* hero plates parallax */
+  (function(){
+    var row = $('#platesRow'); if(!row || RM) return;
+    var tx=0,ty=0,cx=0,cy=0,sy=0,raf=null;
+    function loop(){
+      cx += (tx-cx)*.07; cy += (ty-cy)*.07;
+      row.style.transform = 'rotateY('+cx+'deg) rotateX('+(cy+sy)+'deg)';
+      if(Math.abs(tx-cx)>.04 || Math.abs(ty-cy)>.04){ raf = requestAnimationFrame(loop); } else { raf = null; }
+    }
+    function push(){ if(!raf) raf = requestAnimationFrame(loop); }
+    window.addEventListener('pointermove', function(e){
+      if(e.pointerType === 'touch') return;
+      tx = ((e.clientX/window.innerWidth)-.5)*13;
+      ty = -((e.clientY/window.innerHeight)-.5)*8; push();
+    }, {passive:true});
+    window.addEventListener('deviceorientation', function(e){
+      if(e.gamma == null) return;
+      tx = Math.max(-14, Math.min(14, e.gamma*.45));
+      ty = Math.max(-8, Math.min(8, ((e.beta||45)-45)*-.22)); push();
+    }, {passive:true});
+    window.addEventListener('scroll', function(){
+      sy = Math.max(-6, Math.min(6, window.scrollY*.012)); push();
+    }, {passive:true});
+  })();
+
+  /* ---------- Kaarigar wheel ---------- */
+  (function(){
+    var wheel = $('#wheelEl'), stage = $('#stage'); if(!wheel || !stage) return;
+    var faces = $$('.st-face', wheel), N = faces.length, STEP = 360/N;
+    var radius=0, angle=0, dragging=false, startX=0, startAngle=0, moved=0, auto=null;
+    var dots = $('#dots');
+
+    function measure(){
+      var w = stage.clientWidth;
+      var fw = Math.min(300, Math.max(196, w * (w < 640 ? .60 : .29)));
+      wheel.style.setProperty('--fw', fw+'px');
+      radius = Math.round((fw + (w < 640 ? 24 : 52)) / (2*Math.tan(Math.PI/N)));
+      faces.forEach(function(f,i){ f.style.transform = 'rotateY('+(i*STEP)+'deg) translateZ('+radius+'px)'; });
+      apply(false);
+    }
+    function apply(animate){
+      wheel.classList.toggle('drag', !animate);
+      wheel.style.transform = 'translateZ('+(-radius)+'px) rotateY('+(-angle)+'deg)';
+      var live = ((Math.round(angle/STEP) % N) + N) % N;
+      faces.forEach(function(f,i){ f.classList.toggle('on', i === live); });
+      $$('.st-dot', dots).forEach(function(d,i){ d.classList.toggle('on', i === live); });
+    }
+    function goTo(i, animate){ angle = i*STEP; apply(animate !== false); }
+
+    faces.forEach(function(f,i){
+      var b = document.createElement('button');
+      b.className='st-dot'; b.type='button'; b.setAttribute('aria-label','Show craft '+(i+1));
+      b.addEventListener('click', function(){ stopAuto(); goTo(i); startAuto(); });
+      dots.appendChild(b);
+    });
+
+    stage.addEventListener('pointerdown', function(e){
+      dragging=true; moved=0; startX=e.clientX; startAngle=angle;
+      stage.setPointerCapture(e.pointerId); stopAuto(); wheel.classList.add('drag');
+    });
+    stage.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var dx = e.clientX-startX; moved = Math.abs(dx);
+      angle = startAngle - dx*.35; apply(false);
+    });
+    function release(){ if(!dragging) return; dragging=false; goTo(Math.round(angle/STEP)); startAuto(); }
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
+    stage.addEventListener('lostpointercapture', release);
+    stage.addEventListener('click', function(e){ if(moved>8) e.preventDefault(); }, true);
+
+    $('#next').addEventListener('click', function(){ stopAuto(); goTo(Math.round(angle/STEP)+1); startAuto(); });
+    $('#prev').addEventListener('click', function(){ stopAuto(); goTo(Math.round(angle/STEP)-1); startAuto(); });
+    stage.addEventListener('keydown', function(e){
+      if(e.key==='ArrowRight'){ e.preventDefault(); stopAuto(); goTo(Math.round(angle/STEP)+1); }
+      if(e.key==='ArrowLeft'){ e.preventDefault(); stopAuto(); goTo(Math.round(angle/STEP)-1); }
+    });
+    function startAuto(){ if(RM||auto) return; auto = setInterval(function(){ goTo(Math.round(angle/STEP)+1); }, 4800); }
+    function stopAuto(){ if(auto){ clearInterval(auto); auto=null; } }
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(en){ en.forEach(function(e){ e.isIntersecting ? startAuto() : stopAuto(); }); }, {threshold:.35}).observe(stage);
+    } else { startAuto(); }
+
+    measure();
+    var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(measure,140); });
+  })();
+
+  /* ---------- tilt ---------- */
+  (function(){
+    if(RM) return;
+    $$('.tilt').forEach(function(card){
+      var raf=null, rx=0, ry=0;
+      function draw(){ card.style.transform='perspective(1000px) rotateX('+rx+'deg) rotateY('+ry+'deg) translateY(-5px)'; raf=null; }
+      card.addEventListener('pointermove', function(e){
+        if(e.pointerType==='touch') return;
+        var r = card.getBoundingClientRect();
+        ry = (((e.clientX-r.left)/r.width)-.5)*9;
+        rx = -((((e.clientY-r.top)/r.height)-.5)*9);
+        if(!raf) raf = requestAnimationFrame(draw);
+      });
+      card.addEventListener('pointerleave', function(){ rx=0; ry=0; card.style.transform=''; });
+    });
+  })();
+
+  /* ---------- horizontal rail arrows ---------- */
+  $$('[data-rail]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var rail = document.getElementById(btn.dataset.rail); if(!rail) return;
+      rail.scrollBy({ left: Number(btn.dataset.dir) * Math.round(rail.clientWidth * .8), behavior:'smooth' });
+    });
+  });
+
+  /* ---------- fabric fan (click now works: readout is pointer-events:none) ---------- */
+  (function(){
+    var inner = $('#fanInner'); if(!inner) return;
+    var bolts = $$('.st-bolt', inner), n = bolts.length, spread = 15, active = 0;
+    var nameEl=$('#fanName'), descEl=$('#fanDesc'), priceEl=$('#fanPrice'), tabHost=$('#fanTabs');
+
+    function layout(){
+      bolts.forEach(function(b,i){
+        var off = i - (n-1)/2;
+        var lift = (i===active) ? -34 : Math.abs(off)*6;
+        var z    = (i===active) ? 70 : -Math.abs(off)*26;
+        var sc   = (i===active) ? 1.06 : 1;
+        b.style.transform = 'rotate('+(off*spread)+'deg) translateY('+lift+'px) translateZ('+z+'px) scale('+sc+')';
+        b.style.zIndex = (i===active) ? 9 : (5 - Math.abs(off));
+        b.classList.toggle('on', i===active);
+      });
+    }
+    function select(i){
+      active = i;
+      nameEl.textContent  = bolts[i].dataset.name;
+      descEl.textContent  = bolts[i].dataset.desc;
+      priceEl.textContent = bolts[i].dataset.price;
+      $$('.st-fantab', tabHost).forEach(function(t,k){ t.classList.toggle('on', k===i); });
+      layout();
+    }
+
+    /* labelled tabs — keyboard reachable, and immune to the rotated hit areas */
+    bolts.forEach(function(b,i){
+      var t = document.createElement('button');
+      t.type = 'button'; t.className = 'st-fantab'; t.textContent = b.dataset.name;
+      t.addEventListener('click', function(){ select(i); });
+      tabHost.appendChild(t);
+      b.addEventListener('click', function(e){ e.preventDefault(); select(i); });
+      b.addEventListener('pointerenter', function(e){ if(e.pointerType !== 'touch') select(i); });
+    });
+
+    if(!RM){ bolts.forEach(function(b){ b.style.opacity = 0; }); }
+    var opened = false;
+    function open(){
+      if(opened) return; opened = true;
+      bolts.forEach(function(b,i){ setTimeout(function(){ b.style.opacity = 1; }, i*80); });
+      select(0);
+    }
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(en,o){
+        en.forEach(function(e){ if(e.isIntersecting){ open(); o.disconnect(); } });
+      }, {threshold:.28}).observe(inner);
+    } else { open(); }
+  })();
+
+  /* ---------- making rail depth ---------- */
+  (function(){
+    var rail = $('#rail'); if(!rail || RM) return;
+    var steps = $$('.st-step', rail), raf=null;
+    function paint(){
+      var r = rail.getBoundingClientRect(), mid = r.left + r.width/2;
+      steps.forEach(function(s){
+        var b = s.getBoundingClientRect();
+        var d = Math.max(-1.4, Math.min(1.4, (b.left + b.width/2 - mid)/(r.width/2)));
+        s.style.transform = 'perspective(1100px) rotateY('+(d*-13)+'deg) translateZ('+(-Math.abs(d)*62)+'px) scale('+(1-Math.abs(d)*.05)+')';
+        s.style.opacity = String(1 - Math.abs(d)*.34);
+      });
+      raf = null;
+    }
+    function req(){ if(!raf) raf = requestAnimationFrame(paint); }
+    rail.addEventListener('scroll', req, {passive:true});
+    window.addEventListener('resize', req);
+    setTimeout(paint, 220);
+  })();
+
+  /* ============================================================
+     VIDEO BANNER — frame opens on scroll, video parallaxes, lazy src
+     ============================================================ */
+  (function(){
+    var sec = $('#film'), frame = $('#vFrame'), vid = $('#vBanner');
+    if(!sec || !frame || !vid) return;
+    var playBtn = $('#vPlay'), muteBtn = $('#vMute');
+    var loaded = false, raf = null;
+
+    var SAVE_DATA = !!(navigator.connection && navigator.connection.saveData);
+    var AUTO = !RM && !SAVE_DATA;
+
+    function load(){
+      if(loaded) return; loaded = true;
+      vid.src = vid.dataset.src;
+      vid.addEventListener('error', function(){
+        frame.style.background = 'linear-gradient(160deg,#16212B,#0B1116)';
+      });
+    }
+
+    function paint(){
+      var r = sec.getBoundingClientRect(), vh = window.innerHeight;
+      /* 0 when the section is still low on screen, 1 once it's settled in view */
+      var p = 1 - Math.min(1, Math.max(0, (r.top - vh * .12) / (vh * .62)));
+      sec.style.setProperty('--p', p.toFixed(3));
+      /* gentle counter-drift so the footage doesn't feel pinned */
+      var mid = (r.top + r.height/2 - vh/2) / vh;
+      vid.style.transform = 'translateY(' + (mid * -26).toFixed(1) + 'px)';
+      raf = null;
+    }
+    function req(){ if(!raf) raf = requestAnimationFrame(paint); }
+    window.addEventListener('scroll', req, {passive:true});
+    window.addEventListener('resize', req);
+    paint();
+
+    function setPlaying(on){ playBtn.classList.toggle('is-playing', on); }
+    playBtn.addEventListener('click', function(){
+      load();
+      if(vid.paused){ vid.play().then(function(){ setPlaying(true); }).catch(function(){}); }
+      else { vid.pause(); setPlaying(false); }
+    });
+    muteBtn.addEventListener('click', function(){
+      load();
+      vid.muted = !vid.muted;
+      muteBtn.classList.toggle('is-on', !vid.muted);
+      if(!vid.muted && vid.paused){ vid.play().then(function(){ setPlaying(true); }).catch(function(){}); }
+    });
+
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(en){
+        en.forEach(function(e){
+          if(e.isIntersecting){
+            load();
+            if(AUTO){ vid.play().then(function(){ setPlaying(true); }).catch(function(){}); }
+          } else if(!vid.paused){
+            vid.pause(); setPlaying(false);
+          }
+        });
+      }, {threshold:.3}).observe(frame);
+    } else { load(); }
+  })();
+
+  /* ============================================================
+     SHOPPABLE REELS — only the centred card plays
+     ============================================================ */
+  (function(){
+    var rail = $('#reelRail'); if(!rail) return;
+    var reels = $$('.st-reel', rail);
+    var SAVE_DATA = !!(navigator.connection && navigator.connection.saveData);
+    var AUTO = !RM && !SAVE_DATA;
+    var visible = false, raf = null;
+
+    reels.forEach(function(reel){
+      var vid = $('video', reel);
+      var mute = $('.st-reel__mute', reel);
+      var play = $('.st-reel__play', reel);
+
+      reel._vid = vid;
+      reel._load = function(){
+        if(vid.src) return;
+        vid.src = vid.dataset.src;
+        vid.addEventListener('error', function(){
+          reel.classList.remove('paused');
+          if(!$('.reel-fallback', reel)){
+            var s = document.createElement('span');
+            s.className = 'reel-fallback';
+            s.textContent = vid.dataset.swap || 'Video unavailable';
+            s.style.cssText = 'position:absolute;inset:0;display:grid;place-items:center;padding:1.2rem;'+
+              'text-align:center;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;'+
+              'color:rgba(255,255,255,.5);z-index:2;';
+            reel.appendChild(s);
+          }
+        });
+      };
+      reel._play = function(){
+        reel._load();
+        vid.play().then(function(){ reel.classList.remove('paused'); }).catch(function(){});
+      };
+      reel._pause = function(){ if(!vid.paused){ vid.pause(); } reel.classList.add('paused'); };
+
+      play.addEventListener('click', function(){
+        if(vid.paused){ reel._play(); } else { reel._pause(); }
+      });
+      vid.addEventListener('click', function(){
+        if(vid.paused){ reel._play(); } else { reel._pause(); }
+      });
+
+      /* one soundtrack at a time — unmuting a reel mutes the rest */
+      mute.addEventListener('click', function(e){
+        e.stopPropagation();
+        reel._load();
+        var turningOn = vid.muted;
+        reels.forEach(function(other){
+          if(other === reel) return;
+          other._vid.muted = true;
+          $('.st-reel__mute', other).classList.remove('is-on');
+        });
+        vid.muted = !turningOn ? true : false;
+        mute.classList.toggle('is-on', !vid.muted);
+        if(!vid.muted) reel._play();
+      });
+    });
+
+    function centreMost(){
+      var r = rail.getBoundingClientRect(), mid = r.left + r.width/2;
+      var best = null, bestD = Infinity;
+      reels.forEach(function(reel){
+        var b = reel.getBoundingClientRect();
+        var d = Math.abs(b.left + b.width/2 - mid);
+        if(d < bestD){ bestD = d; best = reel; }
+      });
+      return best;
+    }
+    function sync(){
+      var live = centreMost();
+      reels.forEach(function(reel){
+        var isLive = reel === live;
+        reel.classList.toggle('live', isLive);
+        if(!isLive){ reel._pause(); }
+      });
+      if(live){
+        live._load();
+        if(AUTO && visible){ live._play(); } else { live.classList.add('paused'); }
+      }
+      raf = null;
+    }
+    function req(){ if(!raf) raf = requestAnimationFrame(sync); }
+
+    rail.addEventListener('scroll', req, {passive:true});
+    window.addEventListener('resize', req);
+
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(en){
+        en.forEach(function(e){
+          visible = e.isIntersecting;
+          if(visible){ sync(); }
+          else { reels.forEach(function(reel){ reel._pause(); }); }
+        });
+      }, {threshold:.25}).observe(rail);
+    } else { visible = true; sync(); }
+
+    setTimeout(sync, 200);
+  })();
+
+})();
+</script>
+<script>
+/* ============================================================
+   SAROJ TEXTILE · v4 — one file, two views
+   Shop router · cart drawer · search sheet · product listing
+   Vanilla + the Bootstrap bundle already loaded above.
+   ============================================================ */
+(function(){
+  'use strict';
+
+  var RM   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $    = function(s,c){ return (c||document).querySelector(s); };
+  var $$   = function(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
+  var INR  = function(n){ return '\u20B9' + Math.round(n).toLocaleString('en-IN'); };
+  var esc  = function(s){ return String(s).replace(/[&<>"]/g, function(c){
+               return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); };
+  var CDN  = 'https://saroj-textile-store.b-cdn.net/products/';
+  var PIC  = 'https://picsum.photos/seed/';
+
+  /* tiny storage that never throws (file:// , private mode, sandboxed frames) */
+  var store = (function(){
+    var ok = false, mem = {};
+    try{ window.localStorage.setItem('__t','1'); window.localStorage.removeItem('__t'); ok = true; }catch(e){}
+    return {
+      get:function(k){ try{ return ok ? window.localStorage.getItem(k) : mem[k]; }catch(e){ return null; } },
+      set:function(k,v){ try{ ok ? window.localStorage.setItem(k,v) : (mem[k]=v); }catch(e){} }
+    };
+  })();
+
+  /* ============================================================
+     1 · THE COUNTER — every piece we sell, in one list
+     ============================================================ */
+  var CRAFTS = [
+    { k:'pottery', n:'Blue Pottery',  hi:'\u0928\u0940\u0932\u0940 \u092E\u093F\u091F\u094D\u091F\u0940',        lane:'Kot Jewar',      img:PIC+'saroj-craft-pottery/200/200' },
+    { k:'meena',   n:'Meenakari',     hi:'\u092E\u0940\u0928\u093E\u0915\u093E\u0930\u0940',                      lane:'Johari Bazaar',  img:PIC+'saroj-craft-meena/200/200' },
+    { k:'bagru',   n:'Bagru Block',   hi:'\u092C\u0917\u0930\u0942 \u091B\u092A\u093E\u0908',                     lane:'Bagru village',  img:CDN+'48561785562288.webp' },
+    { k:'brass',   n:'Lac & Brass',   hi:'\u0932\u093E\u0916 \u0914\u0930 \u092A\u0940\u0924\u0932',              lane:'Tripolia Bazaar',img:PIC+'saroj-craft-brass/200/200' },
+    { k:'marble',  n:'Marble Jali',   hi:'\u0938\u0902\u0917\u092E\u0930\u092E\u0930 \u091C\u093E\u0932\u0940',   lane:'Kishanpole',     img:PIC+'saroj-craft-marble/200/200' },
+    { k:'puppet',  n:'Kathputli',     hi:'\u0915\u0920\u092A\u0941\u0924\u0932\u0940',                            lane:'Shilpgram',      img:PIC+'saroj-craft-puppet/200/200' },
+    { k:'fabric',  n:'Fabric',        hi:'\u0915\u092A\u0921\u093C\u093E',                                        lane:'By the metre',   img:CDN+'48621785565568.webp' }
+  ];
+  var CRAFT_BY = {}; CRAFTS.forEach(function(c){ CRAFT_BY[c.k] = c; });
+
+  /* n name · k kind · c craft · mat material · p price · m was · u unit · s stock · pop sold · nw new */
+  var P = [
+    {id:'p01', n:'Kot Jewar vase & jar, cobalt on white',      k:'craft', c:'pottery', mat:'Clay',            p:1450, m:1750, u:'pair',      s:'in',  pop:41, nw:9,  img:PIC+'saroj-shelf-vase/700/880'},
+    {id:'p02', n:'Blue pottery serving bowl, 6 inch',          k:'craft', c:'pottery', mat:'Clay',            p:880,  m:0,    u:'each',      s:'in',  pop:77, nw:14, img:PIC+'saroj-new-bowl/700/880'},
+    {id:'p03', n:'Blue pottery soap dish, lotus rim',          k:'craft', c:'pottery', mat:'Clay',            p:390,  m:480,  u:'each',      s:'in',  pop:96, nw:6,  img:PIC+'saroj-pottery-soap/700/880'},
+    {id:'p04', n:'Blue pottery door knobs, set of four',       k:'craft', c:'pottery', mat:'Clay',            p:640,  m:0,    u:'set of 4',  s:'low', pop:52, nw:4,  img:PIC+'saroj-pottery-knob/700/880'},
+    {id:'p05', n:'Blue pottery tile coasters, cobalt jaal',    k:'craft', c:'pottery', mat:'Clay',            p:720,  m:900,  u:'set of 6',  s:'in',  pop:63, nw:11, img:PIC+'saroj-pottery-tile/700/880'},
+
+    {id:'p06', n:'Meenakari wall plate, 9 inch',               k:'craft', c:'meena',   mat:'Enamel on brass', p:2900, m:0,    u:'each',      s:'in',  pop:28, nw:8,  img:PIC+'saroj-shelf-plate/700/880'},
+    {id:'p07', n:'Meenakari trinket box, peacock',             k:'craft', c:'meena',   mat:'Enamel on brass', p:1240, m:1490, u:'each',      s:'in',  pop:71, nw:15, img:PIC+'saroj-new-box/700/880'},
+    {id:'p08', n:'Meenakari kumkum bowls, pair',               k:'craft', c:'meena',   mat:'Enamel on brass', p:960,  m:0,    u:'pair',      s:'low', pop:44, nw:5,  img:PIC+'saroj-meena-bowl/700/880'},
+    {id:'p09', n:'Meenakari napkin rings, six',                k:'craft', c:'meena',   mat:'Enamel on brass', p:1680, m:2100, u:'set of 6',  s:'in',  pop:33, nw:12, img:PIC+'saroj-meena-ring/700/880'},
+
+    {id:'p10', n:'Brass diya, hand-beaten',                    k:'craft', c:'brass',   mat:'Brass',           p:690,  m:0,    u:'set of 2',  s:'in',  pop:88, nw:7,  img:PIC+'saroj-shelf-diya/700/880'},
+    {id:'p11', n:'Hand-beaten brass urli, 8 inch',             k:'craft', c:'brass',   mat:'Brass',           p:1650, m:1950, u:'each',      s:'in',  pop:59, nw:16, img:PIC+'saroj-new-brass/700/880'},
+    {id:'p12', n:'Lac bangles, stack of six',                  k:'craft', c:'brass',   mat:'Lac',             p:450,  m:0,    u:'stack',     s:'low', pop:104,nw:3,  img:PIC+'saroj-shelf-bangle/700/880'},
+    {id:'p13', n:'Brass temple bell, teak handle',             k:'craft', c:'brass',   mat:'Brass',           p:1180, m:0,    u:'each',      s:'in',  pop:37, nw:10, img:PIC+'saroj-brass-bell/700/880'},
+    {id:'p14', n:'Lac coasters, mirror inlay',                 k:'craft', c:'brass',   mat:'Lac',             p:520,  m:640,  u:'set of 4',  s:'out', pop:66, nw:2,  img:PIC+'saroj-lac-coaster/700/880'},
+
+    {id:'p15', n:'Marble jali lamp',                           k:'craft', c:'marble',  mat:'Marble',          p:3200, m:0,    u:'each',      s:'in',  pop:19, nw:13, img:PIC+'saroj-shelf-lamp/700/880'},
+    {id:'p16', n:'Marble coasters, jali edge',                 k:'craft', c:'marble',  mat:'Marble',          p:1150, m:1400, u:'set of 4',  s:'in',  pop:31, nw:1,  img:PIC+'saroj-marble-coaster/700/880'},
+    {id:'p17', n:'Marble jali tealight cube',                  k:'craft', c:'marble',  mat:'Marble',          p:1980, m:0,    u:'each',      s:'low', pop:22, nw:17, img:PIC+'saroj-marble-cube/700/880'},
+
+    {id:'p18', n:'Kathputli pair, Rajasthani court dress',     k:'craft', c:'puppet',  mat:'Mango wood',      p:1340, m:1600, u:'pair',      s:'in',  pop:26, nw:18, img:PIC+'saroj-craft-puppet/700/880'},
+    {id:'p19', n:'Single kathputli, sawaari rider',            k:'craft', c:'puppet',  mat:'Mango wood',      p:780,  m:0,    u:'each',      s:'in',  pop:35, nw:19, img:PIC+'saroj-puppet-rider/700/880'},
+
+    {id:'p31', n:'Bagru block table runner, indigo dabu',      k:'craft', c:'bagru',   mat:'Cotton',          p:1150, m:1400, u:'each',      s:'in',  pop:47, nw:31, img:PIC+'saroj-bagru-runner/700/880'},
+    {id:'p32', n:'Bagru cushion covers, madder red',           k:'craft', c:'bagru',   mat:'Cotton',          p:1490, m:0,    u:'set of 2',  s:'in',  pop:69, nw:32, img:PIC+'saroj-bagru-cushion/700/880'},
+    {id:'p33', n:'Hand-block napkins, six',                    k:'craft', c:'bagru',   mat:'Mul cotton',      p:840,  m:1050, u:'set of 6',  s:'low', pop:54, nw:33, img:PIC+'saroj-bagru-napkin/700/880'},
+    {id:'p34', n:'Bagru dabu razai, single',                   k:'craft', c:'bagru',   mat:'Cotton',          p:3400, m:0,    u:'each',      s:'in',  pop:21, nw:34, img:PIC+'saroj-bagru-razai/700/880'},
+
+    {id:'p20', n:'Red over-dye Ajrakh block printed cotton',   k:'fabric',c:'bagru',   mat:'Cotton',          p:180,  m:240,  u:'metre',     s:'in',  pop:142,nw:20, img:CDN+'63141785559833.webp'},
+    {id:'p21', n:'Teal pastel green with blue Ajrakh cotton',  k:'fabric',c:'bagru',   mat:'Cotton',          p:160,  m:220,  u:'metre',     s:'in',  pop:168,nw:24, img:CDN+'48621785565568.webp'},
+    {id:'p22', n:'Teal green and mustard Kalamkari cotton',    k:'fabric',c:'bagru',   mat:'Cotton',          p:170,  m:0,    u:'metre',     s:'in',  pop:91, nw:21, img:CDN+'42621785568665.webp'},
+    {id:'p23', n:'White base butta printed cotton',            k:'fabric',c:'bagru',   mat:'Mul cotton',      p:129,  m:165,  u:'metre',     s:'in',  pop:133,nw:22, img:CDN+'81901780987621.webp'},
+    {id:'p24', n:'Navy indigo Kalamkari paisley print',        k:'fabric',c:'bagru',   mat:'Cotton',          p:190,  m:250,  u:'metre',     s:'low', pop:117,nw:23, img:CDN+'13001785568370.webp'},
+    {id:'p25', n:'Leaf green polka Patola printed cotton',     k:'fabric',c:'bagru',   mat:'Cotton',          p:155,  m:0,    u:'metre',     s:'in',  pop:74, nw:25, img:CDN+'97721785569096.webp'},
+    {id:'p26', n:'White base floral Kalamkari Jaipuri cotton', k:'fabric',c:'bagru',   mat:'Mul cotton',      p:145,  m:190,  u:'metre',     s:'in',  pop:126,nw:26, img:CDN+'12091782565773.webp'},
+    {id:'p27', n:'Mustard and dark block Ajrakh print',        k:'fabric',c:'bagru',   mat:'Cotton silk',     p:260,  m:320,  u:'metre',     s:'in',  pop:58, nw:27, img:CDN+'48561785562288.webp'},
+    {id:'p28', n:'Red vibrant multi-colour paisley Kalamkari', k:'fabric',c:'bagru',   mat:'Cotton',          p:160,  m:220,  u:'metre',     s:'in',  pop:149,nw:28, img:CDN+'94351785567420.webp'},
+    {id:'p29', n:'Leaf green tree jaal printed Ajrakh cotton', k:'fabric',c:'bagru',   mat:'Cotton',          p:150,  m:180,  u:'metre',     s:'low', pop:108,nw:29, img:CDN+'711785564464.webp'},
+    {id:'p30', n:'Pink shade base with jaal printed cotton',   k:'fabric',c:'bagru',   mat:'Cotton',          p:129,  m:160,  u:'metre',     s:'in',  pop:95, nw:30, img:CDN+'47691780986642.webp'}
+  ];
+  /* fabric sits in its own craft bucket for browsing, keeps its printing lane for filters */
+  P.forEach(function(p){ if(p.k === 'fabric'){ p.print = p.c; p.c = 'fabric'; } });
+  /* swap these for your Laravel product routes as the handicraft SKUs go live */
+  var URLS = {
+    p21:'https://www.sarojtextile.com/product/teal-pastel-green-with-blue-ajrakh-printed-cotton-fabric',
+    p28:'https://www.sarojtextile.com/product/red-vibrant-multi-colour-paisley-kalamkari-print',
+    p29:'https://www.sarojtextile.com/product/leaf-green-base-tree-jaal-printed-ajrakh-cotton-fabric',
+    p30:'https://www.sarojtextile.com/product/pink-shade-base-with-jaal-printed-cotton-fabric'
+  };
+  P.forEach(function(p){ p.url = URLS[p.id] || ('#/shop?q=' + encodeURIComponent(p.n)); });
+  var BY_ID = {}; P.forEach(function(p){ BY_ID[p.id] = p; });
+  var off = function(p){ return p.m ? Math.round((p.m - p.p) / p.m * 100) : 0; };
+  var unit = function(u){ return u === 'metre' ? 'per metre' : u; };
+
+  /* ============================================================
+     2 · TOAST
+     ============================================================ */
+  var toastEl = $('#toast'), toastT;
+  function toast(msg){
+    if(!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    clearTimeout(toastT);
+    toastT = setTimeout(function(){ toastEl.classList.remove('on'); }, 2400);
+  }
+
+  /* ============================================================
+     3 · CART
+     ============================================================ */
+  var FREE_AT = 2000;
+  var cart = [];
+  try{ cart = JSON.parse(store.get('saroj.cart') || '[]') || []; }catch(e){ cart = []; }
+  if(!Array.isArray(cart)) cart = [];
+
+  var cartOff  = null;
+  var countEl  = $('#cartCount');
+  var bodyEl   = $('#cartBody');
+  var footEl   = $('#cartFoot');
+  var totalEl  = $('#cartTotal');
+  var shipEl   = $('#ship');
+  var shipMsg  = $('#shipMsg');
+  var shipFill = $('#shipFill');
+
+  function save(){ store.set('saroj.cart', JSON.stringify(cart)); }
+  function units(){ return cart.reduce(function(a,l){ return a + l.q; }, 0); }
+  function subtotal(){ return cart.reduce(function(a,l){ return a + l.p * l.q; }, 0); }
+
+  function addToCart(item, qty){
+    var line = null;
+    for(var i=0;i<cart.length;i++){ if(cart[i].id === item.id){ line = cart[i]; break; } }
+    if(line){ line.q += (qty || 1); }
+    else{ cart.push({ id:item.id, n:item.n, p:item.p, u:item.u || 'each', img:item.img, q:qty || 1 }); }
+    save(); paintCart(true);
+    toast('Added \u00B7 ' + item.n.slice(0, 34));
+  }
+  function setQty(id, q){
+    for(var i=0;i<cart.length;i++){
+      if(cart[i].id === id){
+        if(q <= 0){ cart.splice(i,1); } else { cart[i].q = q; }
+        break;
+      }
+    }
+    save(); paintCart();
+  }
+
+  function paintCart(bump){
+    var n = units(), sum = subtotal();
+
+    if(countEl){
+      countEl.textContent = n > 99 ? '99+' : n;
+      countEl.classList.toggle('on', n > 0);
+      if(bump && n > 0){
+        countEl.classList.remove('bump');
+        void countEl.offsetWidth;
+        countEl.classList.add('bump');
+      }
+    }
+    var cartBtn = $('#cartBtn');
+    if(cartBtn) cartBtn.setAttribute('aria-label', 'Cart, ' + n + (n === 1 ? ' item' : ' items'));
+
+    if(!bodyEl) return;
+
+    if(!cart.length){
+      bodyEl.innerHTML =
+        '<div class="st-cart__empty">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>' +
+          '<h4>Nothing in here yet</h4>' +
+          '<p>Pottery, brass, marble and the cotton they were always made beside.</p>' +
+          '<a href="#/shop" class="st-btn st-btn--solid" data-bs-dismiss="offcanvas">Browse the counter</a>' +
+        '</div>';
+      if(footEl) footEl.hidden = true;
+      if(shipEl) shipEl.hidden = true;
+      return;
+    }
+
+    var html = '<div class="st-lines">';
+    cart.forEach(function(l){
+      html +=
+        '<div class="st-line">' +
+          '<div class="st-line__ph"><img src="' + l.img + '" alt=""></div>' +
+          '<div class="st-line__t">' +
+            '<span class="st-line__n">' + esc(l.n) + '</span>' +
+            '<small class="st-line__m">' + INR(l.p) + ' \u00B7 ' + esc(unit(l.u)) + '</small>' +
+            '<div class="st-line__foot">' +
+              '<span class="st-qty">' +
+                '<button type="button" data-dec="' + l.id + '" aria-label="One fewer">\u2212</button>' +
+                '<span>' + l.q + '</span>' +
+                '<button type="button" data-inc="' + l.id + '" aria-label="One more">+</button>' +
+              '</span>' +
+              '<span class="st-line__p">' + INR(l.p * l.q) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button type="button" class="st-line__x" data-del="' + l.id + '">Remove</button>' +
+        '</div>';
+    });
+    html += '</div>';
+    bodyEl.innerHTML = html;
+
+    if(footEl){ footEl.hidden = false; totalEl.textContent = INR(sum); }
+    if(shipEl){
+      shipEl.hidden = false;
+      var short = FREE_AT - sum;
+      shipEl.classList.toggle('done', short <= 0);
+      shipMsg.innerHTML = short > 0
+        ? '<b>' + INR(short) + '</b> more and the shipping is on us.'
+        : '<b>Shipping is on us.</b> Packed and out of Jhotwara in two working days.';
+      shipFill.style.width = Math.min(100, sum / FREE_AT * 100) + '%';
+    }
+  }
+
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-inc],[data-dec],[data-del]');
+    if(!b) return;
+    var id = b.dataset.inc || b.dataset.dec || b.dataset.del;
+    var line = null;
+    cart.forEach(function(l){ if(l.id === id) line = l; });
+    if(!line) return;
+    if(b.dataset.inc) setQty(id, line.q + 1);
+    else if(b.dataset.dec) setQty(id, line.q - 1);
+    else setQty(id, 0);
+  });
+
+  function openCart(){
+    var el = $('#cart'); if(!el || !window.bootstrap) return;
+    cartOff = cartOff || new bootstrap.Offcanvas(el);
+    cartOff.show();
+  }
+  var cartBtn = $('#cartBtn');
+  if(cartBtn) cartBtn.addEventListener('click', openCart);
+  var checkoutBtn = $('#checkout');
+  if(checkoutBtn) checkoutBtn.addEventListener('click', function(){
+    toast('Checkout is next \u2014 wire this to your Laravel route');
+  });
+
+  paintCart();
+
+  /* ============================================================
+     4 · VIEW ROUTER — #/ home  ·  #/shop listing
+     ============================================================ */
+  var homeView = $('#homeView'), shopView = $('#shopView');
+
+  function parseHash(){
+    var h = location.hash || '';
+    if(h.indexOf('#/shop') !== 0) return { view:'home', hash:h };
+    var q = {}, qs = h.split('?')[1];
+    if(qs) qs.split('&').forEach(function(pair){
+      var kv = pair.split('=');
+      q[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+    });
+    return { view:'shop', q:q };
+  }
+
+  var built = false;
+  function route(scroll){
+    var r = parseHash();
+    if(r.view === 'shop'){
+      homeView.classList.remove('on');
+      shopView.classList.add('on');
+      applyURL(r.q);
+      if(scroll !== false) window.scrollTo(0, 0);
+    } else {
+      shopView.classList.remove('on');
+      homeView.classList.add('on');
+      var t = r.hash && r.hash.length > 1 && r.hash !== '#/' ? document.getElementById(r.hash.slice(1)) : null;
+      if(t){ t.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' }); }
+      else if(scroll !== false){ window.scrollTo(0, 0); }
+    }
+  }
+  window.addEventListener('hashchange', function(){ route(true); });
+
+  /* ============================================================
+     6 · PRODUCT LISTING
+     ============================================================ */
+  var F = { craft:[], mat:[], avail:[], deal:[], min:null, max:null, q:'' };
+  var sortBy = 'new', shown = 12, PAGE = 12;
+  var gridEl, chipsEl, barCount, barWord, afterEl, stripEl, fltBadge;
+  var favs = {};
+  try{ favs = JSON.parse(store.get('saroj.favs') || '{}') || {}; }catch(e){ favs = {}; }
+
+  var MATS = ['Clay','Enamel on brass','Brass','Lac','Marble','Mango wood','Cotton','Mul cotton','Cotton silk'];
+
+  function passes(p, skip){
+    if(skip !== 'craft' && F.craft.length && F.craft.indexOf(p.c) < 0) return false;
+    if(skip !== 'mat'   && F.mat.length   && F.mat.indexOf(p.mat) < 0) return false;
+    if(skip !== 'avail' && F.avail.length && F.avail.indexOf(p.s) < 0) return false;
+    if(skip !== 'deal'  && F.deal.length  && !off(p)) return false;
+    if(skip !== 'price'){
+      if(F.min != null && p.p < F.min) return false;
+      if(F.max != null && p.p > F.max) return false;
+    }
+    if(F.q){
+      var words = F.q.toLowerCase().split(/\s+/);
+      var hay = (p.n + ' ' + CRAFT_BY[p.c].n + ' ' + p.mat).toLowerCase();
+      if(!words.every(function(w){ return hay.indexOf(w) > -1; })) return false;
+    }
+    return true;
+  }
+  function results(){
+    var out = P.filter(function(p){ return passes(p); });
+    var by = {
+      new: function(a,b){ return b.nw - a.nw; },
+      pop: function(a,b){ return b.pop - a.pop; },
+      lo:  function(a,b){ return a.p - b.p; },
+      hi:  function(a,b){ return b.p - a.p; },
+      off: function(a,b){ return off(b) - off(a); }
+    };
+    return out.sort(by[sortBy] || by.new);
+  }
+  function countIn(key, val){
+    return P.filter(function(p){
+      if(!passes(p, key)) return false;
+      if(key === 'craft') return p.c === val;
+      if(key === 'mat')   return p.mat === val;
+      if(key === 'avail') return p.s === val;
+      if(key === 'deal')  return !!off(p);
+      return true;
+    }).length;
+  }
+
+  function chk(k, v, label, count){
+    var on = F[k].indexOf(v) > -1;
+    var dead = !count && !on;
+    return '<label class="st-chk' + (dead ? ' off' : '') + '">' +
+      '<input type="checkbox" data-k="' + k + '" data-v="' + esc(v) + '"' +
+        (on ? ' checked' : '') + (dead ? ' disabled' : '') + '>' +
+      '<i aria-hidden="true"></i><span>' + esc(label) + '</span><small>' + count + '</small></label>';
+  }
+  var CARET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>';
+
+  function filterHTML(){
+    var h = '';
+    h += '<div class="st-fg"><button type="button" class="st-fg__h">Craft' + CARET + '</button><div class="st-fg__b">' +
+         CRAFTS.map(function(c){ return chk('craft', c.k, c.n, countIn('craft', c.k)); }).join('') + '</div></div>';
+
+    h += '<div class="st-fg"><button type="button" class="st-fg__h">Material' + CARET + '</button><div class="st-fg__b">' +
+         MATS.filter(function(m){ return countIn('mat', m) > 0 || F.mat.indexOf(m) > -1; })
+             .map(function(m){ return chk('mat', m, m, countIn('mat', m)); }).join('') + '</div></div>';
+
+    h += '<div class="st-fg"><button type="button" class="st-fg__h">Price' + CARET + '</button><div class="st-fg__b">' +
+         '<div class="st-range">' +
+           '<input type="number" inputmode="numeric" data-k="min" placeholder="Min \u20B9" value="' + (F.min == null ? '' : F.min) + '" aria-label="Lowest price">' +
+           '<span>to</span>' +
+           '<input type="number" inputmode="numeric" data-k="max" placeholder="Max \u20B9" value="' + (F.max == null ? '' : F.max) + '" aria-label="Highest price">' +
+         '</div></div></div>';
+
+    h += '<div class="st-fg"><button type="button" class="st-fg__h">Availability' + CARET + '</button><div class="st-fg__b">' +
+         chk('avail', 'in',  'In stock',  countIn('avail','in')) +
+         chk('avail', 'low', 'Last few',  countIn('avail','low')) +
+         '</div></div>';
+
+    h += '<div class="st-fg"><button type="button" class="st-fg__h">Offer' + CARET + '</button><div class="st-fg__b">' +
+         chk('deal', 'sale', 'Reduced', countIn('deal','sale')) + '</div></div>';
+    return h;
+  }
+
+  function activeCount(){
+    return F.craft.length + F.mat.length + F.avail.length + F.deal.length +
+           (F.min != null ? 1 : 0) + (F.max != null ? 1 : 0) + (F.q ? 1 : 0);
+  }
+
+  function card(p){
+    var d = off(p), out = p.s === 'out';
+    var stock = out ? 'Back at the next firing' : (p.s === 'low' ? 'Only a few left' : 'Ready to ship');
+    var fav = favs[p.id] ? ' on' : '';
+    return '<article class="st-card" data-id="' + p.id + '">' +
+      '<a class="st-card__ph ph" href="' + p.url + '" data-swap="' + esc(p.n) + '">' +
+        '<img src="' + p.img + '" alt="' + esc(p.n) + '" loading="lazy">' +
+      '</a>' +
+      '<span class="st-card__kind' + (p.k === 'craft' ? ' craft' : '') + '">' + (p.k === 'craft' ? 'Handicraft' : 'Fabric') + '</span>' +
+      (d ? '<span class="st-card__off">' + d + '% off</span>' : '') +
+      '<button type="button" class="st-card__fav' + fav + '" data-fav="' + p.id + '" aria-pressed="' + (favs[p.id] ? 'true' : 'false') + '" aria-label="Save ' + esc(p.n) + '">' +
+        '<svg viewBox="0 0 24 24" fill="' + (favs[p.id] ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.6-7-9.4A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.6C19 15.4 12 20 12 20Z"/></svg>' +
+      '</button>' +
+      '<button type="button" class="st-card__add" data-add="' + p.id + '"' + (out ? ' disabled' : '') + '>' +
+        (out ? 'Sold out' : 'Add to cart') + '</button>' +
+      '<div class="st-card__body">' +
+        '<span class="st-card__craft">' + esc(CRAFT_BY[p.c].n) + '</span>' +
+        '<h3 class="st-card__n">' + esc(p.n) + '</h3>' +
+        '<span class="st-card__p"><b>' + INR(p.p) + '</b>' +
+          (p.m ? '<s>' + INR(p.m) + '</s>' : '') +
+          '<em>' + esc(unit(p.u)) + '</em></span>' +
+        '<span class="st-card__stock ' + p.s + '">' + stock + '</span>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function paintChips(){
+    if(!chipsEl) return;
+    var out = [];
+    if(F.q) out.push(chip('q', F.q, '\u201C' + F.q + '\u201D'));
+    F.craft.forEach(function(v){ out.push(chip('craft', v, CRAFT_BY[v].n)); });
+    F.mat.forEach(function(v){ out.push(chip('mat', v, v)); });
+    F.avail.forEach(function(v){ out.push(chip('avail', v, v === 'in' ? 'In stock' : 'Last few')); });
+    F.deal.forEach(function(v){ out.push(chip('deal', v, 'Reduced')); });
+    if(F.min != null) out.push(chip('min', '', 'From ' + INR(F.min)));
+    if(F.max != null) out.push(chip('max', '', 'Up to ' + INR(F.max)));
+    if(out.length > 1) out.push('<button type="button" class="clr" data-clear>Clear all</button>');
+    chipsEl.innerHTML = out.join('');
+  }
+  function chip(k, v, label){
+    return '<button type="button" data-drop="' + k + '" data-v="' + esc(v) + '">' +
+           esc(label) + ' <i aria-hidden="true">\u00D7</i></button>';
+  }
+
+  function paintStrip(){
+    if(!stripEl) return;
+    var all = !F.craft.length;
+    var h = '<button type="button" class="st-craft' + (all ? ' on' : '') + '" data-craft="">' +
+            '<span>Everything<small>' + P.length + ' pieces</small></span></button>';
+    h += CRAFTS.map(function(c){
+      var n = P.filter(function(p){ return p.c === c.k; }).length;
+      var on = F.craft.length === 1 && F.craft[0] === c.k;
+      return '<button type="button" class="st-craft' + (on ? ' on' : '') + '" data-craft="' + c.k + '">' +
+        '<i><img src="' + c.img + '" alt="" loading="lazy"></i>' +
+        '<span>' + esc(c.n) + '<small>' + c.lane + ' \u00B7 ' + n + '</small></span></button>';
+    }).join('');
+    stripEl.innerHTML = h;
+  }
+
+  function paintHead(list){
+    var title = 'Everything on the counter', crumb = 'Everything';
+    if(F.q){ title = 'Results for \u201C' + F.q + '\u201D'; crumb = 'Search'; }
+    else if(F.craft.length === 1){ title = CRAFT_BY[F.craft[0]].n; crumb = title; }
+    else if(F.craft.length > 1){ title = 'Selected crafts'; crumb = 'Selected crafts'; }
+    $('#plpTitle').textContent = title;
+    $('#crumbNow').textContent = crumb;
+    barCount.textContent = list.length;
+    var apply = $('#fltApply');
+    if(apply) apply.textContent = list.length
+      ? 'Show ' + list.length + (list.length === 1 ? ' piece' : ' pieces')
+      : 'Nothing matches yet';
+    barWord.textContent = list.length === 1 ? 'piece' : 'pieces';
+    var n = activeCount();
+    fltBadge.hidden = !n; fltBadge.textContent = n;
+  }
+
+  function render(more){
+    var list = results();
+    if(!more) shown = PAGE;
+    paintHead(list);
+    paintChips();
+    paintStrip();
+
+    if(!list.length){
+      gridEl.innerHTML = '';
+      gridEl.style.display = 'none';
+      afterEl.innerHTML =
+        '<div class="st-empty">' +
+          '<h3>Nothing matches that yet</h3>' +
+          '<p>Loosen one filter and the shelf fills back up. Most people start with a craft, then a price.</p>' +
+          '<button type="button" class="st-btn st-btn--solid" data-clear>Clear the filters</button>' +
+        '</div>';
+      return;
+    }
+    gridEl.style.display = '';
+
+    var slice = list.slice(0, shown);
+    gridEl.innerHTML = slice.map(card).join('');
+    photos($$('.st-card__ph img', gridEl));
+    reveal($$('.st-card', gridEl));
+
+    afterEl.innerHTML = shown >= list.length
+      ? '<div class="st-more"><p>That\u2019s all ' + list.length + '</p></div>'
+      : '<div class="st-more">' +
+          '<div class="st-more__bar"><span class="st-more__fill" style="width:' + (shown / list.length * 100) + '%"></span></div>' +
+          '<p>' + shown + ' of ' + list.length + '</p>' +
+          '<button type="button" class="st-btn" id="loadMore">Load ' + Math.min(PAGE, list.length - shown) + ' more</button>' +
+        '</div>';
+  }
+
+  /* mirrors the .ph behaviour from the first script, for markup built at runtime */
+  function photos(imgs){
+    imgs.forEach(function(img){
+      if(!img.complete) img.setAttribute('data-loading','');
+      img.addEventListener('load', function(){ img.removeAttribute('data-loading'); });
+      img.addEventListener('error', function(){
+        img.removeAttribute('data-loading');
+        img.style.display = 'none';
+        var host = img.closest('.ph');
+        if(!host || $('.ph-fallback', host)) return;
+        var s = document.createElement('span');
+        s.className = 'ph-fallback';
+        s.textContent = host.dataset.swap || img.alt || 'Photo';
+        s.style.cssText = 'position:absolute;inset:0;display:grid;place-items:center;padding:1rem;' +
+                          'text-align:center;font-size:.6rem;letter-spacing:.14em;' +
+                          'text-transform:uppercase;color:#6C7A82;';
+        host.appendChild(s);
+      });
+    });
+  }
+
+  function reveal(cards){
+    if(RM || !('IntersectionObserver' in window)){
+      cards.forEach(function(c){ c.classList.add('in'); }); return;
+    }
+    var io = new IntersectionObserver(function(en){
+      en.forEach(function(e){
+        if(!e.isIntersecting) return;
+        var i = cards.indexOf(e.target) % PAGE;
+        e.target.style.transitionDelay = (Math.min(i, 8) * 0.045) + 's';
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      });
+    }, { threshold:.08, rootMargin:'0px 0px -4% 0px' });
+    cards.forEach(function(c){ io.observe(c); });
+  }
+
+  function syncInputs(){
+    $$('[data-k]').forEach(function(el){
+      var k = el.dataset.k;
+      if(k === 'min' || k === 'max'){ el.value = F[k] == null ? '' : F[k]; }
+      else if(el.type === 'checkbox'){ el.checked = F[k].indexOf(el.dataset.v) > -1; }
+    });
+  }
+  function rebuildFilters(){
+    var h = filterHTML();
+    $('#fltDesk').innerHTML = h;
+    $('#fltMob').innerHTML  = h;
+  }
+
+  function buildShop(){
+    gridEl   = $('#grid');
+    chipsEl  = $('#activeChips');
+    barCount = $('#barCount');
+    barWord  = $('#barWord');
+    afterEl  = $('#after');
+    stripEl  = $('#craftStrip');
+    fltBadge = $('#fltBadge');
+    rebuildFilters();
+    render();
+  }
+
+  function applyURL(q){
+    F = { craft:q.craft ? q.craft.split(',') : [], mat:[], avail:[], deal:[],
+          min:null, max:null, q:q.q || '' };
+    shown = PAGE;
+    if(!built){ buildShop(); built = true; return; }
+    rebuildFilters();
+    render();
+  }
+
+  /* --- listing interactions (delegated, so re-renders never lose them) --- */
+  document.addEventListener('change', function(e){
+    var el = e.target.closest('[data-k]'); if(!el) return;
+    var k = el.dataset.k;
+    if(k === 'min' || k === 'max'){
+      var v = el.value.trim();
+      F[k] = v === '' ? null : Math.max(0, parseInt(v, 10) || 0);
+    } else {
+      var v2 = el.dataset.v, i = F[k].indexOf(v2);
+      if(el.checked && i < 0) F[k].push(v2);
+      if(!el.checked && i > -1) F[k].splice(i, 1);
+    }
+    rebuildFilters(); syncInputs(); render();
+  });
+
+  document.addEventListener('click', function(e){
+    var t = e.target;
+
+    var head = t.closest('.st-fg__h');
+    if(head){ head.closest('.st-fg').classList.toggle('shut'); return; }
+
+    var craft = t.closest('[data-craft]');
+    if(craft){
+      var k = craft.dataset.craft;
+      F.craft = (!k || (F.craft.length === 1 && F.craft[0] === k)) ? [] : [k];
+      F.q = '';
+      rebuildFilters(); render();
+      return;
+    }
+
+    var drop = t.closest('[data-drop]');
+    if(drop){
+      var dk = drop.dataset.drop;
+      if(dk === 'q') F.q = '';
+      else if(dk === 'min' || dk === 'max') F[dk] = null;
+      else F[dk] = F[dk].filter(function(x){ return x !== drop.dataset.v; });
+      rebuildFilters(); render();
+      return;
+    }
+
+    if(t.closest('[data-clear]')){
+      F = { craft:[], mat:[], avail:[], deal:[], min:null, max:null, q:'' };
+      rebuildFilters(); render();
+      return;
+    }
+
+    if(t.closest('#loadMore')){ shown += PAGE; render(true); return; }
+
+    var fav = t.closest('[data-fav]');
+    if(fav){
+      var fid = fav.dataset.fav;
+      favs[fid] = !favs[fid];
+      if(!favs[fid]) delete favs[fid];
+      store.set('saroj.favs', JSON.stringify(favs));
+      fav.classList.toggle('on', !!favs[fid]);
+      fav.setAttribute('aria-pressed', favs[fid] ? 'true' : 'false');
+      $('svg', fav).setAttribute('fill', favs[fid] ? 'currentColor' : 'none');
+      toast(favs[fid] ? 'Saved for later' : 'Removed from saved');
+      return;
+    }
+
+    var add = t.closest('[data-add]');
+    if(add && BY_ID[add.dataset.add]){
+      addToCart(BY_ID[add.dataset.add], 1);
+      var was = add.textContent;
+      add.textContent = 'In your cart';
+      setTimeout(function(){ add.textContent = was; }, 1600);
+    }
+  });
+
+  var sortEl = $('#sort');
+  if(sortEl) sortEl.addEventListener('change', function(){ sortBy = this.value; render(); });
+
+  $$('.st-dense button').forEach(function(b){
+    b.addEventListener('click', function(){
+      $$('.st-dense button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      $('#grid').dataset.cols = b.dataset.cols;
+    });
+  });
+
+  /* ============================================================
+     7 · MAKE THE HOME PAGE SHOPPABLE TOO
+     ============================================================ */
+  /* quick-add pill on every card in the "New this week" rail */
+  $$('#shopRail .st-prod').forEach(function(el){
+    var name  = $('.st-prod__name', el);
+    var price = $('.st-prod__price b', el);
+    var img   = $('img', el);
+    if(!name || !price) return;
+    var found = null;
+    P.forEach(function(p){ if(p.n.toLowerCase().indexOf(name.textContent.trim().toLowerCase().slice(0,18)) > -1) found = p; });
+    var item = found || {
+      id:'rail-' + name.textContent.trim().slice(0,20),
+      n:name.textContent.trim(),
+      p:parseInt(price.textContent.replace(/[^0-9]/g,''), 10) || 0,
+      u:$('.st-prod__kind', el) && $('.st-prod__kind', el).classList.contains('craft') ? 'each' : 'metre',
+      img:img ? img.src : ''
+    };
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'st-quick';
+    b.setAttribute('aria-label', 'Add ' + item.n + ' to cart');
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
+    b.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); addToCart(item, 1); });
+    el.appendChild(b);
+  });
+
+  /* reel "Buy" buttons */
+  $$('.st-reel__buy').forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var reel  = b.closest('.st-reel');
+      var name  = $('.st-reel__name', reel);
+      var price = $('.st-reel__price b', reel);
+      var vid   = $('video', reel);
+      var kind  = $('.st-reel__kind', reel);
+      addToCart({
+        id:'reel-' + (name ? name.textContent.trim().slice(0,20) : Math.random()),
+        n:name ? name.textContent.trim() : 'Reel piece',
+        p:price ? parseInt(price.textContent.replace(/[^0-9]/g,''), 10) : 0,
+        u:kind && kind.classList.contains('craft') ? 'each' : 'metre',
+        img:vid && vid.poster ? vid.poster : PIC + 'saroj-reel/300/300'
+      }, 1);
+    });
+  });
+
+  /* the gift builder now actually puts the parcel in the cart */
+  var giftAdd = $('#giftAdd');
+  if(giftAdd){
+    giftAdd.addEventListener('click', function(){
+      var sum = $('#giftSummary');
+      var tot = $('#giftTotal');
+      var n = sum ? sum.textContent.trim() : 'Gift parcel';
+      var raw = tot && tot.childNodes[0] ? tot.childNodes[0].nodeValue : '0';
+      var p = parseInt(String(raw).replace(/[^0-9]/g,''), 10) || 0;
+      addToCart({ id:'gift-' + Date.now(), n:'Gift parcel \u2014 ' + n, p:p, u:'parcel',
+                  img:PIC + 'saroj-hands-main/300/375' }, 1);
+    });
+  }
+
+  /* ============================================================
+     8 · GO
+     ============================================================ */
+  route(false);
+})();
+</script>
+
+</body>
+</html>
