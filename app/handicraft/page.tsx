@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HandicraftPage from "@/components/handicraft/HandicraftPage";
+import { getHandicraftData } from "@/lib/handicraft";
 import { pageMeta } from "@/lib/seo";
 import "@/styles/handicraft.css";
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = pageMeta({
   path: "/handicraft",
 });
 
-export default function Handicraft() {
-  return <HandicraftPage />;
+export default async function Handicraft() {
+  const data = await getHandicraftData();
+  return <HandicraftPage data={data} />;
 }

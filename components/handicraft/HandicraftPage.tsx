@@ -2,41 +2,50 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { plates, swatches } from "@/components/home/Hero";
+import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
+import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSwatch } from "@/lib/handicraft";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 const PIC = "https://picsum.photos/seed/";
 
+/* Everything below is the page's own copy, used wherever /api/handicraft-data comes back short. */
+
 /* Five drifting columns behind the opening hero; each is listed twice so the loop is seamless. */
-const COLUMNS = [
-  ["48621785565568", "711785564464", "97721785569096"],
-  ["42621785568665", "13001785568370", "67951785568205"],
-  ["12091782565773", "47691780986642", "94351785567420"],
-  ["47191782732714", "71911780379169", "8731780988074"],
-  ["62201785562941", "2201780380811", "16601783765066"],
-];
+const COLUMN_IMAGES = [
+  "48621785565568", "711785564464", "97721785569096",
+  "42621785568665", "13001785568370", "67951785568205",
+  "12091782565773", "47691780986642", "94351785567420",
+  "47191782732714", "71911780379169", "8731780988074",
+  "62201785562941", "2201780380811", "16601783765066",
+].map((id) => CDN + id + ".webp");
+
+const PLATES: HcPlate[] = homePlates.map((p) => ({ href: `/product/${p.slug}`, src: p.src, cap: p.cap, alt: p.alt }));
+const SWATCHES: HcSwatch[] = homeSwatches.map(([file, title, slug]) => ({ href: `/product/${slug}`, src: CDN + file + ".webp", title }));
+const PLATE_CLS = ["hc-plate--l", "hc-plate--c", "hc-plate--r"];
 
 const ROLL: { t: string; cls?: string }[] = [
   { t: "Blue Pottery", cls: "hi" }, { t: "मीनाकारी", cls: "hc-dv" }, { t: "Bagru Block" },
   { t: "Lac & Brass", cls: "hi" }, { t: "संगमरमर जाली", cls: "hc-dv" }, { t: "Kathputli" },
 ];
 
-const FACES = [
-  { name: "Blue Pottery", hi: "नीली मिट्टी", lane: "Kot Jewar", n: 46, img: PIC + "saroj-craft-pottery/700/900", alt: "Blue pottery from Kot Jewar", swap: "Blue pottery vase, cobalt floral, plain backdrop" },
-  { name: "Meenakari", hi: "मीनाकारी", lane: "Johari Bazaar", n: 28, img: PIC + "saroj-craft-meena/700/900", alt: "Meenakari enamel work", swap: "Meenakari enamel plate, macro, raking light" },
-  { name: "Bagru Block", hi: "बगरू छपाई", lane: "Bagru village", n: 63, img: CDN + "48561785562288.webp", alt: "Mustard and dark block Ajrakh print", swap: "Wooden Bagru blocks stacked, or a block mid-stamp" },
-  { name: "Lac & Brass", hi: "लाख और पीतल", lane: "Tripolia Bazaar", n: 34, img: PIC + "saroj-craft-brass/700/900", alt: "Lac and brass work from Tripolia Bazaar", swap: "Brass vessels or lac bangle stack, warm light" },
-  { name: "Marble Jali", hi: "संगमरमर जाली", lane: "Kishanpole", n: 19, img: PIC + "saroj-craft-marble/700/900", alt: "Carved marble jali", swap: "Carved marble jali screen, backlit so the lattice reads" },
-  { name: "Kathputli", hi: "कठपुतली", lane: "Shilpgram", n: 22, img: PIC + "saroj-craft-puppet/700/900", alt: "Kathputli puppets", swap: "Kathputli puppets hung in a row against a plain wall" },
+const FACES: HcFace[] = [
+  { name: "Blue Pottery", hi: "नीली मिट्टी", meta: "Kot Jewar", count: "46 pieces", img: PIC + "saroj-craft-pottery/700/900", alt: "Blue pottery from Kot Jewar", swap: "Blue pottery vase, cobalt floral, plain backdrop" },
+  { name: "Meenakari", hi: "मीनाकारी", meta: "Johari Bazaar", count: "28 pieces", img: PIC + "saroj-craft-meena/700/900", alt: "Meenakari enamel work", swap: "Meenakari enamel plate, macro, raking light" },
+  { name: "Bagru Block", hi: "बगरू छपाई", meta: "Bagru village", count: "63 pieces", img: CDN + "48561785562288.webp", alt: "Mustard and dark block Ajrakh print", swap: "Wooden Bagru blocks stacked, or a block mid-stamp" },
+  { name: "Lac & Brass", hi: "लाख और पीतल", meta: "Tripolia Bazaar", count: "34 pieces", img: PIC + "saroj-craft-brass/700/900", alt: "Lac and brass work from Tripolia Bazaar", swap: "Brass vessels or lac bangle stack, warm light" },
+  { name: "Marble Jali", hi: "संगमरमर जाली", meta: "Kishanpole", count: "19 pieces", img: PIC + "saroj-craft-marble/700/900", alt: "Carved marble jali", swap: "Carved marble jali screen, backlit so the lattice reads" },
+  { name: "Kathputli", hi: "कठपुतली", meta: "Shilpgram", count: "22 pieces", img: PIC + "saroj-craft-puppet/700/900", alt: "Kathputli puppets", swap: "Kathputli puppets hung in a row against a plain wall" },
 ];
 
-const BOLTS = [
-  { name: "Ajrakh", desc: "Resist-printed in indigo and madder, both sides, sixteen steps.", price: "from ₹150 / m", img: "63141785559833", alt: "Red over-dye Ajrakh block printed cotton" },
-  { name: "Jaipuri Cotton", desc: "Sanganeri butti and jaal on soft mill cotton. The everyday one.", price: "from ₹129 / m", img: "47691780986642", alt: "Pink base jaal printed Jaipuri cotton" },
-  { name: "Kalamkari", desc: "Pen-drawn paisley and vine, vegetable dyed. Colour holds after wash.", price: "from ₹160 / m", img: "94351785567420", alt: "Red multicolour paisley Kalamkari print" },
-  { name: "Patola", desc: "Polka and patch patola, printed on pure cotton for everyday suits.", price: "from ₹160 / m", img: "97721785569096", alt: "Leaf green polka patola printed cotton" },
-  { name: "Indigo", desc: "Dabu mud-resist over natural indigo. Deepens with every wash.", price: "from ₹150 / m", img: "2201780380811", alt: "Indigo blue base bindu and stripes Ajrakh print" },
+const BOLTS: HcBolt[] = [
+  { name: "Ajrakh", desc: "Resist-printed in indigo and madder, both sides, sixteen steps.", price: "from ₹150 / m", img: CDN + "63141785559833.webp", alt: "Red over-dye Ajrakh block printed cotton" },
+  { name: "Jaipuri Cotton", desc: "Sanganeri butti and jaal on soft mill cotton. The everyday one.", price: "from ₹129 / m", img: CDN + "47691780986642.webp", alt: "Pink base jaal printed Jaipuri cotton" },
+  { name: "Kalamkari", desc: "Pen-drawn paisley and vine, vegetable dyed. Colour holds after wash.", price: "from ₹160 / m", img: CDN + "94351785567420.webp", alt: "Red multicolour paisley Kalamkari print" },
+  { name: "Patola", desc: "Polka and patch patola, printed on pure cotton for everyday suits.", price: "from ₹160 / m", img: CDN + "97721785569096.webp", alt: "Leaf green polka patola printed cotton" },
+  { name: "Indigo", desc: "Dabu mud-resist over natural indigo. Deepens with every wash.", price: "from ₹150 / m", img: CDN + "2201780380811.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
 ];
+
+const VIDEO = { src: "https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4", name: "", href: "" };
 
 const STEPS = [
   { i: "I", title: "Quartz, not clay", tag: "300", img: PIC + "saroj-make-clay/800/600", alt: "Quartz paste prepared by hand", swap: "Quartz paste being kneaded — hands and material, close" },
@@ -45,7 +54,7 @@ const STEPS = [
   { i: "IV", title: "Wrapped in our own cloth", tag: "350", img: CDN + "711785564464.webp", alt: "Leaf green tree jaal Ajrakh cotton used as wrapping", swap: "A pot being wrapped in an Ajrakh offcut — signature shot, shoot it properly" },
 ];
 
-type Voice = { q: string; ini: string; who: string; role: string };
+type Voice = { q: string; ini: string; who: string; role: string; rating?: number };
 const VOICES_A: Voice[] = [
   { q: "Fabric quality is very good — loved the kurta fabrics.", ini: "SS", who: "Santosh Selam", role: "Verified buyer" },
   { q: "Excellent communication, and outstanding fabrics.", ini: "TP", who: "Tarun P.", role: "Verified buyer" },
@@ -61,10 +70,29 @@ const VOICES_B: Voice[] = [
   { q: "Prints are beautiful, and the colours stay after washing.", ini: "AP", who: "Anitha P.", role: "Verified buyer" },
 ];
 
+const initials = (name: string) =>
+  name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "·";
+
+/**
+ * The API's testimonials carry a name and rating but (for now) no text, so
+ * each borrows its quote from the page's own copy by name. One with neither
+ * is left out rather than shown as an empty card.
+ */
+function apiVoices(list: HandicraftData["voices"]): Voice[] {
+  const byName = new Map([...VOICES_A, ...VOICES_B].map((v) => [v.who.toLowerCase(), v]));
+  return list.flatMap((t) => {
+    const known = byName.get(t.name.toLowerCase());
+    const q = t.content?.trim() || known?.q;
+    if (!q) return [];
+    return [{ q, who: t.name, ini: known?.ini ?? initials(t.name), role: known?.role ?? "Verified buyer", rating: t.rating }];
+  });
+}
+
 function VoiceCard({ v }: { v: Voice }) {
+  const r = Math.max(0, Math.min(5, Math.round(v.rating ?? 5)));
   return (
     <div className="hc-voice">
-      <div className="hc-voice__stars">★★★★★</div>
+      <div className="hc-voice__stars" aria-label={`${r} out of 5`}>{"★".repeat(r) + "☆".repeat(5 - r)}</div>
       <p>{v.q}</p>
       <div className="hc-voice__who">
         <span className="hc-voice__ini">{v.ini}</span>
@@ -80,8 +108,20 @@ function VoiceCard({ v }: { v: Voice }) {
  * plain DOM work in one effect, as in the original page, so the markup and
  * class toggles stay identical to the design.
  */
-export default function HandicraftPage() {
+export default function HandicraftPage({ data }: { data: HandicraftData }) {
   const root = useRef<HTMLElement>(null);
+
+  /* Each section takes the API's picks only when there are enough to fill its layout. */
+  const images = data.columnImages.length >= 15 ? data.columnImages : COLUMN_IMAGES;
+  const columns = Array.from({ length: 5 }, (_, c) => images.slice(c * 3, c * 3 + 3));
+  const plates = data.plates.length === 3 ? data.plates : PLATES;
+  const swatches = data.swatches.length >= 3 ? data.swatches : SWATCHES;
+  const faces = data.faces.length >= 3 ? data.faces : FACES;
+  const bolts = data.bolts.length >= 3 ? data.bolts : BOLTS;
+  const video = data.video ?? VIDEO;
+  const liveVoices = apiVoices(data.voices);
+  const voicesA = liveVoices.length >= 3 ? liveVoices : VOICES_A;
+  const collections = data.collections || 21;
 
   useEffect(() => {
     const el = root.current;
@@ -193,11 +233,14 @@ export default function HandicraftPage() {
 
       listen(stage, "pointerdown", ((e: PointerEvent) => {
         dragging = true; moved = 0; startX = e.clientX; startAngle = angle;
-        stage.setPointerCapture(e.pointerId); stopAuto(); wheel.classList.add("drag");
+        stopAuto(); wheel.classList.add("drag");
       }) as EventListener);
       listen(stage, "pointermove", ((e: PointerEvent) => {
         if (!dragging) return;
         const dx = e.clientX - startX; moved = Math.abs(dx);
+        /* Capture only once it's really a drag — capturing on pointerdown would
+           retarget the click to the stage, and a tap on a card's link would go nowhere. */
+        if (moved > 4 && !stage.hasPointerCapture(e.pointerId)) stage.setPointerCapture(e.pointerId);
         angle = startAngle - dx * 0.35; apply(false);
       }) as EventListener);
       const release = () => { if (!dragging) return; dragging = false; goTo(Math.round(angle / STEP)); startAuto(); };
@@ -360,10 +403,10 @@ export default function HandicraftPage() {
     <main id="main" className="hc" ref={root}>
       <section className="hero" id="top">
         <div className="hero__cols" aria-hidden="true">
-          {COLUMNS.map((col, c) => (
+          {columns.map((col, c) => (
             <div className="hcol" key={c}>
               <div className="hcol__in">
-                {[...col, ...col].map((id, i) => <img key={i} src={CDN + id + ".webp"} alt="" />)}
+                {[...col, ...col].map((src, i) => <img key={i} src={src} alt="" />)}
               </div>
             </div>
           ))}
@@ -400,8 +443,8 @@ export default function HandicraftPage() {
 
           <div className="hc-plates fade f4">
             <div className="hc-plates__row" id="platesRow">
-              {plates.map((p) => (
-                <Link key={p.cls} href={`/product/${p.slug}`} className={`hc-plate ${p.cls.replace("st-", "hc-")} ph`} data-swap={p.note}>
+              {plates.map((p, i) => (
+                <Link key={PLATE_CLS[i]} href={p.href} className={`hc-plate ${PLATE_CLS[i]} ph`} data-swap={p.alt}>
                   <img src={p.src} alt={p.alt} />
                   <span className="hc-plate__cap">{p.cap}</span>
                 </Link>
@@ -410,9 +453,9 @@ export default function HandicraftPage() {
           </div>
 
           <div className="hc-hero__strip fade f4">
-            {swatches.map(([file, title, slug]) => (
-              <Link key={file} href={`/product/${slug}`} className="hc-swatch ph" title={title}>
-                <img src={CDN + file + ".webp"} alt={title} loading="lazy" />
+            {swatches.map((s) => (
+              <Link key={s.href} href={s.href} className="hc-swatch ph" title={s.title}>
+                <img src={s.src} alt={s.title} loading="lazy" />
               </Link>
             ))}
           </div>
@@ -440,21 +483,29 @@ export default function HandicraftPage() {
 
           <div className="hc-stage rv" data-d="2" id="stage" role="group" aria-label="Craft categories, draggable carousel" tabIndex={0}>
             <div className="hc-wheel" id="wheelEl">
-              {FACES.map((f, i) => (
-                <article className="hc-face" key={f.name}>
-                  <div className="hc-face__card">
-                    <div className="hc-face__ph ph" data-swap={f.swap}>
+              {faces.map((f, i) => {
+                const card = (
+                  <>
+                    <div className="hc-face__ph ph" data-swap={f.swap ?? f.alt}>
                       <img src={f.img} alt={f.alt} loading="lazy" />
                     </div>
                     <div className="hc-face__body">
                       <span className="hc-face__num">{String(i + 1).padStart(2, "0")}</span>
                       <h3 className="hc-face__name">{f.name}</h3>
-                      <p className="hc-face__hi hc-dv">{f.hi}</p>
-                      <p className="hc-face__meta">{f.lane} · <b>{f.n} pieces</b></p>
+                      {f.hi && <p className="hc-face__hi hc-dv">{f.hi}</p>}
+                      <p className="hc-face__meta">{f.meta}{f.count && <> · <b>{f.count}</b></>}</p>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </>
+                );
+                return (
+                  <article className="hc-face" key={f.name}>
+                    {/* A drag that ends on a card is swallowed by the stage's click guard, so only a real tap navigates. */}
+                    {f.href
+                      ? <Link href={f.href} className="hc-face__card" draggable={false}>{card}</Link>
+                      : <div className="hc-face__card">{card}</div>}
+                  </article>
+                );
+              })}
             </div>
           </div>
 
@@ -463,7 +514,7 @@ export default function HandicraftPage() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 5l-7 7 7 7" /></svg>
             </button>
             <div className="hc-dots" id="dots">
-              {FACES.map((f, i) => (
+              {faces.map((f, i) => (
                 <button key={f.name} className="hc-dot" type="button" aria-label={`Show craft ${i + 1}`} />
               ))}
             </div>
@@ -481,7 +532,7 @@ export default function HandicraftPage() {
           <video
             className="hc-vbanner__vid"
             id="vBanner"
-            data-src="https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4"
+            data-src={video.src}
             muted loop playsInline preload="none"
             aria-label="Fabric moving on the bolt"
           />
@@ -506,6 +557,11 @@ export default function HandicraftPage() {
             <div className="hc-vbanner__chips">
               <span>No stock footage</span><span>Same lanes as our cloth</span><span>42 families</span>
             </div>
+            {video.href && (
+              <div className="hc-hero__cta" style={{ justifyContent: "flex-start" }}>
+                <Link href={video.href} className="hc-btn hc-btn--light">Shop this print</Link>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -518,7 +574,7 @@ export default function HandicraftPage() {
             <h2 className="hc-h2 rv" data-d="1">Still, and always,<br />cloth.</h2>
             <p className="hc-lede rv" data-d="2">Handicraft is the new wing. The looms are the load-bearing wall. Pick a bolt — every one is on the shelf today, retail or wholesale.</p>
             <div className="hc-cloth__stats rv" data-d="2">
-              <div><span>21</span><small>Collections</small></div>
+              <div><span>{collections}</span><small>Collections</small></div>
               <div><span>₹80</span><small>Wholesale / metre</small></div>
               <div><span>576</span><small>Reviews</small></div>
             </div>
@@ -531,15 +587,15 @@ export default function HandicraftPage() {
           <div className="rv" data-d="2">
             <div className="hc-fan">
               <div className="hc-fan__out" aria-live="polite">
-                <h4 id="fanName">{BOLTS[0].name}</h4>
-                <p id="fanDesc">{BOLTS[0].desc}</p>
-                <b id="fanPrice">{BOLTS[0].price}</b>
+                <h4 id="fanName">{bolts[0].name}</h4>
+                <p id="fanDesc">{bolts[0].desc}</p>
+                <b id="fanPrice">{bolts[0].price}</b>
               </div>
 
               <div className="hc-fan__inner" id="fanInner">
-                {BOLTS.map((b) => (
+                {bolts.map((b) => (
                   <button key={b.name} className="hc-bolt" data-name={b.name} data-desc={b.desc} data-price={b.price} aria-label={`Show ${b.name}`}>
-                    <img src={CDN + b.img + ".webp"} alt={b.alt} loading="lazy" />
+                    <img src={b.img} alt={b.alt} loading="lazy" />
                     <span className="hc-bolt__lbl">{b.name}</span>
                   </button>
                 ))}
@@ -547,7 +603,7 @@ export default function HandicraftPage() {
             </div>
 
             <div className="hc-fantabs" id="fanTabs">
-              {BOLTS.map((b) => <button key={b.name} type="button" className="hc-fantab">{b.name}</button>)}
+              {bolts.map((b) => <button key={b.name} type="button" className="hc-fantab">{b.name}</button>)}
             </div>
           </div>
         </div>
@@ -587,7 +643,7 @@ export default function HandicraftPage() {
         </div>
 
         <div className="hc-vrow hc-vrow--a" aria-hidden="true">
-          {[...VOICES_A, ...VOICES_A].map((v, i) => <VoiceCard key={i} v={v} />)}
+          {[...voicesA, ...voicesA].map((v, i) => <VoiceCard key={i} v={v} />)}
         </div>
         <div className="hc-vrow hc-vrow--b" aria-hidden="true">
           {[...VOICES_B, ...VOICES_B].map((v, i) => <VoiceCard key={i} v={v} />)}
