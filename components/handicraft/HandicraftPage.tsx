@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
 import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
-import FabricSlider from "./FabricSlider";
+import FabricStrip from "./FabricStrip";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 const PIC = "https://picsum.photos/seed/";
@@ -624,10 +624,10 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ================= FABRIC SHELF ================= */}
-      <FabricSlider slides={fabricSlides} />
+        {/* Every fabric collection, drifting past under the fan. */}
+        <FabricStrip slides={fabricSlides} />
+      </section>
 
       {/* ================= MAKING ================= */}
       <section className="hc-sec" id="making">
