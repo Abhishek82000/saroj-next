@@ -7,6 +7,7 @@ import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from 
 import FabricStrip from "./FabricStrip";
 import Rail from "@/components/product/Rail";
 import Reels from "@/components/home/Reels";
+import Voices from "@/components/home/Voices";
 import { products } from "@/lib/products";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
@@ -66,56 +67,8 @@ const FABRIC_SLIDES: HcSlide[] = [
 
 const VIDEO = { src: "https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4", name: "", href: "" };
 
-type Voice = { q: string; ini: string; who: string; role: string; rating?: number };
-const VOICES_A: Voice[] = [
-  { q: "Fabric quality is very good — loved the kurta fabrics.", ini: "SS", who: "Santosh Selam", role: "Verified buyer" },
-  { q: "Excellent communication, and outstanding fabrics.", ini: "TP", who: "Tarun P.", role: "Verified buyer" },
-  { q: "Well packed parcel, and the quality beat what I expected.", ini: "SU", who: "Suhana", role: "Verified buyer" },
-  { q: "My customer loved it. Please add more rayon prints.", ini: "SO", who: "Sonam", role: "Reseller" },
-  { q: "Quality was just awesome, well beyond what I expected.", ini: "AI", who: "Amutha Indraraj", role: "Verified buyer" },
-];
-const VOICES_B: Voice[] = [
-  { q: "Excellent quality — so soft and flowy.", ini: "KS", who: "Keerthana S.", role: "Verified buyer" },
-  { q: "Loved the colour and the texture. Very elegant.", ini: "DR", who: "Divya R.", role: "Verified buyer" },
-  { q: "Super soft cotton — ideal for our weather.", ini: "LT", who: "Lakshmi T.", role: "Verified buyer" },
-  { q: "Stitched a dress from this fabric and it turned out lovely.", ini: "DL", who: "Devi L.", role: "Verified buyer" },
-  { q: "Prints are beautiful, and the colours stay after washing.", ini: "AP", who: "Anitha P.", role: "Verified buyer" },
-];
-
 const WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
 const countWord = (n: number) => WORDS[n] ?? String(n);
-
-const initials = (name: string) =>
-  name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "·";
-
-/**
- * The API's testimonials carry a name and rating but (for now) no text, so
- * each borrows its quote from the page's own copy by name. One with neither
- * is left out rather than shown as an empty card.
- */
-function apiVoices(list: HandicraftData["voices"]): Voice[] {
-  const byName = new Map([...VOICES_A, ...VOICES_B].map((v) => [v.who.toLowerCase(), v]));
-  return list.flatMap((t) => {
-    const known = byName.get(t.name.toLowerCase());
-    const q = t.content?.trim() || known?.q;
-    if (!q) return [];
-    return [{ q, who: t.name, ini: known?.ini ?? initials(t.name), role: known?.role ?? "Verified buyer", rating: t.rating }];
-  });
-}
-
-function VoiceCard({ v }: { v: Voice }) {
-  const r = Math.max(0, Math.min(5, Math.round(v.rating ?? 5)));
-  return (
-    <div className="hc-voice">
-      <div className="hc-voice__stars" aria-label={`${r} out of 5`}>{"★".repeat(r) + "☆".repeat(5 - r)}</div>
-      <p>{v.q}</p>
-      <div className="hc-voice__who">
-        <span className="hc-voice__ini">{v.ini}</span>
-        <div><b>{v.who}</b><br /><small>{v.role}</small></div>
-      </div>
-    </div>
-  );
-}
 
 /**
  * /handicraft — the standalone handicraft landing page, section for section.
@@ -135,8 +88,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
   const fabricSlides = data.fabricSlides.length >= 3 ? data.fabricSlides : FABRIC_SLIDES;
   const bolts = data.bolts.length >= 3 ? data.bolts : BOLTS;
   const video = data.video ?? VIDEO;
-  const liveVoices = apiVoices(data.voices);
-  const voicesA = liveVoices.length >= 3 ? liveVoices : VOICES_A;
   const collections = data.collections || 21;
 
   useEffect(() => {
@@ -614,21 +565,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}
       {data.reels.length > 0 && <Reels items={data.reels} />}
 
-      {/* ================= VOICES ================= */}
-      <section className="hc-voices">
-        <div className="hc-wrap hc-voices__head">
-          <div className="hc-eyebrow rv">576 reviews, cloth side</div>
-          <h2 className="hc-h2 rv" data-d="1">What they said<br />about the cloth.</h2>
-          <p className="hc-lede rv" data-d="2">The handicraft reviews start now. These are from the years that got us here.</p>
-        </div>
-
-        <div className="hc-vrow hc-vrow--a" aria-hidden="true">
-          {[...voicesA, ...voicesA].map((v, i) => <VoiceCard key={i} v={v} />)}
-        </div>
-        <div className="hc-vrow hc-vrow--b" aria-hidden="true">
-          {[...VOICES_B, ...VOICES_B].map((v, i) => <VoiceCard key={i} v={v} />)}
-        </div>
-      </section>
+      {/* ================= VOICES — the home page's review wall, fed by the API's testimonials ================= */}
+      <Voices items={data.voices} />
     </main>
   );
 }

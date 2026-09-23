@@ -20,9 +20,29 @@ const Card = ({ text, who, rating }: { text: string; who: string; rating: number
   </figure>
 );
 
-export default function Voices() {
-  const a = reviews.slice(0, 3);
-  const b = reviews.slice(3);
+/** A live testimonial: the storefront sends name and rating, and text only sometimes. */
+export type VoiceItem = { name: string; content: string | null; rating: number };
+
+/**
+ * Live testimonials when there are enough to fill both rows, otherwise the
+ * built-in ones. One the API sends without text borrows it from the built-in
+ * review of the same name, and is dropped if there isn't one.
+ */
+function resolve(items?: VoiceItem[]): [string, string, number][] {
+  if (!items?.length) return reviews;
+  const byName = new Map(reviews.map((r) => [r[1].toLowerCase(), r[0]]));
+  const live = items.flatMap((t): [string, string, number][] => {
+    const text = t.content?.trim() || byName.get(t.name.toLowerCase());
+    return text ? [[text, t.name, Math.max(0, Math.min(5, Math.round(t.rating)))]] : [];
+  });
+  return live.length >= 4 ? live : reviews;
+}
+
+export default function Voices({ items }: { items?: VoiceItem[] }) {
+  const list = resolve(items);
+  const half = Math.ceil(list.length / 2);
+  const a = list.slice(0, half);
+  const b = list.slice(half);
   return (
     <section className="st-voices" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-voices__head st-wrap">
