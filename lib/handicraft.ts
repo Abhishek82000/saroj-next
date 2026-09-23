@@ -18,6 +18,41 @@ export interface HandicraftApiResponse {
     category_show_home_page: HomeCategorySection[];
     video_products: HomeVideoProduct[];
     testimonials: HandicraftApiTestimonial[];
+    /** The handicraft categories picked for the Kaarigar Wheel. */
+    handicraftFeatCategory?: HandicraftApiFeatCategory[];
+    /** The fabric categories for the sliding shelf. */
+    fabricCategory?: HandicraftApiFeatCategory[];
+  };
+}
+
+/**
+ * One category, for the wheel or the fabric slider. The storefront names these fields differently from
+ * endpoint to endpoint (name vs cat_name, image vs cat_cdn_url), so every
+ * spelling seen elsewhere in its API is accepted.
+ */
+export interface HandicraftApiFeatCategory {
+  id?: number; cat_id?: number;
+  name?: string; cat_name?: string;
+  slug?: string; cat_slug?: string;
+  name_hi?: string; hindi_name?: string;
+  image?: string | null; cat_image?: string | null; cat_cdn_url?: string | null; image_cdn?: string | null;
+  products_count?: number; product_count?: number;
+}
+
+function toFace(c: HandicraftApiFeatCategory): HcFace | null {
+  const name = c.name ?? c.cat_name;
+  const img = c.image ?? c.cat_cdn_url ?? c.image_cdn ?? c.cat_image;
+  if (!name || !img) return null;
+  const slug = c.slug ?? c.cat_slug;
+  const count = c.products_count ?? c.product_count;
+  return {
+    name,
+    img,
+    alt: name,
+    href: slug ? categoryHref(slug) : undefined,
+    hi: c.name_hi ?? c.hindi_name,
+    meta: "Shop the collection",
+    count: count ? `${count} ${count === 1 ? "piece" : "pieces"}` : undefined,
   };
 }
 
@@ -25,6 +60,7 @@ export interface HcPlate { href: string; src: string; cap: string; alt: string }
 export interface HcSwatch { href: string; src: string; title: string }
 export interface HcFace { name: string; href?: string; img: string; alt: string; hi?: string; meta: string; count?: string; swap?: string }
 export interface HcBolt { name: string; desc: string; price: string; img: string; alt: string }
+export interface HcSlide { name: string; href?: string; img: string; count?: string }
 export interface HcVideo { src: string; name: string; href: string }
 
 /** Everything /handicraft can take from the storefront. Empty lists mean "use the page's own copy". */
@@ -33,6 +69,8 @@ export interface HandicraftData {
   plates: HcPlate[];
   swatches: HcSwatch[];
   faces: HcFace[];
+  /** Fabric categories for the sliding shelf; falls back to the storefront's full category list. */
+  fabricSlides: HcSlide[];
   bolts: HcBolt[];
   video: HcVideo | null;
   voices: { name: string; content: string | null; rating: number }[];
@@ -40,7 +78,7 @@ export interface HandicraftData {
 }
 
 const EMPTY: HandicraftData = {
-  columnImages: [], plates: [], swatches: [], faces: [], bolts: [], video: null, voices: [], collections: 0,
+  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0,
 };
 
 const productHref = (slug: string) => `/product/${slug}`;
@@ -90,10 +128,11 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       return { href: productHref(p.slug), src: p.image, cap: c.cat_name, alt: p.image_alt || p.name };
     });
 
-    const faces = categories.slice(0, 6).map((c) => ({
-      name: c.name, href: categoryHref(c.slug), img: c.image, alt: c.name, meta: "Shop the collection",
-    }));
-    const swatches = categories.slice(6, 12).map((c) => ({ href: categoryHref(c.slug), src: c.image, title: c.name }));
+    const faces = (d.handicraftFeatCategory ?? []).map(toFace).filter((f): f is HcFace => f !== null);
+    const fabricSlides = (d.fabricCategory?.length ? d.fabricCategory : categories)
+      .map(toFace).filter((f): f is HcFace => f !== null)
+      .map((f) => ({ name: f.name, href: f.href, img: f.img, count: f.count }));
+    const swatches = categories.slice(0, 6).map((c) => ({ href: categoryHref(c.slug), src: c.image, title: c.name }));
 
     const v = d.video_products?.[0];
 
@@ -102,6 +141,7 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       plates,
       swatches,
       faces,
+      fabricSlides,
       bolts: stocked.slice(0, 5).map(toBolt),
       video: v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
       voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content, rating: t.rating })),

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
-import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSwatch } from "@/lib/handicraft";
+import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
+import FabricSlider from "./FabricSlider";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 const PIC = "https://picsum.photos/seed/";
@@ -45,6 +46,18 @@ const BOLTS: HcBolt[] = [
   { name: "Indigo", desc: "Dabu mud-resist over natural indigo. Deepens with every wash.", price: "from ₹150 / m", img: CDN + "2201780380811.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
 ];
 
+const CAT = "https://saroj-textile-store.b-cdn.net/category/";
+const FABRIC_SLIDES: HcSlide[] = [
+  ["Ajrakh Collection", "ajrakh-collection", "17855740415801.webp"],
+  ["Jaipur Cotton", "jaipur-cotton", "17808346283546.webp"],
+  ["Kalamkari", "kalamkari", "17855703751571.webp"],
+  ["Indigo Prints", "indigo", "17704503359781.webp"],
+  ["Paisley Prints", "paisley-prints", "17855703206077.webp"],
+  ["Patola & Patch Prints", "patola-prints", "17855704741310.webp"],
+  ["Flower Garden Collection", "flower-garden-collection", "17753697832243.webp"],
+  ["Hakoba And Dobby", "hakoba-and-dobby", "17808342608853.webp"],
+].map(([name, slug, file]) => ({ name, href: `/shop/${slug}`, img: CAT + file }));
+
 const VIDEO = { src: "https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4", name: "", href: "" };
 
 const STEPS = [
@@ -69,6 +82,9 @@ const VOICES_B: Voice[] = [
   { q: "Stitched a dress from this fabric and it turned out lovely.", ini: "DL", who: "Devi L.", role: "Verified buyer" },
   { q: "Prints are beautiful, and the colours stay after washing.", ini: "AP", who: "Anitha P.", role: "Verified buyer" },
 ];
+
+const WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+const countWord = (n: number) => WORDS[n] ?? String(n);
 
 const initials = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "·";
@@ -117,6 +133,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
   const plates = data.plates.length === 3 ? data.plates : PLATES;
   const swatches = data.swatches.length >= 3 ? data.swatches : SWATCHES;
   const faces = data.faces.length >= 3 ? data.faces : FACES;
+  const fabricSlides = data.fabricSlides.length >= 3 ? data.fabricSlides : FABRIC_SLIDES;
   const bolts = data.bolts.length >= 3 ? data.bolts : BOLTS;
   const video = data.video ?? VIDEO;
   const liveVoices = apiVoices(data.voices);
@@ -475,7 +492,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <div className="hc-wrap">
           <div className="hc-wheel-head">
             <div className="hc-eyebrow mid rv">The Kaarigar Wheel</div>
-            <h2 className="hc-h2 rv" data-d="1">Six crafts.<br />One turn of the wheel.</h2>
+            <h2 className="hc-h2 rv" data-d="1">{countWord(faces.length)} crafts.<br />One turn of the wheel.</h2>
             <p className="hc-lede rv" data-d="2" style={{ textAlign: "center" }}>
               Every discipline we&apos;ve taken on, and the lane in Jaipur it comes out of.
             </p>
@@ -608,6 +625,9 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           </div>
         </div>
       </section>
+
+      {/* ================= FABRIC SHELF ================= */}
+      <FabricSlider slides={fabricSlides} />
 
       {/* ================= MAKING ================= */}
       <section className="hc-sec" id="making">
