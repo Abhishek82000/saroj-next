@@ -5,6 +5,8 @@ import { useEffect, useRef } from "react";
 import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
 import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
 import FabricStrip from "./FabricStrip";
+import Rail from "@/components/product/Rail";
+import { products } from "@/lib/products";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 const PIC = "https://picsum.photos/seed/";
@@ -46,6 +48,9 @@ const BOLTS: HcBolt[] = [
   { name: "Indigo", desc: "Dabu mud-resist over natural indigo. Deepens with every wash.", price: "from ₹150 / m", img: CDN + "2201780380811.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
 ];
 
+/* The home page shows the same eight when its feed is empty. */
+const fresh = [...products].sort((a, b) => b.fresh - a.fresh).slice(0, 8);
+
 const CAT = "https://saroj-textile-store.b-cdn.net/category/";
 const FABRIC_SLIDES: HcSlide[] = [
   ["Ajrakh Collection", "ajrakh-collection", "17855740415801.webp"],
@@ -59,13 +64,6 @@ const FABRIC_SLIDES: HcSlide[] = [
 ].map(([name, slug, file]) => ({ name, href: `/shop/${slug}`, img: CAT + file }));
 
 const VIDEO = { src: "https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4", name: "", href: "" };
-
-const STEPS = [
-  { i: "I", title: "Quartz, not clay", tag: "300", img: PIC + "saroj-make-clay/800/600", alt: "Quartz paste prepared by hand", swap: "Quartz paste being kneaded — hands and material, close" },
-  { i: "II", title: "The hand decides", tag: "400", img: PIC + "saroj-make-paint/800/600", alt: "Motif painted freehand with a fine brush", swap: "Brush painting a motif freehand, over-the-shoulder crop" },
-  { i: "III", title: "Fire, then enamel", tag: "450", img: PIC + "saroj-make-kiln/800/600", alt: "Pieces loaded into the kiln", swap: "Kiln mouth open, pieces going in — warm light" },
-  { i: "IV", title: "Wrapped in our own cloth", tag: "350", img: CDN + "711785564464.webp", alt: "Leaf green tree jaal Ajrakh cotton used as wrapping", swap: "A pot being wrapped in an Ajrakh offcut — signature shot, shoot it properly" },
-];
 
 type Voice = { q: string; ini: string; who: string; role: string; rating?: number };
 const VOICES_A: Voice[] = [
@@ -334,29 +332,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           en.forEach((e) => { if (e.isIntersecting) { open(); o.disconnect(); } });
         }, { threshold: 0.28 }), inner);
       } else open();
-    })();
-
-    /* making rail depth */
-    (() => {
-      const rail = $("#rail");
-      if (!rail || RM) return;
-      const steps = $$(".hc-step", rail);
-      let raf: number | null = null;
-      const paint = () => {
-        const r = rail.getBoundingClientRect(), mid = r.left + r.width / 2;
-        steps.forEach((s) => {
-          const b = s.getBoundingClientRect();
-          const d = Math.max(-1.4, Math.min(1.4, (b.left + b.width / 2 - mid) / (r.width / 2)));
-          s.style.transform = "perspective(1100px) rotateY(" + d * -13 + "deg) translateZ(" + -Math.abs(d) * 62 + "px) scale(" + (1 - Math.abs(d) * 0.05) + ")";
-          s.style.opacity = String(1 - Math.abs(d) * 0.34);
-        });
-        raf = null;
-      };
-      const req = () => { if (!raf) raf = requestAnimationFrame(paint); };
-      listen(rail, "scroll", req, { passive: true });
-      on("resize", req);
-      const t = window.setTimeout(paint, 220);
-      cleanups.push(() => { clearTimeout(t); if (raf) cancelAnimationFrame(raf); });
     })();
 
     /* video banner — frame opens on scroll, video parallaxes, lazy src */
@@ -629,30 +604,10 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <FabricStrip slides={fabricSlides} />
       </section>
 
-      {/* ================= MAKING ================= */}
-      <section className="hc-sec" id="making">
-        <div className="hc-wrap">
-          <div className="hc-eyebrow rv">Four stages, in order</div>
-          <h2 className="hc-h2 rv" data-d="1">From earth<br />to shelf.</h2>
-          <p className="hc-lede rv" data-d="2">Nothing here is moulded in a factory. This is the actual route a piece takes before it reaches your door.</p>
-        </div>
-        <div className="hc-wrap">
-          <div className="hc-rail" id="rail">
-            {STEPS.map((s) => (
-              <article className="hc-step" key={s.i}>
-                <div className="hc-step__ph ph" data-swap={s.swap}>
-                  <span className="hc-step__i">{s.i}</span>
-                  <img src={s.img} alt={s.alt} loading="lazy" />
-                </div>
-                <div className="hc-step__body">
-                  <h4>{s.title}</h4>
-                  <span className="hc-step__tag">{s.tag}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ================= SHOP RAILS — the same tag and category rails as the home page ================= */}
+      {data.rails.length > 0
+        ? data.rails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)
+        : <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />}
 
       {/* ================= VOICES ================= */}
       <section className="hc-voices">
