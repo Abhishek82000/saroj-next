@@ -11,7 +11,7 @@ export interface NavLink {
 /** A few top-level names map onto filters the local catalogue already supports. */
 const KNOWN_HREFS: Record<string, string> = {
   Home: "/",
-  Fabrics: "/shop?craft=fabric",
+  Fabrics: "/#",
   "Wholesale @80": "/wholesale-fabric",
 };
 
@@ -26,8 +26,8 @@ export function categoryHref(slug: string): string {
  * the footer already uses for "Ajrakh Collection" etc. Stripping the generic
  * suffix gives the search a better chance of matching real product names.
  */
-function searchHref(name: string): string {
-  const q = name.replace(/\s+(collection|prints?)$/i, "").trim();
+function searchHref(name: string | undefined): string {
+  const q = (name ?? "").replace(/\s+(collection|prints?)$/i, "").trim();
   return `/shop?q=${encodeURIComponent(q)}`;
 }
 
@@ -47,7 +47,7 @@ function buildLink(item: CommonMenuItem): NavLink {
  * static links instead of breaking. "Home" is dropped — the brand mark
  * already links there.
  */
-export async function getNavMenu(): Promise<NavLink[]> {
+export async function getFlatMenuTree(): Promise<NavLink[]> {
   try {
     const res = await fetch(`${site.url}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
@@ -55,6 +55,28 @@ export async function getNavMenu(): Promise<NavLink[]> {
     return (json.data?.menu ?? [])
       .map(buildLink)
       .filter((l) => !(l.href === "/" && l.children.length === 0));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * The same nav tree, but un-flattened — every item's `mega` flag, `image`,
+ * `categories` and `pages` are kept intact so <Nav> can decide per item
+ * whether to render a plain link, a single-block dropdown, or a full-width
+ * mega panel. Prefer this over `getMenuTree()` wherever the header itself is
+ * rendered; `getMenuTree()`'s flattened NavLink[] is still around for any
+ * other spot (footer, mobile drawer, etc.) that only needs id/label/href.
+ */
+export async function getMenuTree(): Promise<CommonMenuItem[]> {
+  try {
+    const res = await fetch(`${site.url}/api/common`, { next: { revalidate: 300 } });
+    if (!res.ok) return [];
+    const json: CommonApiResponse = await res.json();
+    const menu = json.data?.menu ?? [];
+    // Match getMenuTree()'s behavior: drop the bare "Home" entry, the brand
+    // mark already links there.
+    return menu.filter((item) => !(item.name === "Home" && (item.children?.length ?? 0) === 0));
   } catch {
     return [];
   }
@@ -90,4 +112,69 @@ export async function getFeaturedCategories(): Promise<CommonFeaturedCategory[]>
   } catch {
     return [];
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Mega-menu support: works straight off the raw CommonMenuItem shape  */
+/* (mega / categories / pages / link / image / children) so <Nav> can  */
+/* pick plain link vs. dropdown vs. full-width mega per item.          */
+/* ------------------------------------------------------------------ */
+
+export type { CommonMenuItem };
+
+/** The API sends "no object" as `[]`. Normalize that to `null`. */
+function asObject<T>(value: T | []): T | null {
+  return Array.isArray(value) ? null : value;
+}
+
+/**
+ * Resolves the URL for a single menu item or mega-menu child.
+ * Priority: categories -> pages -> link -> (children ? "/shop" : search fallback).
+ *
+ * `pages` isn't part of the typed CommonMenuItem shape yet, so it's read
+ * defensively here — add `pages?: { page_url: string | null } | []` to
+ * CommonMenuItem in `./types` to get this type-checked properly.
+ */
+export function resolveHref(item: CommonMenuItem): string {
+  if (!item) return "/shop";
+  if (KNOWN_HREFS[item.name]) return KNOWN_HREFS[item.name];
+
+  const category = asObject(item.categories);
+  if (category?.cat_slug) return categoryHref(category.cat_slug);
+
+  const rawPages = (item as unknown as { pages?: { page_url?: string | null } | [] }).pages;
+  const page = asObject(rawPages ?? []);
+  if (page?.page_url) return `/${page.page_url}`;
+
+  const rawLink = (item as unknown as { link?: string | null }).link;
+  if (rawLink) return rawLink;
+
+  return (item.children?.length ?? 0) > 0 ? "/shop" : searchHref(item.name);
+}
+
+/** True when this item should render as a full-width mega panel. */
+export function isMega(item: CommonMenuItem): boolean {
+  const mega = (item as unknown as { mega?: 0 | 1 }).mega;
+  return mega === 1 && (item.children?.length ?? 0) > 0;
+}
+
+/** True when this item should render the plain single-block dropdown. */
+export function isDropdown(item: CommonMenuItem): boolean {
+  const mega = (item as unknown as { mega?: 0 | 1 }).mega;
+  return mega !== 1 && (item.children?.length ?? 0) > 0;
+}
+
+/** Max number of image tiles a mega menu is allowed to show. */
+export const MEGA_IMAGE_LIMIT = 2;
+
+/**
+ * Splits a mega menu's children into the plain text links and the (at most
+ * two) children that carry an image, so the caller can lay out columns.
+ */
+export function splitMegaChildren(children: CommonMenuItem[]) {
+  const withImage = (c: CommonMenuItem) => !!(c as unknown as { image?: string | null }).image;
+  const imageChildren = children.filter(withImage).slice(0, MEGA_IMAGE_LIMIT);
+  const imageIds = new Set(imageChildren.map((c) => c.id));
+  const textChildren = children.filter((c) => !imageIds.has(c.id));
+  return { textChildren, imageChildren };
 }

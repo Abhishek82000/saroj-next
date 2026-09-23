@@ -31,11 +31,10 @@ export const wholesaleNote = `Wholesale · from ${WHOLESALE_MIN_METRES} m · GST
 export const WHOLESALE_HOME = "/wholesale-fabric";
 
 export const isWholesalePath = (pathname: string) =>
-  pathname === WHOLESALE_HOME || pathname.startsWith(`${WHOLESALE_HOME}/`);
+  !!pathname && (pathname === WHOLESALE_HOME || pathname.startsWith(`${WHOLESALE_HOME}/`));
 
-/** A retail link's wholesale twin. Only the shopping pages have one — a blog
-    post or the contact page reads the same in both modes and is left alone. */
-export function wholesaleHref(href: string): string {
+export function wholesaleHref(href: string | null | undefined): string {
+  if (!href) return href ?? WHOLESALE_HOME;
   if (isWholesalePath(href.split("?")[0])) return href;
   if (href === "/") return WHOLESALE_HOME;
   const path = href.split(/[?#]/)[0];
@@ -44,8 +43,8 @@ export function wholesaleHref(href: string): string {
     : href;
 }
 
-/** A wholesale link's retail twin. */
-export function retailHref(href: string): string {
+export function retailHref(href: string | null | undefined): string {
+  if (!href) return href ?? "/";
   const path = href.split("?")[0];
   if (!isWholesalePath(path)) return href;
   return href.slice(WHOLESALE_HOME.length) || "/";

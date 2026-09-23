@@ -2,7 +2,7 @@
    The three --font-* variables are injected by next/font in app/layout.tsx. */
 :root{
   --paper:#F1F3F2; --paper-2:#E7ECEB; --paper-3:#DCE3E2;
-  --ink:#101820; --ink-2:#3A4750; --mute:#6C7A82;
+  --ink:#101820; --ink-2:#3A4750; --mute:#000;
   --cobalt:#1B5FA8; --teal:#12897C; --lac:#C0392E; --ochre:#A87A2A;
   --line:rgba(16,24,32,.12); --line-2:rgba(16,24,32,.07);
 
@@ -11,7 +11,7 @@
   --dv:var(--font-dv),'Tiro Devanagari Hindi',serif;
 
   --pad:clamp(18px,5vw,64px);
-  --sec-y:clamp(70px,12vw,140px);
+  --sec-y:clamp(25px,6vw,50px);
   --ease:cubic-bezier(.22,.68,.24,1);
   --shadow:0 24px 50px -18px rgba(16,24,32,.28);
 }

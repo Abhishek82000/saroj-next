@@ -18,8 +18,7 @@
 .st-nav nav{ display:flex; align-self:stretch; }
 .st-links{ display:none; gap:1.8rem; list-style:none; margin:0; padding:0; }
 .st-links li{ display:flex; align-items:center; }
-.st-links a{ font-size:.69rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-2);
-             position:relative; padding-block:.3rem; transition:color .3s; display:inline-flex; align-items:center; gap:.3em; }
+.st-links a{ font-size:.8rem; letter-spacing:.13em;font-weight: 600; text-transform:uppercase; color:var(--ink-2);position:relative; padding-block:.3rem; transition:color .3s; display:inline-flex; align-items:center; gap:.3em; }
 .st-links a::after{ content:''; position:absolute; left:0; bottom:0; height:1px; width:0; background:var(--cobalt); transition:width .4s var(--ease); }
 .st-links a:hover{ color:var(--ink); } .st-links a:hover::after{ width:100%; }
 .st-links li.has-children>a>svg{ transition:transform .25s var(--ease); }
@@ -34,6 +33,17 @@
    bottom edge (padding-top eats the nav bar's own bottom padding) so the
    pointer never crosses a dead zone on the way down; .st-dropdown__panel
    carries all the visible chrome and keeps its on-screen position. */
+.st-dropdown--mega .st-dropdown__panel,
+.st-mega__panel{
+  display:flex; gap:2.5rem; padding:1.75rem 2.5rem;justify-content: space-evenly;
+  width:100%; left:0; right:0;background: var(--paper);
+}
+.st-mega__col{ display:flex; flex-direction:column; gap:.5rem; width:100%; }
+.st-mega__col--images{ flex-direction:row; gap:1rem; }
+.st-mega__image{ display:flex; flex-direction:column; gap:.5rem; width:100%; }
+.st-mega__image img{ width:100%; aspect-ratio:1/1; object-fit:fill; border-radius:8px; }
+.st-mega__image span{ font-size:.8rem; text-align:center; }
+.st-mega__col a{font-size: .7rem;}
 .st-dropdown{ position:absolute; left:0; right:0; top:calc(100% - .9rem); padding-top:.9rem;
               opacity:0; visibility:hidden; pointer-events:none;
               transition:opacity .25s var(--ease); z-index:90; }

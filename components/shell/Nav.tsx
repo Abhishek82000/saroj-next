@@ -4,21 +4,29 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
 import AccountMenu from "./AccountMenu";
-import type { NavLink } from "@/lib/nav";
+import { resolveHref, isMega, splitMegaChildren, type CommonMenuItem } from "@/lib/nav";
 
-/** Shown only if the live menu couldn't be fetched. */
-const fallback: NavLink[] = [
-  { id: -1, label: "Shop all", href: "/shop", children: [] },
-  { id: -2, label: "Crafts", href: "/#wheel", children: [] },
-  { id: -3, label: "The Shelf", href: "/#shelf", children: [] },
-  { id: -4, label: "The Wrap", href: "/#gift", children: [] },
-  { id: -5, label: "Fabrics", href: "/#cloth", children: [] },
-  { id: -6, label: "Bulk", href: "/#bulk", children: [] },
-];
+function getImage(item: CommonMenuItem): string | null {
+  return (item as unknown as { image?: string | null }).image ?? null;
+}
 
-export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
-  const { count, pulse, setCartOpen, setSearchOpen, setMenuOpen, href, mode, navItem } = useStore();
-  const items = navMenu.length > 0 ? navMenu : fallback;
+/**
+ * Shown only if the live menu couldn't be fetched. Cast to CommonMenuItem
+ * since the fallback doesn't need to carry mega/image/pages data — these
+ * items always render as plain links (no children).
+ */
+const fallback = [
+  { id: -1, name: "Shop all", link: "/shop", categories: [], children: [] },
+  { id: -2, name: "Crafts", link: "/#wheel", categories: [], children: [] },
+  { id: -3, name: "The Shelf", link: "/#shelf", categories: [], children: [] },
+  { id: -4, name: "The Wrap", link: "/#gift", categories: [], children: [] },
+  { id: -5, name: "Fabrics", link: "/#cloth", categories: [], children: [] },
+  { id: -6, name: "Bulk", link: "/#bulk", categories: [], children: [] },
+] as unknown as CommonMenuItem[];
+
+export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
+  const { count, pulse, setCartOpen, setSearchOpen, setMenuOpen, href, mode } = useStore();
+  const items = navMenu?.length > 0 ? navMenu : fallback;
   const [stuck, setStuck] = useState(false);
   const badge = useRef<HTMLSpanElement>(null);
 
@@ -54,36 +62,28 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
 
   return (
     <header className={`st-nav${stuck ? " stuck" : ""}`}>
-      <Link className="st-brand" href={href("/")}><img width={80} src="https://www.sarojtextile.com/public/img/uploads/settings/1758459499.png" alt="Saroj Textile" /></Link>
+      <Link className="st-brand" href={href("/")}>
+        <img width={80} src="https://www.sarojtextile.com/public/img/uploads/settings/1758459499.png" alt="Saroj Textile" />
+      </Link>
+
       <nav aria-label="Primary">
         <ul className="st-links">
-          {items.map((l) => {
-            const item = navItem(l);
-            return (
-            <li key={l.id} className={l.children.length > 0 ? "has-children" : undefined}>
-              <Link href={item.href}>
-                {item.label}
-                {l.children.length > 0 && <Icon name="down" size={11} strokeWidth={2} />}
-              </Link>
-              {l.children.length > 0 && (
-                <div className="st-dropdown">
-                  <div className="st-dropdown__panel">
-                    {l.children.map((c) => <Link key={c.id} href={href(c.href)}>{c.label}</Link>)}
-                  </div>
-                </div>
-              )}
-            </li>
-            );
-          })}
+          {items.map((item) => (
+            <NavItem key={item.id} item={item} resolve={href} />
+          ))}
         </ul>
       </nav>
+
       <div className="st-tools">
         <button className="st-icn" onClick={() => setSearchOpen(true)} aria-label="Search the counter">
           <Icon name="search" />
         </button>
         <AccountMenu />
-        <button className="st-icn" onClick={() => setCartOpen(true)}
-          aria-label={`${mode === "wholesale" ? "Wholesale cart" : "Cart"}, ${count} ${count === 1 ? "item" : "items"}`}>
+        <button
+          className="st-icn"
+          onClick={() => setCartOpen(true)}
+          aria-label={`${mode === "wholesale" ? "Wholesale cart" : "Cart"}, ${count} ${count === 1 ? "item" : "items"}`}
+        >
           <Icon name="cart" />
           <span ref={badge} className={`st-count${count ? " on" : ""}`} aria-hidden="true">
             {count > 99 ? "99+" : count}
@@ -94,5 +94,86 @@ export default function Nav({ navMenu }: { navMenu: NavLink[] }) {
         </button>
       </div>
     </header>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* One top-level nav item: plain link, single-block dropdown, or a     */
+/* full-width mega menu — picked from `mega` + whether it has children.*/
+/* ------------------------------------------------------------------ */
+
+function NavItem({ item, resolve }: { item: CommonMenuItem; resolve: (h: string) => string }) {
+  const itemHref = resolve(resolveHref(item));
+  const children = item.children ?? [];
+
+  // No children -> just a link, nothing to open.
+  if (children.length === 0) {
+    return (
+      <li>
+        <Link href={itemHref}>{item.name}</Link>
+      </li>
+    );
+  }
+
+  // Has children, mega flag off -> single-block dropdown.
+  if (!isMega(item)) {
+    return (
+      <li className="has-children">
+        <Link href={itemHref}>
+          {item.name} <Icon name="down" size={11} strokeWidth={2} />
+        </Link>
+        <div className="st-dropdown">
+          <div className="st-dropdown__panel">
+            {children.map((c) => (
+              <Link key={c.id} href={resolve(resolveHref(c))}>
+                {c.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </li>
+    );
+  }
+
+  // mega === 1 -> full-width mega menu, with up to 2 image tiles in their
+  // own column at the end.
+  const { textChildren, imageChildren } = splitMegaChildren(children);
+  const COLS = 4;
+  const perCol = Math.max(1, Math.ceil(textChildren.length / COLS));
+  const columns: CommonMenuItem[][] = [];
+  for (let i = 0; i < textChildren.length; i += perCol) {
+    columns.push(textChildren.slice(i, i + perCol));
+  }
+
+  return (
+    <li className="has-children">
+      <Link href={itemHref}>
+        {item.name} <Icon name="down" size={11} strokeWidth={2} />
+      </Link>
+      <div className="st-dropdown st-dropdown--mega">
+        <div className="st-mega__panel">
+          {columns.map((col, i) => (
+            <div className="st-mega__col" key={i}>
+              {col.map((c) => (
+                <Link key={c.id} href={resolve(resolveHref(c))}>
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+          ))}
+
+          {imageChildren.length > 0 && (
+            <div className="st-mega__col st-mega__col--images">
+              {imageChildren.map((c) => (
+                <Link key={c.id} href={resolve(resolveHref(c))} className="st-mega__image">
+                  <img src={getImage(c) as string} alt={c.name} loading="lazy" />
+                  <span>{c.name}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </li>
   );
 }

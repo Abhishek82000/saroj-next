@@ -5,7 +5,8 @@
    the way a piece is labelled on a wall rather than sold from a tile.
    ============================================================ */
 
-.st-shelf-sec{ padding-block:clamp(58px,9vw,118px);
+.st-shelf-sec{ 
+  /* padding-block:clamp(58px,9vw,118px); */
                /* "The Shelf" is a nav target — keep the eyebrow clear of the sticky bar. */
                scroll-margin-top:clamp(72px,9vw,104px); }
 
@@ -35,7 +36,7 @@
 
 .st-piece{ display:block; position:relative; color:inherit; }
 
-.st-piece__ph{ display:block; position:relative; overflow:hidden; aspect-ratio:3/4; }
+.st-piece__ph{ display:block; position:relative; overflow:hidden; aspect-ratio:3/4;border-radius: 16px; }
 @media(min-width:1000px){
   .st-piece:first-child .st-piece__ph{ aspect-ratio:5/4; }
   .st-piece:nth-child(n+3) .st-piece__ph{ aspect-ratio:1; }

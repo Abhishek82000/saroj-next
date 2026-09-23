@@ -8,20 +8,22 @@ import Footer from "./Footer";
 import WhatsApp from "./WhatsApp";
 import StoreProvider from "./StoreProvider";
 import LoginModal from "./LoginModal";
-import { getNavMenu } from "@/lib/nav";
+import { getMenuTree } from "@/lib/nav";
 
 /** Everything that wraps every page. Mounted once, in the root layout. */
 export default async function Shell({ children }: { children: React.ReactNode }) {
-  const navMenu = await getNavMenu();
+  const navMenu = await getMenuTree();
 
   return (
     <StoreProvider>
       <Ticker />
-      <Nav navMenu={navMenu} />
+      <Nav navMenu={navMenu as unknown as React.ComponentProps<typeof Nav>["navMenu"]} />
       {children}
       <Footer />
       <WhatsApp />
-      <MenuDrawer navMenu={navMenu} />
+      <MenuDrawer
+        navMenu={navMenu as unknown as React.ComponentProps<typeof MenuDrawer>["navMenu"]}
+      />
       <CartDrawer />
       <SearchSheet />
       <LoginModal />
