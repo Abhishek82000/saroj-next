@@ -6,6 +6,7 @@ import { plates as homePlates, swatches as homeSwatches } from "@/components/hom
 import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
 import FabricStrip from "./FabricStrip";
 import Rail from "@/components/product/Rail";
+import Reels from "@/components/home/Reels";
 import { products } from "@/lib/products";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
@@ -608,6 +609,10 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       {data.rails.length > 0
         ? data.rails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)
         : <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />}
+
+      {/* ================= REELS — handicraft on film, shoppable like the home page ================= */}
+      {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}
+      {data.reels.length > 0 && <Reels items={data.reels} />}
 
       {/* ================= VOICES ================= */}
       <section className="hc-voices">

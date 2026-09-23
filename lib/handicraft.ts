@@ -1,7 +1,7 @@
-import { apiProductToProduct } from "./home";
+import { apiProductToProduct, buildReels } from "./home";
 import { categoryHref } from "./nav";
 import { site } from "./site";
-import type { Product, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeTagSection, HomeVideoProduct } from "./types";
+import type { Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeTagSection, HomeVideoProduct } from "./types";
 
 export interface HandicraftApiTestimonial {
   id: number;
@@ -18,6 +18,8 @@ export interface HandicraftApiResponse {
     tag_show_home_page: HomeTagSection[];
     category_show_home_page: HomeCategorySection[];
     video_products: HomeVideoProduct[];
+    /** Handicraft pieces on film, for the shoppable reels (same shape as video_products). */
+    video_handicraft_products?: HomeVideoProduct[];
     testimonials: HandicraftApiTestimonial[];
     /** The handicraft categories picked for the Kaarigar Wheel. */
     handicraftFeatCategory?: HandicraftApiFeatCategory[];
@@ -78,10 +80,12 @@ export interface HandicraftData {
   collections: number;
   /** Product rails, as on the home page: the tag rails (New Arrivals, Best Seller) then the stocked categories. */
   rails: { id: string; heading: string; items: Product[] }[];
+  /** Shoppable reels of handicraft pieces, drawn like the home page's. */
+  reels: Reel[];
 }
 
 const EMPTY: HandicraftData = {
-  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, rails: [],
+  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, rails: [], reels: [],
 };
 
 const productHref = (slug: string) => `/product/${slug}`;
@@ -149,6 +153,12 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       video: v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
       voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content, rating: t.rating })),
       collections: d.categories?.length ?? 0,
+      // Thumbnails are borrowed from the rails by product id, same as on the home page.
+      reels: buildReels({
+        tagSections: d.tag_show_home_page ?? [],
+        categorySections: stocked,
+        videoProducts: d.video_handicraft_products ?? [],
+      }).map((r) => ({ ...r, kind: "Handicraft" as const, unit: "piece" })),
       rails: [
         ...(d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
           .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
