@@ -162,9 +162,7 @@
                font-weight:700; padding:.28em .55em; border-radius:99px; background:var(--lac); color:#fff; }
 .st-card__fav{ position:absolute; top:2.2rem; right:.5rem; z-index:4; width:29px; height:29px; border-radius:50%;
                border:0; background:rgba(255,255,255,.94); color:var(--ink-2); cursor:pointer;
-               display:grid; place-items:center; opacity:0; transform:translateY(-5px);
-               transition:.32s var(--ease); }
-.st-card:hover .st-card__fav,.st-prod:hover .st-card__fav,.st-card__fav.on,.st-card__fav:focus-visible{ opacity:1; transform:none; }
+               display:grid; place-items:center; transition:color .32s var(--ease); }
 .st-card__fav:hover{ color:var(--lac); }
 .st-card__fav.on{ color:var(--lac); }
 .st-card__fav svg{ width:14px; height:14px; }
@@ -175,7 +173,6 @@
                font-weight:700; transition:.32s var(--ease); }
 .st-card__add:hover{ background:var(--cobalt); }
 .st-card__add:disabled{ background:var(--paper-3); color:var(--mute); cursor:not-allowed; }
-@media(hover:none){ .st-card__fav{ opacity:1; transform:none; } }
 .st-card__body{ padding:.75rem; display:flex; flex-direction:column; flex:1; }
 .st-card__craft{ font-size:.53rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700; color:var(--cobalt); }
 .st-card__n{ font-size:.9rem; line-height:1.38; color:var(--ink-2); margin:0;
