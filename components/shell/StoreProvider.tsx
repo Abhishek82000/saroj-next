@@ -14,14 +14,26 @@ import { getCounts, type Counts } from "@/lib/counts";
     /wholesale is wholesale — so it can be linked to, bookmarked and refreshed. */
 export type Mode = "retail" | "wholesale";
 
-/** Retail and wholesale each have their own cart. The retail one belongs to the
-    browser; the wholesale one belongs to the logged-in account, so it's stored
-    under the mobile number and is empty while logged out. */
-const CART_KEY = "saroj.cart";
+/** Retail and wholesale each have their own cart, and both belong to the
+    logged-in account: stored under the mobile number, empty while logged out.
+    Nothing goes in either cart without a login. */
+const retailCartKey = (mobile: string) => `saroj.cart.retail.${mobile}`;
 const wholesaleCartKey = (mobile: string) => `saroj.cart.wholesale.${mobile}`;
+/** Before the retail cart was per account it sat here; read once as a fallback. */
+const OLD_CART_KEY = "saroj.cart";
+const readRetailCart = (mobile: string) =>
+  safe.read<CartLine[]>(retailCartKey(mobile), safe.read<CartLine[]>(OLD_CART_KEY, []));
 const USER_KEY = "saroj.user";
-/** Retail and wholesale each keep their own wishlist. */
-const FAV_KEY: Record<Mode, string> = { retail: "saroj.favs", wholesale: "saroj.favs.wholesale" };
+/** The wishlist belongs to the logged-in account — retail and wholesale each
+    kept under the mobile number, and empty while logged out. */
+const favKey = (m: Mode, mobile: string) => `saroj.favs.${m}.${mobile}`;
+/** Before wishlists were per account they sat under these; read once as a fallback. */
+const OLD_FAV_KEY: Record<Mode, string> = { retail: "saroj.favs", wholesale: "saroj.favs.wholesale" };
+const EMPTY_WISHLIST: Record<Mode, Favs> = { retail: {}, wholesale: {} };
+const readWishlist = (mobile: string): Record<Mode, Favs> => ({
+  retail: safe.read<Favs>(favKey("retail", mobile), safe.read<Favs>(OLD_FAV_KEY.retail, {})),
+  wholesale: safe.read<Favs>(favKey("wholesale", mobile), safe.read<Favs>(OLD_FAV_KEY.wholesale, {})),
+});
 type Favs = Record<string, true>;
 const RECENT_KEY = "saroj.recent";
 
@@ -43,7 +55,7 @@ const safe = {
 interface Store {
   /** The cart of the current mode — retail or wholesale, never both. */
   cart: CartLine[];
-  /** Puts a line in `m`'s cart (retail by default). Catalogue pieces go through `addProduct`. */
+  /** Puts a line in `m`'s cart (retail by default), after a login if needed. Catalogue pieces go through `addProduct`. */
   add: (line: Omit<CartLine, "qty"> & { qty?: number }, m?: Mode) => void;
   setQty: (id: string, qty: number) => void;
   remove: (id: string) => void;
@@ -114,10 +126,15 @@ export function useStore() {
 }
 
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [retail, setRetail] = useState<CartLine[]>([]);
+  const [rt, setRt] = useState<{ owner: string | null; lines: CartLine[] }>({ owner: null, lines: [] });
+  const retail = rt.lines;
   const [wh, setWh] = useState<{ owner: string | null; lines: CartLine[] }>({ owner: null, lines: [] });
-  const [wishlist, setWishlist] = useState<Record<Mode, Favs>>({ retail: {}, wholesale: {} });
+  const [wishlist, setWishlist] = useState<Record<Mode, Favs>>(EMPTY_WISHLIST);
   const [counts, setCounts] = useState<Counts | null>(null);
+  /* Latest user and wishlist for callbacks that run as the pending action right
+     after login, whose closures still hold the logged-out values. */
+  const userRef = useRef<User | null>(null);
+  const wishlistRef = useRef(wishlist);
   const refreshCounts = useCallback((token?: string) => {
     if (token) getCounts(token).then((c) => { if (c) setCounts(c); });
   }, []);
@@ -134,6 +151,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const router = useRouter();
   const mode: Mode = isWholesalePath(pathname) ? "wholesale" : "retail";
+  userRef.current = user;
+  wishlistRef.current = wishlist;
   /* State, not a ref: the save effects below must not run until the saved values have been
      read back, or (with React's dev double-mount) they overwrite them with empty ones. */
   const [hydrated, setHydrated] = useState(false);
@@ -158,25 +177,25 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
 
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
-    setRetail(safe.read<CartLine[]>(CART_KEY, []));
-    setWishlist({ retail: safe.read<Favs>(FAV_KEY.retail, {}), wholesale: safe.read<Favs>(FAV_KEY.wholesale, {}) });
     setRecent(safe.read<string[]>(RECENT_KEY, []));
     const saved = safe.read<User | null>(USER_KEY, null);
     setUser(saved);
     if (saved) {
       setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
+      setRt({ owner: saved.mobile, lines: readRetailCart(saved.mobile) });
+      setWishlist(readWishlist(saved.mobile));
       if (saved.token) { syncWishlist(saved.token); refreshCounts(saved.token); }
     }
     setHydrated(true);
   }, [syncWishlist, refreshCounts]);
 
-  useEffect(() => { if (hydrated) safe.write(CART_KEY, retail); }, [hydrated, retail]);
+  useEffect(() => { if (hydrated && rt.owner) safe.write(retailCartKey(rt.owner), rt.lines); }, [hydrated, rt]);
   useEffect(() => { if (hydrated && wh.owner) safe.write(wholesaleCartKey(wh.owner), wh.lines); }, [hydrated, wh]);
   useEffect(() => {
-    if (!hydrated) return;
-    safe.write(FAV_KEY.retail, wishlist.retail);
-    safe.write(FAV_KEY.wholesale, wishlist.wholesale);
-  }, [hydrated, wishlist]);
+    if (!hydrated || !user) return;
+    safe.write(favKey("retail", user.mobile), wishlist.retail);
+    safe.write(favKey("wholesale", user.mobile), wishlist.wholesale);
+  }, [hydrated, user, wishlist]);
   useEffect(() => { if (hydrated) safe.write(RECENT_KEY, recent); }, [hydrated, recent]);
   useEffect(() => { if (hydrated) safe.write(USER_KEY, user); }, [hydrated, user]);
 
@@ -189,7 +208,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   /** Edits one mode's cart, whichever page the shopper happens to be on. */
   const mutate = useCallback((kind: Mode, fn: (lines: CartLine[]) => CartLine[]) => {
     if (kind === "wholesale") setWh((w) => ({ ...w, lines: fn(w.lines) }));
-    else setRetail(fn);
+    else setRt((r) => ({ ...r, lines: fn(r.lines) }));
   }, []);
 
   const addTo = useCallback((kind: Mode, line: Omit<CartLine, "qty"> & { qty?: number }) => {
@@ -205,7 +224,6 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     say("Added · " + line.name.slice(0, 32));
   }, [mutate, say]);
 
-  const add: Store["add"] = useCallback((line, m = "retail") => addTo(m, line), [addTo]);
 
   const setQty = useCallback((id: string, qty: number) => {
     mutate(mode, (prev) =>
@@ -224,16 +242,28 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     pending.current = null;
   }, []);
 
+  /* Reads the ref, not `user`: a pending action runs inside `login`, before the
+     re-render, and may itself call withLogin (an add that was waiting). */
   const withLogin = useCallback((reason: string, action: () => void) => {
-    if (user) { action(); return; }
+    if (userRef.current) { action(); return; }
     pending.current = action;
     openLogin(reason);
-  }, [user, openLogin]);
+  }, [openLogin]);
+
+  const add: Store["add"] = useCallback((line, m = "retail") => {
+    withLogin(m === "wholesale" ? "Log in to add wholesale products to cart" : "Log in to add to cart", () => addTo(m, line));
+  }, [withLogin, addTo]);
 
   const login = useCallback((u: User) => {
     setUser(u);
-    /* Set before the pending action runs, so a wholesale add lands in this account's cart. */
+    /* Set before the pending action runs, so an add lands in this account's cart. */
     setWh({ owner: u.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(u.mobile), []) });
+    setRt({ owner: u.mobile, lines: readRetailCart(u.mobile) });
+    const list = readWishlist(u.mobile);
+    setWishlist(list);
+    /* The pending action (a heart tapped while logged out) runs below, before re-render. */
+    userRef.current = u;
+    wishlistRef.current = list;
     if (u.token) { syncWishlist(u.token); refreshCounts(u.token); }
     setLoginOpen(false);
     say(`Welcome, ${u.name.split(" ")[0]}`);
@@ -247,6 +277,9 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const logout = useCallback(() => {
     setUser(null);
     setWh({ owner: null, lines: [] });
+    setRt({ owner: null, lines: [] });
+    setCartOpen(false);
+    setWishlist(EMPTY_WISHLIST);
     setCounts(null);
     say("Logged out");
   }, [say]);
@@ -274,12 +307,13 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       step: p.cut?.step ?? (p.unit === "metre" ? 0.5 : 1), qty: Math.max(qty ?? 0, rate.minQty),
       href: wholesaleHref(`/product/${p.slug}`), minQty: rate.minQty,
     };
-    withLogin("Log in to add wholesale products to cart", () => addTo("wholesale", line));
-  }, [mode, add, addTo, say, withLogin]);
+    add(line, "wholesale");
+  }, [mode, add, say]);
+
 
   const toggleFav = useCallback((p: Product, m: Mode = mode) => {
-    withLogin("Log in to save pieces for later", () => {
-      const saved = !!wishlist[m][p.slug];
+    withLogin("Log in to save pieces to your wishlist", () => {
+      const saved = !!wishlistRef.current[m][p.slug];
       setWishlist((prev) => {
         const next = { ...prev[m] };
         if (saved) delete next[p.slug];
@@ -290,10 +324,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       /* Fire-and-forget: mirrors the flip server-side. The local state above
          is what the UI shows either way. Only live pieces have the numeric
          id the API wants. */
-      const token = user?.token;
+      const token = userRef.current?.token;
       if (token && p.live?.id) setWishlistRemote(token, p.live.id, m === "wholesale", !saved).then(() => refreshCounts(token));
     });
-  }, [mode, wishlist, say, withLogin, user, refreshCounts]);
+  }, [mode, say, withLogin, refreshCounts]);
 
   const remember = useCallback((q: string) => {
     const term = q.trim();
@@ -318,7 +352,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     user, login, logout, hydrated, updateUser, loginOpen, loginReason, openLogin, closeLogin, withLogin,
     mode, switchMode, href, navItem,
     favs: wishlist[mode], wishlist, toggleFav,
-    favCount: (user && counts?.wishlist[mode]) ?? Object.keys(wishlist[mode]).length,
+    favCount: user ? counts?.wishlist[mode] ?? Object.keys(wishlist[mode]).length : 0,
     recent, remember,
     cartOpen, setCartOpen,
     searchOpen, setSearchOpen,
