@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/components/ui/SiteLink";
 import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import type { BannerSlide } from "@/lib/types";

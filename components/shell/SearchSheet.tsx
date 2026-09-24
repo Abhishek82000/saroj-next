@@ -18,7 +18,7 @@ function highlight(text: string, q: string) {
 }
 
 export default function SearchSheet() {
-  const { searchOpen, setSearchOpen, recent, remember } = useStore();
+  const { searchOpen, setSearchOpen, recent, remember, href } = useStore();
   const { render, shown } = useTransition(searchOpen);
   const [q, setQ] = useState("");
   const [cursor, setCursor] = useState(-1);
@@ -53,7 +53,8 @@ export default function SearchSheet() {
   const shown7 = q.trim() ? hits.slice(0, 7) : hits;
 
   const close = () => setSearchOpen(false);
-  const go = (href: string, term?: string) => { if (term) remember(term); close(); router.push(href); };
+  /* Through the store's `href`, so a search from wholesale stays in wholesale. */
+  const go = (to: string, term?: string) => { if (term) remember(term); close(); router.push(href(to)); };
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") { close(); return; }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/SiteLink";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Page not found", robots: { index: false, follow: true } };

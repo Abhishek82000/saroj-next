@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/SiteLink";
 import Gallery from "./Gallery";
 import BuyBox from "./BuyBox";
 import Rail from "./Rail";

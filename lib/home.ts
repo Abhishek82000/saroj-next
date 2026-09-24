@@ -34,7 +34,7 @@ export async function getHomeData(): Promise<HomeData> {
         alt: s.category?.name ?? s.tag?.name ?? s.name,
         image: s.image_web,
         mobileImage: s.image_mobile || s.image_web,
-        href: s.url || (s.category ? categoryHref(s.category.slug) : s.tag ? `/shop/tag/${s.tag.slug}` : null),
+        href: s.url || (s.category ? categoryHref(s.category.slug) : s.tag ? `/shop/${s.tag.slug}` : null),
       })),
       tagSections: json.data?.tag_show_home_page ?? [],
       // Some categories aren't stocked yet, so the API lists them with no products.

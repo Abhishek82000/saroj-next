@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/SiteLink";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/components/shell/StoreProvider";
 import { useEffect, useRef, useState } from "react";
