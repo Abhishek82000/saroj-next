@@ -16,11 +16,14 @@ function fmtDate(v?: string): string | undefined {
   return `${day}, ${time}`;
 }
 
+const inr = (n: number) => `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const toNum = (v?: string) => { const n = Number(String(v ?? "").replace(/[,\s₹]/g, "")); return Number.isFinite(n) ? n : 0; };
+
 /** "₹230.00" from 230 / "230" / "230.5"; anything already formatted passes through. */
 function fmtMoney(v?: string): string | undefined {
   if (!v) return undefined;
   const n = Number(v.replace(/[,\s₹]/g, ""));
-  return Number.isFinite(n) ? `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : v;
+  return Number.isFinite(n) ? inr(n) : v;
 }
 
 const label = (s: string) => s.replace(/[_-]+/g, " ").trim();
@@ -40,6 +43,7 @@ function Pill({ status }: { status?: string }) {
 
 /* ---------- the list ---------- */
 
+<<<<<<< HEAD
 /**
  * GET /api/auth/orders, Bearer-authenticated — see lib/orders.ts for why its
  * fields are read defensively rather than trusted. "View" opens that order
@@ -47,6 +51,9 @@ function Pill({ status }: { status?: string }) {
  * back button and a refresh both land where you'd expect.
  */
 export default function OrdersTab({ token, openId }: { token?: string; openId?: string }) {
+=======
+export default function OrdersTab({ token }: { token?: string }) {
+>>>>>>> 8ad5fa75bc7dc150c890f7f9ac071ea07b93497e
   const router = useRouter();
   const [state, setState] = useState<{ loading: boolean; error: string; orders: Order[] }>({ loading: true, error: "", orders: [] });
 
@@ -130,10 +137,8 @@ function OrderDetail({ token, id, summary, onBack }: { token: string; id: string
   if (state.loading) return <>{back}<p className="st-account__empty">Loading order…</p></>;
   if (state.error || !state.order) return <>{back}<p className="st-account__empty">Couldn&rsquo;t load this order — {state.error}</p></>;
 
-  // The detail wins; the list row fills whatever the detail left out.
-  const o: Order = { ...summary, ...state.order };
-  for (const k of ["status", "total", "placedAt"] as const) o[k] = state.order[k] ?? summary?.[k];
-  o.id = summary?.id ?? state.order.id;
+  // Detail wins; the list row fills whatever the detail left out.
+  const o: Order = { ...summary, ...state.order, id: summary?.id ?? state.order.id };
 
   const facts: [string, ReactNode][] = [
     ["Name", o.name],
@@ -143,7 +148,7 @@ function OrderDetail({ token, id, summary, onBack }: { token: string; id: string
     )],
     ["Address", o.address],
     ["Status", o.status && label(o.status)],
-    ["Location", o.location],
+    ["Location", o.tracking?.location],
     ["Total", fmtMoney(o.total)],
   ];
 
@@ -181,32 +186,21 @@ function OrderDetail({ token, id, summary, onBack }: { token: string; id: string
   );
 }
 
-/** Placed → Confirmed → Shipped → Delivered, each ticked off by how far the
-    order's status (or its tracking feed) says it has got. A cancelled order
-    stops after Placed with a Cancelled step instead. */
+/** Placed → Confirmed → Shipped → Delivered, each ticked off by its own
+    timestamp. A cancellation replaces the Delivered step with Cancelled,
+    keeping whatever stages actually happened before it. */
 function StatusTimeline({ o }: { o: Order }) {
-  const s = (o.status ?? "").toLowerCase();
-  const cancelled = /cancel|reject|fail/.test(s);
-  const stage =
-    /deliver(ed)?$|^delivered|complete/.test(s) && !/undeliver|not deliver/.test(s) ? 4
-    : /ship|transit|dispatch|out for/.test(s) || o.tracking.length > 0 ? 3
-    : /confirm|ready|process|pack|pick|manifest/.test(s) ? 2
-    : 1;
   const place = [o.city, o.state].filter(Boolean).join(", ");
-  const last = o.tracking[0];
 
   type Step = { title: string; at?: string; lines: [string, string | undefined][]; done: boolean; bad?: boolean };
-  const steps: Step[] = cancelled
-    ? [
-        { title: "Order Placed", at: o.placedAt, lines: [["Location", place]], done: true },
-        { title: "Order Cancelled", at: o.updatedAt, lines: [], done: true, bad: true },
-      ]
-    : [
-        { title: "Order Placed", at: o.placedAt, lines: [["Location", place]], done: true },
-        { title: "Order Confirmed", at: o.confirmedAt, lines: [], done: stage >= 2 },
-        { title: "Order Shipped", at: last?.at, lines: [["Current Location", last?.location ?? o.location]], done: stage >= 3 },
-        { title: "Order Delivered", at: o.deliveredAt, lines: [["Delivery Address", o.address]], done: stage >= 4 },
-      ];
+  const steps: Step[] = [
+    { title: "Order Placed", at: o.placedAt, lines: [["Location", place]], done: true },
+    { title: "Order Confirmed", at: o.confirmedAt, lines: [["Warehouse", "Jaipur"]], done: !!o.confirmedAt },
+    { title: "Order Shipped", at: o.shippedAt, lines: [["Current Location", o.tracking?.location]], done: !!o.shippedAt },
+    o.cancelledAt
+      ? { title: "Order Cancelled", at: o.cancelledAt, lines: [], done: true, bad: true }
+      : { title: "Order Delivered", at: o.deliveredAt, lines: [["Delivery Address", o.deliveryAddress]], done: !!o.deliveredAt },
+  ];
 
   return (
     <ol className="st-otimeline">
@@ -221,9 +215,16 @@ function StatusTimeline({ o }: { o: Order }) {
   );
 }
 
-/** Same line markup as the cart drawer, minus the qty stepper. */
+/** Line items plus the price breakdown from the order's own amount fields. */
 function Items({ o }: { o: Order }) {
   if (!o.items.length) return <p className="st-account__empty">Item details aren&rsquo;t available for this order yet.</p>;
+
+  const subTotal = o.items.reduce((s, it) => s + toNum(it.netPrice) * toNum(it.qty), 0);
+  const gst = o.items.reduce((s, it) => s + toNum(it.total) * 0.05, 0);
+  const discount = toNum(o.discount);
+  const coupon = toNum(o.couponDiscount);
+  const shipping = toNum(o.shipping);
+
   return (
     <div className="st-oitems">
       {o.items.map((it, i) => (
@@ -239,22 +240,73 @@ function Items({ o }: { o: Order }) {
           </div>
         </div>
       ))}
+
+      <dl className="st-osummary">
+        <div><dt>Total Price</dt><dd>{inr(subTotal)}</dd></div>
+        {discount > 0 && <div><dt>Total Discounts</dt><dd>{inr(discount)}</dd></div>}
+        {coupon > 0 && <div><dt>Coupon Discount{o.couponCode ? ` (${o.couponCode})` : ""}</dt><dd>{inr(coupon)}</dd></div>}
+        <div><dt>Total Shipping</dt><dd>{inr(shipping)}</dd></div>
+        {o.isWholesale && <div><dt>GST</dt><dd>{inr(gst)}</dd></div>}
+        <div className="st-osummary__total"><dt>Order Total</dt><dd>{fmtMoney(o.total)}</dd></div>
+      </dl>
     </div>
   );
 }
 
+/** Courier details + live status + scan history. */
 function Tracking({ o }: { o: Order }) {
-  if (!o.tracking.length) return <p className="st-account__empty">No tracking updates yet — they appear here once the courier picks up your order.</p>;
+  const [copied, setCopied] = useState(false);
+  const t = o.tracking;
+
+  const copy = (v?: string) => {
+    if (!v) return;
+    navigator.clipboard?.writeText(v).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }).catch(() => {});
+  };
+
+  const meta: [string, ReactNode][] = [
+    ["Courier", o.trackingId ? "Assigned" : (o.deliveryType ?? "Not Assigned")],
+    ["Tracking Number", o.trackingId && (
+      <>{o.trackingId}{" "}
+        <button type="button" className="st-copy" onClick={() => copy(o.trackingId)}>{copied ? "Copied" : "Copy"}</button>
+      </>
+    )],
+    ["Tracking URL", o.trackingUrl && <a href={o.trackingUrl} target="_blank" rel="noreferrer">{o.trackingUrl}</a>],
+    ["Current Status", t && (t.statusType ? `${t.status} (${t.statusType})` : t.status)],
+    ["Current Location", t?.location],
+    ["Expected Delivery", t?.expectedDelivery && fmtDate(t.expectedDelivery)],
+  ];
+
+  const hasMeta = meta.some(([, v]) => v);
+
   return (
-    <ol className="st-otimeline">
-      {o.tracking.map((t, i) => (
-        <li key={i} className={i === 0 ? "done" : "past"}>
-          <b>{t.status}</b>
-          {t.at && <span>{fmtDate(t.at)}</span>}
-          {t.location && <span><b>Location :</b> {t.location}</span>}
-          {t.note && <span>{t.note}</span>}
-        </li>
-      ))}
-    </ol>
+    <div className="st-otracking">
+      {hasMeta && (
+        <dl className="st-odetail__facts">
+          {meta.filter(([, v]) => v).map(([k, v]) => (
+            <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+          ))}
+        </dl>
+      )}
+
+      {t && t.scans.length > 0 ? (
+        <>
+          <h6 className="st-otracking__h">Scan History</h6>
+          <ol className="st-otimeline">
+            {t.scans.map((s, i) => (
+              <li key={i} className={i === 0 ? "done" : "past"}>
+                <b>{s.status}</b>
+                {s.at && <span>{fmtDate(s.at)}</span>}
+                {s.location && <span><b>Location :</b> {s.location}</span>}
+                {s.note && <span>{s.note}</span>}
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : o.waybill ? (
+        <p className="st-account__empty">Live tracking isn&rsquo;t available right now. Please check back shortly.</p>
+      ) : (
+        <p className="st-account__empty">Your order hasn&rsquo;t been shipped yet. Tracking details will appear here once it&rsquo;s dispatched.</p>
+      )}
+    </div>
   );
 }
