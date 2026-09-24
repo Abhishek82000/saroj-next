@@ -14,7 +14,7 @@ import type { Product } from "@/lib/types";
 export default function Rail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
-  const { addProduct, mode, href } = useStore();
+  const { addProduct, mode, href, wishlist, toggleFav } = useStore();
   const { rail, nudge, hold } = useAutoRail(items.length);
 
   return (
@@ -46,6 +46,11 @@ export default function Rail({
                   <Photo src={p.images[0].src} alt={p.name} note={p.images[0].note} sizes="232px" />
                 </Link>
                 {off > 0 && <span className="st-prod__off">{off}% off</span>}
+                {/* Same heart as the shop grid's cards — login-gated, saved to this mode's wishlist. */}
+                <button type="button" className={`st-card__fav${wishlist[mode][p.slug] ? " on" : ""}`}
+                  aria-pressed={!!wishlist[mode][p.slug]} aria-label={`Save ${p.name}`} onClick={() => toggleFav(p, mode)}>
+                  <Icon name="heart" size={14} fill={wishlist[mode][p.slug] ? "currentColor" : "none"} strokeWidth={1.6} />
+                </button>
                 <div className="st-prod__body">
                   <Link href={href(`/product/${p.slug}`)} className="st-prod__name">{p.name}</Link>
                   {known && <span className="st-prod__price"><b>{inr(view.price)}</b>{view.mrp > 0 && <s>{inr(view.mrp)}</s>}</span>}

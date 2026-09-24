@@ -164,7 +164,7 @@
                border:0; background:rgba(255,255,255,.94); color:var(--ink-2); cursor:pointer;
                display:grid; place-items:center; opacity:0; transform:translateY(-5px);
                transition:.32s var(--ease); }
-.st-card:hover .st-card__fav,.st-card__fav.on,.st-card__fav:focus-visible{ opacity:1; transform:none; }
+.st-card:hover .st-card__fav,.st-prod:hover .st-card__fav,.st-card__fav.on,.st-card__fav:focus-visible{ opacity:1; transform:none; }
 .st-card__fav:hover{ color:var(--lac); }
 .st-card__fav.on{ color:var(--lac); }
 .st-card__fav svg{ width:14px; height:14px; }
