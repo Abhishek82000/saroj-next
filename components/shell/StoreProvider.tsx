@@ -6,7 +6,8 @@ import type { CartLine, Product } from "@/lib/types";
 import type { User } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate } from "@/lib/wholesale";
-import { getWishlist, toggleWishlistRemote } from "@/lib/wishlist";
+import { getWishlist, setWishlistRemote } from "@/lib/wishlist";
+import { getCounts, type Counts } from "@/lib/counts";
 
 /** Retail shows the ordinary catalogue; wholesale shows trade rates, GST extra.
     Which one is on is decided by the URL — everything under /wholesale-fabric and
@@ -19,7 +20,9 @@ export type Mode = "retail" | "wholesale";
 const CART_KEY = "saroj.cart";
 const wholesaleCartKey = (mobile: string) => `saroj.cart.wholesale.${mobile}`;
 const USER_KEY = "saroj.user";
-const FAV_KEY = "saroj.favs";
+/** Retail and wholesale each keep their own wishlist. */
+const FAV_KEY: Record<Mode, string> = { retail: "saroj.favs", wholesale: "saroj.favs.wholesale" };
+type Favs = Record<string, true>;
 const RECENT_KEY = "saroj.recent";
 
 /** localStorage that never throws — private mode, sandboxed frames, SSR. */
@@ -40,8 +43,8 @@ const safe = {
 interface Store {
   /** The cart of the current mode — retail or wholesale, never both. */
   cart: CartLine[];
-  /** Puts a retail line in the retail cart. Pieces go through `addProduct`. */
-  add: (line: Omit<CartLine, "qty"> & { qty?: number }) => void;
+  /** Puts a line in `m`'s cart (retail by default). Catalogue pieces go through `addProduct`. */
+  add: (line: Omit<CartLine, "qty"> & { qty?: number }, m?: Mode) => void;
   setQty: (id: string, qty: number) => void;
   remove: (id: string) => void;
   subtotal: number;
@@ -79,8 +82,15 @@ interface Store {
       same page's retail twin. */
   navItem: (link: { label: string; href: string }) => { label: string; href: string };
 
-  favs: Record<string, true>;
-  toggleFav: (slug: string) => void;
+  /** The current mode's wishlist, keyed by product slug. */
+  favs: Favs;
+  /** Both wishlists — the account page shows either one whatever the URL's mode. */
+  wishlist: Record<Mode, Favs>;
+  /** Saves/unsaves a piece in `m`'s wishlist (the current mode's by default). */
+  toggleFav: (p: Product, m?: Mode) => void;
+  /** The current mode's wishlist size for the header badge — the account's
+      server-side count (GET /api/auth/count-data) once known, else local. */
+  favCount: number;
 
   recent: string[];
   remember: (q: string) => void;
@@ -106,7 +116,11 @@ export function useStore() {
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
   const [retail, setRetail] = useState<CartLine[]>([]);
   const [wh, setWh] = useState<{ owner: string | null; lines: CartLine[] }>({ owner: null, lines: [] });
-  const [favs, setFavs] = useState<Record<string, true>>({});
+  const [wishlist, setWishlist] = useState<Record<Mode, Favs>>({ retail: {}, wholesale: {} });
+  const [counts, setCounts] = useState<Counts | null>(null);
+  const refreshCounts = useCallback((token?: string) => {
+    if (token) getCounts(token).then((c) => { if (c) setCounts(c); });
+  }, []);
   const [recent, setRecent] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -125,38 +139,44 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const [hydrated, setHydrated] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  /** Fire-and-forget: pulls the saved slugs from GET /api/auth/wishlist and
-      unions them into local `favs`, so a piece saved on another device shows
+  /** Fire-and-forget: pulls both lists' saved slugs from GET /api/auth/wishlist
+      and unions them into the local wishlists, so a piece saved on another device shows
       up here too. Never blocks or surfaces an error — the local list is
       already the source of truth for what the UI shows. */
   const syncWishlist = useCallback((token: string) => {
-    getWishlist(token).then((r) => {
-      if (!r.ok) return;
-      setFavs((prev) => {
-        const next = { ...prev };
-        for (const slug of r.slugs) next[slug] = true;
-        return next;
+    for (const m of ["retail", "wholesale"] as const) {
+      getWishlist(token, m === "wholesale").then((r) => {
+        if (!r.ok) return;
+        setWishlist((prev) => {
+          const next = { ...prev[m] };
+          for (const slug of r.slugs) next[slug] = true;
+          return { ...prev, [m]: next };
+        });
       });
-    });
+    }
   }, []);
 
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
     setRetail(safe.read<CartLine[]>(CART_KEY, []));
-    setFavs(safe.read<Record<string, true>>(FAV_KEY, {}));
+    setWishlist({ retail: safe.read<Favs>(FAV_KEY.retail, {}), wholesale: safe.read<Favs>(FAV_KEY.wholesale, {}) });
     setRecent(safe.read<string[]>(RECENT_KEY, []));
     const saved = safe.read<User | null>(USER_KEY, null);
     setUser(saved);
     if (saved) {
       setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
-      if (saved.token) syncWishlist(saved.token);
+      if (saved.token) { syncWishlist(saved.token); refreshCounts(saved.token); }
     }
     setHydrated(true);
-  }, [syncWishlist]);
+  }, [syncWishlist, refreshCounts]);
 
   useEffect(() => { if (hydrated) safe.write(CART_KEY, retail); }, [hydrated, retail]);
   useEffect(() => { if (hydrated && wh.owner) safe.write(wholesaleCartKey(wh.owner), wh.lines); }, [hydrated, wh]);
-  useEffect(() => { if (hydrated) safe.write(FAV_KEY, favs); }, [hydrated, favs]);
+  useEffect(() => {
+    if (!hydrated) return;
+    safe.write(FAV_KEY.retail, wishlist.retail);
+    safe.write(FAV_KEY.wholesale, wishlist.wholesale);
+  }, [hydrated, wishlist]);
   useEffect(() => { if (hydrated) safe.write(RECENT_KEY, recent); }, [hydrated, recent]);
   useEffect(() => { if (hydrated) safe.write(USER_KEY, user); }, [hydrated, user]);
 
@@ -185,7 +205,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     say("Added · " + line.name.slice(0, 32));
   }, [mutate, say]);
 
-  const add: Store["add"] = useCallback((line) => addTo("retail", line), [addTo]);
+  const add: Store["add"] = useCallback((line, m = "retail") => addTo(m, line), [addTo]);
 
   const setQty = useCallback((id: string, qty: number) => {
     mutate(mode, (prev) =>
@@ -214,26 +234,27 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setUser(u);
     /* Set before the pending action runs, so a wholesale add lands in this account's cart. */
     setWh({ owner: u.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(u.mobile), []) });
-    if (u.token) syncWishlist(u.token);
+    if (u.token) { syncWishlist(u.token); refreshCounts(u.token); }
     setLoginOpen(false);
     say(`Welcome, ${u.name.split(" ")[0]}`);
     const next = pending.current;
     pending.current = null;
     next?.();
-  }, [say, syncWishlist]);
+  }, [say, syncWishlist, refreshCounts]);
 
   const updateUser = useCallback((patch: Partial<Pick<User, "name" | "email">>) => setUser((u) => (u ? { ...u, ...patch } : u)), []);
 
   const logout = useCallback(() => {
     setUser(null);
     setWh({ owner: null, lines: [] });
+    setCounts(null);
     say("Logged out");
   }, [say]);
 
   const switchMode = useCallback((m: Mode) => router.push(swapMode(pathname, m)), [router, pathname]);
   const href = useCallback((retail: string) => (mode === "wholesale" ? wholesaleHref(retail) : retail), [mode]);
   const navItem: Store["navItem"] = useCallback((link) => (
-    mode === "wholesale" && link.href === WHOLESALE_HOME
+    mode === "wholesale" && (link.href ?? "").replace(/^https?:\/\/[^/]+/, "").replace(/\/+$/, "") === WHOLESALE_HOME
       ? { label: "Retail", href: swapMode(pathname, "retail") }
       : { label: link.label, href: href(link.href) }
   ), [mode, pathname, href]);
@@ -256,20 +277,23 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     withLogin("Log in to add wholesale products to cart", () => addTo("wholesale", line));
   }, [mode, add, addTo, say, withLogin]);
 
-  const toggleFav = useCallback((slug: string) => {
+  const toggleFav = useCallback((p: Product, m: Mode = mode) => {
     withLogin("Log in to save pieces for later", () => {
-      setFavs((prev) => {
-        const next = { ...prev };
-        if (next[slug]) { delete next[slug]; say("Removed from saved"); }
-        else { next[slug] = true; say("Saved for later"); }
-        return next;
+      const saved = !!wishlist[m][p.slug];
+      setWishlist((prev) => {
+        const next = { ...prev[m] };
+        if (saved) delete next[p.slug];
+        else next[p.slug] = true;
+        return { ...prev, [m]: next };
       });
+      say(saved ? "Removed from wishlist" : "Saved to wishlist");
       /* Fire-and-forget: mirrors the flip server-side. The local state above
-         is what the UI shows either way — see lib/wishlist.ts for why this
-         call's shape is still a best guess. */
-      if (user?.token) toggleWishlistRemote(user.token, slug);
+         is what the UI shows either way. Only live pieces have the numeric
+         id the API wants. */
+      const token = user?.token;
+      if (token && p.live?.id) setWishlistRemote(token, p.live.id, m === "wholesale", !saved).then(() => refreshCounts(token));
     });
-  }, [say, withLogin, user]);
+  }, [mode, wishlist, say, withLogin, user, refreshCounts]);
 
   const remember = useCallback((q: string) => {
     const term = q.trim();
@@ -293,7 +317,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     addProduct,
     user, login, logout, hydrated, updateUser, loginOpen, loginReason, openLogin, closeLogin, withLogin,
     mode, switchMode, href, navItem,
-    favs, toggleFav,
+    favs: wishlist[mode], wishlist, toggleFav,
+    favCount: (user && counts?.wishlist[mode]) ?? Object.keys(wishlist[mode]).length,
     recent, remember,
     cartOpen, setCartOpen,
     searchOpen, setSearchOpen,

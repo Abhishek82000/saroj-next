@@ -6,7 +6,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** /account — the page the header's avatar opens. Everything in it is about
+/** /account and everything under it (/account/wishlist, /account/wishlist/wholesale,
+    /account/orders/<id>, ...) — the page the header's avatar opens. Everything in it is about
     the signed-in visitor, so it renders on the client from the store. */
 export default function AccountPage() {
   return <AccountView />;

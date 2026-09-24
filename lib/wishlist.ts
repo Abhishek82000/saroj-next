@@ -1,23 +1,19 @@
-import { authedCall, authedGet } from "./auth";
+import { authedCall } from "./auth";
 
 /**
- * The signed-in visitor's wishlist, server-side — Bearer-authenticated, the
- * same gate as `me`/orders (see `authedCall` in lib/auth.ts):
+ * The signed-in visitor's wishlists, server-side — Bearer-authenticated, the
+ * same gate as `me`/orders (see `authedCall` in lib/auth.ts). Retail and
+ * wholesale are two separate lists, told apart by `is_wholesale` (0 / 1):
  *
- *   GET  /api/auth/wishlist                       → the saved pieces
- *   POST /api/auth/wishlist?product_slug=<slug>   → add/remove one (toggle)
+ *   POST /api/auth/add-to-wishlist?product_id=<id>&is_wholesale=<0|1>
+ *   POST /api/auth/remove-to-wishlist?product_id=<id>&is_wholesale=<0|1>
+ *   GET  /api/auth/wishlist?is_wholesale=<0|1>     → the saved pieces
  *
- * Unconfirmed: this pairs with the *local* toggle in StoreProvider
- * (`toggleFav`, keyed by product slug, `saroj.favs` in localStorage), which
- * already gates on login. Nothing here has been tried against a real
- * account yet, so `product_slug` as the field name, POST-as-a-toggle, and
- * the response shape are all a best guess — `product_slug` because that's
- * the only id every `Product` reliably carries (the static catalogue has no
- * numeric id; only pieces from the live API do, under `live`), and query
- * params rather than a JSON body because that's how every other write in
- * this API family (send-otp, verify-otp, register) takes theirs. Check live
- * and fix the field name / verb here once a real response is seen — same as
- * lib/orders.ts was written before its shape was confirmed.
+ * Add and remove are confirmed by the backend (both POST-only). The GET's
+ * path and response shape are still a best guess — check live once a real
+ * response is seen.
+ * `product_id` is the live API's numeric id, so pieces only in the static
+ * catalogue (no `live`) stay local-only.
  */
 
 /** First array of plain objects found breadth-first under `root` (see
@@ -56,19 +52,24 @@ export type Failure = { ok: false; message: string };
     this after login (or on app start, once a session token is known) to
     reconcile the local `favs` with whatever the account actually has saved
     on other devices. */
-export async function getWishlist(token: string): Promise<{ ok: true; slugs: string[] } | Failure> {
-  const r = await authedGet("wishlist", token);
+export async function getWishlist(token: string, wholesale: boolean): Promise<{ ok: true; slugs: string[] } | Failure> {
+  const r = await authedCall("wishlist", token, { method: "GET", query: { is_wholesale: wholesale ? "1" : "0" } });
   if (!r.ok) return r;
   const arr = findArray(r.json) ?? [];
   const slugs = arr.map(slugOf).filter((s): s is string => !!s);
   return { ok: true, slugs };
 }
 
-/** Adds or removes one piece server-side. Fire-and-forget from the caller's
+/** Adds (`save`) or removes one piece server-side. Fire-and-forget from the caller's
     point of view — the local toggle in StoreProvider is the source of truth
     for the UI and already flipped by the time this is called; a failure
     here just means the next `getWishlist` won't see the change yet. */
-export async function toggleWishlistRemote(token: string, slug: string): Promise<{ ok: true } | Failure> {
-  const r = await authedCall("wishlist", token, { method: "POST", query: { product_slug: slug } });
+export async function setWishlistRemote(
+  token: string, productId: number, wholesale: boolean, save: boolean,
+): Promise<{ ok: true } | Failure> {
+  const r = await authedCall(save ? "add-to-wishlist" : "remove-to-wishlist", token, {
+    method: "POST",
+    query: { product_id: String(productId), is_wholesale: wholesale ? "1" : "0" },
+  });
   return r.ok ? { ok: true } : r;
 }

@@ -16,8 +16,6 @@ import { discount } from "@/lib/products";
 import { inr, site, unitLabel } from "@/lib/site";
 import type { Product, ProductDetail } from "@/lib/types";
 
-const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL ?? "/login";
-
 /**
  * Everything interactive on a product page.
  *
@@ -27,7 +25,7 @@ const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL ?? "/login";
  * catalogue so the marketing pages keep working.
  */
 export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDetail }) {
-  const { add, favs, toggleFav, say } = useStore();
+  const { add, wishlist, toggleFav, say, user, openLogin, withLogin } = useStore();
   const live = detail?.live ?? p.live;
   const wholesale = detail?.mode === "wholesale";
   const mode = live?.cut.mode ?? (p.cut ? "length" : "quantity");
@@ -58,9 +56,11 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
   const stockLeft = variant?.stock ?? live?.stock ?? 999;
 
   const total = price * (qty || 1);
-  const saved = !!favs[p.slug];
+  const saved = !!wishlist[wholesale ? "wholesale" : "retail"][p.slug];
   const soldOut = stockLeft <= 0 || p.stock === "out";
-  const gateCart = detail?.requiresLogin ?? false;
+  /* The API renders without the visitor's session, so it always says "log in"
+     for wholesale — only gate while nobody is actually logged in here. */
+  const gateCart = !user && (detail?.requiresLogin ?? wholesale);
 
   const coupons = detail
     ? detail.coupons
@@ -89,7 +89,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
 
   const addThis = () => {
     if (soldOut) { say("Out of stock just now"); return; }
-    add({
+    const line = {
       id: variant?.variationId ? `${p.slug}#${variant.variationId}` : p.slug,
       name: variant?.combination ? `${p.name} · ${variant.combination}` : p.name,
       price,
@@ -98,7 +98,11 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       step: stepQty,
       qty: qty || 1,
       href: productHref(p.slug, wholesale),
-    });
+      ...(wholesale ? { minQty } : {}),
+    };
+    /* Wholesale pages fill the wholesale cart only, and only for a logged-in account. */
+    if (wholesale) withLogin("Log in to add wholesale products to cart", () => add(line, "wholesale"));
+    else add(line);
   };
 
   const copy = async (code: string) => {
@@ -219,16 +223,17 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       {mode !== "enquiry" && (
         <div className="st-buy">
           {gateCart ? (
-            <a href={LOGIN_URL} className="st-btn st-btn--solid" style={{ flex: 1 }}>
+            <button type="button" className="st-btn st-btn--solid" style={{ flex: 1 }}
+              onClick={() => openLogin("Log in to buy wholesale")}>
               Sign in to buy wholesale
-            </a>
+            </button>
           ) : (
             <button ref={addRef} type="button" className="st-btn st-btn--solid" disabled={soldOut} onClick={addThis}>
               {soldOut ? "Sold out" : `Add to cart · ${inr(total)}`}
             </button>
           )}
           <button type="button" className={`st-heart${saved ? " on" : ""}`} aria-pressed={saved}
-            aria-label="Save to wishlist" onClick={() => toggleFav(p.slug)}>
+            aria-label="Save to wishlist" onClick={() => toggleFav(p, wholesale ? "wholesale" : "retail")}>
             <Icon name="heart" size={19} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
           </button>
         </div>
@@ -293,7 +298,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
               <small>{qty}{mode === "length" ? " m" : ""} · {inr(total)}</small>
             </div>
             {gateCart
-              ? <a className="st-btn st-btn--solid" href={LOGIN_URL}>Sign in</a>
+              ? <button type="button" className="st-btn st-btn--solid" onClick={() => openLogin("Log in to buy wholesale")}>Sign in</button>
               : <button type="button" className="st-btn st-btn--solid" onClick={addThis}>Add to cart</button>}
           </div>
         </Portal>

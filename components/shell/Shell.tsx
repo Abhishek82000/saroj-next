@@ -17,13 +17,11 @@ export default async function Shell({ children }: { children: React.ReactNode })
   return (
     <StoreProvider>
       <Ticker />
-      <Nav navMenu={navMenu as unknown as React.ComponentProps<typeof Nav>["navMenu"]} />
+      <Nav navMenu={navMenu} />
       {children}
       <Footer />
       <WhatsApp />
-      <MenuDrawer
-        navMenu={navMenu as unknown as React.ComponentProps<typeof MenuDrawer>["navMenu"]}
-      />
+      <MenuDrawer navMenu={navMenu} />
       <CartDrawer />
       <SearchSheet />
       <LoginModal />

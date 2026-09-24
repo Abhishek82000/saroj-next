@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { initialOf } from "@/components/shell/AccountMenu";
-import { useStore } from "@/components/shell/StoreProvider";
+import { useStore, type Mode } from "@/components/shell/StoreProvider";
 import ProductCard from "@/components/shop/ProductCard";
 import OrdersTab from "@/components/account/OrdersTab";
 import { isValidEmail } from "@/lib/auth";
@@ -28,7 +28,7 @@ const isTab = (v: string | null): v is Tab => TABS.some((t) => t.key === v);
     fetched from `GET /api/products/<slug>` the same way the product page
     itself does, so nothing falls back to a plain link. A slug the API 404s
     on (deleted, mistyped) just quietly drops rather than spinning forever. */
-function WishlistTab({ slugs }: { slugs: string[] }) {
+function WishlistTab({ slugs, mode }: { slugs: string[]; mode: Mode }) {
   const [live, setLive] = useState<Record<string, Product | null>>({});
   const key = slugs.join(",");
 
@@ -52,17 +52,21 @@ function WishlistTab({ slugs }: { slugs: string[] }) {
 
   return (
     <>
-      <div className="st-grid" data-cols="3">{cards.map((p) => <ProductCard key={p.slug} p={p} />)}</div>
+      <div className="st-grid" data-cols="3">{cards.map((p) => <ProductCard key={p.slug} p={p} mode={mode} />)}</div>
       {loading && <p className="st-account__empty">Loading more…</p>}
     </>
   );
 }
 
 function Account() {
-  const { user, hydrated, openLogin, logout, updateUser, favs, say } = useStore();
+  const { user, hydrated, openLogin, logout, updateUser, wishlist, say } = useStore();
   const router = useRouter();
-  const q = useSearchParams().get("tab");
-  const tab: Tab = isTab(q) ? q : "dashboard";
+  /* Everything is in the path: /account/<tab>, /account/wishlist/wholesale,
+     /account/orders/<order id>. */
+  const [seg, sub] = usePathname().split("/").slice(2).map(decodeURIComponent);
+  const tab: Tab = isTab(seg ?? null) ? (seg as Tab) : "dashboard";
+  /* Retail by default; /account/wishlist/wholesale shows the wholesale wishlist. */
+  const list: Mode = tab === "wishlist" && sub === "wholesale" ? "wholesale" : "retail";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [err, setErr] = useState("");
@@ -87,8 +91,8 @@ function Account() {
     updateUser({ name: name.trim(), email: email.trim() });
     say("Profile saved");
   };
-  const go = (t: Tab) => router.push(t === "dashboard" ? "/account" : `/account?tab=${t}`);
-  const favSlugs = Object.keys(favs);
+  const go = (t: Tab) => router.push(t === "dashboard" ? "/account" : `/account/${t}`);
+  const favSlugs = Object.keys(wishlist[list]);
 
   const cards = [
     { tab: "profile" as const, icon: "user", title: "Profile", copy: "Manage your account information" },
@@ -146,9 +150,21 @@ function Account() {
             </div>
           )}
 
-          {tab === "wishlist" && <WishlistTab slugs={favSlugs} />}
+          {tab === "wishlist" && (
+            <>
+              <div className="st-tabs st-account__lists" role="tablist" aria-label="Wishlist">
+                {(["retail", "wholesale"] as const).map((m) => (
+                  <button key={m} type="button" role="tab" aria-selected={m === list} className={`st-tab${m === list ? " on" : ""}`}
+                    onClick={() => router.replace(`/account/wishlist${m === "wholesale" ? "/wholesale" : ""}`)}>
+                    {m === "retail" ? "Retail" : "Wholesale"} ({Object.keys(wishlist[m]).length})
+                  </button>
+                ))}
+              </div>
+              <WishlistTab key={list} slugs={favSlugs} mode={list} />
+            </>
+          )}
 
-          {tab === "orders" && <OrdersTab token={user.token} />}
+          {tab === "orders" && <OrdersTab token={user.token} openId={tab === "orders" ? sub : undefined} />}
         </section>
       </div>
     </div>
@@ -156,5 +172,5 @@ function Account() {
 }
 
 export default function AccountView() {
-  return <Suspense><Account /></Suspense>;
+  return <Account />;
 }

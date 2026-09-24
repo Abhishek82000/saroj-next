@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
@@ -26,7 +27,8 @@ const fallback = [
 ] as unknown as CommonMenuItem[];
 
 export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
-  const { count, pulse, setCartOpen, setSearchOpen, setMenuOpen, href, mode } = useStore();
+  const { count, pulse, setCartOpen, setSearchOpen, setMenuOpen, href, navItem, mode, favCount, withLogin } = useStore();
+  const router = useRouter();
   const items = navMenu?.length > 0 ? navMenu : fallback;
   const [stuck, setStuck] = useState(false);
   const badge = useRef<HTMLSpanElement>(null);
@@ -70,7 +72,7 @@ export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
       <nav aria-label="Primary">
         <ul className="st-links">
           {items.map((item) => (
-            <NavItem key={item.id} item={item} resolve={href} />
+            <NavItem key={item.id} item={item} resolve={href} link={navItem} />
           ))}
         </ul>
       </nav>
@@ -80,6 +82,16 @@ export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
           <Icon name="search" />
         </button>
         <AccountMenu />
+        <button
+          className="st-icn"
+          onClick={() => withLogin("Log in to see your wishlist", () => router.push(`/account/wishlist${mode === "wholesale" ? "/wholesale" : ""}`))}
+          aria-label={`Wishlist, ${favCount} ${favCount === 1 ? "item" : "items"}`}
+        >
+          <Icon name="heart" />
+          <span className={`st-count${favCount ? " on" : ""}`} aria-hidden="true">
+            {favCount > 99 ? "99+" : favCount}
+          </span>
+        </button>
         <button
           className="st-icn"
           onClick={() => setCartOpen(true)}
@@ -103,15 +115,21 @@ export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
 /* full-width mega menu — picked from `mega` + whether it has children.*/
 /* ------------------------------------------------------------------ */
 
-function NavItem({ item, resolve }: { item: CommonMenuItem; resolve: (h: string) => string }) {
+function NavItem({ item, resolve, link }: {
+  item: CommonMenuItem;
+  resolve: (h: string) => string;
+  /** The store's `navItem` — turns "Wholesale @80" into "Retail" while in wholesale mode. */
+  link: (l: { label: string; href: string }) => { label: string; href: string };
+}) {
   const itemHref = resolve(resolveHref(item));
   const children = item.children ?? [];
 
   // No children -> just a link, nothing to open.
   if (children.length === 0) {
+    const l = link({ label: item.name, href: resolveHref(item) });
     return (
       <li>
-        <Link href={itemHref}>{item.name}</Link>
+        <Link href={l.href}>{l.label}</Link>
       </li>
     );
   }

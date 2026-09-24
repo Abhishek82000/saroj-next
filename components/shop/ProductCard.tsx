@@ -3,20 +3,25 @@ import Link from "next/link";
 import { useState } from "react";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
-import { useStore } from "@/components/shell/StoreProvider";
+import { useStore, type Mode } from "@/components/shell/StoreProvider";
 import { discount } from "@/lib/products";
 import { inr, unitLabel } from "@/lib/site";
-import { priced } from "@/lib/wholesale";
+import { priced, wholesaleHref } from "@/lib/wholesale";
 import { craftBy } from "@/lib/crafts";
 import type { Product } from "@/lib/types";
 
-export default function ProductCard({ p, priority }: { p: Product; priority?: boolean }) {
-  const { addProduct, favs, toggleFav, mode, href } = useStore();
+/** `mode` pins the card to one mode's prices and wishlist regardless of the
+    URL — the account page shows the wholesale wishlist from a retail path. */
+export default function ProductCard({ p, priority, mode: pinned }: { p: Product; priority?: boolean; mode?: Mode }) {
+  const store = useStore();
+  const { addProduct, wishlist, toggleFav } = store;
+  const mode = pinned ?? store.mode;
+  const href = (h: string) => (mode === "wholesale" ? wholesaleHref(h) : h);
   const [added, setAdded] = useState(false);
   const view = priced(p, mode === "wholesale");
   const off = discount(view.wholesale ? { ...p, price: view.price, mrp: view.mrp } : p);
   const out = p.stock === "out";
-  const saved = !!favs[p.slug];
+  const saved = !!wishlist[mode][p.slug];
 
   return (
     <article className="st-card in" data-id={p.slug}>
@@ -31,7 +36,7 @@ export default function ProductCard({ p, priority }: { p: Product; priority?: bo
       {off > 0 && <span className="st-card__off">{off}% off</span>}
 
       <button type="button" className={`st-card__fav${saved ? " on" : ""}`} aria-pressed={saved}
-        aria-label={`Save ${p.name}`} onClick={() => toggleFav(p.slug)}>
+        aria-label={`Save ${p.name}`} onClick={() => toggleFav(p, mode)}>
         <Icon name="heart" size={14} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
       </button>
 

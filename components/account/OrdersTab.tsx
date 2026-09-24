@@ -1,5 +1,5 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import Icon from "@/components/ui/Icon";
 import { getOrder, getOrders, type Order } from "@/lib/orders";
@@ -43,12 +43,11 @@ function Pill({ status }: { status?: string }) {
 /**
  * GET /api/auth/orders, Bearer-authenticated — see lib/orders.ts for why its
  * fields are read defensively rather than trusted. "View" opens that order
- * (GET /api/auth/order-view/<id>) at /account?tab=orders&order=<id>, so the
+ * (GET /api/auth/order-view/<id>) at /account/orders/<id>, so the
  * back button and a refresh both land where you'd expect.
  */
-export default function OrdersTab({ token }: { token?: string }) {
+export default function OrdersTab({ token, openId }: { token?: string; openId?: string }) {
   const router = useRouter();
-  const openId = useSearchParams().get("order");
   const [state, setState] = useState<{ loading: boolean; error: string; orders: Order[] }>({ loading: true, error: "", orders: [] });
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export default function OrdersTab({ token }: { token?: string }) {
   if (openId) {
     return (
       <OrderDetail token={token} id={openId} summary={state.orders.find((o) => o.id === openId)}
-        onBack={() => router.push("/account?tab=orders")} />
+        onBack={() => router.push("/account/orders")} />
     );
   }
 
@@ -90,7 +89,7 @@ export default function OrdersTab({ token }: { token?: string }) {
               <td data-label="Total">{fmtMoney(o.total) ?? "—"}</td>
               <td>
                 <button type="button" className="st-btn st-otable__view"
-                  onClick={() => router.push(`/account?tab=orders&order=${encodeURIComponent(o.id)}`)}>View</button>
+                  onClick={() => router.push(`/account/orders/${encodeURIComponent(o.id)}`)}>View</button>
               </td>
             </tr>
           ))}

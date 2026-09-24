@@ -3,7 +3,7 @@ import Link from "next/link";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import { useStore } from "./StoreProvider";
 import { site } from "@/lib/site";
-import type { NavLink } from "@/lib/nav";
+import { resolveHref, type CommonMenuItem } from "@/lib/nav";
 
 const items = [
   { href: "/shop", label: "Shop all", note: "Everything" },
@@ -17,7 +17,7 @@ const items = [
   { href: "/#bulk", label: "Bulk & gifting" },
 ];
 
-export default function MenuDrawer({ navMenu = [] }: { navMenu?: NavLink[] }) {
+export default function MenuDrawer({ navMenu = [] }: { navMenu?: CommonMenuItem[] }) {
   const { menuOpen, setMenuOpen, user, openLogin, logout, href, navItem, mode } = useStore();
   const close = () => setMenuOpen(false);
 
@@ -49,18 +49,21 @@ export default function MenuDrawer({ navMenu = [] }: { navMenu?: NavLink[] }) {
         {navMenu.length > 0 && (
           <nav className="st-drawer__cats" aria-label="Shop by category">
             <span className="st-eyebrow" style={{ display: "block", marginTop: "1.7rem" }}>Shop by category</span>
-            {navMenu.map((l) => (
-              l.children.length > 0 ? (
-                <details key={l.id}>
-                  <summary>{l.label}</summary>
-                  <div>
-                    {l.children.map((c) => <Link key={c.id} href={href(c.href)} onClick={close}>{c.label}</Link>)}
-                  </div>
-                </details>
-              ) : (
-                <Link key={l.id} href={navItem(l).href} onClick={close}>{navItem(l).label}</Link>
-              )
-            ))}
+            {navMenu.map((m) => {
+              const children = m.children ?? [];
+              if (children.length > 0) {
+                return (
+                  <details key={m.id}>
+                    <summary>{m.name}</summary>
+                    <div>
+                      {children.map((c) => <Link key={c.id} href={href(resolveHref(c))} onClick={close}>{c.name}</Link>)}
+                    </div>
+                  </details>
+                );
+              }
+              const l = navItem({ label: m.name, href: resolveHref(m) });
+              return <Link key={m.id} href={l.href} onClick={close}>{l.label}</Link>;
+            })}
           </nav>
         )}
 

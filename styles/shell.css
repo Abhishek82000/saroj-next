@@ -322,6 +322,7 @@
 .st-account__card svg{ color:var(--ochre); } .st-account__card b{ font-family:var(--d); font-weight:400; font-size:1.1rem; } .st-account__card span{ font-size:.76rem; color:var(--mute); }
 .st-account__form{ display:grid; gap:1rem; max-width:420px; }
 .st-account__empty{ color:var(--mute); font-size:.9rem; margin:0; }
+.st-account__lists{ margin:-.4rem 0 1.4rem; }
 .st-account__list{ margin:0; padding-left:1.1rem; display:grid; gap:.5rem; font-size:.9rem; }
 
 /* order history — built from the shop's own parts: .st-sizetable-style
