@@ -255,8 +255,9 @@ export async function fetchCards(ids: number[], wholesale = false): Promise<Prod
  * (/wholesale-fabric), and every internal wholesale link is built from it —
  * change it here and the breadcrumbs, cross-sell links and JSON-LD follow.
  */
+/** Wholesale's front door — see lib/wholesale.ts for the URL layout. */
 export const WHOLESALE_BASE = "/wholesale-fabric";
 
 /** The canonical pair of URLs for a product, used for the cross-sell link. */
 export const productHref = (slug: string, wholesale = false) =>
-  wholesale ? `${WHOLESALE_BASE}/product/${slug}` : `/product/${slug}`;
+  wholesale ? `/wholesale/product/${slug}` : `/product/${slug}`;

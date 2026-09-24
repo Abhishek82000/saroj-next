@@ -8,10 +8,10 @@ import Voices from "@/components/home/Voices";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph } from "@/lib/seo";
 import { site } from "@/lib/site";
-import { WHOLESALE_HOME, WHOLESALE_MIN_METRES } from "@/lib/wholesale";
+import { WHOLESALE_HOME, WHOLESALE_MIN_METRES, wholesaleCategoryHref } from "@/lib/wholesale";
 import type { WholesaleCollection, WholesalePage } from "@/lib/wholesalePage";
 
-const shop = (slug: string) => `${WHOLESALE_HOME}/shop/${slug}`;
+const shop = wholesaleCategoryHref;
 
 const TERMS: [string, string][] = [
   [`${WHOLESALE_MIN_METRES} m`, "Minimum order, any print"],

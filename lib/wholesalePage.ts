@@ -1,6 +1,6 @@
 import { apiProductToProduct } from "./home";
 import { site } from "./site";
-import { WHOLESALE_HOME } from "./wholesale";
+import { wholesaleCategoryHref } from "./wholesale";
 import { homePrices, withRates } from "./wholesalePrices";
 import type { BannerSlide, Product, WholesaleApiCategory, WholesalePageApiResponse } from "./types";
 
@@ -62,7 +62,7 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
         alt: s.category?.cat_name ?? s.slider_name,
         image: d.slider_image + s.slider_image,
         mobileImage: d.slider_image + (s.slider_image_mobile ?? s.slider_image),
-        href: s.slider_url || (s.category ? `${WHOLESALE_HOME}/shop/${s.category.cat_slug}` : null),
+        href: s.slider_url || (s.category ? wholesaleCategoryHref(s.category.cat_slug) : null),
       })),
       collections: (d.category_high ?? []).map(toCollection),
       more: (d.category_rayon ?? []).map(toCollection),

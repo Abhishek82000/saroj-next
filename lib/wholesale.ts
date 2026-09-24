@@ -22,32 +22,60 @@ export function priced(p: Product, wholesale: boolean) {
 export const wholesaleNote = `Wholesale · from ${WHOLESALE_MIN_METRES} m · GST extra`;
 
 /* ---------- where wholesale lives in the URL ----------
-   Wholesale is a section of the site rather than a setting: /wholesale-fabric
-   is its front door, and every page after it is the ordinary page's URL with
-   that prefix — /wholesale-fabric/shop/ajrakh-collection,
-   /wholesale-fabric/product/<slug>. Only the prices differ. The mode is
-   whatever the URL says, so it can be linked to, bookmarked and refreshed. */
+   Wholesale is a section of the site rather than a setting, laid out the way
+   the live storefront has it:
+
+     /wholesale-fabric                 front door
+     /wholesale-fabric/shop            the whole counter (and its search)
+     /wholesale/<category or tag>      a listing
+     /wholesale/product/<slug>         a piece
+
+   Only the prices differ from retail. The mode is whatever the URL says, so it
+   can be linked to, bookmarked and refreshed. */
 
 export const WHOLESALE_HOME = "/wholesale-fabric";
+/** Prefix for wholesale listings and pieces. */
+export const WHOLESALE_SECTION = "/wholesale";
+
+const under = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
 
 export const isWholesalePath = (pathname: string) =>
-  !!pathname && (pathname === WHOLESALE_HOME || pathname.startsWith(`${WHOLESALE_HOME}/`));
+  !!pathname && (under(pathname, WHOLESALE_HOME) || under(pathname, WHOLESALE_SECTION));
 
+export const wholesaleCategoryHref = (slug: string) => `${WHOLESALE_SECTION}/${slug}`;
+export const wholesaleProductHref = (slug: string) => `${WHOLESALE_SECTION}/product/${slug}`;
+
+/** Splits "/a/b?x#y" into its path and whatever follows it. */
+const split = (href: string) => {
+  const i = href.search(/[?#]/);
+  return i < 0 ? [href, ""] : [href.slice(0, i), href.slice(i)];
+};
+
+/** A retail link's wholesale twin: / → /wholesale-fabric, /shop → /wholesale-fabric/shop,
+    /shop/<slug> (and the old /shop/tag/<slug>) → /wholesale/<slug>,
+    /product/<slug> → /wholesale/product/<slug>. Anything else has no twin. */
 export function wholesaleHref(href: string | null | undefined): string {
   if (!href) return href ?? WHOLESALE_HOME;
-  if (isWholesalePath(href.split("?")[0])) return href;
-  if (href === "/") return WHOLESALE_HOME;
-  const path = href.split(/[?#]/)[0];
-  return path === "/shop" || path.startsWith("/shop/") || path.startsWith("/product/")
-    ? WHOLESALE_HOME + href
-    : href;
+  const [path, rest] = split(href);
+  if (isWholesalePath(path)) return href;
+  if (path === "/") return WHOLESALE_HOME + rest;
+  if (path === "/shop") return `${WHOLESALE_HOME}/shop${rest}`;
+  const m = path.match(/^\/shop\/(?:tag\/)?([^/]+)$/);
+  if (m) return wholesaleCategoryHref(m[1]) + rest;
+  if (path.startsWith("/product/")) return WHOLESALE_SECTION + path + rest;
+  return href;
 }
 
+/** The inverse of `wholesaleHref`. */
 export function retailHref(href: string | null | undefined): string {
   if (!href) return href ?? "/";
-  const path = href.split("?")[0];
+  const [path, rest] = split(href);
   if (!isWholesalePath(path)) return href;
-  return href.slice(WHOLESALE_HOME.length) || "/";
+  if (under(path, WHOLESALE_HOME)) return (path.slice(WHOLESALE_HOME.length) || "/") + rest;
+  const tail = path.slice(WHOLESALE_SECTION.length);
+  if (!tail || tail === "/") return "/" + rest;
+  if (tail.startsWith("/product/")) return tail + rest;
+  return `/shop${tail}${rest}`;
 }
 
 /** Where the Retail | Wholesale switch takes you from the page you're on —

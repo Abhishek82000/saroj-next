@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Photo from "@/components/ui/Photo";
-import { WHOLESALE_HOME } from "@/lib/wholesale";
+import { wholesaleCategoryHref } from "@/lib/wholesale";
 import type { WholesaleCollection } from "@/lib/wholesalePage";
 
 /**
@@ -13,7 +13,7 @@ import type { WholesaleCollection } from "@/lib/wholesalePage";
  * there's no hover, the first tap opens a column instead of following the
  * link; tapping an already-open one follows it.
  *
- * Builds its own hrefs from WHOLESALE_HOME rather than taking a function prop
+ * Builds its own hrefs with wholesaleCategoryHref rather than taking a function prop
  * — a Server Component (WholesaleHome) can't pass a closure into a Client one.
  */
 export default function BoltFan({ collections }: { collections: WholesaleCollection[] }) {
@@ -26,7 +26,7 @@ export default function BoltFan({ collections }: { collections: WholesaleCollect
         return (
           <Link
             key={c.id}
-            href={`${WHOLESALE_HOME}/shop/${c.slug}`}
+            href={wholesaleCategoryHref(c.slug)}
             className={`st-openbolt__item${on ? " on" : ""}`}
             aria-label={c.heading}
             onPointerEnter={(e) => { if (e.pointerType !== "touch") setActive(i); }}
