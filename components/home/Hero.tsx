@@ -84,7 +84,7 @@ export default function Hero() {
         <div className="st-hero__strip fade f4">
           {swatches.map(([file, title, slug]) => (
             <Link key={file} href={categoryHref(slug)} className="st-swatch-item" title={title}>
-              <span className="st-swatch ph">
+              <span className="st-hero-swatch ph">
                 <Photo src={CDN + file + ".webp"} alt={title} sizes="100px" />
               </span>
               <span className="st-swatch__label">{title}</span>
