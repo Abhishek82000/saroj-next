@@ -261,7 +261,7 @@ export async function getProductDetail(slug: string): Promise<ApiProductDetail |
  * video_products has no thumbnail of its own, so we borrow one from the tag
  * and category rails by product id where the clip's product also shows up there.
  */
-export function buildReels({ tagSections, categorySections, videoProducts }: HomeData): Reel[] {
+export function buildReels({ tagSections, categorySections, videoProducts }: Omit<HomeData, "slides">): Reel[] {
   const imageById = new Map<number, string>();
   for (const tag of tagSections) for (const p of tag.products) imageById.set(p.id, p.image);
   for (const cat of categorySections) for (const p of cat.products) imageById.set(p.id, p.image);

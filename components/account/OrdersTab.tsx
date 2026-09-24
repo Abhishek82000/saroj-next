@@ -43,7 +43,6 @@ function Pill({ status }: { status?: string }) {
 
 /* ---------- the list ---------- */
 
-<<<<<<< HEAD
 /**
  * GET /api/auth/orders, Bearer-authenticated — see lib/orders.ts for why its
  * fields are read defensively rather than trusted. "View" opens that order
@@ -51,9 +50,6 @@ function Pill({ status }: { status?: string }) {
  * back button and a refresh both land where you'd expect.
  */
 export default function OrdersTab({ token, openId }: { token?: string; openId?: string }) {
-=======
-export default function OrdersTab({ token }: { token?: string }) {
->>>>>>> 8ad5fa75bc7dc150c890f7f9ac071ea07b93497e
   const router = useRouter();
   const [state, setState] = useState<{ loading: boolean; error: string; orders: Order[] }>({ loading: true, error: "", orders: [] });
 
