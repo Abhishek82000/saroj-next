@@ -42,11 +42,9 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
 
   return (
     <main id="main">
-      {/* Top banners from the feed (wholesale's own in wholesale, `top_slider` otherwise); the static hero if there are none. */}
-      {(() => {
-        const slides = isWholesale && wholesale?.slides.length ? wholesale.slides : homeData.slides;
-        return slides.length ? <BannerSlider slides={slides} label={isWholesale ? "Wholesale offers" : "Offers"} /> : <Hero />;
-      })()}
+      {isWholesale && wholesale?.slides.length ? <BannerSlider slides={wholesale.slides} label="Wholesale offers" /> : <Hero />}
+      {/* `top_slider` banners — their own section under the hero, retail only. */}
+      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}
       <CraftRoll />
       {tagSections.length > 0 ? (
         tagSections.map((tag) => (
