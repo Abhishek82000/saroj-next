@@ -1,6 +1,7 @@
 import { permanentRedirect } from "next/navigation";
+import { wholesaleCategoryHref } from "@/lib/wholesale";
 
-/** The old /wholesale-fabric/shop/tag/<tag> address — tags now live at /wholesale-fabric/shop/<tag>. */
+/** Old address — wholesale tags live at /wholesale/<tag>, same as categories. */
 export default async function WholesaleTagRedirect({ params }: { params: Promise<{ slug: string }> }) {
-  permanentRedirect(`/wholesale-fabric/shop/${(await params).slug}`);
+  permanentRedirect(wholesaleCategoryHref((await params).slug));
 }

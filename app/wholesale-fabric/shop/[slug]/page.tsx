@@ -1,7 +1,7 @@
-import { CategoryView } from "../../../shop/[slug]/page";
+import { permanentRedirect } from "next/navigation";
+import { wholesaleCategoryHref } from "@/lib/wholesale";
 
-/** /wholesale-fabric/shop/<category> — the ordinary category page, in wholesale mode. */
-export { generateMetadata } from "../../../shop/[slug]/page";
-export default function WholesaleCategoryPage(props: Parameters<typeof CategoryView>[0]) {
-  return CategoryView({ ...props, wholesale: true });
+/** Old address — wholesale listings live at /wholesale/<slug>. */
+export default async function OldWholesaleCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  permanentRedirect(wholesaleCategoryHref((await params).slug));
 }
