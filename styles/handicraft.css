@@ -56,9 +56,11 @@
 .hc .hc-plate--c{ aspect-ratio:4/5; transform:translateZ(40px); border-radius:16px; }
 .hc .hc-plate--r{ aspect-ratio:3/4; transform:translateZ(-90px) rotateY(-16deg) translateY(16px); }
 .hc .hc-plate__cap{ position:absolute; left:10px; bottom:10px; z-index:3; font-size:.55rem; letter-spacing:.18em; text-transform:uppercase; font-weight:700; background:rgba(255,255,255,.92); color:var(--ink); padding:.32em .7em; border-radius:99px; }
-.hc .hc-hero__strip{ display:flex; gap:.5rem; justify-content:center; margin-top:clamp(22px,4vw,34px); flex-wrap:wrap; }
-.hc .hc-swatch{ width:clamp(46px,11vw,60px); aspect-ratio:1; border-radius:10px; overflow:hidden; box-shadow:0 8px 18px -8px rgba(16,24,32,.4); transition:transform .45s var(--ease); border:2px solid transparent; }
-.hc .hc-swatch:hover{ transform:translateY(-6px) scale(1.06); border-color:var(--cobalt); }
+.hc .hc-hero__strip{ display:flex; gap:1.2rem; justify-content:center; margin-top:clamp(22px,4vw,34px); flex-wrap:wrap; }
+.hc .hc-swatch-item{ display:flex; flex-direction:column; align-items:center; gap:.5rem; width:clamp(70px,16vw,100px); }
+.hc .hc-swatch{ display:block; width:clamp(46px,11vw,60px); aspect-ratio:1; border-radius:10px; overflow:hidden; box-shadow:0 8px 18px -8px rgba(16,24,32,.4); transition:transform .45s var(--ease); border:2px solid transparent; }
+.hc .hc-swatch-item:hover .hc-swatch{ transform:translateY(-6px) scale(1.06); border-color:var(--cobalt); }
+.hc .hc-swatch__label{ font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600; color:var(--mute); text-align:center; line-height:1.25; }
 .hc .hc-hero__note{ display:flex; align-items:center; justify-content:center; gap:.7rem; margin-top:1.4rem; font-size:.6rem; letter-spacing:.22em; text-transform:uppercase; color:var(--mute); }
 .hc .hc-hero__note::before,.hc .hc-hero__note::after{ content:''; width:clamp(20px,6vw,54px); height:1px; background:var(--line); }
 .hc .hc-roll{ border-block:1px solid var(--line-2); background:var(--paper-2); padding:clamp(13px,2.6vw,18px) 0; overflow:hidden; }

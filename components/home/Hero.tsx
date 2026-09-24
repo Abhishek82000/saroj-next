@@ -2,24 +2,25 @@
 import Link from "@/components/ui/SiteLink";
 import { useEffect, useRef, useState } from "react";
 import Photo from "@/components/ui/Photo";
+import { categoryHref } from "@/lib/nav";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 
-/** The 3 featured categories — real category names, each linked to its best-selling product. */
+/** The 3 featured categories — real category names, each linked to its /shop/<slug> listing. */
 export const plates = [
-  { cls: "st-plate--l", src: CDN + "40661788078255.webp", cap: "Jaipur Cotton", alt: "Maroon base, cream paisley printed Jaipuri cotton fabric", note: "Best-selling Jaipuri cotton print", slug: "maroon-base-with-cream-paisley-printed-jaipuri-cotton-fabric" },
-  { cls: "st-plate--c", src: CDN + "63141785559833.webp", cap: "Ajrakh Collection", alt: "Red over-dye Ajrakh block printed cotton", note: "Ajrakh bolt half-unrolled" , slug: "red-over-dye-with-blue-block-printed-ajrakh-cotton-fabric" },
-  { cls: "st-plate--r", src: CDN + "94351785567420.webp", cap: "Kalamkari", alt: "Red vibrant multi-colour paisley Kalamkari print", note: "Kalamkari paisley, vibrant multi-colour", slug: "red-vibrant-multi-colour-paisley-kalamkari-print" },
+  { cls: "st-plate--l", src: CDN + "40661788078255.webp", cap: "Jaipur Cotton", alt: "Maroon base, cream paisley printed Jaipuri cotton fabric", note: "Best-selling Jaipuri cotton print", slug: "jaipur-cotton" },
+  { cls: "st-plate--c", src: CDN + "63141785559833.webp", cap: "Ajrakh Collection", alt: "Red over-dye Ajrakh block printed cotton", note: "Ajrakh bolt half-unrolled" , slug: "ajrakh-collection" },
+  { cls: "st-plate--r", src: CDN + "94351785567420.webp", cap: "Kalamkari", alt: "Red vibrant multi-colour paisley Kalamkari print", note: "Kalamkari paisley, vibrant multi-colour", slug: "kalamkari" },
 ];
 
-/** The remaining featured categories, each linked to its matching product. */
+/** The remaining featured categories, each linked to its /shop/<slug> listing. */
 export const swatches = [
-  ["42621785568665", "Paisley Prints", "teal-green-and-mustard-paisley-printed-kalamkari-cotton-fabric"],
-  ["13001785568370", "Indigo Prints", "neavy-blue-base-indigo-printed-kalamkari-paisley-print"],
-  ["97721785569096", "Patola & Patch Prints", "leaf-green-polka-patola-in-red-ajrakh-cotton-printed-fabric"],
-  ["74021788077426", "Abstract Prints", "blace-base-with-abstract-white-jaal-printed-jaipuri-cotton-fabric"],
-  ["41911788077745", "Cotton Kantha", "white-base-with-red-and-yellow-block-printed-kantha-jaipuri-cotton-fabric"],
-  ["34411788077677", "Stripes and Checks", "white-and-blue-strips-with-block-printed-jaipuri-cotton-fabric"],
+  ["42621785568665", "Paisley Prints", "paisley-prints"],
+  ["13001785568370", "Indigo Prints", "indigo"],
+  ["97721785569096", "Patola & Patch Prints", "patola-prints"],
+  ["74021788077426", "Abstract Prints", "abstract-prints"],
+  ["41911788077745", "Cotton Kantha", "cotton-kantha"],
+  ["34411788077677", "Stripes and Checks", "strips-and-checks"],
 ];
 
 export default function Hero() {
@@ -72,7 +73,7 @@ export default function Hero() {
         <div className="st-plates fade f4">
           <div className="st-plates__row" ref={row}>
             {plates.map((p) => (
-              <Link key={p.cls} href={`/product/${p.slug}`} className={`st-plate ${p.cls} ph`}>
+              <Link key={p.cls} href={categoryHref(p.slug)} className={`st-plate ${p.cls} ph`}>
                 <Photo src={p.src} alt={p.alt} note={p.note} priority sizes="(max-width:900px) 40vw, 340px" />
                 <span className="st-plate__cap">{p.cap}</span>
               </Link>
@@ -82,7 +83,7 @@ export default function Hero() {
 
         <div className="st-hero__strip fade f4">
           {swatches.map(([file, title, slug]) => (
-            <Link key={file} href={`/product/${slug}`} className="st-swatch-item" title={title}>
+            <Link key={file} href={categoryHref(slug)} className="st-swatch-item" title={title}>
               <span className="st-swatch ph">
                 <Photo src={CDN + file + ".webp"} alt={title} sizes="100px" />
               </span>
