@@ -284,9 +284,24 @@ export interface HomeVideoProduct {
   product_video_cdn: string;
 }
 
+/** One `top_slider` banner from GET /api/home. `type` 2 links a category, 3 a tag. */
+export interface HomeApiSlide {
+  id: number;
+  name: string;
+  image_web: string;
+  image_mobile: string | null;
+  url: string | null;
+  category: { id: number; name: string; slug: string } | null;
+  tag: { id: number; name: string; slug: string } | null;
+}
+
+/** A top banner as the slider draws it: desktop and phone artwork, optionally linked. */
+export interface BannerSlide { id: number; alt: string; image: string; mobileImage: string; href: string | null }
+
 export interface HomeApiResponse {
   success: boolean;
   data: {
+    top_slider?: HomeApiSlide[];
     tag_show_home_page: HomeTagSection[];
     category_show_home_page: HomeCategorySection[];
     video_products: HomeVideoProduct[];

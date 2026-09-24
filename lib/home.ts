@@ -1,18 +1,20 @@
-import { getFeaturedCategories } from "./nav";
+import { categoryHref, getFeaturedCategories } from "./nav";
 import { site } from "./site";
 import type {
-  CommonCategoryRef, HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
+  BannerSlide, CommonCategoryRef, HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
   Product, ProductDetailApiResponse, ProductsApiResponse, ProductsApiSaleProduct, ProductsApiTag,
   Reel, SaleProduct,
 } from "./types";
 
 export interface HomeData {
+  /** `top_slider` — the banners across the top of the page. */
+  slides: BannerSlide[];
   tagSections: HomeTagSection[];
   categorySections: HomeCategorySection[];
   videoProducts: HomeVideoProduct[];
 }
 
-const EMPTY_HOME_DATA: HomeData = { tagSections: [], categorySections: [], videoProducts: [] };
+const EMPTY_HOME_DATA: HomeData = { slides: [], tagSections: [], categorySections: [], videoProducts: [] };
 
 /**
  * Everything the homepage pulls live from the storefront: the tag rails
@@ -27,6 +29,13 @@ export async function getHomeData(): Promise<HomeData> {
     if (!res.ok) return EMPTY_HOME_DATA;
     const json: HomeApiResponse = await res.json();
     return {
+      slides: (json.data?.top_slider ?? []).filter((s) => s.image_web).map((s) => ({
+        id: s.id,
+        alt: s.category?.name ?? s.tag?.name ?? s.name,
+        image: s.image_web,
+        mobileImage: s.image_mobile || s.image_web,
+        href: s.url || (s.category ? categoryHref(s.category.slug) : s.tag ? `/shop/tag/${s.tag.slug}` : null),
+      })),
       tagSections: json.data?.tag_show_home_page ?? [],
       // Some categories aren't stocked yet, so the API lists them with no products.
       categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Rail from "@/components/product/Rail";
-import WholesaleHero from "@/components/wholesale/WholesaleHero";
+import BannerSlider from "@/components/home/BannerSlider";
 import BoltFan from "@/components/wholesale/BoltFan";
 import Voices from "@/components/home/Voices";
 import JsonLd from "@/components/seo/JsonLd";
@@ -43,7 +43,7 @@ function Feature({ c, i }: { c: WholesaleCollection; i: number }) {
 export default function WholesaleHome({ page }: { page: WholesalePage }) {
   return (
     <main id="main" className="st-whome">
-      {page.slides.length > 0 && <WholesaleHero slides={page.slides} />}
+      {page.slides.length > 0 && <BannerSlider slides={page.slides} label="Wholesale offers" />}
 
       {page.collections.length > 0 && (
         <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>

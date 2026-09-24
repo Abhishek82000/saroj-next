@@ -2,9 +2,9 @@ import { apiProductToProduct } from "./home";
 import { site } from "./site";
 import { WHOLESALE_HOME } from "./wholesale";
 import { homePrices, withRates } from "./wholesalePrices";
-import type { Product, WholesaleApiCategory, WholesalePageApiResponse } from "./types";
+import type { BannerSlide, Product, WholesaleApiCategory, WholesalePageApiResponse } from "./types";
 
-export interface WholesaleSlide { id: number; alt: string; image: string; mobileImage: string; href: string | null }
+export type WholesaleSlide = BannerSlide;
 export interface WholesaleCollection { id: number; name: string; heading: string; slug: string; blurb: string; image: string; banner: string }
 export interface Testimonial { id: number; name: string; rating: number; quote: string }
 export interface WholesaleRail { id: number; slug: string; name: string; items: Product[] }

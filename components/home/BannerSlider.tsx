@@ -2,12 +2,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
-import type { WholesaleSlide } from "@/lib/wholesalePage";
+import type { BannerSlide } from "@/lib/types";
 
-/** The wholesale front page's banners — one at a time, arrows and dots when
-    there's more than one, moving on by itself unless the pointer is on it or
-    the visitor prefers reduced motion. */
-export default function WholesaleHero({ slides }: { slides: WholesaleSlide[] }) {
+/** The home pages' top banners (retail `top_slider`, and the wholesale
+    feed's) — one at a time, arrows and dots when there's more than one,
+    moving on by itself unless the pointer is on it or the visitor prefers
+    reduced motion. */
+export default function BannerSlider({ slides, label = "Offers" }: { slides: BannerSlide[]; label?: string }) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   const many = slides.length > 1;
@@ -20,7 +21,7 @@ export default function WholesaleHero({ slides }: { slides: WholesaleSlide[] }) 
   }, [many, paused, slides.length]);
 
   return (
-    <section className="st-wh__hero" aria-roledescription="carousel" aria-label="Wholesale offers"
+    <section className="st-wh__hero" aria-roledescription="carousel" aria-label={label}
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <div className="st-wh__slides" style={{ transform: `translateX(-${i * 100}%)` }}>
         {slides.map((s, k) => {

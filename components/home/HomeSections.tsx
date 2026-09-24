@@ -10,7 +10,7 @@ import Voices from "@/components/home/Voices";
 import Bulk from "@/components/home/Bulk";
 import Journal from "@/components/home/Journal";
 import Rail from "@/components/product/Rail";
-import WholesaleHero from "@/components/wholesale/WholesaleHero";
+import BannerSlider from "@/components/home/BannerSlider";
 import JsonLd from "@/components/seo/JsonLd";
 import { getBlogList } from "@/lib/blogs";
 import { apiProductToProduct, buildReels, getHomeData } from "@/lib/home";
@@ -42,7 +42,11 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
 
   return (
     <main id="main">
-      {isWholesale && wholesale?.slides.length ? <WholesaleHero slides={wholesale.slides} /> : <Hero />}
+      {/* Top banners from the feed (wholesale's own in wholesale, `top_slider` otherwise); the static hero if there are none. */}
+      {(() => {
+        const slides = isWholesale && wholesale?.slides.length ? wholesale.slides : homeData.slides;
+        return slides.length ? <BannerSlider slides={slides} label={isWholesale ? "Wholesale offers" : "Offers"} /> : <Hero />;
+      })()}
       <CraftRoll />
       {tagSections.length > 0 ? (
         tagSections.map((tag) => (
