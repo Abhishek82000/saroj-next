@@ -74,6 +74,10 @@ function Account() {
   useEffect(() => { if (user) { setName(user.name === user.mobile ? "" : user.name); setEmail(user.email); } }, [user]);
   useEffect(() => { if (hydrated && !user) openLogin("Log in to see your account"); }, [hydrated, user, openLogin]);
 
+  /* Until the saved login has been read back (a refresh), there's no telling
+     yet — show nothing rather than flash the logged-out message. */
+  if (!hydrated) return <div className="st-wrap st-account" style={{ minHeight: "60vh" }} aria-busy="true" />;
+
   if (!user) {
     return (
       <div className="st-empty" style={{ margin: "60px auto", maxWidth: 420, textAlign: "center" }}>
