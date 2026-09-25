@@ -123,6 +123,19 @@ function NavItem({ item, resolve, link }: {
 }) {
   const itemHref = resolve(resolveHref(item));
   const children = item.children ?? [];
+  /* The dropdown opens on :hover / :focus-within, so after a link in it is
+     clicked the pointer and focus still hold it open over the new page.
+     `shut` hides it until the pointer leaves the item. */
+  const [shut, setShut] = useState(false);
+  const menuProps = {
+    className: `has-children${shut ? " shut" : ""}`,
+    onClick: (e: React.MouseEvent) => {
+      if (!(e.target as HTMLElement).closest("a")) return;
+      setShut(true);
+      (document.activeElement as HTMLElement | null)?.blur();
+    },
+    onMouseLeave: () => setShut(false),
+  };
 
   // No children -> just a link, nothing to open.
   if (children.length === 0) {
@@ -137,7 +150,7 @@ function NavItem({ item, resolve, link }: {
   // Has children, mega flag off -> single-block dropdown.
   if (!isMega(item)) {
     return (
-      <li className="has-children">
+      <li {...menuProps}>
         <Link href={itemHref}>
           {item.name} <Icon name="down" size={11} strokeWidth={2} />
         </Link>
@@ -165,7 +178,7 @@ function NavItem({ item, resolve, link }: {
   }
 
   return (
-    <li className="has-children">
+    <li {...menuProps}>
       <Link href={itemHref}>
         {item.name} <Icon name="down" size={11} strokeWidth={2} />
       </Link>

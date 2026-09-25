@@ -1,14 +1,13 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Portal from "@/components/ui/Portal";
 import Icon from "@/components/ui/Icon";
 import { useLockedBody } from "@/components/ui/useLockedBody";
 import { useTransition } from "@/components/ui/useMounted";
 import { useStore } from "./StoreProvider";
-import { products } from "@/lib/products";
-import { crafts, craftBy } from "@/lib/crafts";
-import { inr } from "@/lib/site";
+import { crafts } from "@/lib/crafts";
+import { searchProducts, type SearchHit } from "@/lib/search";
 
 /** Splits a name so the matched run can be marked without dangerouslySetInnerHTML. */
 function highlight(text: string, q: string) {
@@ -17,10 +16,14 @@ function highlight(text: string, q: string) {
   return (<>{text.slice(0, i)}<mark>{text.slice(i, i + q.length)}</mark>{text.slice(i + q.length)}</>);
 }
 
+/** The header's search: live results from GET /api/search, in the mode the
+    visitor is browsing (retail or wholesale), each one opening its product. */
 export default function SearchSheet() {
-  const { searchOpen, setSearchOpen, recent, remember, href } = useStore();
+  const { searchOpen, setSearchOpen, href, mode } = useStore();
   const { render, shown } = useTransition(searchOpen);
   const [q, setQ] = useState("");
+  const [hits, setHits] = useState<SearchHit[]>([]);
+  const [loading, setLoading] = useState(false);
   const [cursor, setCursor] = useState(-1);
   const input = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -28,44 +31,40 @@ export default function SearchSheet() {
 
   useEffect(() => {
     if (!searchOpen) return;
-    setQ(""); setCursor(-1);
+    setQ(""); setHits([]); setCursor(-1);
     const t = setTimeout(() => input.current?.focus(), 60);
     return () => clearTimeout(t);
   }, [searchOpen]);
 
-  const hits = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    if (!term) return [...products].sort((a, b) => b.sold - a.sold).slice(0, 5);
-    const words = term.split(/\s+/);
-    return products
-      .filter((p) => {
-        const hay = `${p.name} ${craftBy[p.craft]?.name ?? ""} ${p.material} ${p.kind}`.toLowerCase();
-        return words.every((w) => hay.includes(w));
-      })
-      .sort((a, b) => {
-        const ai = a.name.toLowerCase().indexOf(term);
-        const bi = b.name.toLowerCase().indexOf(term);
-        if (ai !== bi) return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
-        return b.sold - a.sold;
+  /* Ask the API once typing pauses; a newer keystroke cancels the older request. */
+  const term = q.trim();
+  useEffect(() => {
+    if (!term) { setHits([]); setLoading(false); return; }
+    const ctl = new AbortController();
+    setLoading(true);
+    const t = setTimeout(() => {
+      searchProducts(term, mode === "wholesale", ctl.signal).then((r) => {
+        if (ctl.signal.aborted) return;
+        setHits(r); setCursor(-1); setLoading(false);
       });
-  }, [q]);
-
-  const shown7 = q.trim() ? hits.slice(0, 7) : hits;
+    }, 250);
+    return () => { clearTimeout(t); ctl.abort(); };
+  }, [term, mode]);
 
   const close = () => setSearchOpen(false);
   /* Through the store's `href`, so a search from wholesale stays in wholesale. */
-  const go = (to: string, term?: string) => { if (term) remember(term); close(); router.push(href(to)); };
+  const go = (to: string) => { close(); router.push(href(to)); };
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") { close(); return; }
-    if (!shown7.length) return;
+    if (!hits.length) return;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
-      setCursor((c) => (e.key === "ArrowDown" ? (c + 1) % shown7.length : c <= 0 ? shown7.length - 1 : c - 1));
+      setCursor((c) => (e.key === "ArrowDown" ? (c + 1) % hits.length : c <= 0 ? hits.length - 1 : c - 1));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const pick = shown7[cursor] ?? shown7[0];
-      if (pick) go(`/product/${pick.slug}`, q);
+      const pick = hits[cursor] ?? hits[0];
+      if (pick) go(`/product/${pick.slug}`);
     }
   };
 
@@ -79,8 +78,8 @@ export default function SearchSheet() {
           <div className="st-search__field">
             <Icon name="search" size={21} />
             <input ref={input} type="search" value={q} autoComplete="off" spellCheck={false}
-              onChange={(e) => { setQ(e.target.value); setCursor(-1); }} onKeyDown={onKey}
-              placeholder="Pottery, Ajrakh, brass, a colour…" aria-label="Search products" />
+              onChange={(e) => setQ(e.target.value)} onKeyDown={onKey}
+              placeholder="Ajrakh, Kalamkari, cotton, a colour…" aria-label="Search products" />
             <button type="button" className="st-search__x" onClick={close}>Close</button>
           </div>
 
@@ -94,54 +93,31 @@ export default function SearchSheet() {
                   </button>
                 ))}
               </div>
-              {recent.length > 0 && (
-                <>
-                  <p className="st-search__lbl">Searched before</p>
-                  <div className="st-sugg">
-                    {recent.map((r) => (
-                      <button type="button" key={r} onClick={() => { setQ(r); input.current?.focus(); }}>{r}</button>
-                    ))}
-                  </div>
-                </>
-              )}
             </div>
 
-            <div className="st-res">
-              {!q.trim() && <p className="st-search__lbl">Most bought this month</p>}
-              {q.trim() && hits.length === 0 ? (
+            <div className="st-res" aria-live="polite" aria-busy={loading}>
+              {!term ? (
+                <p className="st-search__lbl">Type a name, craft or colour to search</p>
+              ) : loading && hits.length === 0 ? (
+                <p className="st-search__lbl">Searching…</p>
+              ) : hits.length === 0 ? (
                 <div className="st-res__none">
                   <h3 style={{ fontFamily: "var(--d)", fontWeight: 400, fontSize: "1.35rem", margin: "0 0 .4rem" }}>
-                    No match for “{q}”
+                    No match for “{term}”
                   </h3>
-                  <p>Try a craft name, a colour, or a material — cotton, brass, marble.</p>
+                  <p>Try a craft name, a colour, or a material — cotton, Ajrakh, Kalamkari.</p>
                   <button type="button" className="st-btn" onClick={() => go("/shop")}>Browse everything</button>
                 </div>
               ) : (
-                <>
-                  {shown7.map((p, i) => (
-                    <button type="button" key={p.slug}
-                      className={`st-res__row${i === cursor ? " cur" : ""}`}
-                      onClick={() => go(`/product/${p.slug}`, q)}>
-                      <span className="st-res__ph">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={p.images[0].src} alt="" loading="lazy" />
-                      </span>
-                      <span className="st-res__t">
-                        <span className="st-res__n">{highlight(p.name, q.trim())}</span>
-                        <span className="st-res__m">{craftBy[p.craft]?.name} · {p.material}</span>
-                      </span>
-                      <span className="st-res__p">{inr(p.price)}</span>
-                    </button>
-                  ))}
-                  {q.trim() && hits.length > 0 && (
-                    <div className="st-res__foot">
-                      <button type="button" className="st-btn st-btn--solid"
-                        onClick={() => go(`/shop?q=${encodeURIComponent(q.trim())}`, q)}>
-                        Show all {hits.length} result{hits.length === 1 ? "" : "s"}
-                      </button>
-                    </div>
-                  )}
-                </>
+                hits.map((h, i) => (
+                  <button type="button" key={h.slug}
+                    className={`st-res__row${i === cursor ? " cur" : ""}`}
+                    onClick={() => go(`/product/${h.slug}`)}>
+                    <span className="st-res__t">
+                      <span className="st-res__n">{highlight(h.name, term)}</span>
+                    </span>
+                  </button>
+                ))
               )}
             </div>
           </div>

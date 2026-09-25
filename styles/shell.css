@@ -50,6 +50,9 @@
 .st-links li.has-children:hover .st-dropdown,
 .st-links li.has-children:focus-within .st-dropdown{
   opacity:1; visibility:visible; pointer-events:auto; }
+/* Just clicked a link inside — stay closed until the pointer leaves (Nav.tsx). */
+.st-links li.has-children.shut .st-dropdown{ opacity:0; visibility:hidden; pointer-events:none; }
+.st-links li.has-children.shut>a>svg{ transform:none; }
 .st-dropdown__panel{ display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:.15rem 2rem;
               background:var(--paper); border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); box-shadow:var(--shadow);
               padding:1.5rem var(--pad); max-height:none; overflow:visible;
