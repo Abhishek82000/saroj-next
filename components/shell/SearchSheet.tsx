@@ -113,6 +113,12 @@ export default function SearchSheet() {
                   <button type="button" key={h.slug}
                     className={`st-res__row${i === cursor ? " cur" : ""}`}
                     onClick={() => go(`/product/${h.slug}`)}>
+                    <span className="st-res__ph">
+                      {h.image
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={h.image} alt="" loading="lazy" />
+                        : <Icon name="search" size={16} />}
+                    </span>
                     <span className="st-res__t">
                       <span className="st-res__n">{highlight(h.name, term)}</span>
                     </span>
