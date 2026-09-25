@@ -94,7 +94,9 @@ export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
         </button>
         <button
           className="st-icn"
-          onClick={() => withLogin("Log in to see your cart", () => setCartOpen(true))}
+          onClick={() => (mode === "wholesale"
+            ? withLogin("Log in to see your wholesale cart", () => setCartOpen(true))
+            : setCartOpen(true))}
           aria-label={`${mode === "wholesale" ? "Wholesale cart" : "Cart"}, ${count} ${count === 1 ? "item" : "items"}`}
         >
           <Icon name="cart" />
