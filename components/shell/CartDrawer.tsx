@@ -109,11 +109,8 @@ export default function CartDrawer() {
           <p className="st-cart__note">
             Taxes and delivery worked out at checkout. Everything ships wrapped in our own Ajrakh offcuts.
           </p>
-          <button type="button" className="st-btn st-btn--solid"
-            onClick={() => say(`${wholesale ? "Wholesale checkout" : "Checkout"} is next — point this at your order route`)}>
-            Go to checkout
-          </button>
-          <button type="button" className="st-btn" onClick={close}>Keep looking</button>
+          <Link href={href("/checkout")} className="st-btn st-btn--solid" onClick={close}>Go to checkout</Link>
+          <Link href={href("/cart")} className="st-btn" onClick={close}>View cart</Link>
         </div>
       )}
     </Drawer>

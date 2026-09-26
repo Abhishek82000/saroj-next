@@ -27,6 +27,7 @@ export const wholesaleNote = `Wholesale · from ${WHOLESALE_MIN_METRES} m · GST
 
      /wholesale-fabric                 front door
      /wholesale-fabric/shop            the whole counter (and its search)
+     /wholesale-fabric/cart, /checkout the wholesale cart and its checkout
      /wholesale/<category or tag>      a listing
      /wholesale/product/<slug>         a piece
 
@@ -51,7 +52,8 @@ const split = (href: string) => {
   return i < 0 ? [href, ""] : [href.slice(0, i), href.slice(i)];
 };
 
-/** A retail link's wholesale twin: / → /wholesale-fabric, /shop → /wholesale-fabric/shop,
+/** A retail link's wholesale twin: / → /wholesale-fabric, /shop (and /cart,
+    /checkout) → /wholesale-fabric/shop (/cart, /checkout),
     /shop/<slug> (and the old /shop/tag/<slug>) → /wholesale/<slug>,
     /product/<slug> → /wholesale/product/<slug>. Anything else has no twin. */
 export function wholesaleHref(href: string | null | undefined): string {
@@ -59,7 +61,7 @@ export function wholesaleHref(href: string | null | undefined): string {
   const [path, rest] = split(href);
   if (isWholesalePath(path)) return href;
   if (path === "/") return WHOLESALE_HOME + rest;
-  if (path === "/shop") return `${WHOLESALE_HOME}/shop${rest}`;
+  if (path === "/shop" || path === "/cart" || path === "/checkout") return WHOLESALE_HOME + path + rest;
   const m = path.match(/^\/shop\/(?:tag\/)?([^/]+)$/);
   if (m) return wholesaleCategoryHref(m[1]) + rest;
   if (path.startsWith("/product/")) return WHOLESALE_SECTION + path + rest;
