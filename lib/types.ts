@@ -10,6 +10,8 @@ export interface Craft {
 }
 
 export interface Product {
+  /** The live API's numeric product id, when the piece came from the API (cart and wishlist calls need it). */
+  productId?: number;
   slug: string;
   name: string;
   /** Short name for breadcrumbs and the sticky bar. */
@@ -53,6 +55,10 @@ export interface CartLine {
   href?: string;
   /** Set on wholesale lines: the smallest quantity the line may be cut down to. */
   minQty?: number;
+  /** The live API's product id — what POST /api/cart/add needs. Absent on static-catalogue pieces. */
+  productId?: number;
+  /** The chosen variation, for a variable product. */
+  variationId?: number | null;
 }
 
 /* ============================================================

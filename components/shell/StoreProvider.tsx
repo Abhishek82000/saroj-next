@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate } from "@/lib/wholesale";
 import { getWishlist, setWishlistRemote } from "@/lib/wishlist";
 import { getCounts, type Counts } from "@/lib/counts";
+import { addToCartRemote } from "@/lib/cart";
 
 /** Retail shows the ordinary catalogue; wholesale shows trade rates, GST extra.
     Which one is on is decided by the URL — everything under /wholesale-fabric and
@@ -207,8 +208,24 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     else setRetail(fn);
   }, []);
 
+  /* Latest carts, so an add can tell the server what the line now holds in total. */
+  const cartsRef = useRef<Record<Mode, CartLine[]>>({ retail: [], wholesale: [] });
+  cartsRef.current = { retail, wholesale: wh.lines };
+
   const addTo = useCallback((kind: Mode, line: Omit<CartLine, "qty"> & { qty?: number }) => {
     const qty = line.qty ?? 1;
+    /* Fire-and-forget: mirror the add server-side (POST /api/cart/add, see
+       lib/cart.ts). Only live pieces carry the product id it needs. */
+    if (line.productId) {
+      const had = cartsRef.current[kind].find((l) => l.id === line.id)?.qty ?? 0;
+      addToCartRemote({
+        type: kind,
+        product_id: line.productId,
+        variation_id: line.variationId ?? null,
+        qty,
+        ...(kind === "retail" ? { current_qty: round(had + qty) } : {}),
+      }, userRef.current?.token);
+    }
     mutate(kind, (prev) => {
       const found = prev.find((l) => l.id === line.id);
       if (found) {
@@ -292,6 +309,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       add({
         id: p.slug, name: p.name, price: p.price, unit: p.unit, image: p.images[0].src,
         step: p.cut?.step ?? 1, qty: qty ?? (p.cut ? 2.5 : 1), href: `/product/${p.slug}`,
+        productId: p.productId ?? p.live?.id,
       });
       return;
     }
@@ -300,7 +318,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     const line = {
       id: p.slug, name: p.name, price: rate.price, unit: p.unit, image: p.images[0].src,
       step: p.cut?.step ?? (p.unit === "metre" ? 0.5 : 1), qty: Math.max(qty ?? 0, rate.minQty),
-      href: wholesaleHref(`/product/${p.slug}`), minQty: rate.minQty,
+      href: wholesaleHref(`/product/${p.slug}`), minQty: rate.minQty, productId: p.productId ?? p.live?.id,
     };
     add(line, "wholesale");
   }, [mode, add, say]);
@@ -320,7 +338,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
          is what the UI shows either way. Only live pieces have the numeric
          id the API wants. */
       const token = userRef.current?.token;
-      if (token && p.live?.id) setWishlistRemote(token, p.live.id, m === "wholesale", !saved).then(() => refreshCounts(token));
+      const pid = p.productId ?? p.live?.id;
+      if (token && pid) setWishlistRemote(token, pid, m === "wholesale", !saved).then(() => refreshCounts(token));
     });
   }, [mode, say, withLogin, refreshCounts]);
 

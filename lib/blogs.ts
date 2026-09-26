@@ -91,6 +91,7 @@ function relatedToProduct(p: BlogApiRelatedProduct): Product {
     stock: p.product_stock <= 0 ? "out" : p.product_stock < 10 ? "low" : "in",
     images: [{ src: p.product_image_cdn, note: p.product_name }],
     fresh: p.product_id,
+    productId: p.product_id,
     sold: 0,
   };
 }

@@ -118,6 +118,7 @@ function mapProduct(raw: RawProduct): Product {
   ];
 
   return {
+    productId: raw.id,
     slug: raw.slug,
     name: raw.name,
     short: raw.name.replace(/ Printed.*$/i, "").replace(/ Cotton Fabric$/i, "").trim() || raw.name,
@@ -143,6 +144,7 @@ function mapProduct(raw: RawProduct): Product {
 
 function mapCard(raw: RawCard): Product {
   return {
+    productId: raw.id,
     slug: raw.slug,
     name: raw.name,
     short: raw.name,

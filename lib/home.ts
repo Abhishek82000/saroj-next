@@ -198,6 +198,7 @@ export function apiProductToProduct(p: HomeApiProduct): Product {
     stock: p.stock <= 0 ? "out" : p.stock < 10 ? "low" : "in",
     images: [{ src: p.image, note: p.image_alt ?? "" }],
     fresh: p.id,
+    productId: p.id,
     sold: 0,
     label: p.label || undefined,
   };
@@ -247,6 +248,7 @@ export async function getProductDetail(slug: string): Promise<ApiProductDetail |
       stock: !priced ? "out" : priced.stock <= 0 ? "out" : priced.stock < 10 ? "low" : "in",
       images: images.length > 0 ? images : [{ src: d.image, note: d.name }],
       fresh: d.id,
+      productId: d.id,
       sold: 0,
       label: priced?.label || undefined,
     };

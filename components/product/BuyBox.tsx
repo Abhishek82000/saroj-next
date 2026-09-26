@@ -98,6 +98,8 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       step: stepQty,
       qty: qty || 1,
       href: productHref(p.slug, wholesale),
+      productId: live?.id ?? p.productId,
+      variationId: variant?.variationId ?? null,
       ...(wholesale ? { minQty } : {}),
     };
     /* Wholesale pages fill the wholesale cart only, and only for a logged-in account. */
