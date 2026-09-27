@@ -20,7 +20,8 @@ export default function RecentlyViewed({
     let ids: number[] = [];
     try {
       ids = JSON.parse(window.localStorage.getItem(KEY) ?? "[]");
-      if (!Array.isArray(ids)) ids = [];
+      /* Numbers only — this key once also held search terms (StoreProvider's old search history). */
+      ids = Array.isArray(ids) ? ids.filter((id) => typeof id === "number") : [];
     } catch { ids = []; }
 
     const others = ids.filter((id) => id !== productId);

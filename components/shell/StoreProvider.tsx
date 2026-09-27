@@ -36,7 +36,6 @@ const readWishlist = (mobile: string): Record<Mode, Favs> => ({
   wholesale: safe.read<Favs>(favKey("wholesale", mobile), safe.read<Favs>(OLD_FAV_KEY.wholesale, {})),
 });
 type Favs = Record<string, true>;
-const RECENT_KEY = "saroj.recent";
 
 /** localStorage that never throws — private mode, sandboxed frames, SSR. */
 const safe = {
@@ -107,8 +106,6 @@ interface Store {
       server-side count (GET /api/auth/count-data) and the local list. */
   favCount: number;
 
-  recent: string[];
-  remember: (q: string) => void;
 
   cartOpen: boolean; setCartOpen: (v: boolean) => void;
   searchOpen: boolean; setSearchOpen: (v: boolean) => void;
@@ -140,7 +137,6 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const refreshCounts = useCallback((token?: string) => {
     if (token) getCounts(token).then((c) => { if (c) setCounts(c); });
   }, []);
-  const [recent, setRecent] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -180,7 +176,6 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
     setRetail(safe.read<CartLine[]>(RETAIL_CART_KEY, []));
-    setRecent(safe.read<string[]>(RECENT_KEY, []));
     const saved = safe.read<User | null>(USER_KEY, null);
     setUser(saved);
     if (saved) {
@@ -198,7 +193,6 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     safe.write(favKey("retail", user.mobile), wishlist.retail);
     safe.write(favKey("wholesale", user.mobile), wishlist.wholesale);
   }, [hydrated, user, wishlist]);
-  useEffect(() => { if (hydrated) safe.write(RECENT_KEY, recent); }, [hydrated, recent]);
   useEffect(() => { if (hydrated) safe.write(USER_KEY, user); }, [hydrated, user]);
 
   const say = useCallback((message: string) => {
@@ -409,12 +403,6 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     });
   }, [mode, say, withLogin, refreshCounts]);
 
-  const remember = useCallback((q: string) => {
-    const term = q.trim();
-    if (term.length < 2) return;
-    setRecent((prev) => [term, ...prev.filter((x) => x.toLowerCase() !== term.toLowerCase())].slice(0, 5));
-  }, []);
-
   const cart = mode === "wholesale" ? wh.lines : retail;
   const otherCount = (mode === "wholesale" ? retail : wh.lines).length;
   const total = (lines: CartLine[]) => lines.reduce((a, l) => a + l.price * l.qty, 0);
@@ -436,7 +424,6 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
        can lag (or miss pieces it has no id for), and a filled heart with no badge
        reads as broken. Logged out there's no wishlist, so no badge. */
     favCount: user ? Math.max(counts?.wishlist[mode] ?? 0, Object.keys(wishlist[mode]).length) : 0,
-    recent, remember,
     cartOpen, setCartOpen,
     searchOpen, setSearchOpen,
     menuOpen, setMenuOpen,
