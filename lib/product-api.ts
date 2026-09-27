@@ -166,12 +166,25 @@ function mapCard(raw: RawCard): Product {
 
 /* ---------- calls ---------- */
 
-async function get<T>(path: string): Promise<T | null> {
+/** The API couldn't answer (rate-limited, down, unreachable) — not the same as "no such product". */
+export class ApiUnavailableError extends Error {}
+
+/** `strict`: only a real 404 means "not found" (null); a 429 / 5xx / network
+    failure throws ApiUnavailableError instead, so a product page doesn't turn
+    into a cached "Not found" just because the API blinked. */
+async function get<T>(path: string, strict = false): Promise<T | null> {
+  let res: Response;
   try {
-    const res = await fetch(base() + path, {
+    res = await fetch(base() + path, {
       headers: { Accept: "application/json" },
       next: { revalidate: REVALIDATE },
     });
+  } catch {
+    if (strict) throw new ApiUnavailableError(`unreachable: ${path}`);
+    return null;
+  }
+  if (strict && !res.ok && res.status !== 404) throw new ApiUnavailableError(`${res.status}: ${path}`);
+  try {
     if (!res.ok) return null;
     const json = await res.json();
     return json?.success ? (json.data as T) : null;
@@ -188,11 +201,11 @@ async function get<T>(path: string): Promise<T | null> {
  */
 export async function getProductDetail(
   slug: string,
-  opts: { wholesale?: boolean; recent?: number[] } = {},
+  opts: { wholesale?: boolean; recent?: number[]; strict?: boolean } = {},
 ): Promise<ProductDetail | null> {
   const base = opts.wholesale ? "/api/wholesale/products/" : "/api/products/";
   const query = opts.recent?.length ? `?recent=${opts.recent.join(",")}` : "";
-  const raw = await get<RawDetail>(base + encodeURIComponent(slug) + query);
+  const raw = await get<RawDetail>(base + encodeURIComponent(slug) + query, opts.strict);
   if (!raw) return null;
 
   const rails: CategoryRail[] = (raw.category_rails ?? []).map((c) => ({

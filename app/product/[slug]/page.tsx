@@ -23,7 +23,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ProductPage({ params }: { params: Params }) {
   const { slug } = await params;
 
-  const detail = await getProductDetail(slug);
+  // strict: a rate-limited / down API errors (keeping the last good cached
+  // page) instead of rendering a cacheable 404 — unless the static catalogue
+  // has the piece, which can then stand in.
+  const detail = await getProductDetail(slug, { strict: true }).catch((e) => {
+    if (getProduct(slug)) return null;
+    throw e;
+  });
   if (detail) return <ProductView p={detail.product} detail={detail} />;
 
   // Fall back to the static catalogue when the API has nothing — the

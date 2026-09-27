@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function WholesaleProductPage({ params }: { params: Params }) {
   const { slug } = await params;
 
-  const detail = await getProductDetail(slug, { wholesale: true });
+  const detail = await getProductDetail(slug, { wholesale: true, strict: true });
   if (!detail) notFound();
 
   return <ProductView p={detail.product} detail={detail} />;

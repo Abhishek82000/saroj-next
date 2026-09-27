@@ -11,7 +11,10 @@ export async function resolveProduct(
   slug: string,
   wholesale = false,
 ): Promise<{ product: Product; detail?: ProductDetail }> {
-  const detail = await getProductDetail(slug, { wholesale });
+  const detail = await getProductDetail(slug, { wholesale, strict: true }).catch((e) => {
+    if (getProduct(slug)) return null;
+    throw e;
+  });
   if (detail) return { product: detail.product, detail };
   const local = getProduct(slug);
   return local ? { product: local } : { product: null as unknown as Product };
