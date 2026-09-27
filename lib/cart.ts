@@ -7,6 +7,12 @@
  *            retail:    { type: "retail",    product_id, variation_id, qty, current_qty }
  *          → { status, message, line: { cart_id, key, qty, price, line_total, ... } }
  *   GET    /api/cart?type=<retail|wholesale>   the account's cart (logged in)
+ *   POST   /api/cart/price        fresh prices for a list of lines — guests too
+ *          { type, items: [{ product_id, variation_id?, qty }] }
+ *          → { items: [line…], totals: { mrp, discount, subtotal }, has_errors }
+ *          (checked live: works without a token; a gone piece comes back with `error`)
+ *   POST   /api/cart/sync         after login / registration: hands the guest
+ *          cart to the account — { type, items: [{ product_id, variation_id?, qty }] }
  *   PATCH  /api/cart/<cart_id>?qty=<n>   set a line's quantity (the − / + buttons)
  *   DELETE /api/cart/<cart_id>?qty=<n>   remove a line
  *
@@ -107,3 +113,31 @@ export async function getCartRemote(type: "retail" | "wholesale", token: string)
   if (!r.ok) return null;
   return findLines(r).map((l) => toCartLine(l, type)).filter((l): l is CartLine => !!l);
 }
+
+/** Moves this browser's guest lines into the account that just logged in or registered. */
+export const syncCartRemote = (type: "retail" | "wholesale", lines: CartLine[], token: string) =>
+  call<object>("sync", {
+    method: "POST",
+    body: JSON.stringify({
+      type,
+      items: itemsOf(lines),
+    }),
+  }, token);
+
+export interface CartTotals { mrp: number; discount: number; subtotal: number }
+
+const itemsOf = (lines: CartLine[]) => lines
+  .filter((l) => l.productId)
+  .map((l) => ({ product_id: l.productId, variation_id: l.variationId ?? null, qty: l.qty }));
+
+/** Today's prices for these lines, straight from the server. */
+export async function priceCartRemote(type: "retail" | "wholesale", lines: CartLine[], token?: string) {
+  const r = await call<{ items?: ServerCartLine[]; totals?: CartTotals; has_errors?: boolean }>(
+    "price", { method: "POST", body: JSON.stringify({ type, items: itemsOf(lines) }) }, token);
+  if (!r.ok) return null;
+  return { items: r.items ?? [], totals: r.totals ?? null, hasErrors: !!r.has_errors };
+}
+
+/** The local line a server line answers for — matched on product + variation. */
+export const sameLine = (l: CartLine, s: ServerCartLine) =>
+  l.productId === s.product_id && (l.variationId ?? null) === (s.variation_id ?? null);

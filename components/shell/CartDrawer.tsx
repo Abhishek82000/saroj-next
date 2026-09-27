@@ -4,6 +4,7 @@ import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
 import { inr, site, unitLabel } from "@/lib/site";
+import { useCartPrice } from "@/components/cart/useCartPrice";
 
 export default function CartDrawer() {
   const {
@@ -14,6 +15,8 @@ export default function CartDrawer() {
   const close = () => setCartOpen(false);
   const free = shortOfFreeShipping <= 0;
   const other = wholesale ? "retail" : "wholesale";
+  /* Fresh prices while the drawer is open. */
+  const { totals, errors, hasErrors } = useCartPrice(cartOpen);
 
   return (
     <Drawer open={cartOpen} onClose={close} label={wholesale ? "Your wholesale cart" : "Your cart"} className="st-cartdrawer">
@@ -82,6 +85,7 @@ export default function CartDrawer() {
                   <small className="st-line__m">
                     {inr(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}
                   </small>
+                  {errors[l.id] && <small className="st-co__err">{errors[l.id]}</small>}
                   <div className="st-line__foot">
                     <span className="st-qty">
                       <button type="button" aria-label="Less" onClick={() => {
@@ -104,12 +108,15 @@ export default function CartDrawer() {
 
       {cart.length > 0 && (
         <div className="st-cart__foot">
-          <div className="st-cart__sum"><small>Subtotal</small><b>{inr(subtotal)}</b></div>
+          <div className="st-cart__sum"><small>Subtotal</small><b>{inr(totals?.subtotal ?? subtotal)}</b></div>
+          {hasErrors && <p className="st-cart__note st-co__err">Remove the unavailable items to check out.</p>}
           {wholesale && <p className="st-cart__note">Wholesale prices exclude GST.</p>}
           <p className="st-cart__note">
             Taxes and delivery worked out at checkout. Everything ships wrapped in our own Ajrakh offcuts.
           </p>
-          <Link href={href("/checkout")} className="st-btn st-btn--solid" onClick={close}>Go to checkout</Link>
+          {hasErrors
+            ? <button type="button" className="st-btn st-btn--solid" disabled>Go to checkout</button>
+            : <Link href={href("/checkout")} className="st-btn st-btn--solid" onClick={close}>Go to checkout</Link>}
           <Link href={href("/cart")} className="st-btn" onClick={close}>View cart</Link>
         </div>
       )}

@@ -19,6 +19,7 @@
 .st-co__lines{ list-style:none; margin:0; padding:0; background:#fff; border:1px solid var(--line-2); border-radius:16px; }
 .st-co__line{ display:grid; grid-template-columns:84px minmax(0,1fr) auto; gap:1rem; align-items:start; padding:1rem clamp(14px,2vw,20px); }
 .st-co__line+.st-co__line{ border-top:1px solid var(--line-2); }
+.st-co__line.bad .st-co__ph{ opacity:.45; }
 .st-co__ph{ width:84px; height:84px; border-radius:10px; object-fit:cover; background:var(--paper-2); }
 .st-co__lt{ display:grid; gap:.3rem; min-width:0; }
 .st-co__n{ font-size:.92rem; line-height:1.35; color:var(--ink); }

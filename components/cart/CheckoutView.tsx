@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { Totals } from "@/components/cart/CartView";
+import { useCartPrice } from "@/components/cart/useCartPrice";
 import {
   STATES, emptyCheckout, placeOrder, validateCheckout,
   type CheckoutForm, type PaymentMethod,
@@ -35,6 +36,7 @@ export default function CheckoutView() {
   const [f, setF] = useState<CheckoutForm>(() => emptyCheckout(payments[0].key));
   const [errs, setErrs] = useState<Partial<Record<keyof CheckoutForm, string>>>({});
   const [busy, setBusy] = useState(false);
+  const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
 
   /* A logged-in visitor's details fill in whatever is still blank. */
   useEffect(() => {
@@ -55,6 +57,7 @@ export default function CheckoutView() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (hasErrors) { say("Some items are no longer available — remove them from the cart first"); return; }
     const found = validateCheckout(f, wholesale);
     setErrs(found);
     const first = Object.keys(found)[0];
@@ -190,14 +193,15 @@ export default function CheckoutView() {
                     <img src={l.image} alt="" />
                     <i>{l.qty}{l.unit === "metre" ? "m" : ""}</i>
                   </span>
-                  <span className="st-co__mn">{l.name}</span>
+                  <span className="st-co__mn">{l.name}{errors[l.id] && <em className="st-co__err">{errors[l.id]}</em>}</span>
                   <b>{inr(l.price * l.qty)}</b>
                 </li>
               ))}
             </ul>
-            <Totals subtotal={subtotal} wholesale={wholesale} />
-            <button type="submit" className="st-btn st-btn--solid st-co__go" disabled={busy}>
-              {busy ? "Placing order…" : f.payment === "online" ? `Pay ${inr(subtotal)}` : "Place order"}
+            <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
+            {hasErrors && <p className="st-co__err" style={{ marginBottom: ".8rem" }}>Some items are no longer available. <Link href={href("/cart")}>Fix your cart</Link>.</p>}
+            <button type="submit" className="st-btn st-btn--solid st-co__go" disabled={busy || hasErrors}>
+              {busy ? "Placing order…" : f.payment === "online" ? `Pay ${inr(totals?.subtotal ?? subtotal)}` : "Place order"}
             </button>
             <Link href={href("/cart")} className="st-co__back">← Back to cart</Link>
             <p className="st-co__safe"><Icon name="shield" size={14} /> Your details are only used for this order.</p>

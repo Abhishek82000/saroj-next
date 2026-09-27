@@ -4,6 +4,8 @@ import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { inr, site, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
+import type { CartTotals } from "@/lib/cart";
+import { useCartPrice } from "@/components/cart/useCartPrice";
 
 /** One line's − qty + control, holding wholesale lines at their minimum. */
 export function LineQty({ l }: { l: CartLine }) {
@@ -21,11 +23,19 @@ export function LineQty({ l }: { l: CartLine }) {
   );
 }
 
-/** Subtotal, delivery and total — shared by the cart and checkout pages. */
-export function Totals({ subtotal, wholesale }: { subtotal: number; wholesale: boolean }) {
+/** Subtotal, delivery and total — shared by the cart and checkout pages. `server`
+    is the server's own totals (POST /api/cart/price) when it priced the whole cart. */
+export function Totals({ subtotal: local, wholesale, server }: { subtotal: number; wholesale: boolean; server?: CartTotals | null }) {
+  const subtotal = server?.subtotal ?? local;
   const free = !wholesale && subtotal >= site.freeShippingOver;
   return (
     <dl className="st-co__totals">
+      {server && server.discount > 0 && (
+        <>
+          <div><dt>MRP total</dt><dd><s>{inr(server.mrp)}</s></dd></div>
+          <div><dt>Discount</dt><dd className="st-co__free">− {inr(server.discount)}</dd></div>
+        </>
+      )}
       <div><dt>Subtotal</dt><dd>{inr(subtotal)}</dd></div>
       <div>
         <dt>Delivery</dt>
@@ -46,6 +56,7 @@ export default function CartView() {
   const { cart, remove, subtotal, shortOfFreeShipping, mode, href, user, hydrated, openLogin, otherCount, switchMode } = useStore();
   const wholesale = mode === "wholesale";
   const other = wholesale ? "retail" : "wholesale";
+  const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
 
   return (
     <main id="main">
@@ -99,12 +110,13 @@ export default function CartView() {
               )}
               <ul className="st-co__lines">
                 {cart.map((l) => (
-                  <li key={l.id} className="st-co__line">
+                  <li key={l.id} className={`st-co__line${errors[l.id] ? " bad" : ""}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={l.image} alt="" className="st-co__ph" />
                     <div className="st-co__lt">
                       {l.href ? <Link href={l.href} className="st-co__n">{l.name}</Link> : <span className="st-co__n">{l.name}</span>}
                       <small>{inr(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}</small>
+                      {errors[l.id] && <em className="st-co__err">{errors[l.id]} Remove it to continue.</em>}
                       <div className="st-co__lf">
                         <LineQty l={l} />
                         <button type="button" className="st-co__x" onClick={() => remove(l.id)}>Remove</button>
@@ -118,8 +130,10 @@ export default function CartView() {
 
             <aside className="st-co__card">
               <h2>Order summary</h2>
-              <Totals subtotal={subtotal} wholesale={wholesale} />
-              <Link href={href("/checkout")} className="st-btn st-btn--solid st-co__go">Proceed to checkout</Link>
+              <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
+              {hasErrors
+                ? <button type="button" className="st-btn st-btn--solid st-co__go" disabled>Remove unavailable items</button>
+                : <Link href={href("/checkout")} className="st-btn st-btn--solid st-co__go">Proceed to checkout</Link>}
               <Link href={href("/shop")} className="st-btn st-co__go">Keep shopping</Link>
               <p className="st-co__safe"><Icon name="shield" size={14} /> Secure checkout{wholesale ? "" : " — no account needed"}</p>
             </aside>
