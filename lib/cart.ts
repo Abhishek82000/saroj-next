@@ -1,24 +1,29 @@
 /**
- * The storefront's server-side cart:
+ * The storefront's server-side cart. All calls go to our own origin (the
+ * /api/cart rewrite in next.config.ts), with the Bearer token when logged in.
  *
- *   POST /api/cart/add   (JSON)
- *     wholesale: { type: "wholesale", product_id, variation_id, qty }
- *     retail:    { type: "retail",    product_id, variation_id, qty, current_qty }
+ *   POST   /api/cart/add          add a piece (JSON body)
+ *            wholesale: { type: "wholesale", product_id, variation_id, qty }
+ *            retail:    { type: "retail",    product_id, variation_id, qty, current_qty }
+ *          → { status, message, line: { cart_id, key, qty, price, line_total, ... } }
+ *   GET    /api/cart?type=<retail|wholesale>   the account's cart (logged in)
+ *   PATCH  /api/cart/<cart_id>?qty=<n>   set a line's quantity (the − / + buttons)
+ *   DELETE /api/cart/<cart_id>?qty=<n>   remove a line
  *
- * Wholesale is for a logged-in account (Bearer token); retail also works for
- * a guest, so the token is sent only when there is one. `qty` is how much was
- * just added and `current_qty` what the line now holds in total.
- *
- * The server keeps the cart (product_id, variation_id, qty) in its session,
- * so every call must carry the session cookie: it goes to our own origin
- * (the /api/cart rewrite in next.config.ts) with credentials, and the
- * cookie Laravel sets comes back through the same proxy.
- *
- * Unconfirmed: on 2026-09-26 the endpoint 500s (a PHP parse error in
- * CartApiController.php), so the response shape — and how a guest's cart is
- * told apart — hasn't been seen yet. Like the wishlist, this is fire-and-
- * forget: the local cart in StoreProvider stays what the UI shows.
+ * Checked live on 2026-09-27:
+ * - `qty` is how much is being added, `current_qty` what the line already
+ *   held; the returned `line.qty` is their sum.
+ * - A guest gets `cart_id: null` and no session cookie — the server doesn't
+ *   keep a guest cart, so a guest's cart is the local one only.
+ * - PATCH / DELETE 401 without a token: they're for a logged-in account's
+ *   lines, addressed by the `cart_id` the add handed back.
+ * - GET /api/cart also 401s without a token; its response hasn't been seen
+ *   yet, so `getCartRemote` looks for the first list of line-shaped objects
+ *   (the same fields as the add response's `line`).
+ * The local cart in StoreProvider stays what the UI shows; these mirror it.
  */
+import type { CartLine } from "./types";
+import { wholesaleHref } from "./wholesale";
 export interface CartAddPayload {
   type: "retail" | "wholesale";
   product_id: number;
@@ -27,19 +32,78 @@ export interface CartAddPayload {
   current_qty?: number;
 }
 
-export async function addToCartRemote(payload: CartAddPayload, token?: string): Promise<{ ok: true } | { ok: false; message: string }> {
+export interface ServerCartLine {
+  cart_id: number | null; key: string; product_id: number; variation_id: number | null; qty: number;
+  name: string | null; slug: string | null; image: string | null; unit: string | null; step: number | null;
+  min_qty: number | null; mrp: number; price: number; line_total: number; error: string | null;
+}
+
+type Fail = { ok: false; message: string };
+
+async function call<T>(path: string, init: RequestInit, token?: string): Promise<({ ok: true } & T) | Fail> {
   try {
-    const headers: Record<string, string> = { Accept: "application/json", "Content-Type": "application/json" };
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (init.body) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
-    const res = await fetch("/api/cart/add", {
-      method: "POST", headers, body: JSON.stringify(payload), credentials: "same-origin",
-    });
-    const json = (await res.json().catch(() => ({}))) as { status?: string | boolean; success?: boolean; message?: string };
-    if (!res.ok || json.success === false || (typeof json.status === "string" && json.status !== "success")) {
-      return { ok: false, message: json.message ?? "Couldn't update the cart." };
-    }
-    return { ok: true };
+    const url = `/api/cart${path.startsWith("?") ? path : `/${path}`}`;
+    const res = await fetch(url, { ...init, headers, credentials: "same-origin" });
+    const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string } & T;
+    if (!res.ok || json.status === "error") return { ok: false, message: json.message ?? "Couldn't update the cart." };
+    return { ...json, ok: true };
   } catch {
     return { ok: false, message: "Couldn't reach the server." };
   }
+}
+
+export const addToCartRemote = (payload: CartAddPayload, token?: string) =>
+  call<{ line?: ServerCartLine }>("add", { method: "POST", body: JSON.stringify(payload) }, token);
+
+export const updateCartRemote = (cartId: number, qty: number, token: string) =>
+  call<object>(`${cartId}?qty=${encodeURIComponent(qty)}`, { method: "PATCH" }, token);
+
+export const removeCartRemote = (cartId: number, qty: number, token: string) =>
+  call<object>(`${cartId}?qty=${encodeURIComponent(qty)}`, { method: "DELETE" }, token);
+
+/** First array under `root` (breadth-first, a few levels) whose items look like cart lines. */
+function findLines(root: unknown): ServerCartLine[] {
+  let level: unknown[] = [root];
+  for (let depth = 0; depth < 4 && level.length; depth++) {
+    const next: unknown[] = [];
+    for (const node of level) {
+      if (Array.isArray(node)) {
+        if (node.some((x) => x && typeof x === "object" && "product_id" in x)) return node as ServerCartLine[];
+        continue;
+      }
+      if (node && typeof node === "object") next.push(...Object.values(node));
+    }
+    level = next;
+  }
+  return [];
+}
+
+/** A server line as the local cart holds it — same `id` scheme as the add buttons use. */
+export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): CartLine | null {
+  if (!l.slug || !l.name || l.error) return null;
+  const href = `/product/${l.slug}`;
+  return {
+    id: l.variation_id ? `${l.slug}#${l.variation_id}` : l.slug,
+    name: l.name,
+    price: l.price,
+    unit: l.unit ?? "piece",
+    image: l.image ?? "",
+    qty: l.qty,
+    step: l.step || 1,
+    href: type === "wholesale" ? wholesaleHref(href) : href,
+    ...(l.min_qty ? { minQty: l.min_qty } : {}),
+    productId: l.product_id,
+    variationId: l.variation_id,
+    ...(l.cart_id ? { cartId: l.cart_id } : {}),
+  };
+}
+
+/** The logged-in account's cart of one type, as local cart lines. */
+export async function getCartRemote(type: "retail" | "wholesale", token: string): Promise<CartLine[] | null> {
+  const r = await call<Record<string, unknown>>(`?type=${type}`, { method: "GET" }, token);
+  if (!r.ok) return null;
+  return findLines(r).map((l) => toCartLine(l, type)).filter((l): l is CartLine => !!l);
 }

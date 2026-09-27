@@ -59,6 +59,8 @@ export interface CartLine {
   productId?: number;
   /** The chosen variation, for a variable product. */
   variationId?: number | null;
+  /** The server's id for this line (logged-in accounts only) — what update/remove address. */
+  cartId?: number;
 }
 
 /* ============================================================

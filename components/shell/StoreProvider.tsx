@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate } from "@/lib/wholesale";
 import { getWishlist, setWishlistRemote } from "@/lib/wishlist";
 import { getCounts, type Counts } from "@/lib/counts";
-import { addToCartRemote } from "@/lib/cart";
+import { addToCartRemote, getCartRemote, removeCartRemote, updateCartRemote } from "@/lib/cart";
 
 /** Retail shows the ordinary catalogue; wholesale shows trade rates, GST extra.
     Which one is on is decided by the URL — everything under /wholesale-fabric and
@@ -223,8 +223,12 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
         product_id: line.productId,
         variation_id: line.variationId ?? null,
         qty,
-        ...(kind === "retail" ? { current_qty: round(had + qty) } : {}),
-      }, userRef.current?.token);
+        ...(kind === "retail" ? { current_qty: had } : {}),
+      }, userRef.current?.token).then((r) => {
+        /* A logged-in account's line comes back with its server id — keep it for update/remove. */
+        const cartId = r.ok ? r.line?.cart_id : null;
+        if (cartId) mutate(kind, (prev) => prev.map((l) => (l.id === line.id ? { ...l, cartId } : l)));
+      });
     }
     mutate(kind, (prev) => {
       const found = prev.find((l) => l.id === line.id);
@@ -238,12 +242,52 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   }, [mutate, say]);
 
 
-  const setQty = useCallback((id: string, qty: number) => {
-    mutate(mode, (prev) =>
-      qty <= 0 ? prev.filter((l) => l.id !== id) : prev.map((l) => (l.id === id ? { ...l, qty: round(qty) } : l)));
+  /** Pulls a logged-in account's carts (GET /api/cart?type=…) and merges them
+      with the local ones: the server's lines win, lines only this browser has
+      (added as a guest before logging in, say) stay and are sent up so they
+      get a cart id. A failed fetch leaves the local cart as it is. */
+  const syncCart = useCallback((token: string) => {
+    for (const kind of ["retail", "wholesale"] as const) {
+      getCartRemote(kind, token).then((server) => {
+        if (!server) return;
+        const onServer = new Set(server.map((l) => l.id));
+        const localOnly = cartsRef.current[kind].filter((l) => !onServer.has(l.id));
+        mutate(kind, (prev) => [...server, ...prev.filter((l) => !onServer.has(l.id))]);
+        for (const l of localOnly) {
+          if (!l.productId) continue;
+          addToCartRemote({
+            type: kind, product_id: l.productId, variation_id: l.variationId ?? null, qty: l.qty,
+            ...(kind === "retail" ? { current_qty: 0 } : {}),
+          }, token).then((r) => {
+            const cartId = r.ok ? r.line?.cart_id : null;
+            if (cartId) mutate(kind, (prev) => prev.map((x) => (x.id === l.id ? { ...x, cartId } : x)));
+          });
+        }
+      });
+    }
+  }, [mutate]);
+
+  /* On load with a saved login, and on every login. */
+  const token = user?.token;
+  useEffect(() => { if (hydrated && token) syncCart(token); }, [hydrated, token, syncCart]);
+
+  /* − / + and Remove: the local cart changes at once; a logged-in account's
+     server line (one with a cartId) is told too — PATCH / DELETE /api/cart/<id>. */
+  const remove = useCallback((id: string) => {
+    const line = cartsRef.current[mode].find((l) => l.id === id);
+    const token = userRef.current?.token;
+    if (line?.cartId && token) removeCartRemote(line.cartId, line.qty, token);
+    mutate(mode, (prev) => prev.filter((l) => l.id !== id));
   }, [mutate, mode]);
 
-  const remove = useCallback((id: string) => mutate(mode, (prev) => prev.filter((l) => l.id !== id)), [mutate, mode]);
+  const setQty = useCallback((id: string, qty: number) => {
+    if (qty <= 0) { remove(id); return; }
+    const next = round(qty);
+    const line = cartsRef.current[mode].find((l) => l.id === id);
+    const token = userRef.current?.token;
+    if (line?.cartId && token) updateCartRemote(line.cartId, next, token);
+    mutate(mode, (prev) => prev.map((l) => (l.id === id ? { ...l, qty: next } : l)));
+  }, [mutate, mode, remove]);
 
   const openLogin = useCallback((reason?: string) => {
     setLoginReason(reason ?? null);
