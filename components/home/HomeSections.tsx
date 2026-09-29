@@ -1,6 +1,9 @@
 import Hero from "@/components/home/Hero";
 import CraftRoll from "@/components/home/CraftRoll";
 import TwoHouses from "@/components/home/TwoHouses";
+import WaysToBuy from "@/components/home/WaysToBuy";
+import OffersSlider from "@/components/home/OffersSlider";
+import { getOffersFeed, offerSlides } from "@/lib/offers";
 import Shelf from "@/components/home/Shelf";
 import GiftBuilder from "@/components/home/GiftBuilder";
 import FabricFan from "@/components/home/FabricFan";
@@ -34,6 +37,9 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
   const featuredCategories = await getFeaturedCategories();
   const { posts: journalPosts } = await getBlogList();
   const isWholesale = wholesale !== undefined;
+  /* Live coupons, cart-milestone steps and free shipping (GET /api/offers) — a retail offer. */
+  const feed = isWholesale ? null : await getOffersFeed();
+  const offers = feed ? offerSlides(feed) : [];
 
   /* Category rails: the wholesale feed's own in wholesale, the storefront's otherwise. */
   const categoryRails = isWholesale && wholesale?.rails.length
@@ -46,6 +52,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       {/* `top_slider` banners — their own section under the hero, retail only. */}
       {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}
       <CraftRoll />
+      {offers.length > 1 && <OffersSlider slides={offers} />}
       {tagSections.length > 0 ? (
         tagSections.map((tag) => (
           <Rail
@@ -59,6 +66,8 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       ) : (
         <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />
       )}
+      {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
+      {!isWholesale && <WaysToBuy />}
       <Shelf categories={featuredCategories} />
       {categoryRails.map((cat) => (
         <Rail key={cat.id} id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
