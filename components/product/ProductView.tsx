@@ -5,8 +5,8 @@ import Rail from "./Rail";
 import ProductTabs from "./ProductTabs";
 import RecentlyViewed from "./RecentlyViewed";
 import JsonLd from "@/components/seo/JsonLd";
-import { craftBy } from "@/lib/crafts";
 import { productHref, WHOLESALE_BASE } from "@/lib/product-api";
+import { categoryHref } from "@/lib/nav";
 import { breadcrumbLd, faqLd, graph, productLd } from "@/lib/seo";
 import type { Product, ProductDetail } from "@/lib/types";
 
@@ -18,9 +18,11 @@ import type { Product, ProductDetail } from "@/lib/types";
 export default function ProductView({
   p, detail, related,
 }: { p: Product; detail?: ProductDetail; related?: Product[] }) {
-  const craft = craftBy[p.craft] ?? craftBy.fabric;
   const wholesale = detail?.mode === "wholesale";
   const rails = detail?.categoryRails ?? [];
+  /* The API's first category rail is the piece's own category. */
+  const cat = rails[0] ? { name: rails[0].name, href: categoryHref(rails[0].slug) } : null;
+  const kindLabel = p.kind === "fabric" ? "Fabric" : "Handicraft";
   const also = detail?.related ?? related ?? [];
 
   return (
@@ -30,7 +32,7 @@ export default function ProductView({
         {wholesale
           ? <><Link href={WHOLESALE_BASE}>Wholesale</Link><span aria-hidden="true">/</span></>
           : <><Link href="/shop">Shop</Link><span aria-hidden="true">/</span></>}
-        <Link href={`/shop?craft=${craft.key}`}>{craft.name}</Link><span aria-hidden="true">/</span>
+        {cat && <><Link href={cat.href}>{cat.name}</Link><span aria-hidden="true">/</span></>}
         <b>{p.short}</b>
       </nav>
 
@@ -39,8 +41,8 @@ export default function ProductView({
           <Gallery p={p} />
           <div>
             <p className="st-pd__kind">
-              <Link href={`/shop?craft=${craft.key}`}>{craft.name}</Link>
-              {p.kind === "fabric" ? " · Hand block printed" : ` · ${craft.lane}`}
+              {cat ? <Link href={cat.href}>{cat.name}</Link> : kindLabel}
+              {p.kind === "fabric" ? " · Hand block printed" : " · Jaipur"}
               {wholesale && " · Wholesale"}
             </p>
             <h1 className="st-pd__name">{p.name}</h1>
@@ -74,7 +76,7 @@ export default function ProductView({
 
       {also.length > 0 && (
         <Rail
-          eyebrow={p.kind === "fabric" ? "The same cotton, another base" : `More from ${craft.lane}`}
+          eyebrow={p.kind === "fabric" ? "The same cotton, another base" : "More from Jaipur"}
           heading="People also bought."
           items={also}
         />
@@ -91,7 +93,7 @@ export default function ProductView({
         breadcrumbLd([
           { name: "Home", path: "/" },
           { name: wholesale ? "Wholesale" : "Shop", path: wholesale ? WHOLESALE_BASE : "/shop" },
-          { name: craft.name, path: `/shop?craft=${craft.key}` },
+          ...(cat ? [{ name: cat.name, path: wholesale ? `/wholesale/${rails[0].slug}` : cat.href }] : []),
           { name: p.short, path: productHref(p.slug, wholesale) },
         ]),
         faqLd(),

@@ -327,6 +327,8 @@ export interface Reel {
   image: string;
   /** Catalogue slug when the piece has a page here; an outside URL otherwise. */
   slug?: string;
+  /** The live API's product id — what the cart API needs. */
+  productId?: number;
   href?: string;
 }
 

@@ -1,23 +1,18 @@
 import type { Metadata } from "next";
 import { getProductDetail, productHref } from "./product-api";
-import { getProduct, discount } from "./products";
+import { discount } from "./price";
 import { craftBy } from "./crafts";
 import { pageMeta } from "./seo";
 import { inr, unitLabel } from "./site";
 import type { Product, ProductDetail } from "./types";
 
-/** API first, static catalogue second — used by both product routes. */
+/** The product from the API — used by both product routes. */
 export async function resolveProduct(
   slug: string,
   wholesale = false,
 ): Promise<{ product: Product; detail?: ProductDetail }> {
-  const detail = await getProductDetail(slug, { wholesale, strict: true }).catch((e) => {
-    if (getProduct(slug)) return null;
-    throw e;
-  });
-  if (detail) return { product: detail.product, detail };
-  const local = getProduct(slug);
-  return local ? { product: local } : { product: null as unknown as Product };
+  const detail = await getProductDetail(slug, { wholesale, strict: true });
+  return detail ? { product: detail.product, detail } : { product: null as unknown as Product };
 }
 
 /**

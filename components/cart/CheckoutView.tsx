@@ -3,57 +3,90 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
-import { Totals } from "@/components/cart/CartView";
+import { Totals, payable } from "@/components/cart/CartView";
+import CouponBox from "@/components/cart/CouponBox";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import {
-  STATES, emptyCheckout, placeOrder, validateCheckout,
+  emptyCheckout, lookupPincode, placeOrder, validateCheckout,
   type CheckoutForm, type PaymentMethod,
 } from "@/lib/checkout";
-import { inr } from "@/lib/site";
+import { inr, unitLabel } from "@/lib/site";
 
+/** Payment choices, shown as an accordion above "Pay Now": the chosen one opens to say what happens next. */
 const PAYMENTS: Record<"retail" | "wholesale", { key: PaymentMethod; title: string; note: string }[]> = {
   retail: [
-    { key: "online", title: "Pay online", note: "UPI, cards, net banking, wallets" },
-    { key: "cod", title: "Cash on delivery", note: "Pay when the parcel arrives" },
+    { key: "online", title: "UPI, All Cards, NetBanking, Wallets",
+      note: "After clicking “Pay Now”, you will be redirected to PhonePe — UPI, All Cards, NetBanking, Wallets to complete your purchase securely." },
   ],
   wholesale: [
-    { key: "online", title: "Pay online", note: "UPI, cards, net banking" },
-    { key: "bank", title: "Bank transfer", note: "NEFT / RTGS — details sent with the order" },
+    { key: "online", title: "UPI, All Cards, NetBanking",
+      note: "After clicking “Pay Now”, you will be redirected to PhonePe to complete your payment securely." },
+    { key: "bank", title: "Bank Transfer (NEFT / RTGS)", note: "We'll send our bank details with the order confirmation; the order is processed once the payment lands." },
   ],
 };
 
+type Errors = Partial<Record<keyof CheckoutForm, string>>;
+type PinState = "idle" | "loading" | "ok" | "fail";
+
 /**
- * /checkout (and /wholesale-fabric/checkout) — contact, delivery address and
- * payment method on the left, the order on the right. Retail checks out as a
- * guest (this form is all we need); wholesale needs a login. Placing the order
- * goes through `placeOrder` in lib/checkout.ts, which is where the order and
- * payment APIs plug in.
+ * /checkout (and /wholesale-fabric/checkout) — laid out like the storefront's
+ * own checkout: Contact (mobile), Billing Details (name, email), Delivery
+ * Details (address; state and city fill in from the pincode; a delivery
+ * phone, or "same as above"), then payment. The order sits on the right (on a
+ * phone, in a fold-out at the top). Retail checks out as a guest; wholesale
+ * needs a login. Placing the order goes through `placeOrder` in lib/checkout.ts.
  */
 export default function CheckoutView() {
-  const { cart, subtotal, mode, href, user, hydrated, openLogin, say } = useStore();
+  const { cart, subtotal, mode, href, user, hydrated, openLogin, say, coupon } = useStore();
   const wholesale = mode === "wholesale";
   const payments = PAYMENTS[mode];
   const [f, setF] = useState<CheckoutForm>(() => emptyCheckout(payments[0].key));
-  const [errs, setErrs] = useState<Partial<Record<keyof CheckoutForm, string>>>({});
+  const [errs, setErrs] = useState<Errors>({});
   const [busy, setBusy] = useState(false);
+  const [pin, setPin] = useState<{ state: PinState; message?: string }>({ state: "idle" });
   const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
+  const total = payable(totals?.subtotal ?? subtotal, wholesale ? 0 : coupon?.discount);
 
   /* A logged-in visitor's details fill in whatever is still blank. */
   useEffect(() => {
     if (!user) return;
+    const [first, ...rest] = (user.name === user.mobile ? "" : user.name).split(" ");
     setF((p) => ({
       ...p,
-      name: p.name || (user.name === user.mobile ? "" : user.name),
       mobile: p.mobile || user.mobile,
+      firstName: p.firstName || first,
+      lastName: p.lastName || rest.join(" "),
       email: p.email || user.email,
     }));
   }, [user]);
 
-  const set = (k: keyof CheckoutForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const v = k === "mobile" || k === "pincode" ? e.target.value.replace(/\D/g, "") : e.target.value;
-    setF((p) => ({ ...p, [k]: v }));
-    if (errs[k]) setErrs((p) => ({ ...p, [k]: undefined }));
+  /* A full pincode looks up its city and state. */
+  useEffect(() => {
+    if (!/^[1-9]\d{5}$/.test(f.pincode)) { setPin({ state: "idle" }); return; }
+    let live = true;
+    setPin({ state: "loading" });
+    lookupPincode(f.pincode).then((r) => {
+      if (!live) return;
+      if (r.ok) {
+        setF((p) => ({ ...p, city: r.city, state: r.state }));
+        setErrs((p) => ({ ...p, city: undefined, state: undefined, pincode: undefined }));
+        setPin({ state: "ok" });
+      } else {
+        setPin({ state: "fail", message: r.message });
+      }
+    });
+    return () => { live = false; };
+  }, [f.pincode]);
+
+  const update = (patch: Partial<CheckoutForm>) => {
+    setF((p) => ({ ...p, ...patch }));
+    setErrs((p) => {
+      const next = { ...p };
+      for (const k of Object.keys(patch) as (keyof CheckoutForm)[]) delete next[k];
+      return next;
+    });
   };
+  const digits = (v: string, n: number) => v.replace(/\D/g, "").slice(0, n);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,33 +94,48 @@ export default function CheckoutView() {
     const found = validateCheckout(f, wholesale);
     setErrs(found);
     const first = Object.keys(found)[0];
-    if (first) {
-      document.getElementById(`co-${first}`)?.focus();
-      return;
-    }
+    if (first) { document.getElementById(`co-${first}`)?.focus(); return; }
     setBusy(true);
-    const r = await placeOrder(f, cart, { wholesale, token: user?.token });
+    const r = await placeOrder({
+      ...f,
+      deliveryPhone: f.sameAsContact ? f.mobile : f.deliveryPhone,
+      /* Retail sends its applied coupon; wholesale never carries one. */
+      coupon: wholesale ? "" : coupon?.code ?? "",
+    }, cart, { wholesale, token: user?.token });
     setBusy(false);
     say(r.ok ? `Order ${r.orderId} placed` : r.message);
   };
 
-  const field = (k: keyof CheckoutForm, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
-    <label className={`st-field${errs[k] ? " bad" : ""}`}>
-      <span>{label}</span>
-      <input id={`co-${k}`} value={f[k]} onChange={set(k)} aria-invalid={!!errs[k]} {...props} />
-      {errs[k] && <em className="st-co__err">{errs[k]}</em>}
-    </label>
-  );
+  /** One input with a floating label: it sits inside the field and lifts above the text once there is some. */
+  const input = (
+    k: keyof CheckoutForm, placeholder: string,
+    props: React.InputHTMLAttributes<HTMLInputElement> & { onValue?: (v: string) => string } = {},
+  ) => {
+    const { onValue, ...rest } = props;
+    return (
+      <div className={`st-cf${errs[k] ? " bad" : ""}${rest.readOnly ? " ro" : ""}`}>
+        <input id={`co-${k}`} placeholder=" " value={String(f[k] ?? "")} aria-invalid={!!errs[k]}
+          onChange={(e) => update({ [k]: onValue ? onValue(e.target.value) : e.target.value })} {...rest} />
+        <label htmlFor={`co-${k}`}>{placeholder}</label>
+        {rest.readOnly && <Icon name="lock" size={14} />}
+        {errs[k] && <em className="st-co__err">{errs[k]}</em>}
+      </div>
+    );
+  };
 
   const head = (
-    <div className="st-plp__head">
+    <div className="st-co__top">
       <div className="st-wrap">
         <nav className="st-crumb" aria-label="Breadcrumb">
           <Link href={href("/")}>Home</Link><span aria-hidden="true">/</span>
           <Link href={href("/cart")}>{wholesale ? "Wholesale cart" : "Cart"}</Link><span aria-hidden="true">/</span>
           <span>Checkout</span>
         </nav>
-        <h1>Checkout</h1>
+        <ol className="st-co__steps" aria-label="Progress">
+          <li className="done"><Link href={href("/cart")}>Cart</Link></li>
+          <li className="on" aria-current="step">Details &amp; payment</li>
+          <li>Confirmation</li>
+        </ol>
       </div>
     </div>
   );
@@ -120,91 +168,158 @@ export default function CheckoutView() {
     );
   }
 
+  const lines = (
+    <ul className="st-co__mini">
+      {cart.map((l) => (
+        <li key={l.id}>
+          <span className="st-co__mph">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={l.image} alt="" />
+            <i>{l.qty}{l.unit === "metre" ? "m" : ""}</i>
+          </span>
+          <span className="st-co__mn">
+            {l.name}
+            <small>{inr(l.price)} · {unitLabel(l.unit)}</small>
+            {errors[l.id] && <em className="st-co__err">{errors[l.id]}</em>}
+          </span>
+          <b>{inr(l.price * l.qty)}</b>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const stateCityLocked = pin.state === "ok";
+
   return (
-    <main id="main">
-      {head}
-      <form className="st-wrap st-co" onSubmit={submit} noValidate>
+    <main id="main" className="st-co__page st-co__page--split">
+      <div className="st-co__bar">
+        <div className="st-wrap">
+          <ol className="st-co__steps" aria-label="Progress">
+            <li className="done"><Link href={href("/cart")}>Cart</Link></li>
+            <li className="on" aria-current="step">Details &amp; payment</li>
+            <li>Confirmation</li>
+          </ol>
+          <span className="st-co__secure"><Icon name="lock" size={14} /> Secure checkout</span>
+        </div>
+      </div>
+
+      {/* Phones: the order folds out above the form. */}
+      <details className="st-co__msum">
+        <summary>
+          <span><Icon name="cart" size={16} /> Show order summary</span>
+          <b>{inr(total)}</b>
+        </summary>
+        <div className="st-wrap">{lines}<Totals subtotal={subtotal} wholesale={wholesale} server={totals} /></div>
+      </details>
+
+      <form className="st-co st-co--split" onSubmit={submit} noValidate>
         <div className="st-co__grid">
           <div className="st-co__form">
             {!wholesale && !user && (
               <p className="st-co__guest">
-                Checking out as a guest. <button type="button" onClick={() => openLogin("Log in to fill in your details")}>Log in</button> to fill in your details.
+                <Icon name="user" size={15} /> Checking out as a guest ·{" "}
+                <button type="button" onClick={() => openLogin("Log in to fill in your details")}>Log in</button> to fill in your details
               </p>
             )}
 
-            <fieldset className="st-co__card">
-              <legend><b>1</b> Contact</legend>
+            <section className="st-co__sec">
+              <h2><b>1</b>Contact</h2>
+              {input("mobile", "Mobile number", {
+                type: "tel", inputMode: "numeric", autoComplete: "tel-national", maxLength: 10,
+                onValue: (v) => digits(v, 10),
+              })}
+              <p className="st-co__hint">Order updates are sent to this number.</p>
+            </section>
+
+            <section className="st-co__sec">
+              <h2><b>2</b>Billing Details</h2>
               <div className="st-co__row">
-                {field("name", "Full name", { autoComplete: "name", placeholder: "Your name" })}
-                {field("mobile", "Mobile", { autoComplete: "tel-national", inputMode: "numeric", maxLength: 10, placeholder: "10-digit number" })}
+                {input("firstName", "First Name", { autoComplete: "given-name" })}
+                {input("lastName", "Last Name", { autoComplete: "family-name" })}
               </div>
-              {field("email", "Email (optional)", { type: "email", autoComplete: "email", placeholder: "For the order confirmation" })}
+              {input("email", "Email (optional)", { type: "email", autoComplete: "email" })}
               {wholesale && (
                 <div className="st-co__row">
-                  {field("business", "Business name (optional)", { autoComplete: "organization" })}
-                  {field("gstin", "GSTIN (optional)", { maxLength: 15, placeholder: "For a GST invoice", style: { textTransform: "uppercase" } })}
+                  {input("business", "Business name (optional)", { autoComplete: "organization" })}
+                  {input("gstin", "GSTIN (optional)", { maxLength: 15, style: { textTransform: "uppercase" }, onValue: (v) => v.toUpperCase() })}
                 </div>
               )}
-            </fieldset>
+            </section>
 
-            <fieldset className="st-co__card">
-              <legend><b>2</b> Delivery address</legend>
-              {field("address", "House / street / area", { autoComplete: "street-address", placeholder: "Flat, house no., street, area" })}
-              {field("landmark", "Landmark (optional)", { placeholder: "Near…" })}
-              <div className="st-co__row st-co__row--3">
-                {field("city", "City", { autoComplete: "address-level2" })}
-                <label className={`st-field${errs.state ? " bad" : ""}`}>
-                  <span>State</span>
-                  <select id="co-state" value={f.state} onChange={set("state")} aria-invalid={!!errs.state} autoComplete="address-level1">
-                    <option value="">Select</option>
-                    {STATES.map((s) => <option key={s}>{s}</option>)}
-                  </select>
-                  {errs.state && <em className="st-co__err">{errs.state}</em>}
-                </label>
-                {field("pincode", "Pincode", { autoComplete: "postal-code", inputMode: "numeric", maxLength: 6 })}
+            <section className="st-co__sec">
+              <h2><b>3</b>Delivery Details</h2>
+              {input("address", "Address", { autoComplete: "address-line1" })}
+              {input("landmark", "Apartment/Landmark etc. (optional)", { autoComplete: "address-line2" })}
+              <div className="st-co__row">
+                {input("country", "Country", { readOnly: true, tabIndex: -1 })}
+                <div className="st-co__pin">
+                  {input("pincode", "Pincode", {
+                    inputMode: "numeric", autoComplete: "postal-code", maxLength: 6,
+                    onValue: (v) => digits(v, 6),
+                  })}
+                  {pin.state === "loading" && <small className="st-co__pinnote">Finding city…</small>}
+                  {pin.state === "fail" && <small className="st-co__pinnote bad">{pin.message}</small>}
+                </div>
               </div>
-              <label className="st-field">
-                <span>Order notes (optional)</span>
-                <textarea id="co-notes" rows={3} value={f.notes} onChange={set("notes")} placeholder="Anything we should know about cutting or delivery" />
+              <div className="st-co__row">
+                {input("state", "State", { readOnly: stateCityLocked, autoComplete: "address-level1" })}
+                {input("city", "City", { readOnly: stateCityLocked, autoComplete: "address-level2" })}
+              </div>
+              {input("deliveryPhone", "Phone Number for Delivery", {
+                type: "tel", inputMode: "numeric", maxLength: 10,
+                value: f.sameAsContact ? f.mobile : f.deliveryPhone,
+                readOnly: f.sameAsContact,
+                onValue: (v) => digits(v, 10),
+              })}
+              <label className="st-co__check">
+                <input type="checkbox" checked={f.sameAsContact}
+                  onChange={(e) => update({ sameAsContact: e.target.checked, deliveryPhone: e.target.checked ? "" : f.mobile })} />
+                <span>Same as above</span>
               </label>
-            </fieldset>
-
-            <fieldset className="st-co__card">
-              <legend><b>3</b> Payment</legend>
-              <div className="st-co__pay" role="radiogroup" aria-label="Payment method">
-                {payments.map((p) => (
-                  <label key={p.key} className={`st-co__opt${f.payment === p.key ? " on" : ""}`}>
-                    <input type="radio" name="payment" value={p.key} checked={f.payment === p.key}
-                      onChange={() => setF((prev) => ({ ...prev, payment: p.key }))} />
-                    <span><b>{p.title}</b><small>{p.note}</small></span>
-                  </label>
-                ))}
+              <div className="st-cf">
+                <textarea id="co-notes" rows={3} value={f.notes} onChange={(e) => update({ notes: e.target.value })} placeholder=" " />
+                <label htmlFor="co-notes">Order notes (optional) — cutting or delivery</label>
               </div>
-            </fieldset>
+            </section>
+
           </div>
 
-          <aside className="st-co__card st-co__sum">
+          <aside className="st-co__side">
             <h2>Your order</h2>
-            <ul className="st-co__mini">
-              {cart.map((l) => (
-                <li key={l.id}>
-                  <span className="st-co__mph">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={l.image} alt="" />
-                    <i>{l.qty}{l.unit === "metre" ? "m" : ""}</i>
-                  </span>
-                  <span className="st-co__mn">{l.name}{errors[l.id] && <em className="st-co__err">{errors[l.id]}</em>}</span>
-                  <b>{inr(l.price * l.qty)}</b>
-                </li>
-              ))}
-            </ul>
+            {lines}
+            <CouponBox subtotal={totals?.subtotal ?? subtotal} />
             <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
+
+            <div className="st-pay" role="radiogroup" aria-label="Payment method">
+              {payments.map((p) => (
+                <div key={p.key} className={`st-pay__opt${f.payment === p.key ? " on" : ""}`}>
+                  <label>
+                    <input type="radio" name="payment" value={p.key} checked={f.payment === p.key}
+                      onChange={() => update({ payment: p.key })} />
+                    <span>{p.title}</span>
+                    <Icon name={p.key === "online" ? "lock" : "shield"} size={16} strokeWidth={1.8} />
+                  </label>
+                  {f.payment === p.key && (
+                    <div className="st-pay__body">
+                      <span className="st-pay__chips" aria-hidden="true">
+                        {(p.key === "online" ? ["UPI", "Visa", "Mastercard", "RuPay", "NetBanking"] : ["NEFT", "RTGS", "IMPS"]).map((c) => <i key={c}>{c}</i>)}
+                      </span>
+                      <p>{p.note}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p className="st-co__terms">
+              I have read and agree to the website <Link href="/terms-conditions">terms and conditions</Link> and{" "}
+              <Link href="/privacy-policy">privacy policy</Link>.
+            </p>
             {hasErrors && <p className="st-co__err" style={{ marginBottom: ".8rem" }}>Some items are no longer available. <Link href={href("/cart")}>Fix your cart</Link>.</p>}
-            <button type="submit" className="st-btn st-btn--solid st-co__go" disabled={busy || hasErrors}>
-              {busy ? "Placing order…" : f.payment === "online" ? `Pay ${inr(totals?.subtotal ?? subtotal)}` : "Place order"}
+            <button type="submit" className="st-btn st-btn--solid st-co__pay" disabled={busy || hasErrors}>
+              {busy ? "Placing order…" : f.payment === "online" ? <>Pay {inr(total)} <Icon name="right" size={15} strokeWidth={2} /></> : "Place Order"}
             </button>
-            <Link href={href("/cart")} className="st-co__back">← Back to cart</Link>
-            <p className="st-co__safe"><Icon name="shield" size={14} /> Your details are only used for this order.</p>
+            <p className="st-co__safe"><Icon name="shield" size={14} /> 100% secure payment · your details stay with us</p>
           </aside>
         </div>
       </form>

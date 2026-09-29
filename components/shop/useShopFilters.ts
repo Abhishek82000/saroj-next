@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useMemo, useState } from "react";
-import { products, discount } from "@/lib/products";
+import { discount } from "@/lib/price";
 import { craftBy } from "@/lib/crafts";
 import type { Product } from "@/lib/types";
 
@@ -25,15 +25,14 @@ export const emptyFilters = (q = "", craft: string[] = []): FilterState => ({
  * `skip` lets a facet count itself against every *other* active filter,
  * which is what makes the numbers next to each checkbox honest.
  *
- * `items` defaults to the full static catalogue (the /shop page); a category
- * page passes its own live list so the same filters/sort/paging work there.
+ * `items` is the live list from the API — every product, a category or a tag.
  *
  * `sortLocally: false` (a category page, whose live list has no real
  * `sold`/`fresh` data client-side) trusts the order `items` already arrived
  * in — the API was asked to sort it — instead of re-sorting in the browser.
  */
 export function useShopFilters(
-  initial: FilterState, items: Product[] = products,
+  initial: FilterState, items: Product[],
   opts: { initialSort?: SortKey; sortLocally?: boolean } = {},
 ) {
   const [state, setState] = useState<FilterState>(initial);

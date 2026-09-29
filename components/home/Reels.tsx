@@ -5,59 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
 import { useStore } from "@/components/shell/StoreProvider";
-import { bySlug } from "@/lib/products";
 import { inr } from "@/lib/site";
 import type { Reel } from "@/lib/types";
-
-const MP4 = "https://saroj-textile-store.b-cdn.net/products/";
-
-const reels: Reel[] = [
-  {
-    id: "reel-green-yellow-ajrakh",
-    video: MP4 + "32401765301609.mp4",
-    kind: "Fabric",
-    name: "Green base with yellow big flower Ajrakh print",
-    price: 150, mrp: 180, unit: "metre",
-    image: MP4 + "711785564464.webp",
-    href: "https://www.sarojtextile.com/product/green-base-with-yellow-big-flower-ajrakh-print",
-  },
-  {
-    id: "reel-black-bouquet",
-    video: MP4 + "99751775717907.mp4",
-    kind: "Fabric",
-    name: "Black base with white, mustard and rust flower bouquet cotton",
-    price: 160, mrp: 190, unit: "metre",
-    image: MP4 + "74021788077426.webp",
-    slug: "blace-base-with-abstract-white-jaal-printed-jaipuri-cotton-fabric",
-  },
-  {
-    id: "reel-kot-jewar-vase",
-    video: MP4 + "59221775639239.mp4",
-    kind: "Handicraft",
-    name: "Kot Jewar vase, thrown and painted freehand",
-    price: 1450, mrp: 1750, unit: "pair",
-    image: "https://picsum.photos/seed/saroj-shelf-vase/500/500",
-    slug: "kot-jewar-vase-and-jar",
-  },
-  {
-    id: "reel-flower-garden",
-    video: MP4 + "32401765301609.mp4",
-    kind: "Fabric",
-    name: "Black base with white, green and magenta pink flower garden",
-    price: 160, mrp: 190, unit: "metre",
-    image: MP4 + "63571788078066.webp",
-    slug: "black-base-with-mustard-and-peach-multiflower-printed-jaipuri-cotton-fabric",
-  },
-  {
-    id: "reel-meenakari-plate",
-    video: MP4 + "99751775717907.mp4",
-    kind: "Handicraft",
-    name: "Meenakari wall plate, enamel set colour by colour",
-    price: 2900, mrp: 0, unit: "each",
-    image: "https://picsum.photos/seed/saroj-shelf-plate/500/500",
-    slug: "meenakari-wall-plate",
-  },
-];
 
 /**
  * Drape and glaze don't survive a still, so these are short clips shot on the
@@ -65,13 +14,16 @@ const reels: Reel[] = [
  */
 export default function Reels({ items }: { items?: Reel[] }) {
   const rail = useRef<HTMLDivElement>(null);
-  const data = items && items.length > 0 ? items : reels;
+  const data = items ?? [];
 
   const nudge = (dir: 1 | -1) => {
     const el = rail.current;
     if (!el) return;
     el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.8), behavior: "smooth" });
   };
+
+  /* Clips come from the API only — no clips, no section. */
+  if (data.length === 0) return null;
 
   return (
     <section className="st-sec" id="reels" style={{ paddingBlock: "clamp(30px,5vw,54px)" }}>
@@ -135,7 +87,6 @@ function ReelCard({ reel }: { reel: Reel }) {
   };
 
   const link = reel.slug ? `/product/${reel.slug}` : reel.href!;
-  const product = reel.slug ? bySlug[reel.slug] : undefined;
 
   return (
     <article className={`st-reel${playing ? "" : " paused"}`}>
@@ -180,9 +131,10 @@ function ReelCard({ reel }: { reel: Reel }) {
               price: reel.price,
               unit: reel.unit,
               image: reel.image,
-              step: product?.cut?.step ?? (reel.unit === "metre" ? 0.5 : 1),
+              step: reel.unit === "metre" ? 0.5 : 1,
               qty: reel.unit === "metre" ? 2.5 : 1,
               href: reel.slug ? link : undefined,
+              productId: reel.productId,
             })}>
             Add to Cart
           </button>

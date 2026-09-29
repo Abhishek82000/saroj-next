@@ -4,10 +4,9 @@ import { useState } from "react";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
 import { useStore, type Mode } from "@/components/shell/StoreProvider";
-import { discount } from "@/lib/products";
+import { discount } from "@/lib/price";
 import { inr, unitLabel } from "@/lib/site";
 import { priced, wholesaleHref } from "@/lib/wholesale";
-import { craftBy } from "@/lib/crafts";
 import type { Product } from "@/lib/types";
 
 /** `mode` pins the card to one mode's prices and wishlist regardless of the
@@ -41,7 +40,7 @@ export default function ProductCard({ p, priority, mode: pinned }: { p: Product;
       </button>
 
       <div className="st-card__body">
-        <span className="st-card__craft">{craftBy[p.craft]?.name}</span>
+        <span className="st-card__craft">{p.kind === "fabric" ? "Hand block printed" : "Handmade in Jaipur"}</span>
         <h3 className="st-card__n"><Link href={href(`/product/${p.slug}`)}>{p.name}</Link></h3>
         {view.price > 0 && (
           <span className="st-card__p">

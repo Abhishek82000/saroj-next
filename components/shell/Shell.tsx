@@ -23,7 +23,7 @@ export default async function Shell({ children }: { children: React.ReactNode })
       <WhatsApp />
       <MenuDrawer navMenu={navMenu} />
       <CartDrawer />
-      <SearchSheet />
+      <SearchSheet navMenu={navMenu} />
       <LoginModal />
       <Toast />
     </StoreProvider>

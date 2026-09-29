@@ -1,9 +1,6 @@
 import Hero from "@/components/home/Hero";
 import CraftRoll from "@/components/home/CraftRoll";
-import TwoHouses from "@/components/home/TwoHouses";
 import Shelf from "@/components/home/Shelf";
-import GiftBuilder from "@/components/home/GiftBuilder";
-import FabricFan from "@/components/home/FabricFan";
 import VideoBanner from "@/components/home/VideoBanner";
 import Reels from "@/components/home/Reels";
 import Voices from "@/components/home/Voices";
@@ -15,7 +12,6 @@ import JsonLd from "@/components/seo/JsonLd";
 import { getBlogList } from "@/lib/blogs";
 import { apiProductToProduct, buildReels, getHomeData } from "@/lib/home";
 import { getFeaturedCategories } from "@/lib/nav";
-import { products } from "@/lib/products";
 import { breadcrumbLd, graph, itemListLd } from "@/lib/seo";
 import { WHOLESALE_HOME } from "@/lib/wholesale";
 import type { WholesalePage } from "@/lib/wholesalePage";
@@ -27,7 +23,6 @@ import type { WholesalePage } from "@/lib/wholesalePage";
  * because it is in wholesale mode its cards carry no add-to-cart.
  */
 export default async function HomeSections({ wholesale }: { wholesale?: WholesalePage | null }) {
-  const fresh = [...products].sort((a, b) => b.fresh - a.fresh).slice(0, 8);
   const homeData = await getHomeData();
   const tagSections = homeData.tagSections;
   const apiReels = buildReels(homeData);
@@ -46,19 +41,15 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       {/* `top_slider` banners — their own section under the hero, retail only. */}
       {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}
       <CraftRoll />
-      {tagSections.length > 0 ? (
-        tagSections.map((tag) => (
-          <Rail
+      {tagSections.map((tag) => (
+        <Rail
             key={tag.id}
             id={tag.slug}
             eyebrow="Off the kiln and off the loom"
             heading={tag.name}
             items={tag.products.map(apiProductToProduct)}
           />
-        ))
-      ) : (
-        <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />
-      )}
+      ))}
       <Shelf categories={featuredCategories} />
       {categoryRails.map((cat) => (
         <Rail key={cat.id} id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
@@ -73,7 +64,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
         breadcrumbLd(isWholesale
           ? [{ name: "Home", path: "/" }, { name: "Wholesale", path: WHOLESALE_HOME }]
           : [{ name: "Home", path: "/" }]),
-        itemListLd(fresh, "/"),
+        itemListLd((tagSections[0]?.products ?? []).slice(0, 8).map(apiProductToProduct), "/"),
       ])} />
     </main>
   );

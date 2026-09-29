@@ -9,9 +9,9 @@ import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import ProductCard from "./ProductCard";
 import Filters from "./Filters";
 import { emptyFilters, useShopFilters, type SortKey } from "./useShopFilters";
-import { crafts, craftBy } from "@/lib/crafts";
-import { products } from "@/lib/products";
 import { inr } from "@/lib/site";
+import { apiProductToProduct } from "@/lib/home";
+import type { ProductsApiResponse } from "@/lib/types";
 import type { CommonCategoryRef, Product, ProductsApiTag, SaleProduct } from "@/lib/types";
 
 const sorts: [SortKey, string][] = [
@@ -22,37 +22,61 @@ const sorts: [SortKey, string][] = [
 ];
 
 export default function ShopListing({
-  q = "", craft = "", items, title: titleProp, lede, showCraftFacets = true,
-  categories, currentSlug, currentTag, sort: liveSort, tags, priceRange, saleProducts,
+  q = "", items, title: titleProp, lede,
+  categories, currentSlug, currentTag, sort: liveSort, tags, priceRange, saleProducts, paging,
 }: {
   q?: string;
-  craft?: string;
-  /** A single storefront category's own live list, in place of the static catalogue. */
-  items?: Product[];
+  /** The live list from the API — every product (/shop), a category or a tag. */
+  items: Product[];
   title?: string;
   lede?: string;
-  showCraftFacets?: boolean;
   /** A category page's live sidebar facets — every storefront category, its tags,
       the live price range and a few reduced-price picks. Absent on the plain /shop page. */
   categories?: CommonCategoryRef[];
   currentSlug?: string;
   /** Set instead of currentSlug on a tag page (/shop/<slug>). */
   currentTag?: string;
-  /** The category/tag page's current API sort order — present only there, since that
-      listing is sorted server-side rather than re-sorted in the browser. */
+  /** The current API sort order — the list arrives sorted server-side, so changing
+      it reloads the page with the new order rather than re-sorting in the browser. */
   sort?: SortKey;
   tags?: ProductsApiTag[];
   priceRange?: { min: number; max: number } | null;
   saleProducts?: SaleProduct[];
+  /** /shop only: `items` is page 1 of every product; the rest load on scroll. */
+  paging?: { lastPage: number; total: number };
 }) {
   const router = useRouter();
   const { href } = useStore();
   /** A category or tag page's list arrives already sorted by the API (it has
       the real sold/new-arrival data the static catalogue's `sold`/`fresh`
       proxy fields don't) — so it just gets filtered here, not re-sorted. */
-  const isLiveSort = currentSlug != null || currentTag != null;
-  const liveHref = href(`/shop/${currentTag ?? currentSlug}`);
-  const f = useShopFilters(emptyFilters(q, craft ? [craft] : []), items, {
+  const isLiveSort = liveSort != null;
+  const slug = currentTag ?? currentSlug;
+  const liveHref = href(slug ? `/shop/${slug}` : "/shop");
+  /* /shop arrives with one page; later pages are appended as the list is scrolled. */
+  const [all, setAll] = useState(items);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  useEffect(() => { setAll(items); setPage(1); }, [items]);
+  const hasMore = !!paging && page < paging.lastPage;
+
+  const loadMore = async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}`, { headers: { Accept: "application/json" } });
+      if (res.ok) {
+        const json: ProductsApiResponse = await res.json();
+        const next = (json.data?.products ?? []).map(apiProductToProduct);
+        setAll((prev) => [...prev, ...next.filter((n) => !prev.some((p) => p.slug === n.slug))]);
+        setPage((n) => n + 1);
+      }
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const f = useShopFilters(emptyFilters(q), all, {
     initialSort: liveSort, sortLocally: !isLiveSort,
   });
   const [cols, setCols] = useState<"3" | "4">("3");
@@ -60,35 +84,35 @@ export default function ShopListing({
   const sentinel = useRef<HTMLDivElement>(null);
 
   const list = f.results;
+  /* With no filters on, /shop's count is the whole counter, not just what's loaded so far. */
+  const shownTotal = paging && f.activeCount === 0 ? Math.max(paging.total, list.length) : list.length;
   const slice = list.slice(0, f.shown);
   /** True when the source list itself (a category's live products) is empty —
       as opposed to filters narrowing a non-empty list down to nothing — so the
       empty state doesn't tell someone to "clear filters" they never set. */
-  const sourceEmpty = (items ?? products).length === 0;
+  const sourceEmpty = all.length === 0;
 
   /* More of the list reveals itself as the sentinel below the grid nears the
-     viewport — no "load more" click needed. */
+     viewport — no "load more" click needed. Once everything loaded is shown,
+     /shop fetches its next page from the API. */
+  const more = useRef(loadMore);
+  more.current = loadMore;
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
     const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) f.setShown((s) => Math.min(s + f.PAGE, list.length));
+      if (!e.isIntersecting) return;
+      if (f.shown < list.length) f.setShown((s) => Math.min(s + f.PAGE, list.length));
+      else more.current();
     }, { rootMargin: "800px" });
     io.observe(el);
     return () => io.disconnect();
-  }, [list.length, f.PAGE, f.setShown]);
+  }, [list.length, f.shown, f.PAGE, f.setShown]);
 
-  const title = titleProp ?? (f.state.q
-    ? `Results for “${f.state.q}”`
-    : f.state.craft.length === 1
-      ? craftBy[f.state.craft[0]].name
-      : f.state.craft.length > 1
-        ? "Selected crafts"
-        : "Everything on the counter");
+  const title = titleProp ?? (f.state.q ? `Results for “${f.state.q}”` : "Everything on the counter");
 
   const chips: { key: string; label: string; onDrop: () => void }[] = [
     ...(f.state.q ? [{ key: "q", label: `“${f.state.q}”`, onDrop: () => f.drop("q") }] : []),
-    ...f.state.craft.map((v) => ({ key: "craft" + v, label: craftBy[v].name, onDrop: () => f.drop("craft", v) })),
     ...f.state.material.map((v) => ({ key: "mat" + v, label: v, onDrop: () => f.drop("material", v) })),
     ...f.state.avail.map((v) => ({ key: "av" + v, label: v === "in" ? "In stock" : "Last few", onDrop: () => f.drop("avail", v) })),
     ...f.state.deal.map((v) => ({ key: "deal" + v, label: "Reduced", onDrop: () => f.drop("deal", v) })),
@@ -101,8 +125,8 @@ export default function ShopListing({
     counts: f.counts,
     onToggle: f.toggle,
     onPrice: f.setPrice,
-    showCraft: showCraftFacets,
-    showMaterial: showCraftFacets,
+    showCraft: false,
+    showMaterial: false,
     categories, currentSlug, currentTag, tags, priceRange, saleProducts,
   };
 
@@ -121,28 +145,6 @@ export default function ShopListing({
         </div>
       </div>
 
-      {showCraftFacets && (
-        <div className="st-wrap">
-          <div className="st-crafts" role="group" aria-label="Filter by craft">
-            <button type="button" className={`st-craft${f.state.craft.length ? "" : " on"}`}
-              onClick={() => f.pickCraft("")}>
-              <span>Everything<small>{products.length} pieces</small></span>
-            </button>
-            {crafts.map((c) => {
-              const n = products.filter((p) => p.craft === c.key).length;
-              const on = f.state.craft.length === 1 && f.state.craft[0] === c.key;
-              return (
-                <button type="button" key={c.key} className={`st-craft${on ? " on" : ""}`}
-                  onClick={() => f.pickCraft(c.key)}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <i><img src={c.image} alt="" loading="lazy" /></i>
-                  <span>{c.name}<small>{c.lane} · {n}</small></span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       <div className="st-wrap">
         <div className="st-plp__grid">
@@ -150,7 +152,7 @@ export default function ShopListing({
 
           <div>
             <div className="st-bar">
-              <p className="st-bar__n"><b>{list.length}</b> {list.length === 1 ? "piece" : "pieces"}</p>
+              <p className="st-bar__n"><b>{shownTotal}</b> {shownTotal === 1 ? "piece" : "pieces"}</p>
               <div className="st-bar__r">
                 <button type="button" className="st-btn st-filterbtn" onClick={() => setDrawer(true)}>
                   Filter {f.activeCount > 0 && <b>{f.activeCount}</b>}
@@ -210,14 +212,14 @@ export default function ShopListing({
                   {slice.map((p, i) => <ProductCard key={p.slug} p={p} priority={i < 4} />)}
                 </div>
                 <div className="st-more">
-                  {f.shown >= list.length ? (
+                  {f.shown >= list.length && !hasMore ? (
                     <p>That’s all {list.length}</p>
                   ) : (
                     <>
                       <div className="st-more__bar">
-                        <span className="st-more__fill" style={{ width: `${(f.shown / list.length) * 100}%` }} />
+                        <span className="st-more__fill" style={{ width: `${(Math.min(f.shown, list.length) / shownTotal) * 100}%` }} />
                       </div>
-                      <p>{f.shown} of {list.length} · more on scroll</p>
+                      <p>{Math.min(f.shown, list.length)} of {shownTotal} · {loadingMore ? "loading more…" : "more on scroll"}</p>
                       <div ref={sentinel} aria-hidden="true" style={{ height: 1 }} />
                     </>
                   )}

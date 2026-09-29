@@ -26,7 +26,7 @@ export const faq: [string, string][] = [
   ["Is shipping chargeable?", "Shipping is free on orders above ₹2,000. Below that a flat charge applies at checkout."],
   ["Where is my order?", "You can track it with the tracking number in your order details."],
   ["What happens after I place the order?", "You get a confirmation by call, email or SMS, then we cut, pack and ship it."],
-  ["Can I cancel, and what about a refund?", "Yes. Card, net banking or wallet payments are refunded to the source account within 10–15 working days of cancellation. COD orders have nothing to refund."],
+  ["Can I cancel, and what about a refund?", "Yes. Card, net banking or wallet payments are refunded to the source account within 10–15 working days of cancellation."],
   ["Is it safe to use my credit or debit card?", "All card payments go through secure, trusted payment gateways."],
   ["Who bears the customs charges?", "On international orders, customs and any additional charges are borne by the customer."],
   ["Do I need an account to order?", "No, you can check out as a guest. An account just saves you re-entering everything next time."],
@@ -61,8 +61,3 @@ export const makes: Make[] = [
 
 /** The five offered as one-tap chips next to the length picker. */
 export const quickMakes = ["Blouse", "Tunic / top", "Kurta", "A-line skirt", "Saree"];
-
-export const coupons = [
-  { code: "FIRST10", title: "10% off your first order", till: "30 Nov 2026" },
-  { code: "ABOVE4K", title: "10% off over ₹4,000", till: "26 Nov 2026" },
-];

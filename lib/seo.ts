@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { site } from "./site";
-import { discount } from "./products";
+import { discount } from "./price";
 import { faq } from "./content";
 import type { Product } from "./types";
 

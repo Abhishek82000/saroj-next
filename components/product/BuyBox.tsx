@@ -11,8 +11,8 @@ import VariantPicker, { type VariantState } from "./VariantPicker";
 import LiveViewers from "./LiveViewers";
 import Countdown from "./Countdown";
 import { productHref } from "@/lib/product-api";
-import { coupons as fallbackCoupons, makes } from "@/lib/content";
-import { discount } from "@/lib/products";
+import { makes } from "@/lib/content";
+import { discount } from "@/lib/price";
 import { inr, site, unitLabel } from "@/lib/site";
 import type { Product, ProductDetail } from "@/lib/types";
 
@@ -62,11 +62,8 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
      for wholesale — only gate while nobody is actually logged in here. */
   const gateCart = !user && (detail?.requiresLogin ?? wholesale);
 
-  const coupons = detail
-    ? detail.coupons
-    : wholesale
-      ? []
-      : fallbackCoupons.map((c) => ({ code: c.code, description: c.title, valid_to: c.till }));
+  /* Coupons are a retail offer only — wholesale has none. From the API, never made up. */
+  const coupons = wholesale ? [] : detail?.coupons ?? [];
 
   useEffect(() => {
     const el = addRef.current;
@@ -149,7 +146,8 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
         {off > 0 && <em>{off}% off</em>}
         <small>
           {unitLabel(live?.cut.unit ?? p.unit)} ·{" "}
-          {live?.price.gst_extra ? "GST extra" : "inclusive of all taxes"}
+          {/* Wholesale is quoted before GST; retail prices include it. */}
+          {wholesale ? "GST extra" : "inclusive of all taxes"}
         </small>
       </div>
 
@@ -264,7 +262,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
             <b>Free over {inr(detail?.shipping.free_shipping_above ?? site.freeShippingOver)}</b><small>shipping</small>
           </div>
         )}
-        <div><Icon name="lock" size={17} /><b>Safe checkout</b><small>UPI, cards, COD</small></div>
+        <div><Icon name="lock" size={17} /><b>Safe checkout</b><small>UPI, cards, net banking</small></div>
       </div>
 
       {/* ---------- coupons ---------- */}

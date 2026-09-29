@@ -65,8 +65,8 @@ export default function Hero() {
             <b> Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
           </p>
           <div className="st-hero__cta fade f3">
-            <Link href="/shop?craft=pottery" className="st-btn st-btn--solid">Shop handicraft</Link>
-            <Link href="/shop?craft=fabric" className="st-btn">Fabrics, as always</Link>
+            <Link href="/handicraft" className="st-btn st-btn--solid">Shop handicraft</Link>
+            <Link href="/shop" className="st-btn">Fabrics, as always</Link>
           </div>
         </div>
 

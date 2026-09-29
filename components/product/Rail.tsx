@@ -5,7 +5,7 @@ import { useAutoRail } from "@/components/ui/useAutoRail";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
 import { useStore } from "@/components/shell/StoreProvider";
-import { discount } from "@/lib/products";
+import { discount } from "@/lib/price";
 import { inr } from "@/lib/site";
 import { priced } from "@/lib/wholesale";
 import type { Product } from "@/lib/types";

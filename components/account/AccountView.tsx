@@ -9,7 +9,6 @@ import ProductCard from "@/components/shop/ProductCard";
 import OrdersTab from "@/components/account/OrdersTab";
 import { isValidEmail } from "@/lib/auth";
 import { getProductDetail } from "@/lib/product-api";
-import { getProduct } from "@/lib/products";
 import { site } from "@/lib/site";
 import type { Product } from "@/lib/types";
 
@@ -23,20 +22,18 @@ type Tab = (typeof TABS)[number]["key"];
 const isTab = (v: string | null): v is Tab => TABS.some((t) => t.key === v);
 
 /** Saved pieces as the same cards the shop grid uses — heart, badge, price,
-    add-to-cart all come free from `ProductCard`. Slugs in the static
-    catalogue resolve instantly; anything else (a live-only product) is
-    fetched from `GET /api/products/<slug>` the same way the product page
-    itself does, so nothing falls back to a plain link. A slug the API 404s
+    add-to-cart all come free from `ProductCard`. Each one is fetched from
+    `GET /api/products/<slug>` the same way the product page itself does. A slug the API 404s
     on (deleted, mistyped) just quietly drops rather than spinning forever. */
 function WishlistTab({ slugs, mode }: { slugs: string[]; mode: Mode }) {
   const [live, setLive] = useState<Record<string, Product | null>>({});
   const key = slugs.join(",");
 
   useEffect(() => {
-    const toFetch = slugs.filter((s) => !getProduct(s) && !(s in live));
+    const toFetch = slugs.filter((s) => !(s in live));
     if (!toFetch.length) return;
     let alive = true;
-    Promise.all(toFetch.map((s) => getProductDetail(s).then((d) => [s, d?.product ?? null] as const))).then((pairs) => {
+    Promise.all(toFetch.map((s) => getProductDetail(s, { wholesale: mode === "wholesale" }).then((d) => [s, d?.product ?? null] as const))).then((pairs) => {
       if (alive) setLive((prev) => ({ ...prev, ...Object.fromEntries(pairs) }));
     });
     return () => { alive = false; };
@@ -45,8 +42,8 @@ function WishlistTab({ slugs, mode }: { slugs: string[]; mode: Mode }) {
 
   if (slugs.length === 0) return <p className="st-account__empty">Nothing saved yet — tap the heart on any piece.</p>;
 
-  const cards = slugs.map((s) => getProduct(s) ?? live[s]).filter((p): p is Product => !!p);
-  const loading = slugs.some((s) => !getProduct(s) && live[s] === undefined);
+  const cards = slugs.map((s) => live[s]).filter((p): p is Product => !!p);
+  const loading = slugs.some((s) => live[s] === undefined);
 
   if (cards.length === 0 && loading) return <p className="st-account__empty">Loading your wishlist…</p>;
 

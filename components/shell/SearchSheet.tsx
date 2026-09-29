@@ -6,7 +6,7 @@ import Icon from "@/components/ui/Icon";
 import { useLockedBody } from "@/components/ui/useLockedBody";
 import { useTransition } from "@/components/ui/useMounted";
 import { useStore } from "./StoreProvider";
-import { crafts } from "@/lib/crafts";
+import { resolveHref, type CommonMenuItem } from "@/lib/nav";
 import { searchProducts, type SearchHit } from "@/lib/search";
 
 /** Splits a name so the matched run can be marked without dangerouslySetInnerHTML. */
@@ -18,7 +18,7 @@ function highlight(text: string, q: string) {
 
 /** The header's search: live results from GET /api/search, in the mode the
     visitor is browsing (retail or wholesale), each one opening its product. */
-export default function SearchSheet() {
+export default function SearchSheet({ navMenu = [] }: { navMenu?: CommonMenuItem[] }) {
   const { searchOpen, setSearchOpen, href, mode } = useStore();
   const { render, shown } = useTransition(searchOpen);
   const [q, setQ] = useState("");
@@ -50,6 +50,13 @@ export default function SearchSheet() {
     }, 250);
     return () => { clearTimeout(t); ctl.abort(); };
   }, [term, mode]);
+
+  /* The live menu's collections (its sub-categories, or the top level when
+     an entry has none) — a shortcut beside the search box. */
+  const collections = navMenu
+    .flatMap((m) => (m.children?.length ? m.children : [m]))
+    .filter((c) => c.name)
+    .slice(0, 12);
 
   const close = () => setSearchOpen(false);
   /* Through the store's `href`, so a search from wholesale stays in wholesale. */
@@ -85,14 +92,16 @@ export default function SearchSheet() {
 
           <div className="st-search__body">
             <div className="st-search__side">
-              <p className="st-search__lbl">Try a craft</p>
-              <div className="st-sugg">
-                {crafts.map((c) => (
-                  <button type="button" key={c.key} onClick={() => { setQ(c.name); input.current?.focus(); }}>
-                    {c.name}<span className="st-dv">{c.hindi}</span>
-                  </button>
-                ))}
-              </div>
+              {collections.length > 0 && (
+                <>
+                  <p className="st-search__lbl">Browse a collection</p>
+                  <div className="st-sugg">
+                    {collections.map((c) => (
+                      <button type="button" key={c.id} onClick={() => go(resolveHref(c))}>{c.name}</button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="st-res" aria-live="polite" aria-busy={loading}>

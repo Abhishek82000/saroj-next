@@ -8,7 +8,6 @@ import FabricStrip from "./FabricStrip";
 import Rail from "@/components/product/Rail";
 import Reels from "@/components/home/Reels";
 import Voices from "@/components/home/Voices";
-import { products } from "@/lib/products";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 const PIC = "https://picsum.photos/seed/";
@@ -49,9 +48,6 @@ const BOLTS: HcBolt[] = [
   { name: "Patola", desc: "Polka and patch patola, printed on pure cotton for everyday suits.", price: "from ₹160 / m", img: CDN + "97721785569096.webp", alt: "Leaf green polka patola printed cotton" },
   { name: "Indigo", desc: "Dabu mud-resist over natural indigo. Deepens with every wash.", price: "from ₹150 / m", img: CDN + "2201780380811.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
 ];
-
-/* The home page shows the same eight when its feed is empty. */
-const fresh = [...products].sort((a, b) => b.fresh - a.fresh).slice(0, 8);
 
 const CAT = "https://saroj-textile-store.b-cdn.net/category/";
 const FABRIC_SLIDES: HcSlide[] = [
@@ -434,7 +430,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
               <b>Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
             </p>
             <div className="hc-hero__cta fade f3">
-              <Link href="/shop?craft=pottery" className="hc-btn hc-btn--solid">Shop handicraft</Link>
+              <Link href="/shop" className="hc-btn hc-btn--solid">Shop handicraft</Link>
               <a href="#cloth" className="hc-btn">Fabrics, as always</a>
             </div>
           </div>
@@ -560,9 +556,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       </section>
 
       {/* ================= SHOP RAILS — the same tag and category rails as the home page ================= */}
-      {data.rails.length > 0
-        ? data.rails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)
-        : <Rail id="new" eyebrow="Off the kiln and off the loom" heading="New this week." items={fresh} />}
+      {data.rails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
 
       {/* ================= REELS — handicraft on film, shoppable like the home page ================= */}
       {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}

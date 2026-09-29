@@ -138,6 +138,10 @@ function mapProduct(raw: RawProduct): Product {
       ? { min: raw.cut.min, max: raw.cut.max, step: raw.cut.step, wholesale: raw.wholesale.selling_price }
       : undefined,
     description: plain(raw.description_html) || raw.short_description || undefined,
+    /* The trade rate, so a card in wholesale mode can price it. */
+    wholesale: raw.wholesale.available && raw.wholesale.selling_price > 0
+      ? { price: raw.wholesale.selling_price, mrp: 0, minQty: raw.wholesale.min_qty }
+      : undefined,
     live,
   };
 }

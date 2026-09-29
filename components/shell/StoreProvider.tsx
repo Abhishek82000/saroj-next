@@ -58,6 +58,9 @@ interface Store {
   /** Puts a line in `m`'s cart (retail by default) — wholesale only after a login. Catalogue pieces go through `addProduct`. */
   add: (line: Omit<CartLine, "qty"> & { qty?: number }, m?: Mode) => void;
   setQty: (id: string, qty: number) => void;
+  /** The coupon applied to the retail cart (retail only — wholesale takes none). */
+  coupon: AppliedCoupon | null;
+  setCoupon: (c: AppliedCoupon | null) => void;
   /** Writes the server's prices (POST /api/cart/price) onto `m`'s matching lines. */
   reprice: (m: Mode, items: ServerCartLine[]) => void;
   remove: (id: string) => void;
@@ -117,6 +120,8 @@ interface Store {
   pulse: number;
 }
 
+export interface AppliedCoupon { code: string; discount: number; promoId?: number }
+
 const Ctx = createContext<Store | null>(null);
 
 export function useStore() {
@@ -129,6 +134,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const [retail, setRetail] = useState<CartLine[]>([]);
   const [wh, setWh] = useState<{ owner: string | null; lines: CartLine[] }>({ owner: null, lines: [] });
   const [wishlist, setWishlist] = useState<Record<Mode, Favs>>(EMPTY_WISHLIST);
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const [counts, setCounts] = useState<Counts | null>(null);
   /* Latest user and wishlist for callbacks that run as the pending action right
      after login, whose closures still hold the logged-out values. */
@@ -412,6 +418,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
 
   const value: Store = {
     cart, add, setQty, remove, reprice,
+    coupon: mode === "retail" ? coupon : null, setCoupon,
     subtotal,
     count: cart.length,
     otherCount,

@@ -61,7 +61,6 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
         lede={listing.tag
           ? `Every piece tagged ${title}, cut to any length from one metre.`
           : `Every piece in the ${title} collection, cut to any length from one metre.`}
-        showCraftFacets={false}
         categories={categories}
         currentSlug={listing.tag ? undefined : slug}
         currentTag={listing.tag ? slug : undefined}

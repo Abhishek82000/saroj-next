@@ -64,14 +64,35 @@ const EMPTY_CATEGORY: CategoryProducts = {
 /** The four sort orders the storefront API understands for GET /api/products. */
 export type ProductsApiSort = "best_selling" | "new_arrival" | "high_low" | "low_high";
 
-/** GET /api/products takes either ?category=<slug> or ?tag=<slug> — never both. */
-type Listing = { category: string } | { tag: string };
+/** GET /api/products takes either ?category=<slug> or ?tag=<slug> — never both —
+    or neither, for every product on the counter. */
+type Listing = { category: string } | { tag: string } | { all: true };
 
-const fetchListingPage = (by: Listing, page: number, sort: ProductsApiSort) => {
-  const key = "category" in by ? "category" : "tag";
-  const slug = "category" in by ? by.category : by.tag;
-  return fetch(`${site.url}/api/products?${key}=${encodeURIComponent(slug)}&page=${page}&sort=${sort}`, { next: { revalidate: 300 } });
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** One listing page. The API rate-limits bursts (429) and has no page-size
+    option (always 24), so a 429 is retried after a short, growing pause. */
+const fetchListingPage = async (by: Listing, page: number, sort: ProductsApiSort) => {
+  const filter = "category" in by ? `category=${encodeURIComponent(by.category)}&`
+    : "tag" in by ? `tag=${encodeURIComponent(by.tag)}&` : "";
+  const url = `${site.url}/api/products?${filter}page=${page}&sort=${sort}`;
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (res.status !== 429 || attempt >= 3) return res;
+    await wait(1500 * (attempt + 1));
+  }
 };
+
+/** Runs `fn` over `items` a few at a time — the API rate-limits (429) a burst
+    of dozens of parallel requests, which "every product" (40+ pages) would be. */
+async function pooled<T, R>(items: T[], limit: number, fn: (x: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) { const i = next++; out[i] = await fn(items[i]); }
+  }));
+  return out;
+}
 /** Kept for the fallback fetch below, which only ever anchors on a category. */
 const fetchCategoryPage = (slug: string, page: number, sort: ProductsApiSort) =>
   fetchListingPage({ category: slug }, page, sort);
@@ -127,14 +148,15 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
     const lastPage = firstJson.data?.pagination?.last_page ?? 1;
 
     if (lastPage > 1) {
-      const rest = await Promise.all(
-        Array.from({ length: lastPage - 1 }, (_, i) => fetchListingPage(by, i + 2, sort)),
-      );
-      for (const res of rest) {
-        if (!res.ok) continue;
-        const json: ProductsApiResponse = await res.json();
-        products.push(...(json.data?.products ?? []));
-      }
+      const rest = await pooled(Array.from({ length: lastPage - 1 }, (_, i) => i + 2), 2, async (page) => {
+        try {
+          const res = await fetchListingPage(by, page, sort);
+          if (!res.ok) return [];
+          const json: ProductsApiResponse = await res.json();
+          return json.data?.products ?? [];
+        } catch { return []; }
+      });
+      for (const list of rest) products.push(...list);
     }
 
     const pr = firstJson.data?.price_range;
@@ -161,6 +183,36 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
 
 export function getCategoryProducts(slug: string, sort: ProductsApiSort = "new_arrival"): Promise<CategoryProducts> {
   return getListingProducts({ category: slug }, sort, (j) => j.data?.category?.cat_name ?? "");
+}
+
+/** Every product on the counter, all 40-odd pages — the sitemap only (slow; cached hourly). */
+export function getAllProducts(sort: ProductsApiSort = "new_arrival"): Promise<CategoryProducts> {
+  return getListingProducts({ all: true }, sort, () => "Shop everything");
+}
+
+/** One page of every product plus the sidebar facets — /shop's first screen;
+    the listing loads the following pages as the visitor scrolls. */
+export async function getProductsPage(sort: ProductsApiSort = "new_arrival", page = 1):
+  Promise<CategoryProducts & { page: number; lastPage: number; total: number }> {
+  try {
+    const res = await fetchListingPage({ all: true }, page, sort);
+    if (!res.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)), page, lastPage: page, total: 0 };
+    const json: ProductsApiResponse = await res.json();
+    const pr = json.data?.price_range;
+    return {
+      name: "Shop everything",
+      products: (json.data?.products ?? []).map(apiProductToProduct),
+      categories: json.data?.categoryList ?? [],
+      tags: json.data?.tagsList ?? [],
+      priceRange: pr ? { min: Number(pr.min), max: Number(pr.max) } : null,
+      saleProducts: (json.data?.saleProducts ?? []).map(apiSaleProductToSaleProduct),
+      page,
+      lastPage: json.data?.pagination?.last_page ?? page,
+      total: json.data?.pagination?.total ?? 0,
+    };
+  } catch {
+    return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)), page, lastPage: page, total: 0 };
+  }
 }
 
 /** A tag's own listing, for the sidebar's "Tags" links (e.g. Best Seller, New Arrivals). */
@@ -281,6 +333,7 @@ export function buildReels({ tagSections, categorySections, videoProducts }: Omi
       unit: "metre",
       image: imageById.get(v.product_id) ?? "",
       slug: v.product_slug,
+      productId: v.product_id,
     };
   });
 }

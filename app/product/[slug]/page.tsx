@@ -2,17 +2,16 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductView from "@/components/product/ProductView";
 import { getProductDetail } from "@/lib/product-api";
-import { alsoBought, getProduct, products, sameCraft } from "@/lib/products";
 import { productMeta } from "@/lib/product-page";
 
 type Params = Promise<{ slug: string }>;
 
 /**
- * The static catalogue is prerendered; everything else on the live storefront
- * renders on demand from the Laravel API and is cached for five minutes.
+ * Every product comes from the Laravel API — nothing is prerendered at build;
+ * each page renders on first visit and is cached for five minutes.
  */
 export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -22,22 +21,10 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function ProductPage({ params }: { params: Params }) {
   const { slug } = await params;
-
-  // strict: a rate-limited / down API errors (keeping the last good cached
-  // page) instead of rendering a cacheable 404 — unless the static catalogue
-  // has the piece, which can then stand in.
-  const detail = await getProductDetail(slug, { strict: true }).catch((e) => {
-    if (getProduct(slug)) return null;
-    throw e;
-  });
-  if (detail) return <ProductView p={detail.product} detail={detail} />;
-
-  // Fall back to the static catalogue when the API has nothing — the
-  // marketing pages link to pieces that never existed as CMS rows.
-  const local = getProduct(slug);
-  if (!local) notFound();
-
-  const related = sameCraft(local, 8);
-  const also = alsoBought(local, 10).filter((x) => !related.some((r) => r.slug === x.slug)).slice(0, 8);
-  return <ProductView p={local} related={[...related, ...also].slice(0, 10)} />;
+  // strict: only the API's own 404 means "not found"; a rate-limited / down
+  // API errors instead (keeping the last good cached page) rather than
+  // rendering a cacheable 404.
+  const detail = await getProductDetail(slug, { strict: true });
+  if (!detail) notFound();
+  return <ProductView p={detail.product} detail={detail} />;
 }

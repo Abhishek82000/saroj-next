@@ -6,6 +6,7 @@ import { inr, site, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
 import type { CartTotals } from "@/lib/cart";
 import { useCartPrice } from "@/components/cart/useCartPrice";
+import CouponBox from "@/components/cart/CouponBox";
 
 /** One line's − qty + control, holding wholesale lines at their minimum. */
 export function LineQty({ l }: { l: CartLine }) {
@@ -23,26 +24,47 @@ export function LineQty({ l }: { l: CartLine }) {
   );
 }
 
-/** Subtotal, delivery and total — shared by the cart and checkout pages. `server`
-    is the server's own totals (POST /api/cart/price) when it priced the whole cart. */
-export function Totals({ subtotal: local, wholesale, server }: { subtotal: number; wholesale: boolean; server?: CartTotals | null }) {
+/** The amount to pay: the subtotal less any coupon (retail only), plus shipping. */
+export const payable = (subtotal: number, couponDiscount = 0, shipping = 0) => Math.max(0, subtotal - couponDiscount) + shipping;
+
+/** "1,220.00" — the totals read in rupees with paise, like the storefront's own checkout. */
+const amt = (n: number) => n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/**
+ * The money breakdown, shared by the cart and checkout — laid out like the
+ * storefront's checkout: Total MRP, Total Discount | Subtotal | Coupon
+ * Discount | Shipping Amount | (GST) | Total Amount. `server` is the server's
+ * own totals (POST /api/cart/price) when it priced the whole cart. Retail: GST
+ * included, a coupon may apply. Wholesale: no coupon, GST added on the invoice.
+ * `shipping` stays null until the shipping API gives an amount.
+ */
+export function Totals({ subtotal: local, wholesale, server, shipping = null }: {
+  subtotal: number; wholesale: boolean; server?: CartTotals | null; shipping?: number | null;
+}) {
+  const { coupon } = useStore();
   const subtotal = server?.subtotal ?? local;
+  const mrp = server?.mrp ?? subtotal;
+  const mrpOff = server?.discount ?? Math.max(0, mrp - subtotal);
+  const off = wholesale ? 0 : coupon?.discount ?? 0;
   const free = !wholesale && subtotal >= site.freeShippingOver;
+  const ship = free ? 0 : shipping;
   return (
-    <dl className="st-co__totals">
-      {server && server.discount > 0 && (
-        <>
-          <div><dt>MRP total</dt><dd><s>{inr(server.mrp)}</s></dd></div>
-          <div><dt>Discount</dt><dd className="st-co__free">− {inr(server.discount)}</dd></div>
-        </>
-      )}
-      <div><dt>Subtotal</dt><dd>{inr(subtotal)}</dd></div>
-      <div>
-        <dt>Delivery</dt>
-        <dd>{free ? <b className="st-co__free">Free</b> : "Worked out at checkout"}</dd>
+    <dl className="st-tot">
+      <div className="st-tot__grp">
+        <div><dt>Total MRP</dt><dd>{amt(mrp)}</dd></div>
+        <div><dt>Total Discount</dt><dd>{mrpOff > 0 ? `-${amt(mrpOff)}` : amt(0)}</dd></div>
       </div>
-      {wholesale && <div><dt>GST</dt><dd>Extra, on the invoice</dd></div>}
-      <div className="st-co__grand"><dt>Total</dt><dd>{inr(subtotal)}</dd></div>
+      <div><dt>Subtotal</dt><dd>{amt(subtotal)}</dd></div>
+      {!wholesale && <div><dt>Coupon Discount</dt><dd className={off > 0 ? "st-co__free" : ""}>{off > 0 ? `-${amt(off)}` : amt(0)}</dd></div>}
+      <div>
+        <dt>Shipping Amount</dt>
+        <dd>{ship == null ? <small>Calculated on your address</small> : ship === 0 ? <span className="st-co__free">Free</span> : amt(ship)}</dd>
+      </div>
+      {wholesale && <div><dt>GST</dt><dd><small>Added on the invoice</small></dd></div>}
+      <div className="st-tot__grand">
+        <dt>{wholesale ? "Total Amount (before GST)" : "Total Amount"}</dt>
+        <dd>{inr(payable(subtotal, off, ship ?? 0))}</dd>
+      </div>
     </dl>
   );
 }
@@ -59,14 +81,20 @@ export default function CartView() {
   const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
 
   return (
-    <main id="main">
-      <div className="st-plp__head">
+    <main id="main" className="st-co__page">
+      <div className="st-co__top">
         <div className="st-wrap">
           <nav className="st-crumb" aria-label="Breadcrumb">
             <Link href={href("/")}>Home</Link><span aria-hidden="true">/</span><span>{wholesale ? "Wholesale cart" : "Cart"}</span>
           </nav>
-          <h1>{wholesale ? "Wholesale cart" : "Your cart"}</h1>
-          {cart.length > 0 && <p>{cart.length} {cart.length === 1 ? "piece" : "pieces"} · cut and posted from Jhotwara</p>}
+          <div className="st-co__title">
+            <h1>{wholesale ? "Wholesale cart" : "Your cart"}{cart.length > 0 && <small>{cart.length} {cart.length === 1 ? "item" : "items"}</small>}</h1>
+            <ol className="st-co__steps" aria-label="Progress">
+              <li className="on" aria-current="step">Cart</li>
+              <li>Details &amp; payment</li>
+              <li>Confirmation</li>
+            </ol>
+          </div>
         </div>
       </div>
 
@@ -111,11 +139,12 @@ export default function CartView() {
               <ul className="st-co__lines">
                 {cart.map((l) => (
                   <li key={l.id} className={`st-co__line${errors[l.id] ? " bad" : ""}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={l.image} alt="" className="st-co__ph" />
+                    {l.href
+                      ? <Link href={l.href} className="st-co__ph">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={l.image} alt="" /></Link>
+                      : <span className="st-co__ph">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={l.image} alt="" /></span>}
                     <div className="st-co__lt">
                       {l.href ? <Link href={l.href} className="st-co__n">{l.name}</Link> : <span className="st-co__n">{l.name}</span>}
-                      <small>{inr(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}</small>
+                      <small>{inr(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}{l.minQty ? ` · min ${l.minQty} m` : ""}</small>
                       {errors[l.id] && <em className="st-co__err">{errors[l.id]} Remove it to continue.</em>}
                       <div className="st-co__lf">
                         <LineQty l={l} />
@@ -126,15 +155,16 @@ export default function CartView() {
                   </li>
                 ))}
               </ul>
+              <Link href={href("/shop")} className="st-co__back st-co__cont">← Continue shopping</Link>
             </section>
 
-            <aside className="st-co__card">
+            <aside className="st-co__side">
               <h2>Order summary</h2>
+              <CouponBox subtotal={totals?.subtotal ?? subtotal} />
               <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
               {hasErrors
                 ? <button type="button" className="st-btn st-btn--solid st-co__go" disabled>Remove unavailable items</button>
                 : <Link href={href("/checkout")} className="st-btn st-btn--solid st-co__go">Proceed to checkout</Link>}
-              <Link href={href("/shop")} className="st-btn st-co__go">Keep shopping</Link>
               <p className="st-co__safe"><Icon name="shield" size={14} /> Secure checkout{wholesale ? "" : " — no account needed"}</p>
             </aside>
           </div>
