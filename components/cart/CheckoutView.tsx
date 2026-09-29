@@ -3,9 +3,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
-import { Totals, payable } from "@/components/cart/CartView";
-import CouponBox from "@/components/cart/CouponBox";
+import { Totals, orderTotal } from "@/components/cart/CartView";
 import { useCartPrice } from "@/components/cart/useCartPrice";
+import { CouponBox } from "@/components/cart/Offers";
 import {
   emptyCheckout, lookupPincode, placeOrder, validateCheckout,
   type CheckoutForm, type PaymentMethod,
@@ -44,8 +44,8 @@ export default function CheckoutView() {
   const [errs, setErrs] = useState<Errors>({});
   const [busy, setBusy] = useState(false);
   const [pin, setPin] = useState<{ state: PinState; message?: string }>({ state: "idle" });
-  const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
-  const total = payable(totals?.subtotal ?? subtotal, wholesale ? 0 : coupon?.discount);
+  const { totals, offers, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
+  const total = orderTotal(subtotal, totals, offers);
 
   /* A logged-in visitor's details fill in whatever is still blank. */
   useEffect(() => {
@@ -60,8 +60,11 @@ export default function CheckoutView() {
     }));
   }, [user]);
 
-  /* A full pincode looks up its city and state. */
+  /* A full pincode looks up its city and state (POST /api/get-state-city).
+     Found: they fill in and stay locked. Not found: the two become ordinary
+     text fields to type into. A changed pincode clears the old pair. */
   useEffect(() => {
+    setF((p) => (p.city || p.state ? { ...p, city: "", state: "" } : p));
     if (!/^[1-9]\d{5}$/.test(f.pincode)) { setPin({ state: "idle" }); return; }
     let live = true;
     setPin({ state: "loading" });
@@ -96,12 +99,12 @@ export default function CheckoutView() {
     const first = Object.keys(found)[0];
     if (first) { document.getElementById(`co-${first}`)?.focus(); return; }
     setBusy(true);
+    /* Only the code goes along — the order API works the discount out again. */
     const r = await placeOrder({
       ...f,
       deliveryPhone: f.sameAsContact ? f.mobile : f.deliveryPhone,
-      /* Retail sends its applied coupon; wholesale never carries one. */
-      coupon: wholesale ? "" : coupon?.code ?? "",
-    }, cart, { wholesale, token: user?.token });
+      coupon: wholesale ? "" : coupon ?? "",
+    }, cart, { wholesale, token: user?.token, coupon: wholesale ? null : coupon });
     setBusy(false);
     say(r.ok ? `Order ${r.orderId} placed` : r.message);
   };
@@ -188,7 +191,8 @@ export default function CheckoutView() {
     </ul>
   );
 
-  const stateCityLocked = pin.state === "ok";
+  /* Locked until a lookup fails — then they're for typing into. */
+  const stateCityLocked = pin.state !== "fail";
 
   return (
     <main id="main" className="st-co__page st-co__page--split">
@@ -209,7 +213,7 @@ export default function CheckoutView() {
           <span><Icon name="cart" size={16} /> Show order summary</span>
           <b>{inr(total)}</b>
         </summary>
-        <div className="st-wrap">{lines}<Totals subtotal={subtotal} wholesale={wholesale} server={totals} /></div>
+        <div className="st-wrap">{lines}<Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} /></div>
       </details>
 
       <form className="st-co st-co--split" onSubmit={submit} noValidate>
@@ -287,8 +291,8 @@ export default function CheckoutView() {
           <aside className="st-co__side">
             <h2>Your order</h2>
             {lines}
-            <CouponBox subtotal={totals?.subtotal ?? subtotal} />
-            <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
+            {!wholesale && <CouponBox offers={offers} compact />}
+            <Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} />
 
             <div className="st-pay" role="radiogroup" aria-label="Payment method">
               {payments.map((p) => (

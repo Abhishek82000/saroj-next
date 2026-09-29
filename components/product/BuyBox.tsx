@@ -13,6 +13,7 @@ import Countdown from "./Countdown";
 import { productHref } from "@/lib/product-api";
 import { makes } from "@/lib/content";
 import { discount } from "@/lib/price";
+import { submitReview } from "@/lib/reviews";
 import { inr, site, unitLabel } from "@/lib/site";
 import type { Product, ProductDetail } from "@/lib/types";
 
@@ -357,10 +358,42 @@ function AskForm({ onSent, say }: { onSent: () => void; say: (m: string) => void
   );
 }
 
-export function ReviewForm({ onSent, say }: { onSent: () => void; say: (m: string) => void }) {
+const MAX_IMAGE_MB = 5;
+const MAX_VIDEO_MB = 20;
+
+/** Posts to /api/process/{productId}/reviews — the caller only opens this for a signed-in visitor. */
+export function ReviewForm({ productId, onSent, say }: { productId?: number; onSent: () => void; say: (m: string) => void }) {
+  const { user, openLogin } = useStore();
   const [score, setScore] = useState(0);
   const [hover, setHover] = useState(0);
   const [text, setText] = useState("");
+  const [image1, setImage1] = useState<File | null>(null);
+  const [image2, setImage2] = useState<File | null>(null);
+  const [video, setVideo] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const pick = (set: (f: File | null) => void, maxMb: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    if (f && f.size > maxMb * 1024 * 1024) {
+      e.target.value = "";
+      say(`Keep it under ${maxMb} MB`);
+      return set(null);
+    }
+    set(f);
+  };
+
+  const post = async () => {
+    if (!score) return say("Pick a rating first");
+    if (!text.trim()) return say("Add a line about the fabric");
+    if (!productId) return say("Reviews aren't open for this piece yet");
+    if (!user?.token) return openLogin("Log in to write a review");
+    setBusy(true);
+    const r = await submitReview(productId, user.token, { rating: score, text, image1, image2, video });
+    setBusy(false);
+    if (!r.ok) return say(r.message);
+    onSent();
+  };
+
   return (
     <>
       <label className="st-field"><span>Your rating</span>
@@ -376,12 +409,15 @@ export function ReviewForm({ onSent, say }: { onSent: () => void; say: (m: strin
       <label className="st-field"><span>What did you make with it?</span>
         <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)}
           placeholder="Three metres came out as a kurta with fabric to spare…" /></label>
-      <button type="button" className="st-btn st-btn--solid w-full"
-        onClick={() => {
-          if (!score) return say("Pick a rating first");
-          if (!text.trim()) return say("Add a line about the fabric");
-          onSent();
-        }}>Post review</button>
+      <label className="st-field"><span>Photo (optional)</span>
+        <input type="file" accept="image/*" onChange={pick(setImage1, MAX_IMAGE_MB)} /></label>
+      <label className="st-field"><span>Another photo (optional)</span>
+        <input type="file" accept="image/*" onChange={pick(setImage2, MAX_IMAGE_MB)} /></label>
+      <label className="st-field"><span>Video (optional)</span>
+        <input type="file" accept="video/*" onChange={pick(setVideo, MAX_VIDEO_MB)} /></label>
+      <button type="button" className="st-btn st-btn--solid w-full" disabled={busy} onClick={post}>
+        {busy ? "Posting…" : "Post review"}
+      </button>
     </>
   );
 }

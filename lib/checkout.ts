@@ -1,6 +1,6 @@
 import type { CartLine } from "./types";
 import { isValidEmail, isValidMobile } from "./auth";
-import { getOffers, offerDiscount } from "./offers";
+import { site } from "./site";
 
 /**
  * Checkout — the form the checkout page collects, and the call that turns it
@@ -9,6 +9,7 @@ import { getOffers, offerDiscount } from "./offers";
  *
  * Tax and offers differ by mode: retail prices include GST and can take a
  * coupon; wholesale prices exclude GST (added on the invoice) and take no coupon.
+ * Coupons and offers are worked out on the server (lib/offers.ts).
  *
  * NOT CONNECTED YET: `placeOrder` is a stand-in until the order/payment API
  * is shared. When it is, send `form` + `lines` there (with the Bearer token
@@ -81,13 +82,60 @@ export function validateCheckout(f: CheckoutForm, wholesale: boolean): Partial<R
   return e;
 }
 
-/** City and state for a pincode (GET /api/pincode/<pin>, backed by India Post). */
-export async function lookupPincode(pin: string): Promise<{ ok: true; city: string; state: string } | { ok: false; message: string }> {
+/** First non-empty string under a key matching `re`, breadth-first a few levels down. */
+function findString(root: unknown, re: RegExp): string | undefined {
+  let level: unknown[] = [root];
+  for (let depth = 0; depth < 4 && level.length; depth++) {
+    const next: unknown[] = [];
+    for (const node of level) {
+      if (Array.isArray(node)) { next.push(...node); continue; }
+      if (!node || typeof node !== "object") continue;
+      for (const [k, v] of Object.entries(node)) {
+        if (typeof v === "string" && v.trim() && re.test(k)) return v.trim();
+        if (v && typeof v === "object") next.push(v);
+      }
+    }
+    level = next;
+  }
+  return undefined;
+}
+
+export type PincodeResult = { ok: true; city: string; state: string } | { ok: false; notFound: boolean; message: string };
+
+/**
+ * City and state for a pincode, for the checkout's delivery address:
+ *
+ *   POST /api/get-state-city   { value: "<pincode>" }   (the storefront's own)
+ *
+ * Its response hasn't been seen yet — on 2026-09-29 it 500s ("Class
+ * App\Http\Controllers\Api\ArPincode not found", CartApiController.php:60)
+ * — so state and city are read from whichever keys say so. While it's
+ * broken (any 5xx / network error), GET /api/pincode/<pin> — our India Post
+ * lookup (app/api/pincode) — stands in. `notFound` means the pincode really
+ * has no match, so the form should let the visitor type city and state.
+ */
+export async function lookupPincode(pin: string): Promise<PincodeResult> {
+  try {
+    const res = await fetch(`${site.url}/api/get-state-city`, {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ value: pin }),
+    });
+    if (res.status < 500) {
+      const json = await res.json().catch(() => ({}));
+      const state = findString(json, /state/i);
+      const city = findString(json, /city|district/i);
+      if (res.ok && state && city) return { ok: true, city, state };
+      return { ok: false, notFound: true, message: "We couldn't find that pincode — type the city and state." };
+    }
+  } catch { /* fall through to the stand-in */ }
   try {
     const res = await fetch(`/api/pincode/${pin}`);
-    return await res.json();
+    const r = (await res.json()) as { ok: boolean; city?: string; state?: string; message?: string };
+    if (r.ok && r.city && r.state) return { ok: true, city: r.city, state: r.state };
+    return { ok: false, notFound: res.status === 404, message: "We couldn't find that pincode — type the city and state." };
   } catch {
-    return { ok: false, message: "Couldn't look up the pincode — fill in the city and state." };
+    return { ok: false, notFound: false, message: "Couldn't look up the pincode — type the city and state." };
   }
 }
 
@@ -121,7 +169,8 @@ export function buildOrderPayload(
   f: CheckoutForm, lines: CartLine[],
   o: {
     wholesale: boolean; loggedIn: boolean;
-    coupon?: { code: string; discount: number; promoId?: number } | null;
+    /** The server's applied coupon (POST /api/cart/price → offers.coupon), retail only. */
+    coupon?: { code: string; id: number | null; discount: number } | null;
     subtotal: number; mrpDiscount: number; shipping: number;
   },
 ): OrderPayload {
@@ -139,7 +188,7 @@ export function buildOrderPayload(
     },
     notes: f.notes.trim(),
     payment_method: f.payment,
-    offer: promo ? { promo_id: promo.promoId ?? null, promo_code: promo.code, promo_discount: promoDiscount } : null,
+    offer: promo ? { promo_id: promo.id, promo_code: promo.code, promo_discount: promoDiscount } : null,
     shipping_amount: o.shipping,
     total_discount: o.mrpDiscount + promoDiscount,
     subtotal: o.subtotal,
@@ -150,34 +199,10 @@ export function buildOrderPayload(
 
 export type PlaceOrderResult = { ok: true; orderId: string } | { ok: false; message: string };
 
+/** `coupon` is the applied code (retail only). Send the code, never a discount:
+    the order API re-runs OfferService::summary() on the lines and bills that. */
 export async function placeOrder(
-  _form: CheckoutForm, _lines: CartLine[], _opts: { wholesale: boolean; token?: string },
+  _form: CheckoutForm, _lines: CartLine[], _opts: { wholesale: boolean; token?: string; coupon?: string | null },
 ): Promise<PlaceOrderResult> {
   return { ok: false, message: "Ordering isn't connected yet — the order API goes in lib/checkout.ts." };
-}
-
-export type CouponResult =
-  | { ok: true; code: string; discount: number; promoId: number; message?: string }
-  | { ok: false; message: string };
-
-/**
- * Checks a coupon against the retail subtotal using GET /api/offers (see
- * lib/offers.ts): it must exist, be in date and meet its minimum purchase.
- * First-order-only offers can't be verified here — the order API does that.
- */
-export async function applyCoupon(code: string, subtotal: number): Promise<CouponResult> {
-  const c = code.trim().toUpperCase();
-  if (!c) return { ok: false, message: "Enter a coupon code." };
-  const offers = await getOffers();
-  const o = offers.find((x) => x.code.toUpperCase() === c);
-  if (!o) return { ok: false, message: "That code isn't valid or has expired." };
-  if (o.min_purchase && subtotal < o.min_purchase) {
-    return { ok: false, message: `${o.code} needs an order of ₹${o.min_purchase} or more.` };
-  }
-  const discount = offerDiscount(o, subtotal);
-  if (discount <= 0) return { ok: false, message: `${o.code} doesn't apply to this cart.` };
-  return {
-    ok: true, code: o.code, discount, promoId: o.id,
-    message: o.first_order ? `${o.code} applied — valid on your first order only` : undefined,
-  };
 }

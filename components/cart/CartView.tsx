@@ -2,11 +2,12 @@
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
-import { inr, site, unitLabel } from "@/lib/site";
+import { inr, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
 import type { CartTotals } from "@/lib/cart";
+import { REWARD, type CartOffers } from "@/lib/offers";
 import { useCartPrice } from "@/components/cart/useCartPrice";
-import CouponBox from "@/components/cart/CouponBox";
+import { CartProgress, CouponBox } from "@/components/cart/Offers";
 
 /** One line's − qty + control, holding wholesale lines at their minimum. */
 export function LineQty({ l }: { l: CartLine }) {
@@ -24,30 +25,33 @@ export function LineQty({ l }: { l: CartLine }) {
   );
 }
 
-/** The amount to pay: the subtotal less any coupon (retail only), plus shipping. */
-export const payable = (subtotal: number, couponDiscount = 0, shipping = 0) => Math.max(0, subtotal - couponDiscount) + shipping;
-
-/** "1,220.00" — the totals read in rupees with paise, like the storefront's own checkout. */
+/** "1,220.00" — the breakdown reads in rupees with paise. */
 const amt = (n: number) => n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+/** What the order comes to: the server's figure when it priced the cart
+    (offers and coupon already taken off), else the plain subtotal. */
+export const orderTotal = (subtotal: number, server?: CartTotals | null, offers?: CartOffers | null) =>
+  offers?.total ?? server?.subtotal ?? subtotal;
+
 /**
- * The money breakdown, shared by the cart and checkout — laid out like the
- * storefront's checkout: Total MRP, Total Discount | Subtotal | Coupon
- * Discount | Shipping Amount | (GST) | Total Amount. `server` is the server's
- * own totals (POST /api/cart/price) when it priced the whole cart. Retail: GST
- * included, a coupon may apply. Wholesale: no coupon, GST added on the invoice.
- * `shipping` stays null until the shipping API gives an amount.
+ * The money breakdown, shared by the cart and checkout: Total MRP / Total
+ * Discount | Subtotal | offer + coupon | Shipping | (GST) | Total Amount.
+ * `server` is the server's own totals and `offers` its retail offers (POST
+ * /api/cart/price — milestone, coupon, free gift, free shipping), both there
+ * only when it priced the whole cart. Retail: GST included, offers apply.
+ * Wholesale: no offers or coupon, GST added on the invoice.
  */
-export function Totals({ subtotal: local, wholesale, server, shipping = null }: {
-  subtotal: number; wholesale: boolean; server?: CartTotals | null; shipping?: number | null;
+export function Totals({ subtotal: local, wholesale, server, offers }: {
+  subtotal: number; wholesale: boolean; server?: CartTotals | null; offers?: CartOffers | null;
 }) {
-  const { coupon } = useStore();
   const subtotal = server?.subtotal ?? local;
   const mrp = server?.mrp ?? subtotal;
   const mrpOff = server?.discount ?? Math.max(0, mrp - subtotal);
-  const off = wholesale ? 0 : coupon?.discount ?? 0;
-  const free = !wholesale && subtotal >= site.freeShippingOver;
-  const ship = free ? 0 : shipping;
+  const milestone = wholesale ? null : offers?.milestone;
+  const coupon = !wholesale && offers?.coupon?.applied ? offers.coupon : null;
+  const gift = milestone?.tiers.find((t) => t.id === milestone.reached_tier_id && t.reward_type === REWARD.product)?.product;
+  const free = !wholesale && !!offers?.shipping.free;
+  const saved = mrpOff + (wholesale ? 0 : offers?.discount ?? 0);
   return (
     <dl className="st-tot">
       <div className="st-tot__grp">
@@ -55,16 +59,26 @@ export function Totals({ subtotal: local, wholesale, server, shipping = null }: 
         <div><dt>Total Discount</dt><dd>{mrpOff > 0 ? `-${amt(mrpOff)}` : amt(0)}</dd></div>
       </div>
       <div><dt>Subtotal</dt><dd>{amt(subtotal)}</dd></div>
-      {!wholesale && <div><dt>Coupon Discount</dt><dd className={off > 0 ? "st-co__free" : ""}>{off > 0 ? `-${amt(off)}` : amt(0)}</dd></div>}
+      {milestone && milestone.discount > 0 && (
+        <div><dt>{milestone.name}</dt><dd className="st-co__free">-{amt(milestone.discount)}</dd></div>
+      )}
+      {!wholesale && (
+        <div>
+          <dt>Coupon Discount{coupon && <code className="st-co__code">{coupon.code}</code>}</dt>
+          <dd className={coupon ? "st-co__free" : ""}>{coupon ? `-${amt(coupon.discount)}` : amt(0)}</dd>
+        </div>
+      )}
+      {gift && <div><dt>Free gift · {gift.name}</dt><dd className="st-co__free">Free</dd></div>}
       <div>
         <dt>Shipping Amount</dt>
-        <dd>{ship == null ? <small>Calculated on your address</small> : ship === 0 ? <span className="st-co__free">Free</span> : amt(ship)}</dd>
+        <dd>{free ? <span className="st-co__free">Free</span> : <small>Calculated on your address</small>}</dd>
       </div>
       {wholesale && <div><dt>GST</dt><dd><small>Added on the invoice</small></dd></div>}
       <div className="st-tot__grand">
         <dt>{wholesale ? "Total Amount (before GST)" : "Total Amount"}</dt>
-        <dd>{inr(payable(subtotal, off, ship ?? 0))}</dd>
+        <dd>{inr(orderTotal(subtotal, server, offers))}</dd>
       </div>
+      {saved > 0 && <div className="st-tot__saved st-co__saved"><dt>You save</dt><dd>{inr(saved)} on this order</dd></div>}
     </dl>
   );
 }
@@ -75,10 +89,10 @@ export function Totals({ subtotal: local, wholesale, server, shipping = null }: 
  * Retail is open to guests; the wholesale cart needs a login.
  */
 export default function CartView() {
-  const { cart, remove, subtotal, shortOfFreeShipping, mode, href, user, hydrated, openLogin, otherCount, switchMode } = useStore();
+  const { cart, remove, subtotal, mode, href, user, hydrated, openLogin, otherCount, switchMode } = useStore();
   const wholesale = mode === "wholesale";
   const other = wholesale ? "retail" : "wholesale";
-  const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
+  const { totals, offers, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
 
   return (
     <main id="main" className="st-co__page">
@@ -128,14 +142,7 @@ export default function CartView() {
         ) : (
           <div className="st-co__grid">
             <section aria-label="Items">
-              {!wholesale && (
-                <p className={`st-co__ship${shortOfFreeShipping <= 0 ? " done" : ""}`}>
-                  <Icon name="truck" size={16} />
-                  {shortOfFreeShipping <= 0
-                    ? <span><b>Shipping is on us</b> on this order.</span>
-                    : <span><b>{inr(shortOfFreeShipping)}</b> more for free shipping.</span>}
-                </p>
-              )}
+              {!wholesale && <CartProgress offers={offers} />}
               <ul className="st-co__lines">
                 {cart.map((l) => (
                   <li key={l.id} className={`st-co__line${errors[l.id] ? " bad" : ""}`}>
@@ -160,8 +167,8 @@ export default function CartView() {
 
             <aside className="st-co__side">
               <h2>Order summary</h2>
-              <CouponBox subtotal={totals?.subtotal ?? subtotal} />
-              <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
+              {!wholesale && <CouponBox offers={offers} />}
+              <Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} />
               {hasErrors
                 ? <button type="button" className="st-btn st-btn--solid st-co__go" disabled>Remove unavailable items</button>
                 : <Link href={href("/checkout")} className="st-btn st-btn--solid st-co__go">Proceed to checkout</Link>}

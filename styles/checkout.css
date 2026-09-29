@@ -236,3 +236,4 @@ a.st-co__n:hover{ color:var(--cobalt); }
 .st-co__safe{ display:flex; align-items:center; justify-content:center; gap:.4rem; margin:1rem 0 0; font-size:.72rem; color:var(--ink-2); text-align:center; }
 .st-co__back{ display:block; text-align:center; margin-top:.8rem; font-size:.78rem; color:var(--ink-2); }
 .st-co__back:hover{ color:var(--cobalt); }
+.st-tot__saved{ padding-top:.4rem !important; font-size:.8rem; }
