@@ -23,6 +23,9 @@ export type Mode = "retail" | "wholesale";
     so its cart belongs to the browser. Wholesale needs a login, and its cart
     belongs to the account: stored under the mobile number, empty while logged out. */
 const RETAIL_CART_KEY = "saroj.cart";
+/** The coupon code applied to the retail cart. Only the code is kept — the
+    server re-checks it and works out the discount on every price call. */
+const COUPON_KEY = "saroj.coupon";
 const wholesaleCartKey = (mobile: string) => `saroj.cart.wholesale.${mobile}`;
 const USER_KEY = "saroj.user";
 /** The wishlist belongs to the logged-in account — retail and wholesale each
@@ -65,7 +68,11 @@ interface Store {
   count: number;
   /** How many lines the other mode's cart holds, so the drawer can point to it. */
   otherCount: number;
+  /** Local estimate against site.freeShippingOver, until the server's `offers.shipping` arrives. */
   shortOfFreeShipping: number;
+  /** The retail cart's applied coupon code (lib/offers.ts), or null. */
+  coupon: string | null;
+  setCoupon: (code: string | null) => void;
 
   /** Adds a catalogue piece to the current mode's cart at that mode's price. In
       wholesale mode that means the trade rate, its minimum length, and a login first. */
@@ -142,6 +149,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [pulse, setPulse] = useState(0);
+  const [coupon, setCoupon] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginReason, setLoginReason] = useState<string | null>(null);
@@ -176,6 +184,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
     setRetail(safe.read<CartLine[]>(RETAIL_CART_KEY, []));
+    setCoupon(safe.read<string | null>(COUPON_KEY, null));
     const saved = safe.read<User | null>(USER_KEY, null);
     setUser(saved);
     if (saved) {
@@ -187,6 +196,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   }, [syncWishlist, refreshCounts]);
 
   useEffect(() => { if (hydrated) safe.write(RETAIL_CART_KEY, retail); }, [hydrated, retail]);
+  useEffect(() => { if (hydrated) safe.write(COUPON_KEY, coupon); }, [hydrated, coupon]);
   useEffect(() => { if (hydrated && wh.owner) safe.write(wholesaleCartKey(wh.owner), wh.lines); }, [hydrated, wh]);
   useEffect(() => {
     if (!hydrated || !user) return;
@@ -416,6 +426,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     count: cart.length,
     otherCount,
     shortOfFreeShipping: Math.max(0, site.freeShippingOver - retailSubtotal),
+    coupon, setCoupon,
     addProduct,
     user, login, logout, hydrated, updateUser, loginOpen, loginReason, openLogin, closeLogin, withLogin,
     mode, switchMode, href, navItem,

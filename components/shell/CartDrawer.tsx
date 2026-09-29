@@ -3,20 +3,21 @@ import Link from "next/link";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
-import { inr, site, unitLabel } from "@/lib/site";
+import { inr, unitLabel } from "@/lib/site";
 import { useCartPrice } from "@/components/cart/useCartPrice";
+import { CartProgress, CouponBox } from "@/components/cart/Offers";
 
 export default function CartDrawer() {
   const {
-    cart, cartOpen, setCartOpen, setQty, remove, subtotal, shortOfFreeShipping, say,
+    cart, cartOpen, setCartOpen, setQty, remove, subtotal, say,
     mode, otherCount, switchMode, href, user, openLogin,
   } = useStore();
   const wholesale = mode === "wholesale";
   const close = () => setCartOpen(false);
-  const free = shortOfFreeShipping <= 0;
   const other = wholesale ? "retail" : "wholesale";
-  /* Fresh prices while the drawer is open. */
-  const { totals, errors, hasErrors } = useCartPrice(cartOpen);
+  /* Fresh prices — and the retail cart's offers — while the drawer is open. */
+  const { totals, offers, errors, hasErrors } = useCartPrice(cartOpen);
+  const saved = offers?.discount ?? 0;
 
   return (
     <Drawer open={cartOpen} onClose={close} label={wholesale ? "Your wholesale cart" : "Your cart"} className="st-cartdrawer">
@@ -37,18 +38,8 @@ export default function CartDrawer() {
         </button>
       )}
 
-      {!wholesale && cart.length > 0 && (
-        <div className={`st-ship${free ? " done" : ""}`}>
-          <p>
-            {free
-              ? <><b>Shipping is on us.</b> Cut and posted from Jhotwara in two working days.</>
-              : <><b>{inr(shortOfFreeShipping)}</b> more and the shipping is on us.</>}
-          </p>
-          <div className="st-ship__bar">
-            <div className="st-ship__fill" style={{ width: `${Math.min(100, (subtotal / site.freeShippingOver) * 100)}%` }} />
-          </div>
-        </div>
-      )}
+      {/* The milestone offer's progress when one is running, otherwise free shipping's. */}
+      {!wholesale && cart.length > 0 && <CartProgress offers={offers} compact />}
 
       <div className="st-cart__body">
         {cart.length === 0 ? (
@@ -102,13 +93,21 @@ export default function CartDrawer() {
                 <button type="button" className="st-line__x" onClick={() => remove(l.id)}>Remove</button>
               </div>
             ))}
+            {!wholesale && <CouponBox offers={offers} compact />}
           </div>
         )}
       </div>
 
       {cart.length > 0 && (
         <div className="st-cart__foot">
-          <div className="st-cart__sum"><small>Subtotal</small><b>{inr(totals?.subtotal ?? subtotal)}</b></div>
+          <div className="st-cart__sum">
+            <small>{saved > 0 ? "Total after offers" : "Subtotal"}</small>
+            <b>
+              {saved > 0 && <s className="st-cart__was">{inr(totals?.subtotal ?? subtotal)}</s>}
+              {inr(offers?.total ?? totals?.subtotal ?? subtotal)}
+            </b>
+          </div>
+          {saved > 0 && <p className="st-cart__note st-cart__saved">You save {inr(saved)} with offers.</p>}
           {hasErrors && <p className="st-cart__note st-co__err">Remove the unavailable items to check out.</p>}
           {wholesale && <p className="st-cart__note">Wholesale prices exclude GST.</p>}
           <p className="st-cart__note">

@@ -29,6 +29,7 @@
  * The local cart in StoreProvider stays what the UI shows; these mirror it.
  */
 import type { CartLine } from "./types";
+import type { CartOffers } from "./offers";
 import { wholesaleHref } from "./wholesale";
 export interface CartAddPayload {
   type: "retail" | "wholesale";
@@ -130,12 +131,13 @@ const itemsOf = (lines: CartLine[]) => lines
   .filter((l) => l.productId)
   .map((l) => ({ product_id: l.productId, variation_id: l.variationId ?? null, qty: l.qty }));
 
-/** Today's prices for these lines, straight from the server. */
-export async function priceCartRemote(type: "retail" | "wholesale", lines: CartLine[], token?: string) {
-  const r = await call<{ items?: ServerCartLine[]; totals?: CartTotals; has_errors?: boolean }>(
-    "price", { method: "POST", body: JSON.stringify({ type, items: itemsOf(lines) }) }, token);
+/** Today's prices for these lines, straight from the server — with the retail
+    cart's offers (milestone, free shipping, `coupon` re-checked; see lib/offers.ts). */
+export async function priceCartRemote(type: "retail" | "wholesale", lines: CartLine[], token?: string, coupon?: string | null) {
+  const r = await call<{ items?: ServerCartLine[]; totals?: CartTotals; has_errors?: boolean; offers?: CartOffers | null }>(
+    "price", { method: "POST", body: JSON.stringify({ type, items: itemsOf(lines), ...(coupon ? { coupon } : {}) }) }, token);
   if (!r.ok) return null;
-  return { items: r.items ?? [], totals: r.totals ?? null, hasErrors: !!r.has_errors };
+  return { items: r.items ?? [], totals: r.totals ?? null, hasErrors: !!r.has_errors, offers: r.offers ?? null };
 }
 
 /** The local line a server line answers for — matched on product + variation. */

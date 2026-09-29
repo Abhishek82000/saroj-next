@@ -5,6 +5,7 @@ import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { Totals } from "@/components/cart/CartView";
 import { useCartPrice } from "@/components/cart/useCartPrice";
+import { CouponBox } from "@/components/cart/Offers";
 import {
   STATES, emptyCheckout, placeOrder, validateCheckout,
   type CheckoutForm, type PaymentMethod,
@@ -30,13 +31,13 @@ const PAYMENTS: Record<"retail" | "wholesale", { key: PaymentMethod; title: stri
  * payment APIs plug in.
  */
 export default function CheckoutView() {
-  const { cart, subtotal, mode, href, user, hydrated, openLogin, say } = useStore();
+  const { cart, subtotal, mode, href, user, hydrated, openLogin, say, coupon } = useStore();
   const wholesale = mode === "wholesale";
   const payments = PAYMENTS[mode];
   const [f, setF] = useState<CheckoutForm>(() => emptyCheckout(payments[0].key));
   const [errs, setErrs] = useState<Partial<Record<keyof CheckoutForm, string>>>({});
   const [busy, setBusy] = useState(false);
-  const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
+  const { totals, offers, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
 
   /* A logged-in visitor's details fill in whatever is still blank. */
   useEffect(() => {
@@ -66,7 +67,8 @@ export default function CheckoutView() {
       return;
     }
     setBusy(true);
-    const r = await placeOrder(f, cart, { wholesale, token: user?.token });
+    /* Only the code goes along — the order API works the discount out again. */
+    const r = await placeOrder(f, cart, { wholesale, token: user?.token, coupon: wholesale ? null : coupon });
     setBusy(false);
     say(r.ok ? `Order ${r.orderId} placed` : r.message);
   };
@@ -198,10 +200,11 @@ export default function CheckoutView() {
                 </li>
               ))}
             </ul>
-            <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
+            {!wholesale && <CouponBox offers={offers} compact />}
+            <Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} />
             {hasErrors && <p className="st-co__err" style={{ marginBottom: ".8rem" }}>Some items are no longer available. <Link href={href("/cart")}>Fix your cart</Link>.</p>}
             <button type="submit" className="st-btn st-btn--solid st-co__go" disabled={busy || hasErrors}>
-              {busy ? "Placing order…" : f.payment === "online" ? `Pay ${inr(totals?.subtotal ?? subtotal)}` : "Place order"}
+              {busy ? "Placing order…" : f.payment === "online" ? `Pay ${inr(offers?.total ?? totals?.subtotal ?? subtotal)}` : "Place order"}
             </button>
             <Link href={href("/cart")} className="st-co__back">← Back to cart</Link>
             <p className="st-co__safe"><Icon name="shield" size={14} /> Your details are only used for this order.</p>

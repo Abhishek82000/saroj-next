@@ -5,7 +5,9 @@ import { useStore } from "@/components/shell/StoreProvider";
 import { inr, site, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
 import type { CartTotals } from "@/lib/cart";
+import { REWARD, type CartOffers } from "@/lib/offers";
 import { useCartPrice } from "@/components/cart/useCartPrice";
+import { CartProgress, CouponBox } from "@/components/cart/Offers";
 
 /** One line's − qty + control, holding wholesale lines at their minimum. */
 export function LineQty({ l }: { l: CartLine }) {
@@ -23,11 +25,18 @@ export function LineQty({ l }: { l: CartLine }) {
   );
 }
 
-/** Subtotal, delivery and total — shared by the cart and checkout pages. `server`
-    is the server's own totals (POST /api/cart/price) when it priced the whole cart. */
-export function Totals({ subtotal: local, wholesale, server }: { subtotal: number; wholesale: boolean; server?: CartTotals | null }) {
+/** Subtotal, offers, delivery and total — shared by the cart and checkout pages.
+    `server` is the server's own totals and `offers` its retail offers (POST
+    /api/cart/price), both there only when it priced the whole cart. */
+export function Totals({ subtotal: local, wholesale, server, offers }: {
+  subtotal: number; wholesale: boolean; server?: CartTotals | null; offers?: CartOffers | null;
+}) {
   const subtotal = server?.subtotal ?? local;
-  const free = !wholesale && subtotal >= site.freeShippingOver;
+  const free = !wholesale && (offers ? offers.shipping.free : subtotal >= site.freeShippingOver);
+  const milestone = offers?.milestone;
+  const coupon = offers?.coupon?.applied ? offers.coupon : null;
+  const gift = milestone?.tiers.find((t) => t.id === milestone.reached_tier_id && t.reward_type === REWARD.product)?.product;
+  const saved = (server?.discount ?? 0) + (offers?.discount ?? 0);
   return (
     <dl className="st-co__totals">
       {server && server.discount > 0 && (
@@ -37,12 +46,18 @@ export function Totals({ subtotal: local, wholesale, server }: { subtotal: numbe
         </>
       )}
       <div><dt>Subtotal</dt><dd>{inr(subtotal)}</dd></div>
+      {milestone && milestone.discount > 0 && (
+        <div><dt>{milestone.name}</dt><dd className="st-co__free">− {inr(milestone.discount)}</dd></div>
+      )}
+      {coupon && <div><dt>Coupon <code className="st-co__code">{coupon.code}</code></dt><dd className="st-co__free">− {inr(coupon.discount)}</dd></div>}
+      {gift && <div><dt>Free gift · {gift.name}</dt><dd className="st-co__free">Free</dd></div>}
       <div>
         <dt>Delivery</dt>
         <dd>{free ? <b className="st-co__free">Free</b> : "Worked out at checkout"}</dd>
       </div>
       {wholesale && <div><dt>GST</dt><dd>Extra, on the invoice</dd></div>}
-      <div className="st-co__grand"><dt>Total</dt><dd>{inr(subtotal)}</dd></div>
+      <div className="st-co__grand"><dt>Total</dt><dd>{inr(offers?.total ?? subtotal)}</dd></div>
+      {saved > 0 && <div className="st-co__saved"><dt>You save</dt><dd>{inr(saved)} on this order</dd></div>}
     </dl>
   );
 }
@@ -53,10 +68,10 @@ export function Totals({ subtotal: local, wholesale, server }: { subtotal: numbe
  * Retail is open to guests; the wholesale cart needs a login.
  */
 export default function CartView() {
-  const { cart, remove, subtotal, shortOfFreeShipping, mode, href, user, hydrated, openLogin, otherCount, switchMode } = useStore();
+  const { cart, remove, subtotal, mode, href, user, hydrated, openLogin, otherCount, switchMode } = useStore();
   const wholesale = mode === "wholesale";
   const other = wholesale ? "retail" : "wholesale";
-  const { totals, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
+  const { totals, offers, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
 
   return (
     <main id="main">
@@ -100,14 +115,7 @@ export default function CartView() {
         ) : (
           <div className="st-co__grid">
             <section aria-label="Items">
-              {!wholesale && (
-                <p className={`st-co__ship${shortOfFreeShipping <= 0 ? " done" : ""}`}>
-                  <Icon name="truck" size={16} />
-                  {shortOfFreeShipping <= 0
-                    ? <span><b>Shipping is on us</b> on this order.</span>
-                    : <span><b>{inr(shortOfFreeShipping)}</b> more for free shipping.</span>}
-                </p>
-              )}
+              {!wholesale && <CartProgress offers={offers} />}
               <ul className="st-co__lines">
                 {cart.map((l) => (
                   <li key={l.id} className={`st-co__line${errors[l.id] ? " bad" : ""}`}>
@@ -130,7 +138,8 @@ export default function CartView() {
 
             <aside className="st-co__card">
               <h2>Order summary</h2>
-              <Totals subtotal={subtotal} wholesale={wholesale} server={totals} />
+              {!wholesale && <CouponBox offers={offers} />}
+              <Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} />
               {hasErrors
                 ? <button type="button" className="st-btn st-btn--solid st-co__go" disabled>Remove unavailable items</button>
                 : <Link href={href("/checkout")} className="st-btn st-btn--solid st-co__go">Proceed to checkout</Link>}

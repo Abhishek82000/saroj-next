@@ -61,8 +61,10 @@ export function validateCheckout(f: CheckoutForm, wholesale: boolean): Partial<R
 
 export type PlaceOrderResult = { ok: true; orderId: string } | { ok: false; message: string };
 
+/** `coupon` is the applied code (retail only). Send the code, never a discount:
+    the order API re-runs OfferService::summary() on the lines and bills that. */
 export async function placeOrder(
-  _form: CheckoutForm, _lines: CartLine[], _opts: { wholesale: boolean; token?: string },
+  _form: CheckoutForm, _lines: CartLine[], _opts: { wholesale: boolean; token?: string; coupon?: string | null },
 ): Promise<PlaceOrderResult> {
   return { ok: false, message: "Ordering isn't connected yet — the order API goes in lib/checkout.ts." };
 }

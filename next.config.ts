@@ -29,6 +29,8 @@ const nextConfig: NextConfig = {
       { source: "/api/search", destination: `${API}/api/search` },
       // The cart lives in the Laravel session — same origin, so its cookie rides along.
       { source: "/api/cart/:path*", destination: `${API}/api/cart/:path*` },
+      // Coupons, the cart-milestone offer and free shipping (OfferApiController).
+      { source: "/api/offers/:path*", destination: `${API}/api/offers/:path*` },
     ];
   },
   async headers() {
