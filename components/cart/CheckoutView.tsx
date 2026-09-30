@@ -1,15 +1,16 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { Totals, orderTotal } from "@/components/cart/CartView";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import { CouponBox } from "@/components/cart/Offers";
 import {
-  emptyCheckout, lookupPincode, placeOrder, validateCheckout,
+  buildPayNowPayload, emptyCheckout, lookupPincode, placeOrder, validateCheckout,
   type CheckoutForm, type PaymentMethod,
 } from "@/lib/checkout";
+import { getMe } from "@/lib/auth";
 import { inr, unitLabel } from "@/lib/site";
 
 /** Payment choices, shown as an accordion above "Pay Now": the chosen one opens to say what happens next. */
@@ -37,7 +38,7 @@ type PinState = "idle" | "loading" | "ok" | "fail";
  * needs a login. Placing the order goes through `placeOrder` in lib/checkout.ts.
  */
 export default function CheckoutView() {
-  const { cart, subtotal, mode, href, user, hydrated, openLogin, say, coupon } = useStore();
+  const { cart, subtotal, mode, href, user, hydrated, openLogin, say, coupon, updateUser } = useStore();
   const wholesale = mode === "wholesale";
   const payments = PAYMENTS[mode];
   const [f, setF] = useState<CheckoutForm>(() => emptyCheckout(payments[0].key));
@@ -47,18 +48,39 @@ export default function CheckoutView() {
   const { totals, offers, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
   const total = orderTotal(subtotal, totals, offers);
 
-  /* A logged-in visitor's details fill in whatever is still blank. */
+  /* The account's saved address, for the pincode lookup below to fall back on. */
+  const savedAddress = useRef(user?.address);
+  savedAddress.current = user?.address;
+
+  /* A logged-in visitor's details fill in whatever is still blank. The address
+     is only there once the account has one — a new account (registered with
+     just a name and email) leaves those fields empty to be typed in. City and
+     state follow from the pincode. */
   useEffect(() => {
     if (!user) return;
     const [first, ...rest] = (user.name === user.mobile ? "" : user.name).split(" ");
+    const a = user.address;
     setF((p) => ({
       ...p,
       mobile: p.mobile || user.mobile,
       firstName: p.firstName || first,
       lastName: p.lastName || rest.join(" "),
       email: p.email || user.email,
+      address: p.address || a?.address || "",
+      landmark: p.landmark || a?.landmark || "",
+      pincode: p.pincode || a?.pincode || "",
     }));
   }, [user]);
+
+  /* GET /api/auth/me: the server's copy of the address, if it has one. */
+  const token = user?.token;
+  const userMobile = user?.mobile;
+  useEffect(() => {
+    if (!token || !userMobile) return;
+    let live = true;
+    getMe(token, userMobile).then((r) => { if (live && r.ok && r.user.address) updateUser({ address: r.user.address }); });
+    return () => { live = false; };
+  }, [token, userMobile, updateUser]);
 
   /* A full pincode looks up its city and state (POST /api/get-state-city).
      Found: they fill in and stay locked. Not found: the two become ordinary
@@ -75,6 +97,8 @@ export default function CheckoutView() {
         setErrs((p) => ({ ...p, city: undefined, state: undefined, pincode: undefined }));
         setPin({ state: "ok" });
       } else {
+        const a = savedAddress.current;
+        if (a?.pincode === f.pincode) setF((p) => ({ ...p, city: p.city || a.city, state: p.state || a.state }));
         setPin({ state: "fail", message: r.message });
       }
     });
@@ -99,14 +123,30 @@ export default function CheckoutView() {
     const first = Object.keys(found)[0];
     if (first) { document.getElementById(`co-${first}`)?.focus(); return; }
     setBusy(true);
-    /* Only the code goes along — the order API works the discount out again. */
-    const r = await placeOrder({
-      ...f,
-      deliveryPhone: f.sameAsContact ? f.mobile : f.deliveryPhone,
-      coupon: wholesale ? "" : coupon ?? "",
-    }, cart, { wholesale, token: user?.token, coupon: wholesale ? null : coupon });
+    /* The address just typed becomes the account's, so the next checkout starts with it. */
+    if (user) {
+      updateUser({ address: {
+        address: f.address.trim(), landmark: f.landmark.trim(), pincode: f.pincode.trim(),
+        state: f.state.trim(), city: f.city.trim(),
+      } });
+    }
+    /* Pay Now → POST /api/cart/paynow. The amounts are the ones on screen;
+       the server prices the order again and bills its own. */
+    const applied = !wholesale && offers?.coupon?.applied ? offers.coupon : null;
+    const r = await placeOrder(buildPayNowPayload(f, cart, {
+      wholesale,
+      loggedIn: !!user,
+      coupon: applied ? { code: applied.code, id: applied.id, discount: applied.discount } : null,
+      subtotal: totals?.subtotal ?? subtotal,
+      totalDiscount: (totals?.discount ?? 0) + (wholesale ? 0 : offers?.discount ?? 0),
+      shipping: 0,
+      finalAmount: total,
+    }), user?.token);
     setBusy(false);
-    say(r.ok ? `Order ${r.orderId} placed` : r.message);
+    if (!r.ok) { say(r.message); return; }
+    /* Online payment: the gateway's page (PhonePe) takes over. */
+    if (r.redirectUrl) { window.location.href = r.redirectUrl; return; }
+    say(r.orderId ? `Order ${r.orderId} placed` : r.message);
   };
 
   /** One input with a floating label: it sits inside the field and lifts above the text once there is some. */

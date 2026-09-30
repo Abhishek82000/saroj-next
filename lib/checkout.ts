@@ -11,9 +11,7 @@ import { site } from "./site";
  * coupon; wholesale prices exclude GST (added on the invoice) and take no coupon.
  * Coupons and offers are worked out on the server (lib/offers.ts).
  *
- * NOT CONNECTED YET: `placeOrder` is a stand-in until the order/payment API
- * is shared. When it is, send `form` + `lines` there (with the Bearer token
- * for a logged-in visitor) and hand back the order id / payment redirect.
+ * "Pay Now" posts to /api/cart/paynow — see `buildPayNowPayload` / `placeOrder` below.
  */
 
 /** No cash on delivery — retail pays online; wholesale online or by bank transfer. */
@@ -140,46 +138,68 @@ export async function lookupPincode(pin: string): Promise<PincodeResult> {
 }
 
 /**
- * The body POST /api/order/place is to receive (spec agreed with the backend,
- * 2026-09-29). Prices are sent for reference only — the server re-prices the
- * items, re-checks the promo and works out shipping itself, and its numbers win.
- * A logged-in buyer is identified by the Bearer token, so `customer` is sent
- * only for a guest; the delivery address is always sent.
+ * What "Pay Now" sends — POST /api/cart/paynow (through the /api/cart rewrite,
+ * with the Bearer token when logged in):
+ *
+ *   products         what's being bought: product_id, variation_id, qty, and
+ *                    the price shown (reference only)
+ *   user             logged in → null, the server takes the buyer from the
+ *                    token (the browser holds no user id); guest → the
+ *                    contact + billing fields from the form
+ *   shipping_address the delivery address (always)
+ *   coupon_id / coupon_code / coupon_discount   the applied coupon, retail only
+ *   total_discount   MRP discount + offers + coupon
+ *   shipping_amount
+ *   final_amount     what the page showed as payable
+ *
+ * The amounts are what the page showed — the server must price the products
+ * and re-check the coupon itself and bill its own figures.
+ *
+ * On 2026-09-30 the route isn't deployed yet (404), so the response shape is
+ * unseen: an order id / number is read from whichever key carries one, and a
+ * payment URL (PhonePe), if the response has one, is followed.
  */
-export interface OrderPayload {
+export interface PayNowPayload {
   type: "retail" | "wholesale";
-  items: { product_id: number; variation_id: number | null; qty: number }[];
-  customer: { mobile: string; first_name: string; last_name: string; email: string } | null;
+  products: { product_id: number; variation_id: number | null; qty: number; price: number; line_total: number; name: string }[];
+  user: { mobile: string; first_name: string; last_name: string; email: string } | null;
   shipping_address: {
     address: string; landmark: string; country: string; pincode: string; state: string; city: string; phone: string;
   };
   notes: string;
   payment_method: PaymentMethod;
-  /** Retail only; always null for wholesale. */
-  offer: { promo_id: number | null; promo_code: string; promo_discount: number } | null;
-  shipping_amount: number;
+  coupon_id: number | null;
+  coupon_code: string | null;
+  coupon_discount: number;
   total_discount: number;
+  shipping_amount: number;
   subtotal: number;
-  total: number;
+  final_amount: number;
   /** Wholesale only. */
   gst: { gstin: string; business_name: string } | null;
 }
 
-export function buildOrderPayload(
+export function buildPayNowPayload(
   f: CheckoutForm, lines: CartLine[],
   o: {
     wholesale: boolean; loggedIn: boolean;
     /** The server's applied coupon (POST /api/cart/price → offers.coupon), retail only. */
     coupon?: { code: string; id: number | null; discount: number } | null;
-    subtotal: number; mrpDiscount: number; shipping: number;
+    subtotal: number;
+    /** Everything taken off: MRP discount + offers + coupon. */
+    totalDiscount: number;
+    shipping: number;
+    finalAmount: number;
   },
-): OrderPayload {
-  const promo = !o.wholesale && o.coupon ? o.coupon : null;
-  const promoDiscount = promo?.discount ?? 0;
+): PayNowPayload {
+  const coupon = !o.wholesale && o.coupon ? o.coupon : null;
   return {
     type: o.wholesale ? "wholesale" : "retail",
-    items: lines.filter((l) => l.productId).map((l) => ({ product_id: l.productId!, variation_id: l.variationId ?? null, qty: l.qty })),
-    customer: o.loggedIn ? null : {
+    products: lines.filter((l) => l.productId).map((l) => ({
+      product_id: l.productId!, variation_id: l.variationId ?? null, qty: l.qty,
+      price: l.price, line_total: Math.round(l.price * l.qty * 100) / 100, name: l.name,
+    })),
+    user: o.loggedIn ? null : {
       mobile: f.mobile.trim(), first_name: f.firstName.trim(), last_name: f.lastName.trim(), email: f.email.trim(),
     },
     shipping_address: {
@@ -188,21 +208,58 @@ export function buildOrderPayload(
     },
     notes: f.notes.trim(),
     payment_method: f.payment,
-    offer: promo ? { promo_id: promo.id, promo_code: promo.code, promo_discount: promoDiscount } : null,
+    coupon_id: coupon?.id ?? null,
+    coupon_code: coupon?.code ?? null,
+    coupon_discount: coupon?.discount ?? 0,
+    total_discount: o.totalDiscount,
     shipping_amount: o.shipping,
-    total_discount: o.mrpDiscount + promoDiscount,
     subtotal: o.subtotal,
-    total: Math.max(0, o.subtotal - promoDiscount + o.shipping),
+    final_amount: o.finalAmount,
     gst: o.wholesale ? { gstin: f.gstin.trim().toUpperCase(), business_name: f.business.trim() } : null,
   };
 }
 
-export type PlaceOrderResult = { ok: true; orderId: string } | { ok: false; message: string };
+export type PlaceOrderResult =
+  | { ok: true; orderId: string | null; redirectUrl: string | null; message: string }
+  | { ok: false; message: string; fieldErrors?: Record<string, string[]> };
 
-/** `coupon` is the applied code (retail only). Send the code, never a discount:
-    the order API re-runs OfferService::summary() on the lines and bills that. */
-export async function placeOrder(
-  _form: CheckoutForm, _lines: CartLine[], _opts: { wholesale: boolean; token?: string; coupon?: string | null },
-): Promise<PlaceOrderResult> {
-  return { ok: false, message: "Ordering isn't connected yet — the order API goes in lib/checkout.ts." };
+/** POST /api/cart/paynow. */
+export async function placeOrder(payload: PayNowPayload, token?: string): Promise<PlaceOrderResult> {
+  try {
+    const headers: Record<string, string> = { Accept: "application/json", "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch("/api/cart/paynow", { method: "POST", headers, body: JSON.stringify(payload), credentials: "same-origin" });
+    const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string; errors?: Record<string, string[]> };
+    if (res.status === 404) return { ok: false, message: "Ordering isn't switched on yet — /api/cart/paynow isn't live on the server." };
+    if (!res.ok || json.status === "error") {
+      const first = json.errors ? Object.values(json.errors)[0]?.[0] : undefined;
+      return { ok: false, message: first ?? json.message ?? "Couldn't place the order — please try again.", fieldErrors: json.errors };
+    }
+    const id = findScalar(json, /^(order_no|order_number|order_id|orderid|id)$/i);
+    return {
+      ok: true,
+      orderId: id,
+      redirectUrl: findString(json, /redirect|payment_url|pay_url|checkout_url/i) ?? null,
+      message: json.message ?? "Order placed",
+    };
+  } catch {
+    return { ok: false, message: "Couldn't reach the server — check your connection and try again." };
+  }
+}
+
+/** Like findString, but a number counts too (an order id is often numeric). */
+function findScalar(root: unknown, re: RegExp): string | null {
+  let level: unknown[] = [root];
+  for (let depth = 0; depth < 4 && level.length; depth++) {
+    const next: unknown[] = [];
+    for (const node of level) {
+      if (!node || typeof node !== "object" || Array.isArray(node)) continue;
+      for (const [k, v] of Object.entries(node)) {
+        if ((typeof v === "string" || typeof v === "number") && String(v).trim() && re.test(k)) return String(v);
+        if (v && typeof v === "object") next.push(v);
+      }
+    }
+    level = next;
+  }
+  return null;
 }

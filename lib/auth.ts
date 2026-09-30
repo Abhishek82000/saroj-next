@@ -36,10 +36,22 @@ import { site } from "./site";
 export const AUTH_IS_MOCK = process.env.NEXT_PUBLIC_AUTH_MOCK === "1";
 const MOCK_OTP = "1234";
 
+/** A delivery address kept on the account — what checkout fills its form from. */
+export interface UserAddress {
+  address: string;
+  landmark: string;
+  pincode: string;
+  state: string;
+  city: string;
+}
+
 export interface User {
   mobile: string;
   name: string;
   email: string;
+  /** Absent until there is one: registration only asks for a name and email,
+      so a new account has none until its first checkout fills one in. */
+  address?: UserAddress;
   /** Whatever the API hands back to keep the session, once it hands one back. */
   token?: string;
 }
@@ -107,12 +119,14 @@ async function call(
 
 /** First non-empty string under a key matching `re`, searching the response
     breadth-first a few levels deep — the profile may sit under `user`, `data`,
-    `data.user`, and may call its fields `name` or `user_name`. */
-function findString(root: unknown, re: RegExp): string | undefined {
+    `data.user`, and may call its fields `name` or `user_name`. `intoArrays`
+    looks inside lists too (a profile's `addresses: [...]`). */
+function findString(root: unknown, re: RegExp, intoArrays = false): string | undefined {
   let level: unknown[] = [root];
   for (let depth = 0; depth < 4 && level.length; depth++) {
     const next: unknown[] = [];
     for (const node of level) {
+      if (intoArrays && Array.isArray(node)) { next.push(...node); continue; }
       if (!node || typeof node !== "object" || Array.isArray(node)) continue;
       for (const [k, v] of Object.entries(node)) {
         if (typeof v === "string" && v.trim() && re.test(k)) return v.trim();
@@ -131,7 +145,23 @@ function userFrom(json: ApiBody, mobile: string, typed?: { name: string; email: 
     mobile,
     name: findString(json, /^(user_?|customer_?|full_?)?name$/i) || typed?.name || mobile,
     email: findString(json, /^(user_?|customer_?)?e-?mail$/i) || typed?.email || "",
+    address: addressFrom(json),
     token: tokenOf(json) ?? fallbackToken,
+  };
+}
+
+/** The account's saved address, if the response carries one — undefined when
+    it doesn't (a new account), so the checkout form just stays blank. */
+function addressFrom(json: ApiBody): UserAddress | undefined {
+  const address = findString(json, /^((shipping|billing|delivery)_?)?(address|address_?(line_?)?1|street)$/i, true);
+  const pincode = findString(json, /^(pin_?code|pin|zip(_?code)?|postal_?code|postcode)$/i, true);
+  if (!address && !pincode) return undefined;
+  return {
+    address: address ?? "",
+    landmark: findString(json, /^(landmark|apartment|address_?(line_?)?2)$/i, true) ?? "",
+    pincode: pincode ?? "",
+    state: findString(json, /^state(_?name)?$/i, true) ?? "",
+    city: findString(json, /^(city(_?name)?|district)$/i, true) ?? "",
   };
 }
 

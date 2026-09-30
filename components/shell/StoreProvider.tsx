@@ -83,8 +83,8 @@ interface Store {
   logout: () => void;
   /** True once the saved cart, favourites and login have been read from this device. */
   hydrated: boolean;
-  /** Edit the signed-in user's name/email (kept on this device). */
-  updateUser: (patch: Partial<Pick<User, "name" | "email">>) => void;
+  /** Edit the signed-in user's name/email/address (kept on this device). */
+  updateUser: (patch: Partial<Pick<User, "name" | "email" | "address">>) => void;
   loginOpen: boolean;
   /** Why the login modal opened ("Log in to add wholesale products to cart"). */
   loginReason: string | null;
@@ -355,7 +355,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     next?.();
   }, [say, syncWishlist, refreshCounts]);
 
-  const updateUser = useCallback((patch: Partial<Pick<User, "name" | "email">>) => setUser((u) => (u ? { ...u, ...patch } : u)), []);
+  const updateUser = useCallback((patch: Partial<Pick<User, "name" | "email" | "address">>) => setUser((u) => (u ? { ...u, ...patch } : u)), []);
 
   const logout = useCallback(() => {
     setUser(null);

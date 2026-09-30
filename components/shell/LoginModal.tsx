@@ -53,7 +53,7 @@ export default function LoginModal() {
       surfaces an error — login has already succeeded by the time this runs. */
   const refreshProfile = (u: User) => {
     if (!u.token) return;
-    getMe(u.token, u.mobile).then((r) => { if (r.ok) updateUser({ name: r.user.name, email: r.user.email }); });
+    getMe(u.token, u.mobile).then((r) => { if (r.ok) updateUser({ name: r.user.name, email: r.user.email, ...(r.user.address && { address: r.user.address }) }); });
   };
 
   const send = async () => {
