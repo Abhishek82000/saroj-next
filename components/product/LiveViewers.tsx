@@ -32,6 +32,6 @@ export default function LiveViewers() {
   if (n === null) return null;
 
   return (
-    <span><i className="calm" /> <b>{n} people</b> are viewing this right now</span>
+    <span><i className="calm" /> <b>{n} peoples</b> are viewing this right now</span>
   );
 }
