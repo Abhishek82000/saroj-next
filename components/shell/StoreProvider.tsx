@@ -26,6 +26,11 @@ const RETAIL_CART_KEY = "saroj.cart";
 /** The coupon code applied to the retail cart. Only the code is kept — the
     server re-checks it and works out the discount on every price call. */
 const COUPON_KEY = "saroj.coupon";
+/** A guest's cart lives like a session: last seen at this time, and gone after
+    GUEST_TTL without a visit. A logged-in cart is the account's and never expires. */
+const SEEN_KEY = "saroj.cart.seen";
+const GUEST_TTL = 4 * 60 * 60 * 1000;
+const guestExpired = () => Date.now() - safe.read<number>(SEEN_KEY, Date.now()) > GUEST_TTL;
 const wholesaleCartKey = (mobile: string) => `saroj.cart.wholesale.${mobile}`;
 const USER_KEY = "saroj.user";
 /** The wishlist belongs to the logged-in account — retail and wholesale each
@@ -187,9 +192,11 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     const saved = safe.read<User | null>(USER_KEY, null);
     /* Logged out: lines with a cartId belong to an account's server cart, not this guest. */
-    const lines = safe.read<CartLine[]>(RETAIL_CART_KEY, []);
+    const expired = !saved && guestExpired();
+    const lines = expired ? [] : safe.read<CartLine[]>(RETAIL_CART_KEY, []);
     setRetail(saved ? lines : lines.filter((l) => !l.cartId));
-    setCoupon(safe.read<string | null>(COUPON_KEY, null));
+    setCoupon(expired ? null : safe.read<string | null>(COUPON_KEY, null));
+    safe.write(SEEN_KEY, Date.now());
     setUser(saved);
     if (saved) {
       setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
@@ -199,8 +206,19 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setHydrated(true);
   }, [syncWishlist, refreshCounts]);
 
-  useEffect(() => { if (hydrated) safe.write(RETAIL_CART_KEY, retail); }, [hydrated, retail]);
+  useEffect(() => { if (hydrated) { safe.write(RETAIL_CART_KEY, retail); safe.write(SEEN_KEY, Date.now()); } }, [hydrated, retail]);
   useEffect(() => { if (hydrated) safe.write(COUPON_KEY, coupon); }, [hydrated, coupon]);
+  /* A tab left open past the guest session: clear on return, otherwise mark the visit. */
+  useEffect(() => {
+    if (!hydrated) return;
+    const onShow = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!userRef.current && guestExpired()) { setRetail([]); setCoupon(null); }
+      safe.write(SEEN_KEY, Date.now());
+    };
+    document.addEventListener("visibilitychange", onShow);
+    return () => document.removeEventListener("visibilitychange", onShow);
+  }, [hydrated]);
   useEffect(() => { if (hydrated && wh.owner) safe.write(wholesaleCartKey(wh.owner), wh.lines); }, [hydrated, wh]);
   useEffect(() => {
     if (!hydrated || !user) return;
