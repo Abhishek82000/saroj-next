@@ -185,9 +185,11 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
 
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
-    setRetail(safe.read<CartLine[]>(RETAIL_CART_KEY, []));
-    setCoupon(safe.read<string | null>(COUPON_KEY, null));
     const saved = safe.read<User | null>(USER_KEY, null);
+    /* Logged out: lines with a cartId belong to an account's server cart, not this guest. */
+    const lines = safe.read<CartLine[]>(RETAIL_CART_KEY, []);
+    setRetail(saved ? lines : lines.filter((l) => !l.cartId));
+    setCoupon(safe.read<string | null>(COUPON_KEY, null));
     setUser(saved);
     if (saved) {
       setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
@@ -256,20 +258,20 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   /** After a login (or on load with a saved one): lines this browser holds
       that the server doesn't know yet — no cart id, e.g. added as a guest —
       are handed to the account with POST /api/cart/sync, then the account's
-      cart (GET /api/cart?type=…) is read back and becomes the cart, keeping
-      any local line the server can't hold (no product id). A failed call
-      leaves the local cart as it is. */
+      cart (GET /api/cart?type=…) is read back and becomes the whole cart —
+      nothing local is kept. A failed call leaves the local cart as it is. */
   const syncCart = useCallback(async (token: string) => {
     for (const kind of ["retail", "wholesale"] as const) {
       const guest = cartsRef.current[kind].filter((l) => l.productId && !l.cartId);
       const synced = guest.length ? (await syncCartRemote(kind, guest, token)).ok : true;
       const server = await getCartRemote(kind, token);
       if (!server) continue;
+      /* The account's cart replaces the local one. If the sync failed, keep the
+         guest lines rather than lose them. */
       const onServer = new Set(server.map((l) => l.id));
-      /* If the sync failed, keep the guest lines rather than lose them. */
-      mutate(kind, (prev) => [
+      mutate(kind, (prev) => synced ? server : [
         ...server,
-        ...prev.filter((l) => !onServer.has(l.id) && (!l.productId || !synced)),
+        ...prev.filter((l) => !onServer.has(l.id) && l.productId && !l.cartId),
       ]);
     }
   }, [mutate]);
@@ -366,6 +368,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
 
   const logout = useCallback(() => {
     setUser(null);
+    /* The retail cart now holds the account's lines (syncCart) — they stay on the
+       server and come back on the next login; the guest starts with an empty cart. */
+    setRetail([]);
+    setCoupon(null);
     setWh({ owner: null, lines: [] });
     if (mode === "wholesale") setCartOpen(false);
     setWishlist(EMPTY_WISHLIST);
