@@ -10,21 +10,18 @@
 .st-ms__msg b.st-ms__ok,.st-ms.done .st-ms__msg b{ color:var(--teal); }
 .st-ms.done .st-ms__msg svg{ color:var(--teal); }
 
-.st-ms__track{ position:relative; height:6px; margin:0 5px; border-radius:99px; background:var(--paper-3); }
-.st-ms__fill{ height:100%; border-radius:99px; transition:width .65s var(--ease);
-              background:repeating-linear-gradient(90deg,var(--cobalt) 0 7px,#2E77C4 7px 14px); }
-.st-ms.done .st-ms__fill{ background:repeating-linear-gradient(90deg,var(--teal) 0 7px,#17A093 7px 14px); }
+.st-ms__track{ position:relative; height:5px; margin:0; border-radius:99px; background:var(--paper-3); }
+.st-ms__fill{ height:100%; border-radius:99px; background:var(--cobalt); transition:width .65s var(--ease); }
+.st-ms.done .st-ms__fill{ background:var(--teal); }
 .st-ms__track i{ position:absolute; top:50%; width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%;
                  background:#fff; border:2px solid var(--paper-3); transition:border-color .3s var(--ease), background .3s var(--ease); }
 .st-ms__track i.on{ border-color:var(--teal); background:var(--teal); }
 
-.st-ms__tiers{ list-style:none; margin:.6rem 0 0; padding:0; display:grid; gap:.4rem; }
-.st-ms__tiers li{ display:grid; gap:.1rem; min-width:0; text-align:center; font-size:.6rem; color:var(--ink-2); }
-.st-ms__tiers li:first-child{ text-align:left; }
-.st-ms__tiers li:last-child{ text-align:right; }
-.st-ms__tiers li:only-child{ text-align:right; }
-.st-ms__tiers b{ display:inline-flex; align-items:center; justify-content:inherit; gap:.2rem; font-size:.66rem; color:var(--ink); }
-.st-ms__tiers span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* each tier's label ends right under its dot */
+.st-ms__tiers{ list-style:none; margin:.55rem 0 0; padding:0; display:grid; }
+.st-ms__tiers li{ display:grid; gap:.1rem; min-width:0; padding-left:.5rem; text-align:right; font-size:.6rem; line-height:1.35; color:var(--ink-2); }
+.st-ms__tiers b{ display:inline-flex; align-items:center; justify-content:flex-end; gap:.2rem; font-size:.66rem; color:var(--ink); }
+.st-ms__tiers span{ overflow-wrap:anywhere; }
 .st-ms__tiers li.on,.st-ms__tiers li.on b{ color:var(--teal); }
 .st-ms--page .st-ms__tiers li{ font-size:.72rem; }
 .st-ms--page .st-ms__tiers b{ font-size:.78rem; }

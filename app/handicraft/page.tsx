@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import HandicraftPage from "@/components/handicraft/HandicraftPage";
 import { getHandicraftData } from "@/lib/handicraft";
 import { pageMeta } from "@/lib/seo";
-import "@/styles/handicraft.css";
 
 export const metadata: Metadata = pageMeta({
   title: "Handicraft",
