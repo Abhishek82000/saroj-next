@@ -49,7 +49,7 @@ function WishlistTab({ slugs, mode }: { slugs: string[]; mode: Mode }) {
 
   return (
     <>
-      <div className="st-grid" data-cols="3">{cards.map((p) => <ProductCard key={p.slug} p={p} mode={mode} />)}</div>
+      <div className="st-grid" data-cols="3">{cards.map((p, i) => <ProductCard key={p.slug} p={p} mode={mode} priority={i < 3} />)}</div>
       {loading && <p className="st-account__empty">Loading more…</p>}
     </>
   );
