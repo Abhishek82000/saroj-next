@@ -64,6 +64,8 @@ interface Store {
   /** Writes the server's prices (POST /api/cart/price) onto `m`'s matching lines. */
   reprice: (m: Mode, items: ServerCartLine[]) => void;
   remove: (id: string) => void;
+  /** Empties `m`'s cart on this device (retail drops its coupon too) — after an order. The server clears its own copy. */
+  clearCart: (m: Mode) => void;
   subtotal: number;
   count: number;
   /** How many lines the other mode's cart holds, so the drawer can point to it. */
@@ -306,6 +308,11 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     mutate(mode, (prev) => prev.filter((l) => l.id !== id));
   }, [mutate, mode]);
 
+  const clearCart = useCallback((kind: Mode) => {
+    mutate(kind, () => []);
+    if (kind === "retail") setCoupon(null);
+  }, [mutate]);
+
   const setQty = useCallback((id: string, qty: number) => {
     if (qty <= 0) { remove(id); return; }
     const next = round(qty);
@@ -421,7 +428,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const retailSubtotal = useMemo(() => total(retail), [retail]);
 
   const value: Store = {
-    cart, add, setQty, remove, reprice,
+    cart, add, setQty, remove, clearCart, reprice,
     subtotal,
     count: cart.length,
     otherCount,

@@ -566,7 +566,7 @@
    OFFERS SLIDER — coupon tickets (components/home/OffersSlider)
    Phones: 1.5 tickets, the rail bleeds to the screen edge. Desktop: 3.
    ============================================================ */
-.st-ofrs{ padding-block:clamp(36px,7vw,80px); overflow:hidden; }
+.st-ofrs{ padding-block:clamp(26px,4vw,30px); overflow:hidden; }
 .st-ofrs .st-h2 em{ font-style:italic; color:var(--lac); }
 .st-ofrs__head{ display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; }
 .st-ofrs__arrows{ display:none; gap:.5rem; }

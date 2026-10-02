@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
@@ -7,21 +8,22 @@ import { Totals, orderTotal } from "@/components/cart/CartView";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import { CouponBox } from "@/components/cart/Offers";
 import {
-  buildPayNowPayload, emptyCheckout, lookupPincode, placeOrder, validateCheckout,
+  buildPayNowPayload, emptyCheckout, lookupPincode, placeOrder, saveOrderSnapshot, validateCheckout,
   type CheckoutForm, type PaymentMethod,
 } from "@/lib/checkout";
 import { getMe } from "@/lib/auth";
+import { openCashfree } from "@/lib/cashfree";
 import { inr, unitLabel } from "@/lib/site";
 
 /** Payment choices, shown as an accordion above "Pay Now": the chosen one opens to say what happens next. */
 const PAYMENTS: Record<"retail" | "wholesale", { key: PaymentMethod; title: string; note: string }[]> = {
   retail: [
     { key: "online", title: "UPI, All Cards, NetBanking, Wallets",
-      note: "After clicking “Pay Now”, you will be redirected to PhonePe — UPI, All Cards, NetBanking, Wallets to complete your purchase securely." },
+      note: "After clicking “Pay Now”, you will be redirected to Cashfree — UPI, All Cards, NetBanking, Wallets to complete your purchase securely." },
   ],
   wholesale: [
     { key: "online", title: "UPI, All Cards, NetBanking",
-      note: "After clicking “Pay Now”, you will be redirected to PhonePe to complete your payment securely." },
+      note: "After clicking “Pay Now”, you will be redirected to Cashfree to complete your payment securely." },
     { key: "bank", title: "Bank Transfer (NEFT / RTGS)", note: "We'll send our bank details with the order confirmation; the order is processed once the payment lands." },
   ],
 };
@@ -39,6 +41,7 @@ type PinState = "idle" | "loading" | "ok" | "fail";
  */
 export default function CheckoutView() {
   const { cart, subtotal, mode, href, user, hydrated, openLogin, say, coupon, updateUser } = useStore();
+  const router = useRouter();
   const wholesale = mode === "wholesale";
   const payments = PAYMENTS[mode];
   const [f, setF] = useState<CheckoutForm>(() => emptyCheckout(payments[0].key));
@@ -135,18 +138,22 @@ export default function CheckoutView() {
     const applied = !wholesale && offers?.coupon?.applied ? offers.coupon : null;
     const r = await placeOrder(buildPayNowPayload(f, cart, {
       wholesale,
-      loggedIn: !!user,
       coupon: applied ? { code: applied.code, id: applied.id, discount: applied.discount } : null,
       subtotal: totals?.subtotal ?? subtotal,
       totalDiscount: (totals?.discount ?? 0) + (wholesale ? 0 : offers?.discount ?? 0),
       shipping: 0,
       finalAmount: total,
     }), user?.token);
-    setBusy(false);
-    if (!r.ok) { say(r.message); return; }
-    /* Online payment: the gateway's page (PhonePe) takes over. */
-    if (r.redirectUrl) { window.location.href = r.redirectUrl; return; }
-    say(r.orderId ? `Order ${r.orderId} placed` : r.message);
+    if (!r.ok) { setBusy(false); say(r.message); return; }
+    saveOrderSnapshot(r.orderId, cart);
+    /* Online: Cashfree's page takes over and sends the buyer back to the status page.
+       Bank transfer: the order is placed — straight to the status page. */
+    if (r.payment) {
+      const p = await openCashfree(r.payment.sessionId, r.payment.mode);
+      if (!p.ok) { setBusy(false); say(p.message); }
+      return;
+    }
+    router.push(href(`/checkout/status?order_id=${encodeURIComponent(r.orderId)}&t=${encodeURIComponent(r.receiptToken)}`));
   };
 
   /** One input with a floating label: it sits inside the field and lifts above the text once there is some. */

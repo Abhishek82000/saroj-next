@@ -36,6 +36,7 @@
 .st-co__empty{ text-align:center; max-width:420px; margin:clamp(30px,6vw,70px) auto; display:grid; justify-items:center; gap:.6rem; color:var(--ink-2); }
 .st-co__empty h2{ font-family:var(--d); font-weight:400; font-size:1.5rem; margin:.3rem 0 0; color:var(--ink); }
 .st-co__empty p{ margin:0 0 .8rem; font-weight:300; }
+.st-co__acts{ display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem; }
 
 /* ---------- cart lines ---------- */
 .st-co__ship{ display:flex; align-items:center; gap:.55rem; margin:0 0 1rem; padding:.85rem 1.1rem; border-radius:14px;

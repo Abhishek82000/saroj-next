@@ -143,26 +143,28 @@ export async function lookupPincode(pin: string): Promise<PincodeResult> {
  *
  *   products         what's being bought: product_id, variation_id, qty, and
  *                    the price shown (reference only)
- *   user             logged in → null, the server takes the buyer from the
- *                    token (the browser holds no user id); guest → the
- *                    contact + billing fields from the form
+ *   user             the contact + billing fields from the form. A guest is
+ *                    matched (or registered) by this mobile; logged in, the
+ *                    buyer is the token and these only name the bill
  *   shipping_address the delivery address (always)
  *   coupon_id / coupon_code / coupon_discount   the applied coupon, retail only
  *   total_discount   MRP discount + offers + coupon
  *   shipping_amount
  *   final_amount     what the page showed as payable
  *
- * The amounts are what the page showed — the server must price the products
- * and re-check the coupon itself and bill its own figures.
+ * The amounts are what the page showed — the server prices the cart again
+ * (POST /api/cart/price) and refuses with 409 if its total has moved more
+ * than ₹1, rather than billing a different figure.
  *
- * On 2026-09-30 the route isn't deployed yet (404), so the response shape is
- * unseen: an order id / number is read from whichever key carries one, and a
- * payment URL (PhonePe), if the response has one, is followed.
+ * Answers (CashfreeApiController, backend/ in this repo):
+ *   200 { order_number, amount, payment: { gateway: "cashfree", mode, payment_session_id } | null }
+ *       — `payment` is null for a wholesale bank transfer
+ *   401 wholesale without a login · 409 total moved · 422 form / stock · 502 Cashfree refused
  */
 export interface PayNowPayload {
   type: "retail" | "wholesale";
   products: { product_id: number; variation_id: number | null; qty: number; price: number; line_total: number; name: string }[];
-  user: { mobile: string; first_name: string; last_name: string; email: string } | null;
+  user: { mobile: string; first_name: string; last_name: string; email: string };
   shipping_address: {
     address: string; landmark: string; country: string; pincode: string; state: string; city: string; phone: string;
   };
@@ -182,7 +184,7 @@ export interface PayNowPayload {
 export function buildPayNowPayload(
   f: CheckoutForm, lines: CartLine[],
   o: {
-    wholesale: boolean; loggedIn: boolean;
+    wholesale: boolean;
     /** The server's applied coupon (POST /api/cart/price → offers.coupon), retail only. */
     coupon?: { code: string; id: number | null; discount: number } | null;
     subtotal: number;
@@ -199,9 +201,7 @@ export function buildPayNowPayload(
       product_id: l.productId!, variation_id: l.variationId ?? null, qty: l.qty,
       price: l.price, line_total: Math.round(l.price * l.qty * 100) / 100, name: l.name,
     })),
-    user: o.loggedIn ? null : {
-      mobile: f.mobile.trim(), first_name: f.firstName.trim(), last_name: f.lastName.trim(), email: f.email.trim(),
-    },
+    user: { mobile: f.mobile.trim(), first_name: f.firstName.trim(), last_name: f.lastName.trim(), email: f.email.trim() },
     shipping_address: {
       address: f.address.trim(), landmark: f.landmark.trim(), country: f.country, pincode: f.pincode.trim(),
       state: f.state.trim(), city: f.city.trim(), phone: (f.sameAsContact ? f.mobile : f.deliveryPhone).trim(),
@@ -220,8 +220,23 @@ export function buildPayNowPayload(
 }
 
 export type PlaceOrderResult =
-  | { ok: true; orderId: string | null; redirectUrl: string | null; message: string }
+  | {
+      ok: true; orderId: string; message: string;
+      /** The thank-you page's key to the order's details (GET payment-status ?t=). */
+      receiptToken: string;
+      /** Online: open Cashfree with this. Null for a bank transfer — the order is placed already. */
+      payment: { sessionId: string; mode: "sandbox" | "production" } | null;
+    }
   | { ok: false; message: string; fieldErrors?: Record<string, string[]> };
+
+interface PayNowResponse {
+  status?: string;
+  message?: string;
+  errors?: Record<string, string[]>;
+  order_number?: string;
+  receipt_token?: string;
+  payment?: { gateway: string; mode: "sandbox" | "production"; payment_session_id: string } | null;
+}
 
 /** POST /api/cart/paynow. */
 export async function placeOrder(payload: PayNowPayload, token?: string): Promise<PlaceOrderResult> {
@@ -229,17 +244,17 @@ export async function placeOrder(payload: PayNowPayload, token?: string): Promis
     const headers: Record<string, string> = { Accept: "application/json", "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch("/api/cart/paynow", { method: "POST", headers, body: JSON.stringify(payload), credentials: "same-origin" });
-    const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string; errors?: Record<string, string[]> };
-    if (res.status === 404) return { ok: false, message: "Ordering isn't switched on yet — /api/cart/paynow isn't live on the server." };
-    if (!res.ok || json.status === "error") {
+    const json = (await res.json().catch(() => ({}))) as PayNowResponse;
+    if (res.status === 401 && payload.type === "wholesale") return { ok: false, message: "Log in again to place a wholesale order." };
+    if (!res.ok || json.status === "error" || !json.order_number) {
       const first = json.errors ? Object.values(json.errors)[0]?.[0] : undefined;
       return { ok: false, message: first ?? json.message ?? "Couldn't place the order — please try again.", fieldErrors: json.errors };
     }
-    const id = findScalar(json, /^(order_no|order_number|order_id|orderid|id)$/i);
     return {
       ok: true,
-      orderId: id,
-      redirectUrl: findString(json, /redirect|payment_url|pay_url|checkout_url/i) ?? null,
+      orderId: json.order_number,
+      receiptToken: json.receipt_token ?? "",
+      payment: json.payment?.payment_session_id ? { sessionId: json.payment.payment_session_id, mode: json.payment.mode } : null,
       message: json.message ?? "Order placed",
     };
   } catch {
@@ -247,19 +262,102 @@ export async function placeOrder(payload: PayNowPayload, token?: string): Promis
   }
 }
 
-/** Like findString, but a number counts too (an order id is often numeric). */
-function findScalar(root: unknown, re: RegExp): string | null {
-  let level: unknown[] = [root];
-  for (let depth = 0; depth < 4 && level.length; depth++) {
-    const next: unknown[] = [];
-    for (const node of level) {
-      if (!node || typeof node !== "object" || Array.isArray(node)) continue;
-      for (const [k, v] of Object.entries(node)) {
-        if ((typeof v === "string" || typeof v === "number") && String(v).trim() && re.test(k)) return String(v);
-        if (v && typeof v === "object") next.push(v);
-      }
+/* ---------- after the order: the status / thank-you page ---------- */
+
+/** The cart as it was ordered, kept on this device so the thank-you page has the
+    product photos (the order's own images are catalogue filenames). */
+export interface OrderSnapshotLine { name: string; image: string; qty: number; unit: string; price: number }
+const SNAPSHOT_KEY = "saroj.order-snapshots";
+
+export function saveOrderSnapshot(orderNumber: string, lines: CartLine[]) {
+  try {
+    const all = JSON.parse(window.localStorage.getItem(SNAPSHOT_KEY) ?? "{}") as Record<string, OrderSnapshotLine[]>;
+    const keep = Object.fromEntries(Object.entries(all).slice(-4));
+    keep[orderNumber] = lines.map((l) => ({ name: l.name, image: l.image, qty: l.qty, unit: l.unit, price: l.price }));
+    window.localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(keep));
+  } catch { /* storage off: the page falls back to the server's items */ }
+}
+
+export function readOrderSnapshot(orderNumber: string): OrderSnapshotLine[] | null {
+  try {
+    return (JSON.parse(window.localStorage.getItem(SNAPSHOT_KEY) ?? "{}") as Record<string, OrderSnapshotLine[]>)[orderNumber] ?? null;
+  } catch { return null; }
+}
+
+export type PaymentState = "paid" | "failed" | "pending" | "awaiting_transfer";
+
+export interface ReceiptItem { name: string; image: string | null; variant: string | null; qty: number; mrp: number; price: number; total: number }
+
+/** The order's details — only for whoever placed it (the receipt token). */
+export interface OrderReceipt {
+  placedAt: string;
+  name: string;
+  email: string | null;
+  mobile: string;
+  deliveryAddress: string;
+  deliveryPhone: string;
+  city: string;
+  state: string;
+  pincode: string;
+  /** "upi", "credit_card", "net_banking", "bank_transfer", … */
+  paymentMethod: string;
+  paymentRef: string | null;
+  discount: number;
+  couponCode: string | null;
+  couponDiscount: number;
+  shipping: number;
+  gstin: string | null;
+  items: ReceiptItem[];
+}
+
+export interface OrderPaymentStatus {
+  orderNumber: string;
+  state: PaymentState;
+  amount: number;
+  wholesale: boolean;
+  receipt: OrderReceipt | null;
+}
+
+interface RawReceipt {
+  placed_at: string; name: string; email: string | null; mobile: string; delivery_address: string; delivery_phone: string;
+  city: string; state: string; pincode: string; payment_method: string; payment_ref: string | null; discount: number;
+  coupon_code: string | null; coupon_discount: number; shipping: number; gstin: string | null; items: ReceiptItem[];
+}
+
+const receiptFrom = (r: RawReceipt): OrderReceipt => ({
+  placedAt: r.placed_at, name: r.name, email: r.email, mobile: r.mobile,
+  deliveryAddress: r.delivery_address, deliveryPhone: r.delivery_phone, city: r.city, state: r.state, pincode: r.pincode,
+  paymentMethod: r.payment_method, paymentRef: r.payment_ref,
+  discount: Number(r.discount) || 0, couponCode: r.coupon_code, couponDiscount: Number(r.coupon_discount) || 0,
+  shipping: Number(r.shipping) || 0, gstin: r.gstin,
+  items: (r.items ?? []).map((i) => ({ ...i, qty: Number(i.qty) || 0, mrp: Number(i.mrp) || 0, price: Number(i.price) || 0, total: Number(i.total) || 0 })),
+});
+
+/**
+ * GET /api/cart/payment-status/<order no>[?t=<receipt token>] — where the
+ * return page stands. The server asks Cashfree before answering, so this also
+ * settles the order. With the token, a paid / placed order brings its receipt.
+ */
+export async function getPaymentStatus(orderNumber: string, receiptToken?: string): Promise<{ ok: true; order: OrderPaymentStatus } | { ok: false; notFound: boolean; message: string }> {
+  try {
+    const qs = receiptToken ? `?t=${encodeURIComponent(receiptToken)}` : "";
+    const res = await fetch(`/api/cart/payment-status/${encodeURIComponent(orderNumber)}${qs}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+    const json = (await res.json().catch(() => ({}))) as {
+      message?: string;
+      order?: { order_number: string; payment_status: PaymentState; amount: number; is_wholesale: boolean; receipt?: RawReceipt | null };
+    };
+    if (!res.ok || !json.order) {
+      return { ok: false, notFound: res.status === 404, message: json.message ?? "Couldn't check the payment — please try again." };
     }
-    level = next;
+    const o = json.order;
+    return {
+      ok: true,
+      order: {
+        orderNumber: o.order_number, state: o.payment_status, amount: Number(o.amount) || 0, wholesale: !!o.is_wholesale,
+        receipt: o.receipt ? receiptFrom(o.receipt) : null,
+      },
+    };
+  } catch {
+    return { ok: false, notFound: false, message: "Couldn't reach the server — check your connection." };
   }
-  return null;
 }

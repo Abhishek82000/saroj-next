@@ -1,0 +1,184 @@
+/* ---------- thank-you page (components/cart/ThankYouView) ----------
+   Timeline: 0s block drops · .62s seal prints · 1.05s motifs scatter ·
+   1.2s words rise · 1.6s receipt unrolls · 2s journey draws.            */
+
+.ty{ --tone:var(--teal); position:relative; background:var(--paper); overflow:hidden; padding-bottom:clamp(44px,7vw,96px); }
+.ty--bank{ --tone:var(--ochre); }
+/* a faint block-printed ground behind the hero, fading out downwards */
+.ty::before{ content:""; position:absolute; inset:0 0 auto; height:620px; pointer-events:none; opacity:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='%23101820' fill-opacity='.05'%3E%3Ccircle cx='28' cy='22' r='3.4'/%3E%3Ccircle cx='33.7' cy='26.1' r='3.4'/%3E%3Ccircle cx='31.5' cy='32.9' r='3.4'/%3E%3Ccircle cx='24.5' cy='32.9' r='3.4'/%3E%3Ccircle cx='22.3' cy='26.1' r='3.4'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='56' cy='0' r='2'/%3E%3Ccircle cx='0' cy='56' r='2'/%3E%3Ccircle cx='56' cy='56' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0/56px 56px;
+  -webkit-mask:linear-gradient(#000 30%,transparent); mask:linear-gradient(#000 30%,transparent);
+  animation:tyFade 1.4s .5s var(--ease) forwards; }
+.ty>*{ position:relative; }
+.ty .st-wrap{ padding-inline:clamp(16px,4vw,40px); }
+.ty__steps{ padding:clamp(18px,3vw,26px) 0 0; }
+.ty__steps .st-co__steps{ margin:0; }
+
+/* ---------- hero ---------- */
+.ty__hero{ display:grid; justify-items:center; text-align:center; padding-top:clamp(18px,3vw,34px); }
+.ty__hindi{ margin:.4rem 0 0; font-family:var(--dv); font-size:clamp(1.3rem,3vw,1.7rem); line-height:1.3;
+  color:transparent; -webkit-background-clip:text; background-clip:text;
+  background-image:linear-gradient(90deg,var(--tone) 50%,rgba(16,24,32,.12) 50%); background-size:200% 100%; background-position:100% 0;
+  animation:tyInk 1s 1.15s var(--ease) forwards; }
+.ty__title{ margin:.2rem 0 0; font-family:var(--d); font-weight:400; font-size:clamp(2rem,6vw,3.4rem); line-height:1.05; letter-spacing:-.015em; overflow:hidden; padding-bottom:.08em; }
+.ty__title span{ display:inline-block; transform:translateY(105%); animation:tyRise .9s 1.25s var(--ease) forwards; }
+.ty__lead{ max-width:520px; margin:.9rem 0 0; color:var(--ink-2); font-weight:300; line-height:1.6; opacity:0; animation:tyUp .8s 1.45s var(--ease) forwards; }
+.ty__lead b{ font-weight:600; color:var(--ink); word-break:break-all; }
+
+.ty__chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:.7rem; margin-top:1.4rem; opacity:0; animation:tyUp .8s 1.6s var(--ease) forwards; }
+.ty-chip{ display:flex; align-items:baseline; gap:.55rem; padding:.7rem 1.1rem; border-radius:999px; background:#fff;
+  border:1px solid var(--line-2); box-shadow:0 14px 30px -22px rgba(16,24,32,.45); font:inherit; color:var(--ink); }
+button.ty-chip{ cursor:pointer; transition:border-color .25s, transform .25s var(--ease); }
+button.ty-chip:hover{ border-color:var(--tone); transform:translateY(-1px); }
+.ty-chip small{ font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--ink-2); }
+.ty-chip b{ font-size:1.02rem; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+.ty-chip--amt b{ font-family:var(--d); font-weight:400; font-size:1.3rem; letter-spacing:0; color:var(--tone); min-width:4.5ch; }
+.ty-chip__copy{ display:inline-flex; align-items:center; gap:.25rem; font-size:.7rem; font-weight:600; color:var(--tone); }
+.ty-chip__note{ font-size:.72rem; color:var(--ink-2); }
+
+/* ---------- the stamp ---------- */
+.ty-stamp{ width:clamp(124px,24vw,156px); aspect-ratio:1; margin-top:clamp(40px,6vw,56px); color:var(--tone); }
+.ty-stamp svg{ width:100%; height:100%; overflow:visible; }
+.ty-stamp__print{ fill:currentColor; transform-origin:80px 80px; opacity:0; animation:tyPrint .55s .62s var(--ease) forwards; }
+.ty-stamp__petals{ opacity:.9; transform-origin:80px 80px; animation:tySpin 40s 1.4s linear infinite; }
+.ty-stamp__dots{ fill:none; stroke:var(--paper); stroke-width:2.6; stroke-linecap:round; stroke-dasharray:.1 6.6; opacity:.75; }
+.ty-stamp__mark{ fill:none; stroke:var(--paper); stroke-width:8; stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:80; stroke-dashoffset:80; animation:tyDraw .55s 1.05s var(--ease) forwards; }
+.ty-stamp__ripple{ fill:none; stroke:currentColor; stroke-width:2; transform-origin:80px 80px; opacity:0; animation:tyRipple 1.1s .64s ease-out forwards; }
+.ty-stamp__block{ transform-origin:80px 150px; opacity:0; animation:tyBlock 1.55s cubic-bezier(.5,0,.3,1) forwards; }
+.ty-wood{ fill:#B07A47; }
+.ty-wood--dark{ fill:#7E5330; }
+.ty-wood__face{ fill:var(--tone); }
+.ty-grain{ fill:none; stroke:#8F5F35; stroke-width:2; stroke-linecap:round; opacity:.55; }
+.ty-stamp--wait .ty-stamp__mark{ stroke-dasharray:50; stroke-dashoffset:50; }
+
+/* ---------- confetti: block-print motifs bursting from the seal ---------- */
+.ty-confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:5; }
+.ty-confetti svg{ position:absolute; left:50%; top:clamp(190px,26vw,240px); width:var(--sz); height:var(--sz); margin:calc(var(--sz) / -2);
+  opacity:0; animation:tyBurst var(--du) var(--dl) cubic-bezier(.2,.6,.4,1) forwards; }
+
+/* ---------- body ---------- */
+.ty__grid{ display:grid; gap:clamp(18px,2.6vw,30px); align-items:start; margin-top:clamp(34px,5vw,56px); }
+@media(min-width:960px){ .ty__grid{ grid-template-columns:minmax(0,1fr) 400px; } }
+.ty__side{ display:grid; gap:clamp(14px,2vw,20px); min-width:0; }
+
+/* the receipt: a length of cloth with a pinked edge, unrolling top-down */
+.ty-receipt{ --z:9px; position:relative; min-width:0; background:#fff; padding:clamp(18px,2.6vw,30px) clamp(16px,2.6vw,30px) calc(var(--z) + 30px);
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/calc(2*var(--z)) 100%;
+          mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/calc(2*var(--z)) 100%;
+  border-radius:18px 18px 0 0; clip-path:inset(0 0 100% 0); animation:tyUnroll 1.1s 1.6s var(--ease) forwards; }
+.ty-receipt::before{ content:""; position:absolute; inset:0 0 auto; height:6px; border-radius:18px 18px 0 0;
+  background:repeating-linear-gradient(90deg,var(--cobalt) 0 18px,var(--teal) 18px 36px,var(--lac) 36px 54px,var(--ochre) 54px 72px); }
+.ty-receipt__head{ display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; padding-bottom:1rem; border-bottom:1px dashed var(--line); }
+.ty-receipt__head span{ display:grid; gap:.15rem; }
+.ty-receipt__head b{ font-family:var(--d); font-weight:400; font-size:1.35rem; }
+.ty-receipt__head small{ font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--ink-2); }
+.ty-receipt__no{ text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+
+.ty-receipt__items{ list-style:none; margin:0; padding:.4rem 0; }
+.ty-item{ display:grid; grid-template-columns:56px minmax(0,1fr) auto; gap:.9rem; align-items:center; padding:.75rem 0;
+  opacity:0; animation:tyUp .6s calc(2s + var(--i) * 90ms) var(--ease) forwards; }
+.ty-item+.ty-item{ border-top:1px solid var(--line-2); }
+.ty-item__ph{ width:56px; height:56px; border-radius:10px; overflow:hidden; background:var(--paper-2); display:grid; place-items:center; }
+.ty-item__ph img{ width:100%; height:100%; object-fit:cover; }
+.ty-item__ph i{ font-style:normal; font-family:var(--d); font-size:1.3rem; color:var(--ink-2); }
+.ty-item__n{ display:grid; gap:.2rem; font-size:.9rem; line-height:1.35; min-width:0; overflow-wrap:anywhere; }
+.ty-item__n small{ font-size:.74rem; color:var(--ink-2); }
+.ty-item b{ font-size:.92rem; font-variant-numeric:tabular-nums; }
+
+.ty-receipt__tot{ margin:.4rem 0 0; padding-top:.9rem; border-top:1px dashed var(--line); display:grid; gap:.5rem; font-size:.86rem; }
+.ty-receipt__tot div{ display:flex; justify-content:space-between; gap:1rem; }
+.ty-receipt__tot dt{ font-weight:400; color:var(--ink-2); display:flex; align-items:center; gap:.4rem; }
+.ty-receipt__tot dd{ margin:0; font-variant-numeric:tabular-nums; }
+.ty-receipt__tot code{ font-size:.68rem; padding:.1rem .4rem; border-radius:4px; background:var(--paper-2); color:var(--ink); }
+.ty-off{ color:var(--teal); font-weight:600; }
+.ty-receipt__grand{ margin-top:.3rem; padding-top:.7rem; border-top:1px solid var(--line-2); }
+.ty-receipt__grand dt{ color:var(--ink); font-weight:600; }
+.ty-receipt__grand dd{ font-family:var(--d); font-size:1.45rem; }
+.ty-receipt__pay{ min-height:44px; padding-right:120px; display:flex; flex-wrap:wrap; align-items:center; gap:.35rem; margin:1rem 0 0; font-size:.76rem; color:var(--ink-2); }
+.ty-receipt__pay code{ font-size:.72rem; color:var(--ink); word-break:break-all; }
+
+/* "You saved" — a rubber stamp thumped onto the receipt */
+.ty-saved{ position:absolute; right:clamp(14px,3vw,30px); bottom:calc(var(--z) + 14px); display:grid; justify-items:center; padding:.45rem .8rem;
+  border:2px solid var(--lac); border-radius:8px; color:var(--lac); font-family:var(--d); font-size:1.3rem; line-height:1.1;
+  transform:rotate(-9deg) scale(2.2); opacity:0; mix-blend-mode:multiply; animation:tyThump .45s 2.7s cubic-bezier(.3,1.6,.5,1) forwards; }
+.ty-saved small{ font-family:var(--b); font-size:.56rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700; }
+
+/* side cards */
+.ty-card{ background:#fff; border:1px solid var(--line-2); border-radius:18px; padding:clamp(16px,2.2vw,24px);
+  box-shadow:0 18px 40px -30px rgba(16,24,32,.35); opacity:0; animation:tyUp .8s 1.85s var(--ease) forwards; }
+.ty-card+.ty-card{ animation-delay:2.05s; }
+.ty-card+.ty-card+.ty-card{ animation-delay:2.2s; }
+.ty-card h2{ display:flex; align-items:center; gap:.5rem; margin:0 0 1rem; font-family:var(--d); font-weight:400; font-size:1.25rem; }
+.ty-card h2 svg{ color:var(--tone); }
+
+.ty-journey ol{ list-style:none; margin:0; padding:0; position:relative; display:grid; gap:1.1rem; }
+/* the thread running through the steps, drawn down */
+.ty-journey ol::before{ content:""; position:absolute; left:11px; top:12px; bottom:12px; width:2px; background:var(--line);
+  transform-origin:top; transform:scaleY(0); animation:tyThread 1.1s 2.1s var(--ease) forwards; }
+.ty-journey li{ position:relative; display:grid; gap:.15rem; padding-left:2.3rem; opacity:0; animation:tyUp .5s calc(2.15s + var(--i) * 160ms) var(--ease) forwards; }
+.ty-journey li b{ font-size:.9rem; font-weight:600; }
+.ty-journey li small{ font-size:.76rem; color:var(--ink-2); }
+.ty-journey li:not(.done):not(.now) b{ color:var(--ink-2); font-weight:500; }
+.ty-journey__dot{ position:absolute; left:0; top:0; width:24px; height:24px; border-radius:50%; display:grid; place-items:center;
+  background:var(--paper); border:2px solid var(--line); color:#fff; }
+.ty-journey li.done .ty-journey__dot{ background:var(--tone); border-color:var(--tone); }
+.ty-journey li.now .ty-journey__dot{ border-color:var(--tone); }
+.ty-journey li.now .ty-journey__dot::after{ content:""; width:8px; height:8px; border-radius:50%; background:var(--tone); }
+.ty-journey li.now .ty-journey__dot::before{ content:""; position:absolute; inset:-6px; border-radius:50%; border:2px solid var(--tone); opacity:0;
+  animation:tyPing 1.8s 3s ease-out infinite; }
+
+.ty-ship p{ margin:0; font-size:.88rem; line-height:1.6; color:var(--ink-2); overflow-wrap:anywhere; }
+.ty-ship p b{ color:var(--ink); font-weight:600; }
+.ty-ship__meta{ display:flex; flex-wrap:wrap; gap:.4rem 1.1rem; margin-top:.7rem !important; font-size:.8rem !important; }
+.ty-ship__meta span{ display:inline-flex; align-items:center; gap:.35rem; }
+
+.ty-help{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.9rem; color:var(--ink); text-decoration:none;
+  transition:border-color .25s, transform .25s var(--ease); }
+.ty-help>svg:first-child{ color:#25D366; }
+.ty-help:hover{ border-color:#25D366; transform:translateY(-2px); color:var(--ink); }
+.ty-help span{ display:grid; gap:.15rem; }
+.ty-help b{ font-size:.9rem; font-weight:600; }
+.ty-help small{ font-size:.76rem; color:var(--ink-2); }
+
+.ty__acts{ display:flex; flex-wrap:wrap; justify-content:center; gap:.7rem; margin-top:clamp(28px,4vw,44px); opacity:0; animation:tyUp .8s 2.4s var(--ease) forwards; }
+
+/* ---------- keyframes ---------- */
+@keyframes tyBlock{
+  0%{ opacity:0; transform:translateY(-190px) rotate(-6deg); }
+  18%{ opacity:1; }
+  38%{ transform:translateY(0) rotate(0); }
+  44%{ transform:translateY(5px) scale(1.03,.93); }
+  52%{ transform:translateY(0) scale(1); }
+  66%{ opacity:1; transform:translateY(0); }
+  100%{ opacity:0; transform:translateY(-230px) rotate(4deg); }
+}
+@keyframes tyPrint{ from{ opacity:0; transform:scale(1.1); filter:blur(3px); } to{ opacity:1; transform:scale(1); filter:blur(0); } }
+@keyframes tyRipple{ from{ opacity:.55; transform:scale(.85); } to{ opacity:0; transform:scale(1.9); } }
+@keyframes tyDraw{ to{ stroke-dashoffset:0; } }
+@keyframes tySpin{ to{ transform:rotate(360deg); } }
+@keyframes tyBurst{
+  0%{ opacity:1; transform:translate(0,0) rotate(0) scale(.2); }
+  22%{ opacity:1; transform:translate(calc(var(--dx) * .45),var(--up)) rotate(calc(var(--rot) * .3)) scale(1); }
+  100%{ opacity:0; transform:translate(var(--dx),110vh) rotate(var(--rot)) scale(.9); }
+}
+@keyframes tyInk{ to{ background-position:0 0; } }
+@keyframes tyRise{ to{ transform:none; } }
+@keyframes tyUp{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+@keyframes tyFade{ to{ opacity:1; } }
+@keyframes tyUnroll{ to{ clip-path:inset(0 0 -20px 0); } }
+@keyframes tyThread{ to{ transform:scaleY(1); } }
+@keyframes tyThump{ to{ opacity:.85; transform:rotate(-9deg) scale(1); } }
+@keyframes tyPing{ 0%{ opacity:.6; transform:scale(.7); } 100%{ opacity:0; transform:scale(1.5); } }
+
+@media (prefers-reduced-motion: reduce){
+  .ty *, .ty::before{ animation:none !important; }
+  .ty::before, .ty__lead, .ty__chips, .ty-item, .ty-card, .ty-journey li, .ty__acts, .ty-stamp__print{ opacity:1; }
+  .ty-saved{ opacity:.85; transform:rotate(-9deg); }
+  .ty-stamp__block, .ty-stamp__ripple{ display:none; }
+  .ty .ty-stamp__mark{ stroke-dashoffset:0; }
+  .ty__title span{ transform:none; }
+  .ty__hindi{ background-position:0 0; }
+  .ty-receipt{ clip-path:none; }
+  .ty-journey ol::before{ transform:none; }
+}
