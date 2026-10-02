@@ -58,14 +58,16 @@ function MilestoneBar({ m, compact }: { m: Milestone; compact: boolean }) {
   const done = !m.next && !!reached;
   const giftTier = reached?.reward_type === REWARD.product ? reached : null;
   const codeTier = reached?.reward_type === REWARD.coupon && reached.coupon_code ? reached : null;
-  // Tiers sit evenly along the bar (each ends at its label), so the fill moves
-  // through one segment per tier rather than in proportion to the rupee amount.
+  // Each tier gets an equal column with its dot centred over its label, so the
+  // fill runs dot to dot rather than in proportion to the rupee amount.
   const n = m.tiers.length || 1;
+  const at = (i: number) => (i + 0.5) / n;
   const seg = m.tiers.findIndex((t) => m.amount < t.min_amount);
   const fill = seg < 0 ? 1 : (() => {
     const from = seg > 0 ? m.tiers[seg - 1].min_amount : 0;
     const span = m.tiers[seg].min_amount - from || 1;
-    return (seg + Math.max(0, m.amount - from) / span) / n;
+    const start = seg > 0 ? at(seg - 1) : 0;
+    return start + (at(seg) - start) * Math.min(1, Math.max(0, m.amount - from) / span);
   })();
 
   return (
@@ -84,7 +86,7 @@ function MilestoneBar({ m, compact }: { m: Milestone; compact: boolean }) {
         aria-valuemin={0} aria-valuemax={top} aria-valuenow={Math.min(m.amount, top)}>
         <div className="st-ms__fill" style={{ width: `${fill * 100}%` }} />
         {m.tiers.map((t, i) => (
-          <i key={t.id} className={t.unlocked ? "on" : ""} style={{ left: `${((i + 1) / n) * 100}%` }} />
+          <i key={t.id} className={t.unlocked ? "on" : ""} style={{ left: `${at(i) * 100}%` }} />
         ))}
       </div>
       <ol className="st-ms__tiers" style={{ gridTemplateColumns: `repeat(${m.tiers.length}, minmax(0,1fr))` }}>

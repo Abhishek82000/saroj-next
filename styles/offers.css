@@ -17,10 +17,10 @@
                  background:#fff; border:2px solid var(--paper-3); transition:border-color .3s var(--ease), background .3s var(--ease); }
 .st-ms__track i.on{ border-color:var(--teal); background:var(--teal); }
 
-/* each tier's label ends right under its dot */
+/* each tier's label sits centred under its dot */
 .st-ms__tiers{ list-style:none; margin:.55rem 0 0; padding:0; display:grid; }
-.st-ms__tiers li{ display:grid; gap:.1rem; min-width:0; padding-left:.5rem; text-align:right; font-size:.6rem; line-height:1.35; color:var(--ink-2); }
-.st-ms__tiers b{ display:inline-flex; align-items:center; justify-content:flex-end; gap:.2rem; font-size:.66rem; color:var(--ink); }
+.st-ms__tiers li{ display:grid; gap:.1rem; min-width:0; padding:0 .2rem; text-align:center; font-size:.6rem; line-height:1.35; color:var(--ink-2); }
+.st-ms__tiers b{ display:inline-flex; align-items:center; justify-content:center; gap:.2rem; font-size:.66rem; color:var(--ink); }
 .st-ms__tiers span{ overflow-wrap:anywhere; }
 .st-ms__tiers li.on,.st-ms__tiers li.on b{ color:var(--teal); }
 .st-ms--page .st-ms__tiers li{ font-size:.72rem; }
