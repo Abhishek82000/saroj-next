@@ -3,7 +3,7 @@
 /* cart-milestone progress — in the drawer it takes the free-shipping bar's place */
 .st-ms{ padding:.85rem var(--cp) .9rem; background:var(--paper-2); border-bottom:1px solid var(--line-2); }
 .st-ms--page{ padding:.9rem 1rem 1rem; margin:0 0 1rem; border:0; border-radius:12px; }
-.st-ms__msg{ display:flex; align-items:flex-start; gap:.45rem; margin:0 0 .7rem; font-size:.7rem; line-height:1.45; color:var(--ink-2); }
+.st-ms__msg{ display:flex; align-items:flex-start; justify-content:center; text-align:center; gap:.45rem; margin:0 0 .7rem; font-size:.7rem; line-height:1.45; color:var(--ink-2); }
 .st-ms--page .st-ms__msg{ font-size:.84rem; }
 .st-ms__msg svg{ flex:none; color:var(--cobalt); margin-top:.05em; }
 .st-ms__msg b{ color:var(--cobalt); font-weight:700; }
