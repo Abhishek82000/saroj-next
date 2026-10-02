@@ -301,7 +301,7 @@
 .st-login__h{ margin:1.2rem 0 1.1rem; text-align:center; font-family:var(--d); font-weight:400; font-size:clamp(1.3rem,5vw,2rem); color:var(--ink); }
 .st-login .st-field input{ height:46px; font-size:0.8rem; }
 .st-login .st-btn{ height:46px; border-radius:6px; }
-.st-login .st-lede{ text-align:center; }
+.st-login .st-lede{ text-align:center; color:var(--mute); }
 .st-field--bare{ margin:0 0 .9rem; }
 
 /* /account */
