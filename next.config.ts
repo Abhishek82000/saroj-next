@@ -28,6 +28,10 @@ const nextConfig: NextConfig = {
       { source: "/api/wholesale/:path*", destination: `${API}/api/wholesale/:path*` },
       { source: "/api/search", destination: `${API}/api/search` },
       // The cart lives in the Laravel session — same origin, so its cookie rides along.
+      // Bare /api/cart (GET ?type=…) needs its own rule: through the wildcard it
+      // becomes /api/cart/, which Laravel 301s to /public/api/cart on its own
+      // origin — and the browser drops the Bearer token on that cross-origin hop.
+      { source: "/api/cart", destination: `${API}/api/cart` },
       { source: "/api/cart/:path*", destination: `${API}/api/cart/:path*` },
       // Coupons, the cart-milestone offer and free shipping (OfferApiController).
       { source: "/api/offers/:path*", destination: `${API}/api/offers/:path*` },
