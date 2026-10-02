@@ -22,11 +22,14 @@ import { authedCall } from "./auth";
     `products`/`results`). */
 function findArray(root: unknown): Record<string, unknown>[] | undefined {
   let level: unknown[] = [root];
+  let empty: Record<string, unknown>[] | undefined;
   for (let depth = 0; depth < 4 && level.length; depth++) {
     const next: unknown[] = [];
     for (const node of level) {
       if (Array.isArray(node)) {
-        if (node.length === 0 || node.every((x) => x && typeof x === "object" && !Array.isArray(x))) {
+        /* An empty list (some unrelated `[]` beside the real one) only wins if nothing else turns up. */
+        if (node.length === 0) { empty ??= []; continue; }
+        if (node.every((x) => x && typeof x === "object" && !Array.isArray(x))) {
           return node as Record<string, unknown>[];
         }
         continue;
@@ -35,13 +38,22 @@ function findArray(root: unknown): Record<string, unknown>[] | undefined {
     }
     level = next;
   }
-  return undefined;
+  return empty;
 }
 
-/** First string value on `o` whose key looks like a slug. */
-function slugOf(o: Record<string, unknown>): string | undefined {
+/** First string value on `o` whose key looks like a slug — on the row itself,
+    or on an object nested in it (a row may be `{ id, product: { slug } }`). */
+function slugOf(o: Record<string, unknown>, depth = 0): string | undefined {
   for (const [k, v] of Object.entries(o)) {
     if (typeof v === "string" && v.trim() && /slug/i.test(k)) return v.trim();
+  }
+  if (depth < 2) {
+    for (const v of Object.values(o)) {
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        const s = slugOf(v as Record<string, unknown>, depth + 1);
+        if (s) return s;
+      }
+    }
   }
   return undefined;
 }
