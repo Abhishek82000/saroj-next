@@ -108,7 +108,7 @@ async function send<T>(path: string, init: RequestInit, token?: string) {
     const headers: Record<string, string> = { Accept: "application/json" };
     if (init.body) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
-    const res = await fetch(`/api/offers${path}`, { ...init, headers, credentials: "same-origin" });
+    const res = await fetch(`${site.url}/api/offers${path}`, { ...init, headers });
     const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string } & T;
     return { ok: res.ok && json.status !== "error", json };
   } catch {

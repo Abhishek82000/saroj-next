@@ -9,7 +9,7 @@ import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import ProductCard from "./ProductCard";
 import Filters from "./Filters";
 import { emptyFilters, useShopFilters, type SortKey } from "./useShopFilters";
-import { inr } from "@/lib/site";
+import { inr, site } from "@/lib/site";
 import { apiProductToProduct } from "@/lib/home";
 import type { ProductsApiResponse } from "@/lib/types";
 import type { CommonCategoryRef, Product, ProductsApiTag, SaleProduct } from "@/lib/types";
@@ -64,7 +64,7 @@ export default function ShopListing({
     if (!hasMore || loadingMore) return;
     setLoadingMore(true);
     try {
-      const res = await fetch(`/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}`, { headers: { Accept: "application/json" } });
+      const res = await fetch(`${site.url}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}`, { headers: { Accept: "application/json" } });
       if (res.ok) {
         const json: ProductsApiResponse = await res.json();
         const next = (json.data?.products ?? []).map(apiProductToProduct);

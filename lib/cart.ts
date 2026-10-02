@@ -1,6 +1,7 @@
 /**
- * The storefront's server-side cart. All calls go to our own origin (the
- * /api/cart rewrite in next.config.ts), with the Bearer token when logged in.
+ * The storefront's server-side cart. Calls go straight to Laravel (not through
+ * a rewrite, whose requests would all share Vercel's IP and one rate limit),
+ * with the Bearer token when logged in.
  *
  *   POST   /api/cart/add          add a piece (JSON body)
  *            wholesale: { type: "wholesale", product_id, variation_id, qty }
@@ -31,6 +32,7 @@
 import type { CartLine } from "./types";
 import type { CartOffers } from "./offers";
 import { wholesaleHref } from "./wholesale";
+import { site } from "./site";
 export interface CartAddPayload {
   type: "retail" | "wholesale";
   product_id: number;
@@ -52,8 +54,8 @@ async function call<T>(path: string, init: RequestInit, token?: string): Promise
     const headers: Record<string, string> = { Accept: "application/json" };
     if (init.body) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
-    const url = `/api/cart${path.startsWith("?") ? path : `/${path}`}`;
-    const res = await fetch(url, { ...init, headers, credentials: "same-origin" });
+    const url = `${site.url}/api/cart${path.startsWith("?") ? path : `/${path}`}`;
+    const res = await fetch(url, { ...init, headers });
     const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string } & T;
     if (!res.ok || json.status === "error") return { ok: false, message: json.message ?? "Couldn't update the cart." };
     return { ...json, ok: true };

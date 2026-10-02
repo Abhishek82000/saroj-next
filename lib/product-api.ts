@@ -2,6 +2,7 @@ import type {
   CategoryRail, Coupon, Faq, LiveProduct, Product, ProductDetail,
   ReviewSummary, Stock, VariantGroup,
 } from "./types";
+import { site } from "./site";
 
 /**
  * Talks to ProductApiDetailController.
@@ -15,13 +16,13 @@ const FALLBACK = "https://www.sarojtextile.com";
 
 /**
  * Server-side we call Laravel directly, so API_URL can be an internal address
- * the public never sees. In the browser we call our own origin and let the
- * rewrite in next.config.ts forward it — no CORS to configure, and the API
- * host never ends up in the client bundle.
+ * the public never sees. The browser calls Laravel directly too (its CORS
+ * allows any origin): through the next.config.ts rewrite every visitor's
+ * request would arrive from Vercel's IPs and share one 60/min rate limit.
  */
 const SERVER_API = (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? FALLBACK).replace(/\/$/, "");
 
-const base = () => (typeof window === "undefined" ? SERVER_API : "");
+const base = () => (typeof window === "undefined" ? SERVER_API : site.url);
 
 /** Product data changes with stock and price, so don't cache it for long. */
 const REVALIDATE = 300;
