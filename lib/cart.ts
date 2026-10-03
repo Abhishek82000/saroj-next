@@ -75,13 +75,17 @@ export const updateCartRemote = (cartId: number, qty: number, token: string) =>
 export const removeCartRemote = (cartId: number, qty: number, token: string) =>
   call<object>(`${cartId}?qty=${encodeURIComponent(qty)}`, { method: "DELETE" }, token);
 
-/** First array under `root` (breadth-first, a few levels) whose items look like cart lines. */
-function findLines(root: unknown): ServerCartLine[] {
+/** First array under `root` (breadth-first, a few levels) whose items look
+    like cart lines. An empty array (an empty cart) counts only if nothing
+    else turns up; no array at all is undefined — a reply we can't read. */
+function findLines(root: unknown): ServerCartLine[] | undefined {
   let level: unknown[] = [root];
+  let empty: ServerCartLine[] | undefined;
   for (let depth = 0; depth < 4 && level.length; depth++) {
     const next: unknown[] = [];
     for (const node of level) {
       if (Array.isArray(node)) {
+        if (node.length === 0) { empty ??= []; continue; }
         if (node.some((x) => x && typeof x === "object" && "product_id" in x)) return node as ServerCartLine[];
         continue;
       }
@@ -89,7 +93,7 @@ function findLines(root: unknown): ServerCartLine[] {
     }
     level = next;
   }
-  return [];
+  return empty;
 }
 
 /** A server line as the local cart holds it — same `id` scheme as the add buttons use. */
@@ -112,11 +116,26 @@ export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): Car
   };
 }
 
-/** The logged-in account's cart of one type, as local cart lines. */
+/** The logged-in account's cart of one type, as local cart lines — or null
+    when the call fails or the reply can't be read, so the caller keeps the
+    cart it has rather than emptying it. */
 export async function getCartRemote(type: "retail" | "wholesale", token: string): Promise<CartLine[] | null> {
   const r = await call<Record<string, unknown>>(`?type=${type}`, { method: "GET" }, token);
   if (!r.ok) return null;
-  return findLines(r).map((l) => toCartLine(l, type)).filter((l): l is CartLine => !!l);
+  const rows = findLines(r);
+  if (!rows) {
+    if (process.env.NODE_ENV !== "production") console.warn(`[cart] Unrecognised cart response (type=${type}):`, r);
+    return null;
+  }
+  /* Rows the server marks as gone (`error`) drop out; anything else that can't
+     become a line (no slug or name) means the reply isn't what we expect. */
+  const live = rows.filter((l) => !l.error);
+  const lines = live.map((l) => toCartLine(l, type)).filter((l): l is CartLine => !!l);
+  if (lines.length < live.length) {
+    if (process.env.NODE_ENV !== "production") console.warn(`[cart] Cart rows without slug/name (type=${type}):`, r);
+    return null;
+  }
+  return lines;
 }
 
 /** Moves this browser's guest lines into the account that just logged in or registered. */

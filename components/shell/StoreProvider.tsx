@@ -20,13 +20,16 @@ export type Mode = "retail" | "wholesale";
 
 /** Retail and wholesale each have their own cart. Retail is open to guests —
     add to cart and check out without a login (checkout collects the details) —
-    so its cart belongs to the browser. Wholesale needs a login, and its cart
-    belongs to the account: stored under the mobile number, empty while logged out. */
+    and a guest's cart is kept in this browser, since the server keeps none.
+    Once logged in, both carts are the account's and come from the API only:
+    the guest's lines are handed over on login (POST /api/cart/sync) and
+    nothing is stored locally. Wholesale needs a login, so it's never local. */
 const RETAIL_CART_KEY = "saroj.cart";
 /** The coupon code applied to the retail cart. Only the code is kept — the
     server re-checks it and works out the discount on every price call. */
 const COUPON_KEY = "saroj.coupon";
-const wholesaleCartKey = (mobile: string) => `saroj.cart.wholesale.${mobile}`;
+/** Where older builds kept each account's wholesale cart; cleared on load. */
+const isOldWholesaleCartKey = (k: string) => k.startsWith("saroj.cart.wholesale.");
 const USER_KEY = "saroj.user";
 /** The wishlist lives on the server only (lib/wishlist.ts) — nothing about it
     is kept in the browser, and it's empty while logged out. */
@@ -190,24 +193,25 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
     const saved = safe.read<User | null>(USER_KEY, null);
-    /* Logged out: lines with a cartId belong to an account's server cart, not this guest. */
-    const lines = safe.read<CartLine[]>(RETAIL_CART_KEY, []);
-    setRetail(saved ? lines : lines.filter((l) => !l.cartId));
+    /* Logged in: the cart comes from the API only (syncCart) — nothing local.
+       Logged out: the guest's own lines; any with a cartId were an account's. */
+    setRetail(saved ? [] : safe.read<CartLine[]>(RETAIL_CART_KEY, []).filter((l) => !l.cartId));
     setCoupon(safe.read<string | null>(COUPON_KEY, null));
     setUser(saved);
     if (saved) {
-      setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
+      setWh({ owner: saved.mobile, lines: [] });
       if (saved.token) syncWishlist(saved.token);
     }
     try {
-      Object.keys(window.localStorage).filter(isOldFavKey).forEach((k) => window.localStorage.removeItem(k));
+      Object.keys(window.localStorage).filter((k) => isOldFavKey(k) || isOldWholesaleCartKey(k))
+        .forEach((k) => window.localStorage.removeItem(k));
     } catch { /* storage blocked — nothing to clear */ }
     setHydrated(true);
   }, [syncWishlist]);
 
-  useEffect(() => { if (hydrated) safe.write(RETAIL_CART_KEY, retail); }, [hydrated, retail]);
+  /* Only a guest's cart is kept on this device; a logged-in account's lives on the server. */
+  useEffect(() => { if (hydrated) safe.write(RETAIL_CART_KEY, user ? [] : retail); }, [hydrated, retail, user]);
   useEffect(() => { if (hydrated) safe.write(COUPON_KEY, coupon); }, [hydrated, coupon]);
-  useEffect(() => { if (hydrated && wh.owner) safe.write(wholesaleCartKey(wh.owner), wh.lines); }, [hydrated, wh]);
   useEffect(() => { if (hydrated) safe.write(USER_KEY, user); }, [hydrated, user]);
 
   const say = useCallback((message: string) => {
@@ -425,7 +429,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const login = useCallback((u: User) => {
     setUser(u);
     /* Set before the pending action runs, so a wholesale add lands in this account's cart. */
-    setWh({ owner: u.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(u.mobile), []) });
+    setWh({ owner: u.mobile, lines: [] });
     setWishlist(EMPTY_WISHLIST);
     setCounts(null);
     /* The pending action (a heart tapped while logged out) runs below, before re-render. */
@@ -488,19 +492,34 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       /api/auth/add-to-wishlist or remove-to-wishlist. Nothing is changed
       locally: once the server confirms, the list is re-read from
       GET /api/auth/wishlist, so the heart always shows what the API has. */
+  /** `<mode>:<slug>` of hearts whose request hasn't answered yet — a second
+      tap meanwhile is ignored, or it would send the same add twice. */
+  const favBusy = useRef(new Set<string>());
   const toggleFav = useCallback((p: Product, m: Mode = mode) => {
     withLogin("Log in to save pieces to your wishlist", () => {
       const token = userRef.current?.token;
       const pid = p.productId ?? p.live?.id;
       if (!token || !pid) { say("This piece can't be saved to your wishlist"); return; }
+      const busyKey = `${m}:${p.slug}`;
+      if (favBusy.current.has(busyKey)) return;
+      favBusy.current.add(busyKey);
       const saved = !!wishlistRef.current[m][p.slug];
       setWishlistRemote(token, pid, m === "wholesale", !saved).then(async (r) => {
         if (!r.ok) { say(saved ? "Couldn't remove that — please try again" : "Couldn't save that — please try again"); return; }
         const list = await getWishlist(token);
+        if (userRef.current?.token !== token) return; // logged out meanwhile
         if (list.ok) setWishlist(toFavs(list.lists));
+        /* The server took the change but its list couldn't be read back: show
+           the change it confirmed (in memory only — nothing is stored). */
+        else setWishlist((prev) => {
+          const next = { ...prev[m] };
+          if (saved) delete next[p.slug];
+          else next[p.slug] = true;
+          return { ...prev, [m]: next };
+        });
         say(saved ? "Removed from wishlist" : "Saved to wishlist");
         refreshCounts();
-      });
+      }).finally(() => favBusy.current.delete(busyKey));
     });
   }, [mode, say, withLogin, refreshCounts]);
 
