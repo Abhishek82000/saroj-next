@@ -27,16 +27,11 @@ const RETAIL_CART_KEY = "saroj.cart";
 const COUPON_KEY = "saroj.coupon";
 const wholesaleCartKey = (mobile: string) => `saroj.cart.wholesale.${mobile}`;
 const USER_KEY = "saroj.user";
-/** The wishlist belongs to the logged-in account — retail and wholesale each
-    kept under the mobile number, and empty while logged out. */
-const favKey = (m: Mode, mobile: string) => `saroj.favs.${m}.${mobile}`;
-/** Before wishlists were per account they sat under these; read once as a fallback. */
-const OLD_FAV_KEY: Record<Mode, string> = { retail: "saroj.favs", wholesale: "saroj.favs.wholesale" };
+/** The wishlist lives on the server only (lib/wishlist.ts) — nothing about it
+    is kept in the browser, and it's empty while logged out. */
 const EMPTY_WISHLIST: Record<Mode, Favs> = { retail: {}, wholesale: {} };
-const readWishlist = (mobile: string): Record<Mode, Favs> => ({
-  retail: safe.read<Favs>(favKey("retail", mobile), safe.read<Favs>(OLD_FAV_KEY.retail, {})),
-  wholesale: safe.read<Favs>(favKey("wholesale", mobile), safe.read<Favs>(OLD_FAV_KEY.wholesale, {})),
-});
+/** Where older builds kept a copy of the wishlist; cleared on load. */
+const isOldFavKey = (k: string) => k === "saroj.favs" || k.startsWith("saroj.favs.");
 type Favs = Record<string, true>;
 
 /** localStorage that never throws — private mode, sandboxed frames, SSR. */
@@ -132,10 +127,6 @@ export function useStore() {
   return ctx;
 }
 
-/** Runs `fn`, and once more after a pause if it fails (a 429 clears in a moment). */
-const twice = async (fn: () => Promise<{ ok: boolean }>) =>
-  (await fn()).ok || (await new Promise((r) => setTimeout(r, 1500)), (await fn()).ok);
-
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
   const [retail, setRetail] = useState<CartLine[]>([]);
   const [wh, setWh] = useState<{ owner: string | null; lines: CartLine[] }>({ owner: null, lines: [] });
@@ -164,17 +155,16 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const [hydrated, setHydrated] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  /** The account's wishlists (GET /api/auth/wishlist) are the wishlists: each
-      list the server answers for replaces the local one outright, so a piece
-      removed on another device, or a stale local heart, doesn't linger. The
-      local copy is only a cache for the first paint and for when the call fails. */
+  /** Loads both wishlists from the account (GET /api/auth/wishlist). Once per
+      session token — React's dev double-mount would otherwise ask twice — and
+      asked again next time if either list failed to load. */
   const wishlistSyncedFor = useRef<string | null>(null);
   const syncWishlist = useCallback((token: string) => {
     if (wishlistSyncedFor.current === token) return;
     wishlistSyncedFor.current = token;
     for (const m of ["retail", "wholesale"] as const) {
       getWishlist(token, m === "wholesale").then((r) => {
-        if (!r.ok) return;
+        if (!r.ok) { wishlistSyncedFor.current = null; return; }
         setWishlist((prev) => ({ ...prev, [m]: Object.fromEntries(r.slugs.map((slug) => [slug, true as const])) }));
       });
     }
@@ -190,20 +180,17 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setUser(saved);
     if (saved) {
       setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
-      setWishlist(readWishlist(saved.mobile));
-      if (saved.token) { syncWishlist(saved.token); }
+      if (saved.token) syncWishlist(saved.token);
     }
+    try {
+      Object.keys(window.localStorage).filter(isOldFavKey).forEach((k) => window.localStorage.removeItem(k));
+    } catch { /* storage blocked — nothing to clear */ }
     setHydrated(true);
   }, [syncWishlist]);
 
   useEffect(() => { if (hydrated) safe.write(RETAIL_CART_KEY, retail); }, [hydrated, retail]);
   useEffect(() => { if (hydrated) safe.write(COUPON_KEY, coupon); }, [hydrated, coupon]);
   useEffect(() => { if (hydrated && wh.owner) safe.write(wholesaleCartKey(wh.owner), wh.lines); }, [hydrated, wh]);
-  useEffect(() => {
-    if (!hydrated || !user) return;
-    safe.write(favKey("retail", user.mobile), wishlist.retail);
-    safe.write(favKey("wholesale", user.mobile), wishlist.wholesale);
-  }, [hydrated, user, wishlist]);
   useEffect(() => { if (hydrated) safe.write(USER_KEY, user); }, [hydrated, user]);
 
   const say = useCallback((message: string) => {
@@ -321,7 +308,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
        (GET /api/cart) rather than trusted from local state, which may have no
        cart_id (the add 429'd, or hadn't answered yet) or a quantity the server
        hasn't seen (a debounced − / +);
-     - a failed call is retried once, then the shopper is told. */
+     - a 429 is waited out and retried (lib/retry.ts); any other failure is
+       put back and the shopper told. */
   const serverLine = useCallback(async (kind: Mode, line: CartLine, token: string, qty = line.qty) => {
     await pendingAdds.current.get(`${kind}:${line.id}`);
     /* The add may have handed back its cart_id while we waited. */
@@ -358,7 +346,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       const target = await serverLine(kind, line, token, serverQty);
       if (!target) return; // the server doesn't hold it — nothing to undo
       const { cartId } = target;
-      if (await twice(() => removeCartRemote(cartId, target.qty, token))) return;
+      if ((await removeCartRemote(cartId, target.qty, token)).ok) return;
       /* Still on the server: put it back here too, rather than have it reappear later. */
       mutate(kind, (prev) => (prev.some((l) => l.id === id) ? prev : [...prev, { ...line, cartId }]));
       say("Couldn't remove that — please try again");
@@ -386,7 +374,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       const cartId = (await serverLine(kind, line, token))?.cartId;
       if (!cartId) return;
       if (cartsRef.current[kind].find((l) => l.id === id)?.qty !== next) return; // tapped again, or removed, meanwhile
-      if (!(await twice(() => updateCartRemote(cartId, next, token)))) say("Couldn't save the new quantity — please try again");
+      if (!(await updateCartRemote(cartId, next, token)).ok) say("Couldn't save the new quantity — please try again");
     }, 500) });
   }, [mutate, mode, remove, cancelQtySync, serverLine, say]);
 
@@ -417,12 +405,11 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setUser(u);
     /* Set before the pending action runs, so a wholesale add lands in this account's cart. */
     setWh({ owner: u.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(u.mobile), []) });
-    const list = readWishlist(u.mobile);
-    setWishlist(list);
+    setWishlist(EMPTY_WISHLIST);
     /* The pending action (a heart tapped while logged out) runs below, before re-render. */
     userRef.current = u;
-    wishlistRef.current = list;
-    if (u.token) { syncWishlist(u.token); }
+    wishlistRef.current = EMPTY_WISHLIST;
+    if (u.token) syncWishlist(u.token);
     setLoginOpen(false);
     say(`Welcome, ${u.name.split(" ")[0]}`);
     const next = pending.current;
@@ -474,29 +461,27 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   }, [mode, add, say]);
 
 
+  /** Saves / unsaves a piece in the account's wishlist — POST
+      /api/auth/add-to-wishlist or remove-to-wishlist. The heart flips at once
+      so the tap feels instant; the toast waits for the server, and if the
+      server says no the heart flips back. */
   const toggleFav = useCallback((p: Product, m: Mode = mode) => {
     withLogin("Log in to save pieces to your wishlist", () => {
-      const saved = !!wishlistRef.current[m][p.slug];
       const token = userRef.current?.token;
       const pid = p.productId ?? p.live?.id;
-      /* The account's wishlist is the server's (see syncWishlist): a piece with
-         no live id can't go in it, and would vanish on the next load. */
-      if (!saved && (!token || !pid)) { say("This piece can't be saved to your wishlist"); return; }
+      if (!token || !pid) { say("This piece can't be saved to your wishlist"); return; }
+      const saved = !!wishlistRef.current[m][p.slug];
       const flip = (on: boolean) => setWishlist((prev) => {
         const next = { ...prev[m] };
         if (on) next[p.slug] = true;
         else delete next[p.slug];
         return { ...prev, [m]: next };
       });
-      /* The heart flips at once; if the server says no, it flips back. */
       flip(!saved);
-      say(saved ? "Removed from wishlist" : "Saved to wishlist");
-      if (!token || !pid) return;
       setWishlistRemote(token, pid, m === "wholesale", !saved).then((r) => {
-        if (r.ok) return;
+        if (r.ok) { say(saved ? "Removed from wishlist" : "Saved to wishlist"); return; }
         flip(saved);
-        /* authedCall words a 429 as "wait a minute" — worth passing on as is. */
-        say(/wait/i.test(r.message) ? r.message : saved ? "Couldn't remove that — please try again" : "Couldn't save that — please try again");
+        say(saved ? "Couldn't remove that — please try again" : "Couldn't save that — please try again");
       });
     });
   }, [mode, say, withLogin]);

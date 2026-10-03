@@ -1,4 +1,5 @@
 import { site } from "./site";
+import { fetchRetrying } from "./retry";
 
 /**
  * OTP login against the storefront's JSON API — mobile → 4-digit OTP → a name
@@ -93,18 +94,16 @@ interface ApiBody {
     "GET" explicitly. */
 async function call(
   path: string,
-  opts: { method?: "GET" | "POST"; query?: Record<string, string>; token?: string; body?: object } = {},
+  opts: { method?: "GET" | "POST"; query?: Record<string, string>; token?: string; body?: object; retry?: boolean } = {},
 ): Promise<{ ok: true; json: ApiBody } | Failure> {
   try {
     const qs = opts.query ? `?${new URLSearchParams(opts.query)}` : "";
     const headers: Record<string, string> = { Accept: "application/json" };
     if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
     if (opts.body) headers["Content-Type"] = "application/json";
-    const res = await fetch(`${site.url}/api/auth/${path}${qs}`, {
-      method: opts.method ?? "POST",
-      headers,
-      body: opts.body ? JSON.stringify(opts.body) : undefined,
-    });
+    const init: RequestInit = { method: opts.method ?? "POST", headers, body: opts.body ? JSON.stringify(opts.body) : undefined };
+    const url = `${site.url}/api/auth/${path}${qs}`;
+    const res = opts.retry ? await fetchRetrying(url, init) : await fetch(url, init);
     const json: ApiBody = await res.json().catch(() => ({}));
     if (res.status === 429) return { ok: false, message: "Too many attempts — wait a minute and try again." };
     if (!res.ok || (json.status && json.status !== "success")) {
@@ -265,7 +264,8 @@ export async function authedCall(
   token: string,
   opts: { method?: "GET" | "POST"; query?: Record<string, string> } = {},
 ): Promise<{ ok: true; json: Record<string, unknown> } | Failure> {
-  const r = await call(path, { method: opts.method ?? "GET", token, query: opts.query });
+  /* Logged-in data calls (wishlist, orders) ride out the API's rate limit — see lib/retry.ts. */
+  const r = await call(path, { method: opts.method ?? "GET", token, query: opts.query, retry: true });
   return r.ok ? { ok: true, json: r.json as unknown as Record<string, unknown> } : r;
 }
 
