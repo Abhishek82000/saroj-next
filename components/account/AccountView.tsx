@@ -23,7 +23,7 @@ const isTab = (v: string | null): v is Tab => TABS.some((t) => t.key === v);
 
 /** Saved pieces as the same cards the shop grid uses — heart, badge, price,
     add-to-cart all come free from `ProductCard`. Each one is fetched from
-    `GET /api/products/<slug>` the same way the product page itself does. A slug the API 404s
+    `GET /api/products/<slug>` (or its wholesale twin) the same way the product page itself does. A slug the API 404s
     on (deleted, mistyped) just quietly drops rather than spinning forever. */
 function WishlistTab({ slugs, mode }: { slugs: string[]; mode: Mode }) {
   const [live, setLive] = useState<Record<string, Product | null>>({});
@@ -33,7 +33,13 @@ function WishlistTab({ slugs, mode }: { slugs: string[]; mode: Mode }) {
     const toFetch = slugs.filter((s) => !(s in live));
     if (!toFetch.length) return;
     let alive = true;
-    Promise.all(toFetch.map((s) => getProductDetail(s, { wholesale: mode === "wholesale" }).then((d) => [s, d?.product ?? null] as const))).then((pairs) => {
+    /* A piece saved in wholesale mode that the wholesale catalogue doesn't carry
+       (e.g. hearted on a retail tag rail shown on the wholesale page) 404s
+       there — fall back to its retail detail so it still shows, unpriced, and
+       can be un-hearted rather than silently inflating the badge. */
+    const fetchOne = async (s: string) =>
+      (mode === "wholesale" && (await getProductDetail(s, { wholesale: true }))) || (await getProductDetail(s));
+    Promise.all(toFetch.map((s) => fetchOne(s).then((d) => [s, d?.product ?? null] as const))).then((pairs) => {
       if (alive) setLive((prev) => ({ ...prev, ...Object.fromEntries(pairs) }));
     });
     return () => { alive = false; };
