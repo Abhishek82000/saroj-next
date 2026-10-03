@@ -45,7 +45,7 @@ export default function ContactForm() {
 
   return (
     <div className="st-static__card st-contact__form">
-      <h2>Send a message</h2>
+      <h2>Send a Message</h2>
       <p className="st-lede" style={{ marginTop: ".4rem" }}>
         Someone at the Jhotwara counter reads every message — usually answered the same day.
       </p>
