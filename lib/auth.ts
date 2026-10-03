@@ -73,7 +73,9 @@ export const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(
 /* ---------- the real API ---------- */
 
 interface ApiBody {
-  status?: string;
+  /** "success" / "error" on the OTP calls; other endpoints may send true/false or 1/0. */
+  status?: string | boolean | number;
+  success?: boolean;
   message?: string;
   errors?: Record<string, string[]>;
   token?: string;
@@ -85,6 +87,13 @@ interface ApiBody {
   user?: { name?: string; email?: string; mobile?: string };
   data?: { token?: string; access_token?: string; user?: { name?: string; email?: string; mobile?: string } };
 }
+
+/** Whether a 2xx body still says it failed. Only an explicit failure counts —
+    `status: "success"`, `true`, `1`, `"ok"` or no status at all are all fine. */
+const failed = (json: ApiBody) =>
+  json.success === false ||
+  json.status === false || json.status === 0 ||
+  (typeof json.status === "string" && /^(error|fail(ed|ure)?|false|0)$/i.test(json.status));
 
 /** `query` becomes the URL's query string (send-otp's `mobile`, verify-otp's
     `otp`); `token`, when given, goes as `Authorization: Bearer <token>` — every
@@ -106,7 +115,7 @@ async function call(
     const res = opts.retry ? await fetchRetrying(url, init) : await fetch(url, init);
     const json: ApiBody = await res.json().catch(() => ({}));
     if (res.status === 429) return { ok: false, message: "Too many attempts — wait a minute and try again." };
-    if (!res.ok || (json.status && json.status !== "success")) {
+    if (!res.ok || failed(json)) {
       const first = json.errors ? Object.values(json.errors)[0]?.[0] : undefined;
       return { ok: false, message: first ?? json.message ?? "Something went wrong — please try again." };
     }
