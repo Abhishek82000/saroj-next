@@ -437,21 +437,10 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-whterms__row b{ font-family:var(--d); font-weight:400; font-size:1.25rem; }
 .st-whterms__row span{ font-size:.72rem; letter-spacing:.06em; opacity:.7; }
 
-.st-whf__grid{ display:grid; gap:1rem; margin-top:clamp(28px,4vw,44px); }
-@media(min-width:780px){ .st-whf__grid{ grid-template-columns:repeat(2,1fr); } }
-.st-whf{ background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 14px 30px -18px rgba(16,24,32,.35); transition:transform .45s var(--ease), box-shadow .45s var(--ease); }
-.st-whf:hover{ transform:translateY(-6px); box-shadow:0 28px 46px -22px rgba(16,24,32,.42); }
-.st-whf:hover img{ transform:scale(1.05); }
-.st-whf__link{ display:flex; flex-direction:column; height:100%; color:inherit; text-decoration:none; }
-.st-whf__ph{ aspect-ratio:16/9; }
-.st-whf__body{ padding:1.1rem 1.25rem 1.4rem; display:flex; flex-direction:column; gap:.5rem; flex:1; }
-.st-whf__body h3{ font-family:var(--d); font-weight:400; font-size:1.45rem; margin:0; line-height:1.15; }
-.st-whf__body p{ margin:0; color:var(--mute); font-size:.85rem; line-height:1.5; font-weight:300; }
-.st-whf__more{ margin-top:auto; padding-top:.6rem; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700; color:var(--cobalt); }
 
 .st-whcats{ display:grid; grid-template-columns:repeat(3,1fr); gap:2rem .8rem; margin-top:clamp(28px,4vw,44px); }
 @media(min-width:640px){ .st-whcats{ grid-template-columns:repeat(5,1fr); } }
-@media(min-width:1000px){ .st-whcats{ grid-template-columns:repeat(7,1fr); } }
+@media(min-width:1000px){ .st-whcats{ grid-template-columns:repeat(8,1fr); } }
 .st-whcat{ display:flex; flex-direction:column; align-items:center; gap:.6rem; text-align:center; color:inherit; text-decoration:none; }
 .st-whcat__ph{ width:100%; aspect-ratio:1; border-radius:50%; overflow:hidden; box-shadow:0 10px 24px -14px rgba(16,24,32,.4); transition:transform .45s var(--ease); }
 .st-whcat:hover .st-whcat__ph{ transform:translateY(-5px) scale(1.03); }
@@ -470,31 +459,3 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-whcta__box p{ margin:0; opacity:.75; }
 .st-whcta__btns{ display:flex; flex-wrap:wrap; gap:.7rem; }
 
-/* ---------- BoltFan: hover-to-unfold collections row ---------- */
-.st-openbolt__head{ display:flex; flex-wrap:wrap; gap:1rem 2.5rem; align-items:flex-end; justify-content:space-between; }
-.st-openbolt__head .st-eyebrow{ color:var(--lac); }
-.st-openbolt__head .st-h2 em{ color:var(--lac); font-style:italic; }
-.st-openbolt__head .st-lede{ margin-top:0; text-align:right; }
-@media(max-width:700px){ .st-openbolt__head .st-lede{ text-align:left; } }
-
-.st-openbolt{ display:flex; gap:.5rem; height:clamp(360px,44vw,460px); margin-top:clamp(28px,4vw,44px); }
-.st-openbolt__item{ position:relative; flex:1 1 0; min-width:0; overflow:hidden; border-radius:16px;
-                     display:block; color:#fff; text-decoration:none; background:var(--ink);
-                     transition:flex-grow .6s var(--ease); }
-.st-openbolt__item.on{ flex-grow:3.6; }
-.st-openbolt__ph{ position:absolute; inset:0; }
-.st-openbolt__ph img{ transition:transform 1.1s var(--ease), opacity .7s ease; }
-.st-openbolt__item:hover .st-openbolt__ph img{ transform:scale(1.05); }
-.st-openbolt__item::after{ content:''; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(0deg,rgba(9,13,17,.78) 0%,rgba(9,13,17,.15) 45%,rgba(9,13,17,.05) 100%); }
-.st-openbolt__num{ position:absolute; z-index:2; top:14px; left:16px; font-family:var(--d); font-size:1.05rem; opacity:.85; }
-.st-openbolt__label{ position:absolute; z-index:2; left:16px; right:16px; bottom:14px; display:flex; flex-direction:column; gap:.4rem; }
-.st-openbolt__label b{ font-family:var(--d); font-weight:400; line-height:1.16; font-size:1.1rem; }
-.st-openbolt__label small{ font-size:.78rem; line-height:1.5; opacity:.78; font-weight:300;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.st-openbolt__item:not(.on) .st-openbolt__label b{ writing-mode:vertical-rl; transform:rotate(180deg);
-  white-space:nowrap; font-size:.86rem; letter-spacing:.02em; }
-@media(max-width:700px){
-  .st-openbolt{ height:340px; }
-  .st-openbolt__item.on{ flex-grow:2.2; }
-}

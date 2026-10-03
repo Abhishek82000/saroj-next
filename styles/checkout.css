@@ -211,7 +211,7 @@ a.st-co__n:hover{ color:var(--cobalt); }
 .st-tot dd{ margin:0; text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
 .st-tot dd small{ font-weight:400; font-size:.76rem; color:var(--ink-2); }
 .st-tot__grand{ margin-top:.5rem; padding:1rem 1.1rem !important; border-radius:14px; background:var(--paper); align-items:center !important; }
-.st-tot__grand dt{ color:var(--ink); font-family:var(--d); font-size:1.3rem; }
+.st-tot__grand dt{ color:var(--ink); font-family:var(--d); font-size:1rem; }
 .st-tot__grand dd{ font-family:var(--d); font-size:1.55rem; font-weight:400; }
 .st-co__free{ color:var(--teal); }
 

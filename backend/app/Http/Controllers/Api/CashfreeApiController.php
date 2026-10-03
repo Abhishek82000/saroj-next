@@ -271,7 +271,9 @@ class CashfreeApiController extends Controller
             $order->trans_cashfree_response = json_encode($cf);
             $order->save();
 
-            return $this->fail("Couldn't start the payment — please try again.", 502);
+            // With APP_DEBUG on, say what Cashfree said (bad keys, bad return_url, …).
+            $why = config('app.debug') && !empty($cf['message']) ? ' [Cashfree: ' . $cf['message'] . ']' : '';
+            return $this->fail("Couldn't start the payment — please try again." . $why, 502);
         }
 
         return response()->json([

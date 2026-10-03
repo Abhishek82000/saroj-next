@@ -3,13 +3,14 @@ import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Rail from "@/components/product/Rail";
 import BannerSlider from "@/components/home/BannerSlider";
-import BoltFan from "@/components/wholesale/BoltFan";
+import BoltTable from "@/components/wholesale/BoltTable";
+import SwatchBook from "@/components/wholesale/SwatchBook";
 import Voices from "@/components/home/Voices";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { WHOLESALE_HOME, WHOLESALE_MIN_METRES, wholesaleCategoryHref } from "@/lib/wholesale";
-import type { WholesaleCollection, WholesalePage } from "@/lib/wholesalePage";
+import type { WholesalePage } from "@/lib/wholesalePage";
 
 const shop = wholesaleCategoryHref;
 
@@ -19,21 +20,6 @@ const TERMS: [string, string][] = [
   ["GST invoice", "Trade rates, GST extra"],
   ["Jaipur", "Dispatched from the source"],
 ];
-
-function Feature({ c, i }: { c: WholesaleCollection; i: number }) {
-  return (
-    <Reveal as="div" delay={((i % 3) + 1) as 1 | 2 | 3} className="st-whf">
-      <Link href={shop(c.slug)} className="st-whf__link">
-        <div className="st-whf__ph ph"><Photo src={c.banner} alt={c.heading} sizes="(min-width:900px) 50vw, 100vw" /></div>
-        <div className="st-whf__body">
-          <h3>{c.heading}</h3>
-          {c.blurb && <p>{c.blurb}</p>}
-          <span className="st-whf__more">Shop wholesale &rarr;</span>
-        </div>
-      </Link>
-    </Reveal>
-  );
-}
 
 /**
  * The wholesale front page. Its own layout — trade terms, featured collections,
@@ -46,18 +32,18 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
       {page.slides.length > 0 && <BannerSlider slides={page.slides} label="Wholesale offers" />}
 
       {page.collections.length > 0 && (
-        <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
-          <div className="st-wrap st-openbolt__head">
-            <div>
-              <Reveal className="st-eyebrow">The collections</Reveal>
-              <Reveal as="h2" delay={1} className="st-h2">Open a <em>bolt.</em></Reveal>
+        <section className="st-bolts" aria-labelledby="bolts-h">
+          <div className="st-wrap st-bolts__wrap">
+            <div className="st-bolts__head">
+              <div>
+                <Reveal className="st-eyebrow">The collections</Reveal>
+                <Reveal as="h2" delay={1} className="st-h2" id="bolts-h">Open a <em>bolt.</em></Reveal>
+              </div>
+              <Reveal as="p" delay={2} className="st-lede">
+                {page.collections.length} collections on the cutting table in Jaipur. Pick one and we&rsquo;ll roll it out for you.
+              </Reveal>
             </div>
-            <Reveal as="p" delay={2} className="st-lede">
-              {page.collections.length} collections, each from its own region. Hover to unfold one.
-            </Reveal>
-          </div>
-          <div className="st-wrap">
-            <BoltFan collections={page.collections} />
+            <BoltTable collections={page.collections} />
           </div>
         </section>
       )}
@@ -84,11 +70,18 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
       ))}
 
       {page.more.length > 0 && (
-        <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
+        <section className="st-swb" aria-labelledby="swb-h">
           <div className="st-wrap">
-            <Reveal className="st-eyebrow">Also in the book</Reveal>
-            <Reveal as="h2" delay={1} className="st-h2">More to explore.</Reveal>
-            <div className="st-whf__grid">{page.more.map((c, i) => <Feature key={c.id} c={c} i={i} />)}</div>
+            <div className="st-swb__head">
+              <div>
+                <Reveal className="st-eyebrow">Also in the book</Reveal>
+                <Reveal as="h2" delay={1} className="st-h2" id="swb-h">More to <em>explore.</em></Reveal>
+              </div>
+              <Reveal as="p" delay={2} className="st-lede">
+                Pages from our swatch book. Hold the glass over a print to see the weave before you order.
+              </Reveal>
+            </div>
+            <SwatchBook collections={page.more} />
           </div>
         </section>
       )}

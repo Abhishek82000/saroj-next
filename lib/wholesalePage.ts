@@ -28,6 +28,7 @@ function plain(html: string, max?: number): string {
   const text = html
     .replace(/<[^>]+>/g, " ")
     .replace(/&[a-z#0-9]+;/gi, (e) => ENTITIES[e.toLowerCase()] ?? " ")
+    .replace(/\*\*|__/g, "")
     .replace(/\s+/g, " ")
     .trim();
   return max && text.length > max ? text.slice(0, max).trimEnd() + "…" : text;
