@@ -31,27 +31,8 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
     <main id="main" className="st-whome">
       {page.slides.length > 0 && <BannerSlider slides={page.slides} label="Wholesale offers" />}
 
-      {page.collections.length > 0 && (
-        <section className="st-bolts" aria-labelledby="bolts-h">
-          <div className="st-wrap st-bolts__wrap">
-            <div className="st-bolts__head">
-              <div>
-                <Reveal className="st-eyebrow">The collections</Reveal>
-                <Reveal as="h2" delay={1} className="st-h2" id="bolts-h">Open a <em>bolt.</em></Reveal>
-              </div>
-              <Reveal as="p" delay={2} className="st-lede">
-                {page.collections.length} collections on the cutting table in Jaipur. Pick one and we&rsquo;ll roll it out for you.
-              </Reveal>
-            </div>
-            <BoltTable collections={page.collections} />
-          </div>
-        </section>
-      )}
 
-      {page.tagRails.map((r) => (
-        <Rail key={`tag-${r.id}`} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
-      ))}
-      {page.categories.length > 0 && (
+{page.categories.length > 0 && (
         <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
           <div className="st-wrap">
             <Reveal className="st-eyebrow">Every category</Reveal>
@@ -67,11 +48,30 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
           </div>
         </section>
       )}
+      {page.tagRails.map((r) => (
+        <Rail key={`tag-${r.id}`} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
+      ))}
+      
 
       {page.rails.map((r) => (
         <Rail key={r.id} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
       ))}
-
+{page.collections.length > 0 && (
+        <section className="st-bolts" aria-labelledby="bolts-h">
+          <div className="st-wrap st-bolts__wrap">
+            <div className="st-bolts__head">
+              <div>
+                <Reveal className="st-eyebrow">The collections</Reveal>
+                <Reveal as="h2" delay={1} className="st-h2" id="bolts-h">Open a <em>bolt.</em></Reveal>
+              </div>
+              <Reveal as="p" delay={2} className="st-lede">
+                {page.collections.length} collections on the cutting table in Jaipur. Pick one and we&rsquo;ll roll it out for you.
+              </Reveal>
+            </div>
+            <BoltTable collections={page.collections} />
+          </div>
+        </section>
+      )}
       {page.more.length > 0 && (
         <section className="st-swb" aria-labelledby="swb-h">
           <div className="st-wrap">

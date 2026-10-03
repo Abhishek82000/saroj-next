@@ -234,7 +234,7 @@
 .st-cart__empty h4{ font-family:var(--d); font-weight:400; font-size:1.4rem; margin:0 0 .5rem; }
 .st-cart__empty p{ color:var(--mute); font-size:.87rem; margin:0 0 1.4rem; max-width:28ch; margin-inline:auto; }
 
-.st-cart__foot{ border-top:1px solid var(--line); padding:.95rem var(--cp) 1.15rem; background:var(--paper); }
+.st-cart__foot{ border-top:1px solid var(--line); padding:.5rem var(--cp) 1.15rem; background:var(--paper); }
 .st-cart__sum{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; }
 .st-cart__sum small{ font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); }
 .st-cart__sum b{ font-family:var(--d); font-weight:400; font-size:1.62rem; }
@@ -385,3 +385,274 @@
 .st-otimeline li.bad::before{ border-color:var(--lac); background:var(--lac); box-shadow:0 0 0 4px rgba(192,57,46,.15); }
 
 .st-oitems .st-line:first-child{ padding-top:0; } .st-oitems .st-line:last-child{ border-bottom:0; }
+/* ============================================================
+   Menu drawer  (namespace: sm-)
+   1. DELETE every old .st-drawer / .st-drawer__* rule first.
+   2. Edit ONLY the tokens below to retheme the whole drawer.
+   ============================================================ */
+
+.sm-drawer {
+  /* colour */
+  --sm-bg: #fbfaf7;
+  --sm-ink: #1c1a18;
+  --sm-muted: #7b766e;
+  --sm-line: #e6e2da;
+  --sm-soft: #f1ede5;
+  --sm-accent: #7a1f2b;
+
+  /* type — set --sm-display to your heading font if different */
+  --sm-display: var(--font-display, "Marcellus", Georgia, serif);
+  --sm-body: inherit;
+
+  /* scale: every row uses these, nothing else */
+  --sm-row-size: 1.375rem;   /* 22px  top-level rows */
+  --sm-row-weight: 400;
+  --sm-sub-size: 0.9688rem;  /* 15.5px sub links */
+  --sm-sub-weight: 400;
+  --sm-row-h: 3.5rem;        /* 56px  tap target */
+  --sm-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  background: var(--sm-bg);
+  color: var(--sm-ink);
+}
+
+/* hard reset so global link/button styles can't leak in */
+.sm-drawer a,
+.sm-drawer button {
+  font: inherit;
+  color: inherit;
+  font-size: larger;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 3px 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- header ---------- */
+.sm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--sm-line);
+}
+.sm-brand {
+  font-family: var(--sm-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- body ---------- */
+.sm-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.4rem 1.5rem 1.6rem;
+  font-family: var(--sm-body);
+  scrollbar-width: thin;
+  scrollbar-color: var(--sm-line) transparent;
+}
+.sm-body::-webkit-scrollbar { width: 6px; }
+.sm-body::-webkit-scrollbar-thumb { background: var(--sm-line); border-radius: 6px; }
+
+/* ---------- retail / wholesale switch ---------- */
+.sm-switch {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  background: var(--sm-soft);
+  border-radius: 999px;
+}
+.sm-switch__opt {
+  display: block;
+  padding: 0.65rem 0;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--sm-muted);
+  transition: color 0.2s, background 0.2s;
+}
+a.sm-switch__opt:hover { color: var(--sm-ink); }
+.sm-switch__opt[data-on="true"] {
+  background: var(--sm-ink);
+  color: var(--sm-bg);
+}
+.sm-switch__note {
+  margin: 0.7rem 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--sm-muted);
+}
+
+/* ---------- list rows ---------- */
+.sm-list { margin-top: 1.4rem; }
+
+.sm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-height: var(--sm-row-h);
+  border-bottom: 1px solid var(--sm-line);
+  text-align: left;
+  transition: color 0.2s;
+}
+.sm-row__label {
+  font-family: var(--sm-display);
+  font-size: var(--sm-row-size);
+  font-weight: var(--sm-row-weight);
+  line-height: 1.2;
+  transition: transform 0.3s var(--sm-ease);
+}
+.sm-row:hover,
+.sm-group[data-open="true"] > .sm-row { color: var(--sm-accent); }
+.sm-row:hover .sm-row__label { transform: translateX(4px); }
+.sm-group[data-open="true"] > .sm-row { border-bottom-color: transparent; }
+
+/* plus → minus */
+.sm-plus {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--sm-muted);
+}
+.sm-plus::before,
+.sm-plus::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 0.3s var(--sm-ease);
+}
+.sm-plus::after { transform: rotate(90deg); }
+.sm-group[data-open="true"] .sm-plus { color: var(--sm-accent); }
+.sm-group[data-open="true"] .sm-plus::after { transform: rotate(0deg); }
+
+/* ---------- expanding panel ---------- */
+.sm-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  border-bottom: 1px solid var(--sm-line);
+  transition: grid-template-rows 0.32s var(--sm-ease);
+}
+.sm-group[data-open="true"] .sm-panel { grid-template-rows: 1fr; }
+.sm-panel__inner {
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+}
+.sm-group[data-open="true"] .sm-panel__inner { padding-bottom: 0.9rem; }
+
+.sm-sub {
+  display: block;
+  padding: 0.7rem 0 0.7rem 1rem;
+  font-family: var(--sm-body);
+  font-size: var(--sm-sub-size);
+  font-weight: var(--sm-sub-weight);
+  color: var(--sm-ink);
+  transition: color 0.2s, padding-left 0.25s var(--sm-ease);
+}
+.sm-sub:hover { color: var(--sm-accent); padding-left: .3rem; }
+.sm-sub--all { font-weight: 600; color: var(--sm-accent); }
+
+/* ---------- entrance (runs each time the drawer opens) ---------- */
+.sm-list > * {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s var(--sm-ease), transform 0.4s var(--sm-ease);
+  transition-delay: calc(var(--i, 0) * 35ms);
+}
+.sm-body[data-ready="true"] .sm-list > * { opacity: 1; transform: none; }
+
+/* ---------- footer ---------- */
+.sm-foot { margin-top: auto; padding-top: 2rem; }
+
+.sm-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  background: var(--sm-soft);
+  border-radius: 14px;
+}
+.sm-user__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--sm-ink);
+  color: var(--sm-bg);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.sm-user__name { font-weight: 600; font-size: 0.95rem; }
+.sm-user__out {
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: var(--sm-muted);
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+.sm-user__out:hover { color: var(--sm-accent); }
+
+.sm-login {
+  display: block;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--sm-ink) !important;
+  border-radius: 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.2s, color 0.2s;
+}
+.sm-login small {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--sm-muted);
+  transition: color 0.2s;
+}
+.sm-login:hover { background: var(--sm-ink); color: var(--sm-bg); }
+.sm-login:hover small { color: var(--sm-line); }
+
+.sm-addr {
+  margin: 1.2rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--sm-muted);
+}
+.sm-addr a { color: var(--sm-ink); text-decoration: underline; text-underline-offset: 3px; }
+.sm-addr a:hover { color: var(--sm-accent); }
+
+/* ---------- focus + motion ---------- */
+.sm-drawer a:focus-visible,
+.sm-drawer button:focus-visible {
+  outline: 2px solid var(--sm-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sm-list > *,
+  .sm-panel,
+  .sm-plus::before,
+  .sm-plus::after,
+  .sm-row__label,
+  .sm-sub { transition: none; }
+  .sm-list > * { opacity: 1; transform: none; }
+}

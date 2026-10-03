@@ -107,12 +107,9 @@ export default function CartDrawer() {
               {inr(offers?.total ?? totals?.subtotal ?? subtotal)}
             </b>
           </div>
-          {saved > 0 && <p className="st-cart__note st-cart__saved">You save {inr(saved)} with offers.</p>}
+          {saved > 0 && <p className="st-cart__note st-cart__saved">You save {inr(saved)} with offers.</p>} 
           {hasErrors && <p className="st-cart__note st-co__err">Remove the unavailable items to check out.</p>}
-          {wholesale && <p className="st-cart__note">Wholesale prices exclude GST.</p>}
-          <p className="st-cart__note">
-            Taxes and delivery worked out at checkout. Everything ships wrapped in our own Ajrakh offcuts.
-          </p>
+                    
           {hasErrors
             ? <button type="button" className="st-btn st-btn--solid" disabled>Go to checkout</button>
             : <Link href={href("/checkout")} className="st-btn st-btn--solid" onClick={close}>Go to checkout</Link>}
