@@ -57,6 +57,7 @@ async function call<T>(path: string, init: RequestInit, token?: string): Promise
     const url = `${site.url}/api/cart${path.startsWith("?") ? path : `/${path}`}`;
     const res = await fetch(url, { ...init, headers });
     const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string } & T;
+    if (res.status === 429) return { ok: false, message: "Too many requests — wait a minute and try again." };
     if (!res.ok || json.status === "error") return { ok: false, message: json.message ?? "Couldn't update the cart." };
     return { ...json, ok: true };
   } catch {

@@ -168,7 +168,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       list the server answers for replaces the local one outright, so a piece
       removed on another device, or a stale local heart, doesn't linger. The
       local copy is only a cache for the first paint and for when the call fails. */
+  const wishlistSyncedFor = useRef<string | null>(null);
   const syncWishlist = useCallback((token: string) => {
+    if (wishlistSyncedFor.current === token) return;
+    wishlistSyncedFor.current = token;
     for (const m of ["retail", "wholesale"] as const) {
       getWishlist(token, m === "wholesale").then((r) => {
         if (!r.ok) return;
@@ -300,7 +303,13 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
 
   /* On load with a saved login, and on every login. */
   const token = user?.token;
-  useEffect(() => { if (hydrated && token) syncCart(token); }, [hydrated, token, syncCart]);
+  /* Once per session token — React's dev double-mount would otherwise send it all twice. */
+  const cartSyncedFor = useRef<string | null>(null);
+  useEffect(() => {
+    if (!hydrated || !token || cartSyncedFor.current === token) return;
+    cartSyncedFor.current = token;
+    syncCart(token);
+  }, [hydrated, token, syncCart]);
 
   /* − / + and Remove: the local cart changes at once; a logged-in account's
      server line is told too — PATCH / DELETE /api/cart/<cart_id>.
@@ -313,33 +322,40 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
        cart_id (the add 429'd, or hadn't answered yet) or a quantity the server
        hasn't seen (a debounced − / +);
      - a failed call is retried once, then the shopper is told. */
-  const serverLine = useCallback(async (kind: Mode, line: CartLine, token: string) => {
+  const serverLine = useCallback(async (kind: Mode, line: CartLine, token: string, qty = line.qty) => {
     await pendingAdds.current.get(`${kind}:${line.id}`);
+    /* The add may have handed back its cart_id while we waited. */
+    const cartId = cartsRef.current[kind].find((l) => l.id === line.id)?.cartId ?? line.cartId;
+    if (cartId) return { cartId, qty };
+    /* No id here (the add failed or never answered with one): look it up — one
+       GET, only in this case, since every call counts against the API's limit. */
     const server = await getCartRemote(kind, token);
-    /* Couldn't read the account's cart: fall back to what this line knows. */
-    if (!server) return line.cartId ? { cartId: line.cartId, qty: line.qty } : null;
-    const found = server.find((s) => s.productId === line.productId && (s.variationId ?? null) === (line.variationId ?? null));
+    const found = server?.find((s) => s.productId === line.productId && (s.variationId ?? null) === (line.variationId ?? null));
     return found?.cartId ? { cartId: found.cartId, qty: found.qty } : null;
   }, []);
 
   /* − / + taps are coalesced per line: only the quantity it settles on is
      sent, once the taps stop — one request per tap trips the rate limit. */
-  const qtyTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const qtyTimers = useRef(new Map<string, { timer: ReturnType<typeof setTimeout>; serverQty: number }>());
+  /** Drops a line's unsent quantity change; returns the quantity the server still has. */
   const cancelQtySync = useCallback((key: string) => {
-    clearTimeout(qtyTimers.current.get(key));
+    const pending = qtyTimers.current.get(key);
+    clearTimeout(pending?.timer);
     qtyTimers.current.delete(key);
+    return pending?.serverQty;
   }, []);
 
   const remove = useCallback((id: string) => {
     const kind = mode;
     const line = cartsRef.current[kind].find((l) => l.id === id);
     if (!line) return;
-    cancelQtySync(`${kind}:${id}`);
+    /* A − / + not yet sent means the server still holds the earlier quantity. */
+    const serverQty = cancelQtySync(`${kind}:${id}`) ?? line.qty;
     mutate(kind, (prev) => prev.filter((l) => l.id !== id));
     const token = userRef.current?.token;
     if (!token || !line.productId) return;
     (async () => {
-      const target = await serverLine(kind, line, token);
+      const target = await serverLine(kind, line, token, serverQty);
       if (!target) return; // the server doesn't hold it — nothing to undo
       const { cartId } = target;
       if (await twice(() => removeCartRemote(cartId, target.qty, token))) return;
@@ -364,14 +380,14 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     const token = userRef.current?.token;
     if (!token || !line.productId) return;
     const key = `${kind}:${id}`;
-    cancelQtySync(key);
-    qtyTimers.current.set(key, setTimeout(async () => {
+    const serverQty = cancelQtySync(key) ?? line.qty;
+    qtyTimers.current.set(key, { serverQty, timer: setTimeout(async () => {
       qtyTimers.current.delete(key);
       const cartId = (await serverLine(kind, line, token))?.cartId;
       if (!cartId) return;
       if (cartsRef.current[kind].find((l) => l.id === id)?.qty !== next) return; // tapped again, or removed, meanwhile
       if (!(await twice(() => updateCartRemote(cartId, next, token)))) say("Couldn't save the new quantity — please try again");
-    }, 500));
+    }, 500) });
   }, [mutate, mode, remove, cancelQtySync, serverLine, say]);
 
   const openLogin = useCallback((reason?: string) => {
@@ -425,6 +441,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setWh({ owner: null, lines: [] });
     if (mode === "wholesale") setCartOpen(false);
     setWishlist(EMPTY_WISHLIST);
+    wishlistSyncedFor.current = null;
+    cartSyncedFor.current = null;
     say("Logged out");
   }, [say, mode]);
 
@@ -477,7 +495,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       setWishlistRemote(token, pid, m === "wholesale", !saved).then((r) => {
         if (r.ok) return;
         flip(saved);
-        say(saved ? "Couldn't remove that — please try again" : "Couldn't save that — please try again");
+        /* authedCall words a 429 as "wait a minute" — worth passing on as is. */
+        say(/wait/i.test(r.message) ? r.message : saved ? "Couldn't remove that — please try again" : "Couldn't save that — please try again");
       });
     });
   }, [mode, say, withLogin]);
