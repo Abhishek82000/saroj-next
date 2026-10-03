@@ -84,16 +84,27 @@ export type Failure = { ok: false; message: string };
 export async function getWishlist(token: string, wholesale: boolean): Promise<{ ok: true; slugs: string[] } | Failure> {
   const r = await authedCall("wishlist", token, { method: "GET", query: { is_wholesale: wholesale ? "1" : "0" } });
   if (!r.ok) return r;
+  /* The response's shape has never been checked against a real account. A
+     reply we can't read must not count as "the wishlist is empty" — the
+     caller replaces the local list with what this returns — so anything other
+     than a list of rows with slugs is a failure, and the local list stands. */
+  const rows = findArray(r.json);
+  const unreadable = (message: string): Failure => {
+    if (process.env.NODE_ENV !== "production") console.warn(`[wishlist] ${message} (is_wholesale=${wholesale ? 1 : 0}):`, r.json);
+    return { ok: false, message };
+  };
+  if (!rows) return unreadable("Unrecognised wishlist response");
   /* Keep only this list's rows. A row that says which list it's in — an
      `is_wholesale` (0/1), `wholesale` or `type` ("retail"/"wholesale") field,
      on itself or a nested product — must match; the API answering both
      ?is_wholesale=0 and =1 with every saved piece otherwise copies each heart
      into both lists. A row that says nothing is taken as asked. */
-  const arr = (findArray(r.json) ?? []).filter((row) => {
+  const arr = rows.filter((row) => {
     const w = wholesaleFlag(row);
     return w === undefined || w === wholesale;
   });
   const slugs = arr.map(slugOf).filter((s): s is string => !!s);
+  if (rows.length > 0 && slugs.length === 0) return unreadable("Wishlist rows carry no slug");
   return { ok: true, slugs };
 }
 
