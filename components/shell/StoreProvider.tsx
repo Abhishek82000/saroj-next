@@ -7,7 +7,6 @@ import type { User } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate } from "@/lib/wholesale";
 import { getWishlist, setWishlistRemote } from "@/lib/wishlist";
-import { getCounts, type Counts } from "@/lib/counts";
 import {
   addToCartRemote, getCartRemote, removeCartRemote, sameLine, syncCartRemote, updateCartRemote,
   type ServerCartLine,
@@ -111,9 +110,7 @@ interface Store {
   wishlist: Record<Mode, Favs>;
   /** Saves/unsaves a piece in `m`'s wishlist (the current mode's by default). */
   toggleFav: (p: Product, m?: Mode) => void;
-  /** Both wishlists' size together (retail + wholesale) for the header badge —
-      per mode, the larger of the server-side count (GET /api/auth/count-data)
-      and the local list. */
+  /** Both wishlists' size together (retail + wholesale) for the header badge. */
   favCount: number;
 
 
@@ -135,18 +132,18 @@ export function useStore() {
   return ctx;
 }
 
+/** Runs `fn`, and once more after a pause if it fails (a 429 clears in a moment). */
+const twice = async (fn: () => Promise<{ ok: boolean }>) =>
+  (await fn()).ok || (await new Promise((r) => setTimeout(r, 1500)), (await fn()).ok);
+
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
   const [retail, setRetail] = useState<CartLine[]>([]);
   const [wh, setWh] = useState<{ owner: string | null; lines: CartLine[] }>({ owner: null, lines: [] });
   const [wishlist, setWishlist] = useState<Record<Mode, Favs>>(EMPTY_WISHLIST);
-  const [counts, setCounts] = useState<Counts | null>(null);
   /* Latest user and wishlist for callbacks that run as the pending action right
      after login, whose closures still hold the logged-out values. */
   const userRef = useRef<User | null>(null);
   const wishlistRef = useRef(wishlist);
-  const refreshCounts = useCallback((token?: string) => {
-    if (token) getCounts(token).then((c) => { if (c) setCounts(c); });
-  }, []);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -167,19 +164,15 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const [hydrated, setHydrated] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  /** Fire-and-forget: pulls both lists' saved slugs from GET /api/auth/wishlist
-      and unions them into the local wishlists, so a piece saved on another device shows
-      up here too. Never blocks or surfaces an error — the local list is
-      already the source of truth for what the UI shows. */
+  /** The account's wishlists (GET /api/auth/wishlist) are the wishlists: each
+      list the server answers for replaces the local one outright, so a piece
+      removed on another device, or a stale local heart, doesn't linger. The
+      local copy is only a cache for the first paint and for when the call fails. */
   const syncWishlist = useCallback((token: string) => {
     for (const m of ["retail", "wholesale"] as const) {
       getWishlist(token, m === "wholesale").then((r) => {
         if (!r.ok) return;
-        setWishlist((prev) => {
-          const next = { ...prev[m] };
-          for (const slug of r.slugs) next[slug] = true;
-          return { ...prev, [m]: next };
-        });
+        setWishlist((prev) => ({ ...prev, [m]: Object.fromEntries(r.slugs.map((slug) => [slug, true as const])) }));
       });
     }
   }, []);
@@ -195,10 +188,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     if (saved) {
       setWh({ owner: saved.mobile, lines: safe.read<CartLine[]>(wholesaleCartKey(saved.mobile), []) });
       setWishlist(readWishlist(saved.mobile));
-      if (saved.token) { syncWishlist(saved.token); refreshCounts(saved.token); }
+      if (saved.token) { syncWishlist(saved.token); }
     }
     setHydrated(true);
-  }, [syncWishlist, refreshCounts]);
+  }, [syncWishlist]);
 
   useEffect(() => { if (hydrated) safe.write(RETAIL_CART_KEY, retail); }, [hydrated, retail]);
   useEffect(() => { if (hydrated) safe.write(COUPON_KEY, coupon); }, [hydrated, coupon]);
@@ -225,6 +218,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   /* Latest carts, so an add can tell the server what the line now holds in total. */
   const cartsRef = useRef<Record<Mode, CartLine[]>>({ retail: [], wholesale: [] });
   cartsRef.current = { retail, wholesale: wh.lines };
+  /** Adds still on their way to the server, by `<mode>:<line id>`. */
+  const pendingAdds = useRef(new Map<string, Promise<void>>());
 
   const addTo = useCallback((kind: Mode, line: Omit<CartLine, "qty"> & { qty?: number }) => {
     const qty = line.qty ?? 1;
@@ -232,7 +227,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
        lib/cart.ts). Only live pieces carry the product id it needs. */
     if (line.productId) {
       const had = cartsRef.current[kind].find((l) => l.id === line.id)?.qty ?? 0;
-      addToCartRemote({
+      const pendingKey = `${kind}:${line.id}`;
+      const request = addToCartRemote({
         type: kind,
         product_id: line.productId,
         variation_id: line.variationId ?? null,
@@ -243,6 +239,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
         const cartId = r.ok ? r.line?.cart_id : null;
         if (cartId) mutate(kind, (prev) => prev.map((l) => (l.id === line.id ? { ...l, cartId } : l)));
       });
+      /* A − / + / Remove that follows waits for this add to land first (see serverLine). */
+      const settled = request.then(() => undefined);
+      pendingAdds.current.set(pendingKey, settled);
+      settled.then(() => { if (pendingAdds.current.get(pendingKey) === settled) pendingAdds.current.delete(pendingKey); });
     }
     mutate(kind, (prev) => {
       const found = prev.find((l) => l.id === line.id);
@@ -303,13 +303,51 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   useEffect(() => { if (hydrated && token) syncCart(token); }, [hydrated, token, syncCart]);
 
   /* − / + and Remove: the local cart changes at once; a logged-in account's
-     server line (one with a cartId) is told too — PATCH / DELETE /api/cart/<id>. */
+     server line is told too — PATCH / DELETE /api/cart/<cart_id>.
+
+     The server is only told once it can be told right, or a removed line comes
+     back on the next syncCart:
+     - an add still in flight is waited for, so its line exists server-side;
+     - the line's cart_id and quantity are read from the account's cart
+       (GET /api/cart) rather than trusted from local state, which may have no
+       cart_id (the add 429'd, or hadn't answered yet) or a quantity the server
+       hasn't seen (a debounced − / +);
+     - a failed call is retried once, then the shopper is told. */
+  const serverLine = useCallback(async (kind: Mode, line: CartLine, token: string) => {
+    await pendingAdds.current.get(`${kind}:${line.id}`);
+    const server = await getCartRemote(kind, token);
+    /* Couldn't read the account's cart: fall back to what this line knows. */
+    if (!server) return line.cartId ? { cartId: line.cartId, qty: line.qty } : null;
+    const found = server.find((s) => s.productId === line.productId && (s.variationId ?? null) === (line.variationId ?? null));
+    return found?.cartId ? { cartId: found.cartId, qty: found.qty } : null;
+  }, []);
+
+  /* − / + taps are coalesced per line: only the quantity it settles on is
+     sent, once the taps stop — one request per tap trips the rate limit. */
+  const qtyTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const cancelQtySync = useCallback((key: string) => {
+    clearTimeout(qtyTimers.current.get(key));
+    qtyTimers.current.delete(key);
+  }, []);
+
   const remove = useCallback((id: string) => {
-    const line = cartsRef.current[mode].find((l) => l.id === id);
+    const kind = mode;
+    const line = cartsRef.current[kind].find((l) => l.id === id);
+    if (!line) return;
+    cancelQtySync(`${kind}:${id}`);
+    mutate(kind, (prev) => prev.filter((l) => l.id !== id));
     const token = userRef.current?.token;
-    if (line?.cartId && token) removeCartRemote(line.cartId, line.qty, token);
-    mutate(mode, (prev) => prev.filter((l) => l.id !== id));
-  }, [mutate, mode]);
+    if (!token || !line.productId) return;
+    (async () => {
+      const target = await serverLine(kind, line, token);
+      if (!target) return; // the server doesn't hold it — nothing to undo
+      const { cartId } = target;
+      if (await twice(() => removeCartRemote(cartId, target.qty, token))) return;
+      /* Still on the server: put it back here too, rather than have it reappear later. */
+      mutate(kind, (prev) => (prev.some((l) => l.id === id) ? prev : [...prev, { ...line, cartId }]));
+      say("Couldn't remove that — please try again");
+    })();
+  }, [mutate, mode, cancelQtySync, serverLine, say]);
 
   const clearCart = useCallback((kind: Mode) => {
     mutate(kind, () => []);
@@ -318,12 +356,23 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
 
   const setQty = useCallback((id: string, qty: number) => {
     if (qty <= 0) { remove(id); return; }
+    const kind = mode;
     const next = round(qty);
-    const line = cartsRef.current[mode].find((l) => l.id === id);
+    const line = cartsRef.current[kind].find((l) => l.id === id);
+    if (!line) return;
+    mutate(kind, (prev) => prev.map((l) => (l.id === id ? { ...l, qty: next } : l)));
     const token = userRef.current?.token;
-    if (line?.cartId && token) updateCartRemote(line.cartId, next, token);
-    mutate(mode, (prev) => prev.map((l) => (l.id === id ? { ...l, qty: next } : l)));
-  }, [mutate, mode, remove]);
+    if (!token || !line.productId) return;
+    const key = `${kind}:${id}`;
+    cancelQtySync(key);
+    qtyTimers.current.set(key, setTimeout(async () => {
+      qtyTimers.current.delete(key);
+      const cartId = (await serverLine(kind, line, token))?.cartId;
+      if (!cartId) return;
+      if (cartsRef.current[kind].find((l) => l.id === id)?.qty !== next) return; // tapped again, or removed, meanwhile
+      if (!(await twice(() => updateCartRemote(cartId, next, token)))) say("Couldn't save the new quantity — please try again");
+    }, 500));
+  }, [mutate, mode, remove, cancelQtySync, serverLine, say]);
 
   const openLogin = useCallback((reason?: string) => {
     setLoginReason(reason ?? null);
@@ -357,13 +406,13 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     /* The pending action (a heart tapped while logged out) runs below, before re-render. */
     userRef.current = u;
     wishlistRef.current = list;
-    if (u.token) { syncWishlist(u.token); refreshCounts(u.token); }
+    if (u.token) { syncWishlist(u.token); }
     setLoginOpen(false);
     say(`Welcome, ${u.name.split(" ")[0]}`);
     const next = pending.current;
     pending.current = null;
     next?.();
-  }, [say, syncWishlist, refreshCounts]);
+  }, [say, syncWishlist]);
 
   const updateUser = useCallback((patch: Partial<Pick<User, "name" | "email" | "address">>) => setUser((u) => (u ? { ...u, ...patch } : u)), []);
 
@@ -376,7 +425,6 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setWh({ owner: null, lines: [] });
     if (mode === "wholesale") setCartOpen(false);
     setWishlist(EMPTY_WISHLIST);
-    setCounts(null);
     say("Logged out");
   }, [say, mode]);
 
@@ -411,21 +459,28 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const toggleFav = useCallback((p: Product, m: Mode = mode) => {
     withLogin("Log in to save pieces to your wishlist", () => {
       const saved = !!wishlistRef.current[m][p.slug];
-      setWishlist((prev) => {
-        const next = { ...prev[m] };
-        if (saved) delete next[p.slug];
-        else next[p.slug] = true;
-        return { ...prev, [m]: next };
-      });
-      say(saved ? "Removed from wishlist" : "Saved to wishlist");
-      /* Fire-and-forget: mirrors the flip server-side. The local state above
-         is what the UI shows either way. Only live pieces have the numeric
-         id the API wants. */
       const token = userRef.current?.token;
       const pid = p.productId ?? p.live?.id;
-      if (token && pid) setWishlistRemote(token, pid, m === "wholesale", !saved).then(() => refreshCounts(token));
+      /* The account's wishlist is the server's (see syncWishlist): a piece with
+         no live id can't go in it, and would vanish on the next load. */
+      if (!saved && (!token || !pid)) { say("This piece can't be saved to your wishlist"); return; }
+      const flip = (on: boolean) => setWishlist((prev) => {
+        const next = { ...prev[m] };
+        if (on) next[p.slug] = true;
+        else delete next[p.slug];
+        return { ...prev, [m]: next };
+      });
+      /* The heart flips at once; if the server says no, it flips back. */
+      flip(!saved);
+      say(saved ? "Removed from wishlist" : "Saved to wishlist");
+      if (!token || !pid) return;
+      setWishlistRemote(token, pid, m === "wholesale", !saved).then((r) => {
+        if (r.ok) return;
+        flip(saved);
+        say(saved ? "Couldn't remove that — please try again" : "Couldn't save that — please try again");
+      });
     });
-  }, [mode, say, withLogin, refreshCounts]);
+  }, [mode, say, withLogin]);
 
   const cart = mode === "wholesale" ? wh.lines : retail;
   const otherCount = (mode === "wholesale" ? retail : wh.lines).length;
@@ -445,12 +500,9 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     user, login, logout, hydrated, updateUser, loginOpen, loginReason, openLogin, closeLogin, withLogin,
     mode, switchMode, href, navItem,
     favs: wishlist[mode], wishlist, toggleFav,
-    /* The larger of the server's count and the hearts filled here — the server
-       can lag (or miss pieces it has no id for), and a filled heart with no badge
-       reads as broken. Logged out there's no wishlist, so no badge. */
-    favCount: user
-      ? (["retail", "wholesale"] as const).reduce((n, m) => n + Math.max(counts?.wishlist[m] ?? 0, Object.keys(wishlist[m]).length), 0)
-      : 0,
+    /* Both lists' pieces — the lists themselves come from the server
+       (syncWishlist), so this is the account's count. Logged out, no badge. */
+    favCount: user ? Object.keys(wishlist.retail).length + Object.keys(wishlist.wholesale).length : 0,
     cartOpen, setCartOpen,
     searchOpen, setSearchOpen,
     menuOpen, setMenuOpen,

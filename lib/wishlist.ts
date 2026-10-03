@@ -58,6 +58,23 @@ function slugOf(o: Record<string, unknown>, depth = 0): string | undefined {
   return undefined;
 }
 
+/** Which list a wishlist row says it belongs to, if it says. */
+function wholesaleFlag(o: Record<string, unknown>, depth = 0): boolean | undefined {
+  for (const [k, v] of Object.entries(o)) {
+    if (/^(is_?)?wholesale$/i.test(k) && (typeof v === "number" || typeof v === "boolean" || /^[01]$/.test(String(v)))) return Number(v) === 1;
+    if (/^(wishlist_?)?type$/i.test(k) && typeof v === "string" && /^(retail|wholesale)$/i.test(v)) return /wholesale/i.test(v);
+  }
+  if (depth < 1) {
+    for (const v of Object.values(o)) {
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        const w = wholesaleFlag(v as Record<string, unknown>, depth + 1);
+        if (w !== undefined) return w;
+      }
+    }
+  }
+  return undefined;
+}
+
 export type Failure = { ok: false; message: string };
 
 /** The signed-in visitor's saved product slugs, read from the server. Call
@@ -67,7 +84,15 @@ export type Failure = { ok: false; message: string };
 export async function getWishlist(token: string, wholesale: boolean): Promise<{ ok: true; slugs: string[] } | Failure> {
   const r = await authedCall("wishlist", token, { method: "GET", query: { is_wholesale: wholesale ? "1" : "0" } });
   if (!r.ok) return r;
-  const arr = findArray(r.json) ?? [];
+  /* Keep only this list's rows. A row that says which list it's in — an
+     `is_wholesale` (0/1), `wholesale` or `type` ("retail"/"wholesale") field,
+     on itself or a nested product — must match; the API answering both
+     ?is_wholesale=0 and =1 with every saved piece otherwise copies each heart
+     into both lists. A row that says nothing is taken as asked. */
+  const arr = (findArray(r.json) ?? []).filter((row) => {
+    const w = wholesaleFlag(row);
+    return w === undefined || w === wholesale;
+  });
   const slugs = arr.map(slugOf).filter((s): s is string => !!s);
   return { ok: true, slugs };
 }
