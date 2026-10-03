@@ -1,8 +1,8 @@
-import { apiProductToProduct } from "./home";
+import { apiProductToProduct, getHomeData } from "./home";
 import { site } from "./site";
 import { wholesaleCategoryHref } from "./wholesale";
 import { homePrices, withRates } from "./wholesalePrices";
-import type { BannerSlide, Product, WholesaleApiCategory, WholesalePageApiResponse } from "./types";
+import type { BannerSlide, Product, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse, WholesaleRate } from "./types";
 
 export type WholesaleSlide = BannerSlide;
 export interface WholesaleCollection { id: number; name: string; heading: string; slug: string; blurb: string; image: string; banner: string }
@@ -19,6 +19,8 @@ export interface WholesalePage {
   categories: { id: number; name: string; slug: string; image: string }[];
   testimonials: Testimonial[];
   rails: WholesaleRail[];
+  /** Tag rails ("New Arrivals", "Best Seller", ...), shown above the category rails. */
+  tagRails: WholesaleRail[];
 }
 
 const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&quot;": '"', "&#39;": "'", "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&ndash;": "–", "&mdash;": "—" };
@@ -39,15 +41,40 @@ const toCollection = (c: WholesaleApiCategory): WholesaleCollection => ({
   blurb: plain(c.cat_short_desc ?? "", 150), image: c.cat_cdn_url, banner: c.cat_banner_cdn || c.cat_cdn_url,
 });
 
+/** A wholesale-feed product as a card. Takes the feed's own trade price when
+    it sends one (it currently sends none), else the scraped rate. */
+function toProduct(p: WholesaleApiProduct, rates: Map<string, WholesaleRate>): Product {
+  const item = withRates([apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 })], rates)[0];
+  const price = Number(p.selling_price ?? p.price);
+  return price > 0 ? { ...item, wholesale: { price, mrp: Number(p.price) > price ? Number(p.price) : 0, minQty: p.moq || 10 } } : item;
+}
+
+/** The feed's tag rails, or — until the feed carries them — the storefront's own
+    from GET /api/home (same catalogue, wholesale rates attached where known). */
+async function tagRails(d: WholesalePageApiResponse["data"], rates: Map<string, WholesaleRate>): Promise<WholesaleRail[]> {
+  const own = (d.tag_show_home_page ?? [])
+    .map((t) => ({
+      id: t.tag_id ?? t.id ?? 0,
+      slug: t.tag_slug ?? t.slug ?? "",
+      name: t.tag_name ?? t.name ?? "",
+      items: (t.products ?? []).map((p) => toProduct(p, rates)),
+    }))
+    .filter((t) => t.slug && t.name && t.items.length > 0);
+  if (own.length) return own;
+  const { tagSections } = await getHomeData();
+  return tagSections
+    .filter((t) => t.products.length > 0)
+    .map((t) => ({ id: t.id, slug: t.slug, name: t.name, items: withRates(t.products.map(apiProductToProduct), rates) }));
+}
+
 /**
  * The wholesale front page, from GET /api/wholesale-page-data: banners, the
- * highlighted collections, every wholesale category, testimonials and a product
- * rail per category. Returns null on any failure so /wholesale-fabric can fall
- * back to its plain explainer.
+ * highlighted collections, every wholesale category, testimonials, a product
+ * rail per tag and one per category. Returns null on any failure so
+ * /wholesale-fabric can fall back to its plain explainer.
  *
  * The rail products currently come with no price (`price`/`selling_price` are
- * null), so they stay unpriced; once the feed sends one it becomes the piece's
- * wholesale rate.
+ * null); see toProduct.
  */
 export async function getWholesalePage(): Promise<WholesalePage | null> {
   try {
@@ -75,13 +102,9 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
         .filter((s) => s.products.length > 0)
         .map((s) => ({
           id: s.cat_id, slug: s.cat_slug, name: s.cat_name,
-          items: withRates(s.products.map((p) => {
-            const item = apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 });
-            const price = Number(p.selling_price ?? p.price);
-            /* The feed's own trade price, when it sends one — it currently sends none. */
-            return price > 0 ? { ...item, wholesale: { price, mrp: Number(p.price) > price ? Number(p.price) : 0, minQty: p.moq || 10 } } : item;
-          }), rates),
+          items: s.products.map((p) => toProduct(p, rates)),
         })),
+      tagRails: await tagRails(d, rates),
     };
   } catch {
     return null;

@@ -503,5 +503,13 @@ export interface WholesalePageApiResponse {
     category_list: WholesaleApiCategory[];
     testimonials: WholesaleApiTestimonial[];
     category_show_home_page: { cat_id: number; cat_name: string; cat_slug: string; products: WholesaleApiProduct[] }[];
+    /** Tag rails ("New Arrivals", "Best Seller", ...) — being added on the backend
+        and not live yet, so the key and field names are a best guess covering
+        both the /api/home shape and the raw tag_* columns. */
+    tag_show_home_page?: {
+      id?: number; name?: string; slug?: string;
+      tag_id?: number; tag_name?: string; tag_slug?: string;
+      products?: WholesaleApiProduct[];
+    }[];
   };
 }

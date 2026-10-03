@@ -65,6 +65,10 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
         </section>
       )}
 
+      {page.tagRails.map((r) => (
+        <Rail key={`tag-${r.id}`} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
+      ))}
+
       {page.rails.map((r) => (
         <Rail key={r.id} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
       ))}

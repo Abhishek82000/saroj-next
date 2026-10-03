@@ -111,8 +111,9 @@ interface Store {
   wishlist: Record<Mode, Favs>;
   /** Saves/unsaves a piece in `m`'s wishlist (the current mode's by default). */
   toggleFav: (p: Product, m?: Mode) => void;
-  /** The current mode's wishlist size for the header badge — the larger of the
-      server-side count (GET /api/auth/count-data) and the local list. */
+  /** Both wishlists' size together (retail + wholesale) for the header badge —
+      per mode, the larger of the server-side count (GET /api/auth/count-data)
+      and the local list. */
   favCount: number;
 
 
@@ -447,7 +448,9 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     /* The larger of the server's count and the hearts filled here — the server
        can lag (or miss pieces it has no id for), and a filled heart with no badge
        reads as broken. Logged out there's no wishlist, so no badge. */
-    favCount: user ? Math.max(counts?.wishlist[mode] ?? 0, Object.keys(wishlist[mode]).length) : 0,
+    favCount: user
+      ? (["retail", "wholesale"] as const).reduce((n, m) => n + Math.max(counts?.wishlist[m] ?? 0, Object.keys(wishlist[m]).length), 0)
+      : 0,
     cartOpen, setCartOpen,
     searchOpen, setSearchOpen,
     menuOpen, setMenuOpen,
