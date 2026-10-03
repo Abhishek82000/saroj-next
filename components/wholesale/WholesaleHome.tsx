@@ -48,6 +48,9 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
         </section>
       )}
 
+      {page.tagRails.map((r) => (
+        <Rail key={`tag-${r.id}`} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
+      ))}
       {page.categories.length > 0 && (
         <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
           <div className="st-wrap">
@@ -64,10 +67,6 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
           </div>
         </section>
       )}
-
-      {page.tagRails.map((r) => (
-        <Rail key={`tag-${r.id}`} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
-      ))}
 
       {page.rails.map((r) => (
         <Rail key={r.id} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />

@@ -60,6 +60,8 @@ function toFace(c: HandicraftApiFeatCategory): HcFace | null {
 }
 
 export interface HcPlate { href: string; src: string; cap: string; alt: string }
+/** A row of product cards under one heading. */
+export interface HcRail { id: string; heading: string; items: Product[] }
 export interface HcSwatch { href: string; src: string; title: string }
 export interface HcFace { name: string; href?: string; img: string; alt: string; hi?: string; meta: string; count?: string; swap?: string }
 export interface HcBolt { name: string; desc: string; price: string; img: string; alt: string }
@@ -78,14 +80,16 @@ export interface HandicraftData {
   video: HcVideo | null;
   voices: { name: string; content: string | null; rating: number }[];
   collections: number;
-  /** Product rails, as on the home page: the tag rails (New Arrivals, Best Seller) then the stocked categories. */
-  rails: { id: string; heading: string; items: Product[] }[];
+  /** Product rails from the tags (New Arrivals, Best Seller, …), as on the home page. */
+  tagRails: HcRail[];
+  /** Product rails, one per stocked category. */
+  categoryRails: HcRail[];
   /** Shoppable reels of handicraft pieces, drawn like the home page's. */
   reels: Reel[];
 }
 
 const EMPTY: HandicraftData = {
-  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, rails: [], reels: [],
+  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, tagRails: [], categoryRails: [], reels: [],
 };
 
 const productHref = (slug: string) => `/product/${slug}`;
@@ -159,11 +163,9 @@ export async function getHandicraftData(): Promise<HandicraftData> {
         categorySections: stocked,
         videoProducts: d.video_handicraft_products ?? [],
       }).map((r) => ({ ...r, kind: "Handicraft" as const, unit: "piece" })),
-      rails: [
-        ...(d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
-          .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
-        ...stocked.map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
-      ],
+      tagRails: (d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
+        .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
+      categoryRails: stocked.map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
     };
   } catch {
     return EMPTY;

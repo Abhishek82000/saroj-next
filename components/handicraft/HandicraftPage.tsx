@@ -25,12 +25,12 @@ const COLUMN_IMAGES = [
 
 const PLATES: HcPlate[] = homePlates.map((p) => ({ href: `/shop/${p.slug}`, src: p.src, cap: p.cap, alt: p.alt }));
 const SWATCHES: HcSwatch[] = homeSwatches.map(([file, title, slug]) => ({ href: `/shop/${slug}`, src: CDN + file + ".webp", title }));
-const PLATE_CLS = ["hc-plate--l", "hc-plate--c", "hc-plate--r"];
-
-const ROLL: { t: string; cls?: string }[] = [
-  { t: "Blue Pottery", cls: "hi" }, { t: "मीनाकारी", cls: "hc-dv" }, { t: "Bagru Block" },
-  { t: "Lac & Brass", cls: "hi" }, { t: "संगमरमर जाली", cls: "hc-dv" }, { t: "Kathputli" },
-];
+/* The jharokha windows: an ogee arch (viewBox 0 0 100 150) — also the mask in styles/handicraft.css (.hj-arch__win). */
+const ARCH = "M0 150V58C0 40 10 30 22 24C30 20 38 16 44 9C47 5 49 2 50 0C51 2 53 5 56 9C62 16 70 20 78 24C90 30 100 40 100 58V150Z";
+/* The frame is the same arch left open at the sill. */
+const ARCH_FRAME = ARCH.slice(0, -1);
+const ARCH_SIDES = ["l", "c", "r"];
+const ROMAN = ["i", "ii", "iii"];
 
 const FACES: HcFace[] = [
   { name: "Blue Pottery", hi: "नीली मिट्टी", meta: "Kot Jewar", count: "46 pieces", img: PIC + "saroj-craft-pottery/700/900", alt: "Blue pottery from Kot Jewar", swap: "Blue pottery vase, cobalt floral, plain backdrop" },
@@ -124,8 +124,15 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       listen(img, "error", fail);
     });
 
-    const litT = window.setTimeout(() => $("#hero")?.classList.add("lit"), 100);
-    cleanups.push(() => clearTimeout(litT));
+    /* The second house lights up when it comes into view, not on load — it sits mid-page. */
+    (() => {
+      const hero = $("#hero");
+      if (!hero) return;
+      if (!("IntersectionObserver" in window) || RM) { hero.classList.add("lit"); return; }
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { hero.classList.add("lit"); io.disconnect(); } }, { threshold: 0.2 });
+      io.observe(hero);
+      cleanups.push(() => io.disconnect());
+    })();
 
     /* reveal */
     (() => {
@@ -159,7 +166,11 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         tx = Math.max(-14, Math.min(14, e.gamma * 0.45));
         ty = Math.max(-8, Math.min(8, ((e.beta || 45) - 45) * -0.22)); push();
       });
-      on("scroll", () => { sy = Math.max(-6, Math.min(6, window.scrollY * 0.012)); push(); });
+      /* Tilt with the facade's place in the viewport, not the page's scroll — it sits mid-page. */
+      on("scroll", () => {
+        const r = row.getBoundingClientRect();
+        sy = Math.max(-5, Math.min(5, ((r.top + r.height / 2) / window.innerHeight - 0.5) * -8)); push();
+      });
       cleanups.push(() => { if (raf) cancelAnimationFrame(raf); });
     })();
 
@@ -416,58 +427,82 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           <p className="hc-hint rv">Drag · swipe · arrow keys</p>
         </div>
       </section>
-      {/* ================= HERO ================= */}
-      <section className="hc-hero" id="hero">
-        <div className="hc-wrap">
-          <div className="hc-hero__type">
+      {/* ================= TAG RAILS — New Arrivals, Best Seller, … ================= */}
+      {data.tagRails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
+      {/* ================= THE SECOND HOUSE — a jharokha facade under a toran ================= */}
+      <section className="hj" id="hero" aria-labelledby="hj-title">
+        <span className="hj__jali" aria-hidden="true" />
+
+        {/* the toran: the prints strung across the doorway, as over every Jaipur door on a festival morning */}
+        <nav className="hj-toran" aria-label="Shop by print">
+          <div className="hj-toran__track">
+            <svg className="hj-toran__cord" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 2Q50 78 100 2" />
+            </svg>
+            {swatches.slice(0, 8).map((s, i, all) => {
+              const x = (i + 0.5) / all.length;
+              return (
+                <Link key={s.href} href={s.href} className="hj-flag" aria-label={s.title}
+                  style={{ "--x": x, "--y": (2 + 152 * x * (1 - x)) / 40, "--i": i } as React.CSSProperties}>
+                  <span className="hj-flag__cloth ph" data-swap={s.title}><img src={s.src} alt="" loading="lazy" /></span>
+                  <span className="hj-flag__tassel" aria-hidden="true" />
+                  <span className="hj-flag__label">{s.title}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        <div className="hc-wrap hj__grid">
+          <div className="hj__type">
             <div className="hc-eyebrow fade f1">A second house opens · Jaipur</div>
-            <h1 className="hc-hero__title">
+            <h2 className="hj__title" id="hj-title">
               <span className="ln"><span>Woven, then</span></span>
-              <span className="ln"><span>Fired &amp; <em>ढाला</em></span></span>
-            </h1>
-            <p className="hc-hero__sub fade f2">
+              <span className="ln"><span>Fired &amp; <em className="hc-dv">ढाला</em></span></span>
+            </h2>
+            <p className="hj__sub fade f2">
               The lanes that print our Ajrakh also throw the pottery and beat the brass.{" "}
               <b>Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
             </p>
-            <div className="hc-hero__cta fade f3">
+            <div className="hc-hero__cta hj__cta fade f3">
               <Link href="/shop" className="hc-btn hc-btn--solid">Shop handicraft</Link>
               <a href="#cloth" className="hc-btn">Fabrics, as always</a>
             </div>
+            <p className="hj__note fade f4">
+              <span>Six crafts</span><i aria-hidden="true" /><span>212 pieces</span><i aria-hidden="true" /><span>One counter in Jhotwara</span>
+            </p>
           </div>
 
-          <div className="hc-plates fade f4">
-            <div className="hc-plates__row" id="platesRow">
-              {plates.map((p, i) => (
-                <Link key={PLATE_CLS[i]} href={p.href} className={`hc-plate ${PLATE_CLS[i]} ph`} data-swap={p.alt}>
-                  <img src={p.src} alt={p.alt} />
-                  <span className="hc-plate__cap">{p.cap}</span>
+          {/* three windows of a jharokha, each framing a piece */}
+          <div className="hj__stage fade f2">
+            <div className="hj-facade" id="platesRow">
+              <svg className="hj-seal" viewBox="0 0 200 200" aria-hidden="true">
+                <defs><path id="hj-ring" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0" /></defs>
+                <circle cx="100" cy="100" r="96" />
+                <circle cx="100" cy="100" r="52" />
+                <g className="hj-seal__ring"><text><textPath href="#hj-ring">HAND-THROWN · HAND-BEATEN · HAND-PRINTED · </textPath></text></g>
+                <text x="100" y="118" textAnchor="middle" className="hj-seal__glyph">हस्त</text>
+              </svg>
+              {plates.slice(0, 3).map((p, i) => (
+                <Link key={p.href + i} href={p.href} className={`hj-arch hj-arch--${ARCH_SIDES[i]}`} style={{ "--i": i } as React.CSSProperties}>
+                  <svg className="hj-arch__line hj-arch__line--out" viewBox="0 0 100 150" preserveAspectRatio="none" aria-hidden="true"><path d={ARCH_FRAME} /></svg>
+                  <svg className="hj-arch__line" viewBox="0 0 100 150" preserveAspectRatio="none" aria-hidden="true"><path d={ARCH_FRAME} /></svg>
+                  <span className="hj-arch__win ph" data-swap={p.alt}><img src={p.src} alt={p.alt} /></span>
+                  <span className="hj-arch__plaque">
+                    <small>{ROMAN[i]}</small>
+                    <span>{p.cap}</span>
+                    <b aria-hidden="true">View →</b>
+                  </span>
                 </Link>
               ))}
+              <span className="hj-ledge" aria-hidden="true" />
             </div>
           </div>
-
-          <div className="hc-hero__strip fade f4">
-            {swatches.map((s) => (
-              <Link key={s.href} href={s.href} className="hc-swatch-item" title={s.title}>
-                <span className="hc-swatch ph">
-                  <img src={s.src} alt={s.title} loading="lazy" />
-                </span>
-                <span className="hc-swatch__label">{s.title}</span>
-              </Link>
-            ))}
-          </div>
-
-          <p className="hc-hero__note fade f4">Six crafts · 212 pieces · one counter in Jhotwara</p>
         </div>
       </section>
 
-      <div className="hc-roll" aria-hidden="true">
-        <ul>
-          {[...ROLL, ...ROLL].map((r, i) => <li key={i} className={r.cls}>{r.t}</li>)}
-        </ul>
-      </div>
-
-      
+      {/* ================= CATEGORY RAILS — one per stocked category ================= */}
+      {data.categoryRails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
 
       {/* ================= VIDEO BANNER ================= */}
       <section className="hc-vbanner" id="film">
@@ -508,7 +543,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           </div>
         </div>
       </section>
-
       {/* ================= FABRIC HOUSE ================= */}
       <section className="hc-sec hc-cloth" id="cloth">
         <div className="hc-wrap hc-cloth__grid">
@@ -555,8 +589,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <FabricStrip slides={fabricSlides} />
       </section>
 
-      {/* ================= SHOP RAILS — the same tag and category rails as the home page ================= */}
-      {data.rails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
+    
 
       {/* ================= REELS — handicraft on film, shoppable like the home page ================= */}
       {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}
