@@ -7,11 +7,11 @@ import { authedCall } from "./auth";
  *
  *   POST /api/auth/add-to-wishlist?product_id=<id>&is_wholesale=<0|1>
  *   POST /api/auth/remove-to-wishlist?product_id=<id>&is_wholesale=<0|1>
- *   GET  /api/auth/wishlist?is_wholesale=<0|1>     → the saved pieces
+ *   GET  /api/auth/wishlist                         → both lists' saved pieces
  *
  * Add and remove are confirmed by the backend (both POST-only). The GET's
- * path and response shape are still a best guess — check live once a real
- * response is seen.
+ * response shape is still a best guess — check live once a real response
+ * is seen.
  * `product_id` is the live API's numeric id, so pieces only in the static
  * catalogue (no `live`) stay local-only.
  */
@@ -77,47 +77,75 @@ function wholesaleFlag(o: Record<string, unknown>, depth = 0): boolean | undefin
 
 export type Failure = { ok: false; message: string };
 
-/** The signed-in visitor's saved product slugs, read from the server. Call
-    this after login (or on app start, once a session token is known) to
-    reconcile the local `favs` with whatever the account actually has saved
-    on other devices. */
-export async function getWishlist(token: string, wholesale: boolean): Promise<{ ok: true; slugs: string[] } | Failure> {
-  const r = await authedCall("wishlist", token, { method: "GET", query: { is_wholesale: wholesale ? "1" : "0" } });
+/** An array of rows sitting under a key that names one list — a reply
+    grouped as `{ retail: [...], wholesale: [...] }`, at the top or under
+    `data`. */
+function groupedList(root: unknown, re: RegExp): Record<string, unknown>[] | undefined {
+  let level: unknown[] = [root];
+  for (let depth = 0; depth < 3 && level.length; depth++) {
+    const next: unknown[] = [];
+    for (const node of level) {
+      if (!node || typeof node !== "object" || Array.isArray(node)) continue;
+      for (const [k, v] of Object.entries(node)) {
+        if (Array.isArray(v) && re.test(k)) return v.filter((x) => x && typeof x === "object") as Record<string, unknown>[];
+        next.push(v);
+      }
+    }
+    level = next;
+  }
+  return undefined;
+}
+
+export type Lists = { retail: string[]; wholesale: string[] };
+
+/** Both of the signed-in visitor's wishlists in one call —
+    GET /api/auth/wishlist with the Bearer token, no params. Each saved row
+    goes to the list it says it's in (`is_wholesale` 1 → wholesale, 0 →
+    retail; or a `wholesale`/`type` field); a row that doesn't say is retail. */
+export async function getWishlist(token: string): Promise<{ ok: true; lists: Lists } | Failure> {
+  const r = await authedCall("wishlist", token, { method: "GET" });
   if (!r.ok) return r;
   /* The response's shape has never been checked against a real account. A
      reply we can't read must not count as "the wishlist is empty" — the
-     caller replaces the local list with what this returns — so anything other
-     than a list of rows with slugs is a failure, and the local list stands. */
-  const rows = findArray(r.json);
+     caller replaces its lists with what this returns — so anything other
+     than rows with slugs is a failure, and the lists stand. */
   const unreadable = (message: string): Failure => {
-    if (process.env.NODE_ENV !== "production") console.warn(`[wishlist] ${message} (is_wholesale=${wholesale ? 1 : 0}):`, r.json);
+    if (process.env.NODE_ENV !== "production") console.warn(`[wishlist] ${message}:`, r.json);
     return { ok: false, message };
   };
+  const slugs = (rows: Record<string, unknown>[]) => rows.map((row) => slugOf(row)).filter((s): s is string => !!s);
+
+  const groupedRetail = groupedList(r.json, /retail/i);
+  const groupedWholesale = groupedList(r.json, /wholesale/i);
+  if (groupedRetail || groupedWholesale) {
+    const lists = { retail: slugs(groupedRetail ?? []), wholesale: slugs(groupedWholesale ?? []) };
+    const total = (groupedRetail?.length ?? 0) + (groupedWholesale?.length ?? 0);
+    if (total > 0 && lists.retail.length + lists.wholesale.length === 0) return unreadable("Wishlist rows carry no slug");
+    return { ok: true, lists };
+  }
+
+  const rows = findArray(r.json);
   if (!rows) return unreadable("Unrecognised wishlist response");
-  /* Keep only this list's rows. A row that says which list it's in — an
-     `is_wholesale` (0/1), `wholesale` or `type` ("retail"/"wholesale") field,
-     on itself or a nested product — must match; the API answering both
-     ?is_wholesale=0 and =1 with every saved piece otherwise copies each heart
-     into both lists. A row that says nothing is taken as asked. */
-  const arr = rows.filter((row) => {
-    const w = wholesaleFlag(row);
-    return w === undefined || w === wholesale;
-  });
-  const slugs = arr.map(slugOf).filter((s): s is string => !!s);
-  if (rows.length > 0 && slugs.length === 0) return unreadable("Wishlist rows carry no slug");
-  return { ok: true, slugs };
+  const lists: Lists = { retail: [], wholesale: [] };
+  for (const row of rows) {
+    const slug = slugOf(row);
+    if (slug) lists[wholesaleFlag(row) ? "wholesale" : "retail"].push(slug);
+  }
+  if (rows.length > 0 && lists.retail.length + lists.wholesale.length === 0) return unreadable("Wishlist rows carry no slug");
+  return { ok: true, lists };
 }
 
-/** Adds (`save`) or removes one piece server-side. Fire-and-forget from the caller's
-    point of view — the local toggle in StoreProvider is the source of truth
-    for the UI and already flipped by the time this is called; a failure
-    here just means the next `getWishlist` won't see the change yet. */
+/** Adds (`save`) or removes one piece server-side. The caller re-reads the
+    list with `getWishlist` once this succeeds — the API is the only source. */
 export async function setWishlistRemote(
   token: string, productId: number, wholesale: boolean, save: boolean,
 ): Promise<{ ok: true } | Failure> {
+  /* retail → is_wholesale 0, wholesale → 1. Sent as a JSON body and as query
+     params both, so the backend reads them whichever way it looks. */
   const r = await authedCall(save ? "add-to-wishlist" : "remove-to-wishlist", token, {
     method: "POST",
     query: { product_id: String(productId), is_wholesale: wholesale ? "1" : "0" },
+    body: { product_id: productId, is_wholesale: wholesale ? 1 : 0 },
   });
   return r.ok ? { ok: true } : r;
 }

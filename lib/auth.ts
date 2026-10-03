@@ -271,10 +271,10 @@ export async function getMe(token: string, mobile: string): Promise<{ ok: true; 
 export async function authedCall(
   path: string,
   token: string,
-  opts: { method?: "GET" | "POST"; query?: Record<string, string> } = {},
+  opts: { method?: "GET" | "POST"; query?: Record<string, string>; body?: object } = {},
 ): Promise<{ ok: true; json: Record<string, unknown> } | Failure> {
   /* Logged-in data calls (wishlist, orders) ride out the API's rate limit — see lib/retry.ts. */
-  const r = await call(path, { method: opts.method ?? "GET", token, query: opts.query, retry: true });
+  const r = await call(path, { method: opts.method ?? "GET", token, query: opts.query, body: opts.body, retry: true });
   return r.ok ? { ok: true, json: r.json as unknown as Record<string, unknown> } : r;
 }
 
