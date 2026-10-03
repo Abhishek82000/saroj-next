@@ -14,10 +14,19 @@ export const metadata: Metadata = pageMeta({
 
 /**
  * /wholesale-fabric — its own page, built from GET /api/wholesale-page-data;
- * prices only from that feed, and no add-to-cart. If the feed is down it falls
- * back to the shared home sections' wholesale-mode explainer.
+ * prices only from that feed, and no add-to-cart.
+ *
+ * If the feed is down while the page is being refreshed in the background
+ * (ISR, every 5 minutes), throwing makes Next keep serving the last good
+ * page instead of caching a fallback over it. Only a build that finds the
+ * feed down (nothing to keep yet) falls back to the shared home sections'
+ * wholesale-mode explainer — and the next refresh replaces it.
  */
 export default async function WholesalePage() {
   const page = await getWholesalePage();
-  return page ? <WholesaleHome page={page} /> : <HomeSections wholesale={null} />;
+  if (page) return <WholesaleHome page={page} />;
+  if (process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build") {
+    throw new Error("Wholesale feed unavailable (GET /api/wholesale-page-data) — keeping the last good page.");
+  }
+  return <HomeSections wholesale={null} />;
 }
