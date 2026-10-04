@@ -1,7 +1,7 @@
 /* Design tokens — colour, type, rhythm. The single source of truth.
    The three --font-* variables are injected by next/font in app/layout.tsx. */
 :root{
-  --paper:#F1F3F2; --paper-2:#E7ECEB; --paper-3:#DCE3E2;
+  --paper:#f5f5f5; --paper-2:#E7ECEB; --paper-3:#DCE3E2;
   --ink:#101820; --ink-2:#3A4750; --mute:#000;
   --cobalt:#1B5FA8; --teal:#12897C; --lac:#C0392E; --ochre:#A87A2A;
   --line:rgba(16,24,32,.12); --line-2:rgba(16,24,32,.07);

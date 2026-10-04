@@ -111,7 +111,7 @@ export default function CartDrawer() {
           {hasErrors && <p className="st-cart__note st-co__err">Remove the unavailable items to check out.</p>}
                     
           {hasErrors
-            ? <button type="button" className="st-btn st-btn--solid" disabled>Go to checkout</button>
+            ? <button type="button" className="st-btn mt-2 st-btn--solid" disabled>Go to checkout</button>
             : <Link href={href("/checkout")} className="st-btn st-btn--solid" onClick={close}>Go to checkout</Link>}
           <Link href={href("/cart")} className="st-btn" onClick={close}>View cart</Link>
         </div>
