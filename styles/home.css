@@ -29,9 +29,9 @@
 .st-plate__cap{ position:absolute; left:10px; bottom:10px; z-index:3; font-size:.55rem;
                 letter-spacing:.18em; text-transform:uppercase; font-weight:700;
                 background:rgba(255,255,255,.92); color:var(--ink); padding:.32em .7em; border-radius:99px; }
-.st-hero__strip{ display:flex; gap:1.2rem; justify-content:center; margin-top:clamp(22px,4vw,34px); flex-wrap:wrap; }
-.st-swatch-item{ display:flex; flex-direction:column; align-items:center; gap:.5rem; width:clamp(70px,16vw,100px); }
-.st-hero-swatch{ position:relative; display:block; width:clamp(46px,11vw,60px); aspect-ratio:1; border-radius:10px; overflow:hidden;
+.st-hero__strip{ display:flex; gap:.5rem; justify-content:space-evenly; margin-top:clamp(22px,4vw,34px); flex-wrap:wrap; }
+.st-swatch-item{ display:flex; flex-direction:column; align-items:center; gap:.5rem; width:clamp(70px,16vw,176px); }
+.st-hero-swatch{ position:relative; display:block; width:clamp(46px,11vw,155px); aspect-ratio:1; border-radius:10px; overflow:hidden;
             box-shadow:0 8px 18px -8px rgba(16,24,32,.4); transition:transform .45s var(--ease); border:2px solid transparent; }
 .st-swatch-item:hover .st-hero-swatch{ transform:translateY(-6px) scale(1.06); border-color:var(--cobalt); }
 .st-swatch__label{ font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600;
