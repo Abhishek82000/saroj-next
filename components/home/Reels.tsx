@@ -31,19 +31,7 @@ export default function Reels({ items }: { items?: Reel[] }) {
         <div>
           <Reveal className="st-eyebrow">See it move</Reveal>
           <Reveal as="h2" delay={1} className="st-h2">Shoppable reels.</Reveal>
-          <Reveal as="p" delay={2} className="st-lede">
-            Drape, weight and glaze don’t survive a still photo. These are shot on the counter,
-            no lighting rig.
-          </Reveal>
         </div>
-        <Reveal delay={2} className="row-gap">
-          <button className="st-arrow" onClick={() => nudge(-1)} aria-label="Scroll left">
-            <Icon name="left" size={16} strokeWidth={1.8} />
-          </button>
-          <button className="st-arrow" onClick={() => nudge(1)} aria-label="Scroll right">
-            <Icon name="right" size={16} strokeWidth={1.8} />
-          </button>
-        </Reveal>
       </div>
 
       <div className="st-wrap">

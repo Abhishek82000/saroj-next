@@ -92,7 +92,6 @@ export default function Hero() {
           ))}
         </div>
 
-        <p className="st-hero__note fade f4">Six crafts · 212 pieces · one counter in Jhotwara</p>
       </div>
     </section>
   );

@@ -43,11 +43,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
 
   return (
     <main id="main">
-      {isWholesale && wholesale?.slides.length ? <BannerSlider slides={wholesale.slides} label="Wholesale offers" /> : <Hero />}
-      {/* `top_slider` banners — their own section under the hero, retail only. */}
-      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}
-      <CraftRoll />
-      
+      <Hero />
       {tagSections.map((tag) => (
         <Rail
             key={tag.id}
@@ -57,15 +53,22 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
             items={tag.products.map(apiProductToProduct)}
           />
       ))}
-      {offers.length > 1 && <OffersSlider slides={offers} />}
-      {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
-      <Shelf categories={featuredCategories} />
+      <CraftRoll />
+      <Reels items={apiReels} />
       {categoryRails.map((cat) => (
         <Rail key={cat.id} id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
       ))}
-      {!isWholesale && <WaysToBuy />}
       <VideoBanner />
-      <Reels items={apiReels} />
+      {/* `top_slider` banners — their own section under the hero, retail only. */}
+      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}
+      
+      {offers.length > 1 && <OffersSlider slides={offers} />}
+      {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
+      <Shelf categories={featuredCategories} />
+      
+      {!isWholesale && <WaysToBuy />}
+      
+      
       <Voices />
       <Bulk />
       <Journal posts={journalPosts} />
