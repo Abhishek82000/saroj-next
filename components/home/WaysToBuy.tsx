@@ -87,12 +87,12 @@ export default function WaysToBuy() {
               <div className="st-way__body">
                 <p className="st-way__kick"><span>{w.n}</span>{w.kicker}</p>
                 <h3 id={`way-${w.n}`}>{w.title}</h3>
-                <p className="st-way__copy">{w.copy}</p>
-                <dl className="st-way__facts">
+                {/* <p className="st-way__copy">{w.copy}</p> */}
+                {/* <dl className="st-way__facts">
                   {w.facts.map(([v, label]) => (
                     <div key={label}><dt>{label}</dt><dd>{v}</dd></div>
                   ))}
-                </dl>
+                </dl> */}
                 <Link href={w.href} className="st-btn st-way__cta">
                   {w.cta}<Icon name="right" size={15} strokeWidth={1.8} />
                 </Link>
