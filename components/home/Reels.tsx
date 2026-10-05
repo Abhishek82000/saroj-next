@@ -26,7 +26,7 @@ export default function Reels({ items }: { items?: Reel[] }) {
   if (data.length === 0) return null;
 
   return (
-    <section className="st-sec" id="reels" style={{ paddingBlock: "clamp(30px,5vw,54px)" }}>
+    <section className="st-sec" id="reels" style={{ paddingBlock: "0 clamp(30px,5vw,54px)" }}>
       <div className="st-wrap st-railhead">
         <div>
           <Reveal className="st-eyebrow">See it move</Reveal>

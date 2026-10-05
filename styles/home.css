@@ -495,72 +495,225 @@
    WAYS TO BUY — wholesale + handicraft (components/home/WaysToBuy)
    Mobile first: stacked cards, full-width CTAs. Ink and gold, arch frames.
    ============================================================ */
-.st-ways{ --gold:#E8C87A; --gold-2:#C9A457; background:var(--ink); color:var(--paper); overflow:hidden; isolation:isolate;
-          padding-block:clamp(44px,9vw,110px); }
-/* a faint block-print dot field behind the heading */
-.st-ways::before{ content:''; position:absolute; inset:0 0 auto; height:min(70%,520px); z-index:-1; pointer-events:none;
-                  background:radial-gradient(circle,rgba(232,200,122,.16) 1px,transparent 1.6px) 0 0/22px 22px;
-                  -webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 100%); mask-image:linear-gradient(180deg,#000 0%,transparent 100%); }
-.st-ways .st-eyebrow{ color:var(--gold); }
-.st-ways .st-h2{ color:var(--paper); }
-.st-ways .st-h2 em{ font-style:italic; color:var(--gold); }
-.st-ways .st-lede{ color:rgba(241,243,242,.68); }
-.st-ways__head{ display:grid; gap:0 3rem; align-items:end; }
-@media(min-width:900px){ .st-ways__head{ grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); }
-                         .st-ways__head .st-lede{ margin:0 0 .4rem; justify-self:end; } }
+/* ---------- WaysToBuy: two full-screen splits, mirrored ----------
+   Set --wb-offset to your sticky header height.                      */
 
-.st-ways__grid{ display:grid; gap:clamp(52px,12vw,72px); margin-top:clamp(36px,8vw,72px); }
-@media(min-width:900px){ .st-ways__grid{ grid-template-columns:1fr 1fr; gap:clamp(40px,5vw,84px); }}
-
-.st-way{ display:grid; gap:1.5rem; min-width:0; }
-/* photo: arch with a gold hairline frame offset behind it, and a round detail shot */
-.st-way__art{ position:relative; isolation:isolate; width:100%; max-width:520px; padding:0 16px 22px 0; }
-.st-way__art::before{ content:''; position:absolute; inset:16px 0 6px 16px; z-index:-1;
-                      border:1px solid rgba(232,200,122,.55); border-radius:999px 999px 22px 22px; }
-.st-way__arch{ position:relative; aspect-ratio:4/5; overflow:hidden; border-radius:999px 999px 22px 22px;
-               background:linear-gradient(160deg,#1C2833,#0B1117); box-shadow:0 30px 60px -30px rgba(0,0,0,.7); }
-.st-way__arch img,.st-way__inset img{ object-fit:cover; transition:transform 1.4s var(--ease); }
-.st-way__arch::after{ content:''; position:absolute; inset:0; pointer-events:none;
-                      background:linear-gradient(180deg,transparent 58%,rgba(16,24,32,.55) 100%); }
-.st-way:hover .st-way__arch img{ transform:scale(1.05); }
-.st-way__badge{ position:absolute; left:14px; bottom:14px; z-index:1; padding:.45em .95em; border-radius:99px;
-                font-size:.58rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--ink);
-                background:rgba(241,243,242,.9); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
-.st-way__inset{ position:absolute; right:0; bottom:0; width:34%; aspect-ratio:1; border-radius:50%; overflow:hidden;
-                border:4px solid var(--ink); outline:1px solid rgba(232,200,122,.6); outline-offset:3px;
-                background:#1C2833; box-shadow:0 18px 36px -16px rgba(0,0,0,.8); }
-
-.st-way__body{ display:grid; justify-items:start; min-width:0; }
-.st-way__kick{ display:flex; align-items:center; gap:.8rem; margin:0; font-size:.62rem; font-weight:700;
-               letter-spacing:.28em; text-transform:uppercase; color:var(--gold); }
-.st-way__kick span{ font-family:var(--d); font-size:1.5rem; font-weight:400; letter-spacing:0; line-height:1;
-                    padding-right:.8rem; border-right:1px solid rgba(232,200,122,.4); }
-.st-way h3{ font-family:var(--d); font-weight:400; font-size:clamp(1.9rem,7.4vw,2.7rem); line-height:1.05;
-            letter-spacing:-.015em; margin:.7rem 0 0; color:var(--paper); }
-.st-way__copy{ margin:.75rem 0 0; font-size:.92rem; font-weight:300; line-height:1.65; color:rgba(241,243,242,.7); max-width:44ch; }
-
-.st-way__facts{ width:100%; margin:1.3rem 0 1.5rem; display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
-                border-block:1px solid rgba(255,255,255,.12); }
-.st-way__facts div{ display:flex; flex-direction:column; gap:.2rem; padding:.9rem .6rem .85rem 0; min-width:0; }
-.st-way__facts div+div{ padding-left:.8rem; border-left:1px solid rgba(255,255,255,.12); }
-.st-way__facts dd{ order:-1; margin:0; font-family:var(--d); font-size:clamp(1.15rem,5vw,1.45rem); line-height:1; color:var(--gold); }
-.st-way__facts dt{ font-size:.56rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; line-height:1.35;
-                   color:rgba(241,243,242,.55); }
-
-/* gold CTA — full width under the thumb on phones */
-.st-way__cta{ --bg:var(--gold); --fg:var(--ink); --bd:transparent; width:100%; min-height:52px; }
-.st-way__cta::after{ background:var(--paper); }
-.st-way__cta:hover,.st-way__cta:focus-visible{ color:var(--ink); }
-.st-way__cta svg{ transition:transform .45s var(--ease); }
-.st-way__cta:hover svg{ transform:translateX(4px); }
-.st-way__cta:focus-visible{ outline-color:var(--gold); }
-@media(min-width:560px){ .st-way__cta{ width:auto; padding-inline:2.2em; } }
-
-/* tablet: photo and words side by side in each card */
-@media(min-width:620px) and (max-width:899px){
-  .st-way{ grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr); gap:2rem; align-items:center; }
+.wb-root {
+  --wb-offset: 4rem;
+  --wb-display: var(--font-display, "Cormorant Garamond", "Playfair Display", Georgia, serif);
 }
 
+.wb-part {
+  --wb-arch-r: 50% 50% 0.35rem 0.35rem / 30% 30% 0.35rem 0.35rem;
+  box-sizing: border-box;
+  height: min(calc(100svh - var(--wb-offset)), 54rem);
+  min-height: 33rem;
+  display: grid;
+  /* Phones: picture on top, words below. */
+  grid-template-rows: minmax(0, 1.1fr) auto;
+  gap: clamp(0.9rem, 3vh, 1.5rem);
+  padding: clamp(1.1rem, 3.5vh, 2.5rem) clamp(1.25rem, 6vw, 4rem);
+  background: var(--wb-bg);
+  color: var(--wb-ink);
+}
+
+.wb-part--paper {
+  --wb-bg: #f2ece2;
+  --wb-ink: #1b1a33;
+  --wb-muted: rgba(27, 26, 51, 0.68);
+  --wb-accent: #8a6d33;      /* brass, darkened for text on paper */
+  --wb-line: #b89a5e;
+  --wb-btn-hover-bg: #1b1a33;
+  --wb-btn-hover-ink: #f2ece2;
+}
+.wb-part--ink {
+  --wb-bg: #1b1a33;
+  --wb-ink: #f2ece2;
+  --wb-muted: rgba(242, 236, 226, 0.66);
+  --wb-accent: #b89a5e;
+  --wb-line: #b89a5e;
+  --wb-btn-hover-bg: #f2ece2;
+  --wb-btn-hover-ink: #1b1a33;
+}
+
+/* ---------- picture ---------- */
+
+.wb-art {
+  position: relative;
+  min-height: 0;
+  /* room for the outer frame line */
+  padding: 0.6rem;
+  display: flex;
+  justify-content: center;
+}
+
+.wb-arch {
+  position: relative;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--wb-arch-r);
+  background: color-mix(in srgb, var(--wb-ink) 10%, transparent);
+}
+
+/* Brass frame, one step outside the picture. */
+.wb-arch::before {
+  content: "";
+  position: absolute;
+  inset: -0.6rem;
+  border: 1px solid var(--wb-line);
+  border-radius: 50% 50% 0.6rem 0.6rem / 31% 31% 0.6rem 0.6rem;
+  pointer-events: none;
+}
+
+.wb-img {
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.wb-badge {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  background: var(--wb-bg);
+  color: var(--wb-ink);
+  font-family: var(--wb-display);
+  font-style: italic;
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+
+/* Small close-up overlapping the arch's lower corner, toward the text. */
+.wb-inset {
+  position: absolute;
+  z-index: 2;
+  right: calc(50% - min(var(--wb-inset-shift, 11rem), 42vw));
+  bottom: 0.2rem;
+  width: clamp(4.25rem, 11vh, 8rem);
+  aspect-ratio: 1;
+  border: 4px solid var(--wb-bg);
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+/* ---------- words ---------- */
+
+.wb-text {
+  align-self: center;
+  display: grid;
+  gap: clamp(0.4rem, 1.4vh, 0.9rem);
+  justify-items: start;
+  min-width: 0;
+}
+
+.wb-kicker {
+  margin: 0;
+  font-family: var(--wb-display);
+  font-style: italic;
+  font-size: clamp(1rem, 0.6vw + 0.85rem, 1.25rem);
+  color: var(--wb-accent);
+}
+
+.wb-heading {
+  margin: 0;
+  font-family: var(--wb-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 6vw + 0.4rem, 4.75rem);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.wb-copy {
+  margin: 0;
+  max-width: 28rem;
+  font-size: clamp(0.875rem, 0.4vw + 0.78rem, 1.0625rem);
+  line-height: 1.55;
+  color: var(--wb-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wb-actions { margin-top: clamp(0.25rem, 1vh, 0.75rem); }
+
+.wb-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.35rem;
+  border: 1px solid var(--wb-line);
+  border-radius: 999px;
+  color: var(--wb-ink);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.wb-cta svg { transition: transform 0.3s ease; }
+
+@media (hover: hover) {
+  .wb-cta:hover {
+    background: var(--wb-btn-hover-bg);
+    color: var(--wb-btn-hover-ink);
+    border-color: var(--wb-btn-hover-bg);
+  }
+  .wb-cta:hover svg { transform: translateX(3px); }
+}
+.wb-cta:focus-visible { outline: 2px solid var(--wb-ink); outline-offset: 3px; }
+
+/* ---------- laptops: side by side, mirrored on the second part ---------- */
+
+@media (min-width: 900px) {
+  .wb-part {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+    gap: clamp(2rem, 6vw, 6rem);
+    padding-inline: clamp(2rem, 7vw, 7rem);
+  }
+  .wb-part--flip .wb-art  { order: 2; }
+  .wb-part--flip .wb-text { order: 1; }
+
+  .wb-art { padding: 0.8rem; }
+  .wb-arch::before { inset: -0.8rem; }
+
+  .wb-inset {
+    --wb-inset-shift: 0px;
+    width: clamp(6rem, 18vh, 10rem);
+    right: auto;
+    left: calc(50% + min(14vh, 9rem));
+    bottom: 1.5rem;
+  }
+  .wb-part--flip .wb-inset {
+    left: auto;
+    right: calc(50% + min(14vh, 9rem));
+  }
+
+  .wb-text { padding-inline: clamp(0rem, 2vw, 2rem); }
+}
+
+/* Short laptop screens. */
+@media (min-width: 900px) and (max-height: 720px) {
+  .wb-heading { font-size: 3rem; }
+  .wb-copy { -webkit-line-clamp: 2; }
+}
+
+/* Short phones. */
+@media (max-width: 899px) and (max-height: 700px) {
+  .wb-heading { font-size: 2rem; }
+  .wb-copy { -webkit-line-clamp: 2; }
+  .wb-badge { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-cta, .wb-cta svg { transition: none; }
+  .wb-cta:hover svg { transform: none; }
+}
 /* ============================================================
    OFFERS SLIDER — coupon tickets (components/home/OffersSlider)
    Phones: 1.5 tickets, the rail bleeds to the screen edge. Desktop: 3.

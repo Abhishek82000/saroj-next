@@ -18,7 +18,7 @@ export default function Rail({
   const { rail, nudge, hold } = useAutoRail(items.length);
 
   return (
-    <section className="st-sec" id={id} style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
+    <section className="st-sec" id={id} style={{ paddingBlock: "0 54px" }}>
       <div className="st-wrap st-railhead">
         <div>
           <Reveal className="st-eyebrow">{eyebrow}</Reveal>

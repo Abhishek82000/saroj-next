@@ -5,7 +5,7 @@ export default function CraftRoll() {
     ["Lac & Brass", "hi"], ["संगमरमर जाली", "st-dv"], ["Kathputli", ""],
   ];
   return (
-    <div className="st-roll" aria-hidden="true">
+    <div className="st-roll mb-5" aria-hidden="true">
       <ul>
         {[...names, ...names].map(([name, cls], i) => (
           <li key={i} className={cls}>{name}</li>

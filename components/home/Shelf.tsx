@@ -4,92 +4,70 @@ import Reveal from "@/components/ui/Reveal";
 import { categoryHref } from "@/lib/nav";
 import type { CommonFeaturedCategory } from "@/lib/types";
 
-
-/** Small numbers read better spelled out in a standfirst than as digits. */
+/** Small numbers read better spelled out than as digits. */
 const spell = (n: number) =>
   ["", "one", "two", "three", "four", "five"][n] ?? String(n);
 
-/**
- * One plate on the wall. Both modes — live collections and the static
- * opening selection — are flattened into this shape first, so the markup
- * below stays a single list instead of a ternary wrapped around two trees.
- */
-interface Plate {
-  key: string;
-  href: string;
-  image: string;
-  alt: string;
-  note?: string;
-  name: string;
-  meta?: string;
-  /** At most one marginal note per plate. */
-  flag?: string;
-}
+const VISIBLE = 5;
 
-export default function Shelf({ categories = [] }: { categories?: CommonFeaturedCategory[] }) {
-  /* Five, not seven. The layout below is composed for five, and a shorter
-     shelf of larger plates reads as a selection rather than a grid dump. */
-  const live = categories.slice(0, 5);
+export default function Shelf({
+  categories = [],
+}: {
+  categories?: CommonFeaturedCategory[];
+}) {
+  /* The layout is composed for five arches. */
+  const shown = categories.slice(0, VISIBLE);
+  if (shown.length === 0) return null;
 
-  /* Featured categories from the API only. */
-  const plates: Plate[] = live.map((c) => ({
-    key: String(c.id),
-    href: categoryHref(c.slug),
-    image: c.image,
-    alt: c.name,
-    name: c.name,
-  }));
-
-  if (plates.length === 0) return null;
-
-  /* Only promise "the rest" when there actually is a rest — otherwise the
-     sentence contradicts what's on screen. */
-  const lede = live.length < categories.length
-      ? `${categories.length} collections make up the counter. These ${spell(live.length)} open the shelf — the rest are a search away.`
+  /* Only promise "the rest" when there actually is a rest. */
+  const intro =
+    shown.length < categories.length
+      ? `${categories.length} collections make up the counter. These ${spell(shown.length)} open the shelf — the rest are a search away.`
       : "Every collection on the counter, each one printed, cut and folded in Jaipur.";
 
+  const count =
+    shown.length < categories.length
+      ? `Showing ${shown.length} of ${categories.length}`
+      : `${categories.length} ${categories.length === 1 ? "collection" : "collections"}`;
+
   return (
-    <section className="st-sec st-shelf-sec" id="shelf">
-      <div className="st-wrap">
-        <div className="st-shelf__head">
-          <div>
-            <Reveal className="st-eyebrow">
-              Shop by collection
+    <section className="coll-root" id="shelf" aria-labelledby="coll-title">
+      <div className="coll-inner">
+        <header className="coll-top">
+          <div className="coll-top-main">
+            <Reveal as="h2" className="coll-title" id="coll-title">
+              The first shelf.
             </Reveal>
-            <Reveal as="h2" delay={1} className="st-h2">The first shelf.</Reveal>
+            <Reveal as="p" delay={1} className="coll-intro">
+              {intro}
+            </Reveal>
           </div>
-          <Reveal as="p" delay={2} className="st-shelf__lede">{lede}</Reveal>
-        </div>
+          <div className="coll-meta">
+            <span className="coll-rule" aria-hidden="true" />
+            
+          </div>
+        </header>
 
-        <div className="st-hang">
-          {plates.map((pl, i) => (
-            <RevealLink key={pl.key} href={pl.href} className="st-piece"
-              delay={(Math.min(i + 1, 4)) as 1 | 2 | 3 | 4}>
-              <span className="st-piece__ph ph">
-                <Photo src={pl.image} alt={pl.alt} note={pl.note}
-                  sizes="(max-width:640px) 92vw, (max-width:1000px) 46vw, 33vw" />
-              </span>
-
-              {/* Draws left to right on hover — the only motion in the plate. */}
-              <span className="st-piece__rule" aria-hidden="true" />
-
-              <span className="st-piece__body">
-                <span className="st-piece__i" aria-hidden="true">
-                  {String(i + 1).padStart(2, "0")}
+        <ul className="coll-grid" data-count={shown.length}>
+          {shown.map((c, i) => (
+            <li className="coll-cell" key={c.id}>
+              <RevealLink
+                href={categoryHref(c.slug)}
+                className="coll-card"
+                delay={Math.min(i + 1, 4) as 1 | 2 | 3 | 4}
+              >
+                <span className="coll-card-media">
+                  <Photo
+                    src={c.image}
+                    alt=""
+                    sizes="(max-width:640px) 46vw, (max-width:1000px) 30vw, 20vw"
+                  />
                 </span>
-                <span className="st-piece__t">
-                  <span className="st-piece__name">{pl.name}</span>
-                  {(pl.meta || pl.flag) && (
-                    <span className="st-piece__meta">
-                      {pl.meta}
-                      {pl.flag && <em>{pl.flag}</em>}
-                    </span>
-                  )}
-                </span>
-              </span>
-            </RevealLink>
+                <span className="coll-card-name">{c.name}</span>
+              </RevealLink>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

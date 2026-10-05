@@ -45,6 +45,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
   return (
     <main id="main">
       <Hero />
+      <CraftRoll />
       {tagSections.map((tag) => (
         <Rail
             key={tag.id}
@@ -54,12 +55,14 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
             items={tag.products.map(apiProductToProduct)}
           />
       ))}
-      <CraftRoll />
+      
       <Reels items={apiReels} />
+      <Shelf categories={featuredCategories} />
       {categoryRails.map((cat) => (
         <Rail key={cat.id} id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
       ))}
       <VideoBanner />
+      
       {homeData.handicraftSections.map((hc) => (
         <HandicraftRail key={`hc-${hc.id}`} id={hc.slug} eyebrow="Shaped by hand" heading={hc.name} items={hc.products.map(apiProductToProduct)} />
       ))}
@@ -69,7 +72,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       
       {offers.length > 1 && <OffersSlider slides={offers} />}
       {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
-      <Shelf categories={featuredCategories} />
+      
       
       {!isWholesale && <WaysToBuy />}
       
