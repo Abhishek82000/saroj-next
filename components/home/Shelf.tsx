@@ -31,7 +31,7 @@ export default function Shelf({
       : `${categories.length} ${categories.length === 1 ? "collection" : "collections"}`;
 
   return (
-    <section className="coll-root" id="shelf" aria-labelledby="coll-title">
+    <section className="coll-root mb-5" id="shelf" aria-labelledby="coll-title">
       <div className="coll-inner">
         <header className="coll-top">
           <div className="coll-top-main">
