@@ -10,6 +10,7 @@ import Voices from "@/components/home/Voices";
 import Bulk from "@/components/home/Bulk";
 import Journal from "@/components/home/Journal";
 import Rail from "@/components/product/Rail";
+import HandicraftRail from "@/components/product/HandicraftRail";
 import BannerSlider from "@/components/home/BannerSlider";
 import JsonLd from "@/components/seo/JsonLd";
 import { getBlogList } from "@/lib/blogs";
@@ -59,6 +60,10 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
         <Rail key={cat.id} id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
       ))}
       <VideoBanner />
+      {homeData.handicraftSections.map((hc) => (
+        <HandicraftRail key={`hc-${hc.id}`} id={hc.slug} eyebrow="Shaped by hand" heading={hc.name} items={hc.products.map(apiProductToProduct)} />
+      ))}
+      
       {/* `top_slider` banners — their own section under the hero, retail only. */}
       {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}
       

@@ -83,7 +83,6 @@ export default function WaysToBuy() {
                   <Image src={w.inset.src} alt={w.inset.alt} fill sizes="160px" />
                 </div>
               </div>
-
               <div className="st-way__body">
                 <p className="st-way__kick"><span>{w.n}</span>{w.kicker}</p>
                 <h3 id={`way-${w.n}`}>{w.title}</h3>

@@ -312,6 +312,8 @@ export interface HomeApiResponse {
     top_slider?: HomeApiSlide[];
     tag_show_home_page: HomeTagSection[];
     category_show_home_page: HomeCategorySection[];
+    /** Handicraft rails — the same product payload as the tag/category rails. */
+    handicraft_show_home_page?: (HomeTagSection | HomeCategorySection)[];
     video_products: HomeVideoProduct[];
   };
 }

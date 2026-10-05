@@ -1,0 +1,222 @@
+/* ============================================================
+   Handicraft rail  (namespace: hnd-)
+   Card concept: arched niche (jharokha) — outlined arch frame,
+   borderless, centred label, outlined add button.
+   Replaces the previous handicraft-rail.css. TSX is unchanged.
+   ============================================================ */
+
+.hnd {
+  --hnd-bg: #f4f0e9;
+  --hnd-ink: #0e171e;
+  --hnd-text: #3a4147;
+  --hnd-muted: #8a8f93;
+  --hnd-line: rgba(14, 23, 30, 0.1);
+  --hnd-clay: #a4553a;
+  --hnd-display: var(--font-display, "Marcellus", Georgia, serif);
+  --hnd-card-w: 264px;
+  --hnd-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  padding: clamp(2rem, 3vw, 2rem) 0;
+  color: var(--hnd-ink);
+  overflow: hidden;
+  background-color: var(--hnd-bg);
+  background-image:
+    repeating-linear-gradient(0deg,  rgba(110, 85, 55, 0.035) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(110, 85, 55, 0.035) 0 1px, transparent 1px 4px);
+}
+
+.hnd :where(a, button) {
+  font: inherit; color: inherit; text-decoration: none;
+  background: none; border: 0; padding: 0; margin: 0; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hnd-inner {
+  width: min(1280px, calc(100% - clamp(2rem, 6vw, 5rem)));
+  margin-inline: auto;
+}
+
+/* ---------- heading ---------- */
+.hnd-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+.hnd-eyebrow {
+  display: flex; align-items: center; gap: 0.75rem;
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--hnd-clay);
+}
+.hnd-eyebrow::before { content: ""; width: 2.25rem; height: 1px; background: var(--hnd-clay); }
+.hnd-title {
+  margin: 0.8rem 0 0;
+  font-family: var(--hnd-display);
+  font-weight: 400;
+  font-size: clamp(2.3rem, 5vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.hnd-lede {
+  margin: 1rem 0 0; max-width: 46ch;
+  font-size: 0.975rem; line-height: 1.65;
+  color: var(--hnd-text);
+}
+.hnd .hnd-all {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--hnd-ink);
+  font-size: 0.85rem; font-weight: 600;
+  transition: color 0.25s, border-color 0.25s, gap 0.3s var(--hnd-ease);
+}
+.hnd .hnd-all:hover { color: var(--hnd-clay); border-color: var(--hnd-clay); gap: 0.75rem; }
+
+/* ---------- stage + rail ---------- */
+.hnd-stage { position: relative; }
+.hnd-rail {
+  display: flex;
+  gap: clamp(1.25rem, 2.6vw, 2.5rem);
+  margin: -0.5rem -0.75rem;
+  padding: 0.5rem 0.75rem 1.5rem;
+  scroll-padding-inline: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.hnd-rail::-webkit-scrollbar { display: none; }
+
+.hnd .hnd-arrow {
+  position: absolute; z-index: 3;
+  top: calc(var(--hnd-card-w) * 0.7);
+  transform: translateY(-50%);
+  display: none; place-items: center;
+  width: 2.75rem; height: 2.75rem;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 6px 18px -4px rgba(14, 23, 30, 0.28);
+  color: var(--hnd-ink);
+  transition: background 0.25s, color 0.25s, opacity 0.25s;
+}
+.hnd .hnd-arrow--prev { left: -1.375rem; }
+.hnd .hnd-arrow--next { right: -1.375rem; }
+.hnd .hnd-arrow:hover { background: var(--hnd-ink); color: #fff; }
+.hnd .hnd-arrow[data-off="true"] { opacity: 0; pointer-events: none; }
+@media (min-width: 760px) { .hnd .hnd-arrow { display: grid; } }
+
+/* ============================================================
+   CARD — arched niche, no box
+   ============================================================ */
+.hnd-card {
+  flex: 0 0 min(70vw, var(--hnd-card-w));
+  scroll-snap-align: start;
+  display: flex; flex-direction: column;
+  text-align: center;
+}
+
+/* outlined arch frame */
+.hnd-media {
+  position: relative;
+  padding: 7px;
+  border: 1px solid rgba(164, 85, 58, 0.42);
+  border-radius: 50% 50% 8px 8px / 39% 39% 8px 8px;
+  transition: border-color 0.5s var(--hnd-ease), background 0.5s var(--hnd-ease);
+}
+.hnd-card:hover .hnd-media {
+  border-color: var(--hnd-clay);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* photo in the inner arch */
+.hnd-ph {
+  position: relative; display: block;
+  aspect-ratio: 1 / 1.3;
+  overflow: hidden;
+  background: #e6dfd2;
+  border-radius: 50% 50% 4px 4px / 38.5% 38.5% 4px 4px;
+}
+.hnd-img { position: absolute; inset: 0; display: block; }
+.hnd-img img { width: 100%; height: 100%; object-fit: cover; }
+.hnd-img--a { transition: transform 1.3s var(--hnd-ease); }
+.hnd-img--b { opacity: 0; transition: opacity 0.7s var(--hnd-ease); }
+@media (hover: hover) {
+  .hnd-card:hover .hnd-img--a { transform: scale(1.05); }
+  .hnd-card:hover .hnd-img--b { opacity: 1; }
+}
+
+/* tag + heart sit along the base of the arch (away from the curve) */
+.hnd-tags {
+  position: absolute; z-index: 2;
+  left: 1.1rem; right: 1.1rem; bottom: 1.1rem;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  pointer-events: none;
+}
+.hnd-tags > * { pointer-events: auto; }
+
+.hnd-off {
+  padding: 0.38rem 0.75rem;
+  background: var(--hnd-bg);
+  border-radius: 999px;
+  color: var(--hnd-ink);
+  font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+}
+
+.hnd .hnd-fav {
+  display: grid; place-items: center;
+  width: 2.4rem; height: 2.4rem; min-width: 2.4rem; min-height: 2.4rem;
+  margin-left: auto;
+  background: var(--hnd-bg);
+  border-radius: 50%;
+  color: var(--hnd-ink);
+  transition: background 0.25s, color 0.25s, transform 0.3s var(--hnd-ease);
+}
+.hnd .hnd-fav:hover { background: var(--hnd-ink); color: #fff; transform: scale(1.06); }
+.hnd .hnd-fav.is-on { color: var(--hnd-clay); }
+.hnd .hnd-fav.is-on:hover { color: #fff; }
+
+/* ---------- centred label ---------- */
+.hnd-body {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.55rem;
+  padding: 1.25rem 0.25rem 0;
+}
+
+.hnd .hnd-name {
+  font-family: var(--hnd-display);
+  font-size: 1.12rem; font-weight: 400; line-height: 1.35;
+  color: var(--hnd-ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  min-height: 2.7em;
+  transition: color 0.25s;
+}
+.hnd .hnd-name:hover { color: var(--hnd-clay); }
+
+.hnd-price {
+  display: flex; align-items: baseline; justify-content: center; gap: 0.6rem;
+  font-variant-numeric: tabular-nums;
+}
+.hnd-price b { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.01em; }
+.hnd-price s { font-size: 0.85rem; color: var(--hnd-muted); }
+
+/* outlined add button — quiet, not a filled pill */
+.hnd .hnd-add {
+  margin-top: 0.6rem;
+  min-width: 70%;
+  padding: 0.78rem 1.4rem;
+  border: 1px solid var(--hnd-ink);
+  border-radius: 999px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--hnd-ink);
+  transition: background 0.3s var(--hnd-ease), color 0.3s, border-color 0.3s;
+}
+.hnd .hnd-add:hover { background: var(--hnd-clay); border-color: var(--hnd-clay); color: #fff; }
+.hnd .hnd-add:active { transform: scale(0.98); }
+
+/* ---------- mobile ---------- */
+@media (max-width: 640px) {
+  .hnd-head { flex-direction: column; align-items: flex-start; gap: 1.1rem; }
+}
+
+/* ---------- focus + motion ---------- */
+.hnd a:focus-visible, .hnd button:focus-visible { outline: 2px solid var(--hnd-clay); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .hnd * { transition: none !important; } }

@@ -11,10 +11,16 @@ export interface HomeData {
   slides: BannerSlide[];
   tagSections: HomeTagSection[];
   categorySections: HomeCategorySection[];
+  /** `handicraft_show_home_page` — drawn by HandicraftRail. */
+  handicraftSections: HomeTagSection[];
   videoProducts: HomeVideoProduct[];
 }
 
-const EMPTY_HOME_DATA: HomeData = { slides: [], tagSections: [], categorySections: [], videoProducts: [] };
+const EMPTY_HOME_DATA: HomeData = { slides: [], tagSections: [], categorySections: [], handicraftSections: [], videoProducts: [] };
+
+/** Handicraft rails may come tag-shaped (id/name/slug) or category-shaped (cat_*); read either. */
+const toSection = (s: HomeTagSection | HomeCategorySection): HomeTagSection =>
+  "cat_id" in s ? { id: s.cat_id, name: s.cat_name, slug: s.cat_slug, products: s.products ?? [] } : { ...s, products: s.products ?? [] };
 
 /**
  * Everything the homepage pulls live from the storefront: the tag rails
@@ -39,6 +45,7 @@ export async function getHomeData(): Promise<HomeData> {
       tagSections: json.data?.tag_show_home_page ?? [],
       // Some categories aren't stocked yet, so the API lists them with no products.
       categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),
+      handicraftSections: (json.data?.handicraft_show_home_page ?? []).map(toSection).filter((s) => s.products.length > 0),
       videoProducts: json.data?.video_products ?? [],
     };
   } catch {
@@ -315,7 +322,7 @@ export async function getProductDetail(slug: string): Promise<ApiProductDetail |
  * video_products has no thumbnail of its own, so we borrow one from the tag
  * and category rails by product id where the clip's product also shows up there.
  */
-export function buildReels({ tagSections, categorySections, videoProducts }: Omit<HomeData, "slides">): Reel[] {
+export function buildReels({ tagSections, categorySections, videoProducts }: Pick<HomeData, "tagSections" | "categorySections" | "videoProducts">): Reel[] {
   const imageById = new Map<number, string>();
   for (const tag of tagSections) for (const p of tag.products) imageById.set(p.id, p.image);
   for (const cat of categorySections) for (const p of cat.products) imageById.set(p.id, p.image);
