@@ -551,7 +551,13 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     toast, say, pulse,
   };
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={value}>
+      {/* Server-rendered mode marker, so CSS can theme retail vs wholesale pages without a flash. */}
+      <span hidden data-shop-mode={mode} />
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 /** Lengths come in half metres, so keep one decimal and no float dust. */

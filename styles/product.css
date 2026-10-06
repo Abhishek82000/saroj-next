@@ -460,3 +460,68 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-whcta__btns{ display:flex; flex-wrap:wrap; gap:.7rem; }
 
 
+
+/* ============================================================
+   Rail card — the dressed-up version. Stitched selvedge between photo and
+   label, price per unit with the saving spelled out, and an
+   add button with a light sweep. Overrides the plainer .st-prod rules above.
+   ============================================================ */
+.st-prod{ border:1px solid var(--line-2); border-radius:16px; background:#fff;
+          box-shadow:0 14px 30px -20px rgba(16,24,32,.35); }
+.st-prod:hover{ transform:translateY(-6px); border-color:rgba(27,95,168,.28);
+                box-shadow:0 30px 50px -24px rgba(16,24,32,.45); }
+.st-prod__ph{ position:relative; display:block; overflow:hidden; }
+.st-prod__ph img{ transition:transform .9s var(--ease); }
+/* soft shade at the photo foot so the peek pill reads on any print */
+.st-prod__ph::after{ content:""; position:absolute; inset:auto 0 0; height:42%; z-index:1; pointer-events:none;
+                     background:linear-gradient(to top,rgba(16,24,32,.38),transparent); opacity:0; transition:opacity .45s var(--ease); }
+.st-prod__peek{ position:absolute; left:50%; bottom:.75rem; z-index:2; display:inline-flex; align-items:center; gap:.35rem;
+                padding:.45em .95em; border-radius:99px; background:rgba(255,255,255,.95); color:var(--ink);
+                font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; white-space:nowrap;
+                transform:translate(-50%,12px); opacity:0; transition:transform .45s var(--ease), opacity .45s var(--ease); }
+@media (hover:hover){
+  .st-prod:hover .st-prod__ph::after{ opacity:1; }
+  .st-prod:hover .st-prod__peek{ opacity:1; transform:translate(-50%,0); }
+}
+
+.st-prod__label{ position:absolute; top:.6rem; left:.6rem; z-index:3; max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                 padding:.34em .75em; border-radius:99px; background:var(--ochre); color:#fff;
+                 font-size:.56rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+.st-prod__off{ top:.6rem; right:.6rem; padding:.36em .7em; font-size:.6rem; letter-spacing:.08em;
+               box-shadow:0 6px 14px -6px rgba(192,57,46,.6); }
+
+.st-prod__body{ position:relative; gap:.32rem; padding:1rem .9rem .85rem; }
+/* the selvedge: a running stitch where the photo meets the label */
+.st-prod__body::before{ content:""; position:absolute; top:0; left:.9rem; right:.9rem; height:0;
+                        border-top:1.5px dashed rgba(16,24,32,.16); }
+
+
+.st-prod__name{ font-family:var(--d); font-size:1rem; line-height:1.3; color:var(--ink); min-height:2.6em;
+                transition:color .25s; }
+.st-prod__name:hover{ color:var(--cobalt); }
+
+.st-prod__price{ margin-top:auto; padding-top:.35rem; flex-wrap:wrap; align-items:baseline; gap:.15rem .45rem;
+                 font-variant-numeric:tabular-nums; }
+.st-prod__price b{ font-size:1.12rem; font-weight:700; color:var(--ink); }
+.st-prod__price small{ margin-left:-.25rem; font-size:.7rem; color:var(--ink-2); opacity:.75; }
+.st-prod__price s{ font-size:.76rem; color:var(--ink-2); opacity:.6; }
+.st-prod__save{ align-self:flex-start; padding:.22em .6em; border-radius:6px; background:rgba(18,137,124,.1); color:var(--teal);
+                font-size:.64rem; font-weight:700; letter-spacing:.04em; }
+
+.st-prod__add{ position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:.5rem;
+               margin:0 .9rem .9rem; padding:.85em 1em; }
+.st-prod__add::after{ content:""; position:absolute; top:0; bottom:0; left:-60%; width:45%; pointer-events:none;
+                      background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);
+                      transform:skewX(-20deg); transition:left .7s var(--ease); }
+.st-prod__add:hover::after{ left:120%; }
+.st-prod__add:active{ transform:scale(.97); }
+
+@media (max-width:640px){
+  .st-prod__body{ padding:.85rem .7rem .7rem; }
+  .st-prod__body::before{ left:.7rem; right:.7rem; }
+  .st-prod__name{ font-size:.9rem; }
+  .st-prod__add{ margin:0 .7rem .7rem; }
+}
+@media (prefers-reduced-motion: reduce){
+  .st-prod__add::after{ display:none; }
+}

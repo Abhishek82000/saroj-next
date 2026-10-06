@@ -6,6 +6,7 @@ import { useStore } from "./StoreProvider";
 import { inr, unitLabel } from "@/lib/site";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import { CartProgress, CouponBox } from "@/components/cart/Offers";
+import CartRecent from "./CartRecent";
 
 export default function CartDrawer() {
   const {
@@ -21,6 +22,7 @@ export default function CartDrawer() {
 
   return (
     <Drawer open={cartOpen} onClose={close} label={wholesale ? "Your wholesale cart" : "Your cart"} className="st-cartdrawer">
+      <CartRecent open={cartOpen} onPick={close} />
       <div className="st-cart__head">
         <div>
           <span className="st-eyebrow">{wholesale ? "Wholesale" : "Jhotwara counter"}</span>

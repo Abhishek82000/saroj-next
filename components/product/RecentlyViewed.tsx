@@ -6,6 +6,15 @@ import type { Product } from "@/lib/types";
 
 const KEY = "saroj.recent";
 
+/** The product ids this browser has viewed, newest first. Empty when storage is unavailable. */
+export function readRecent(): number[] {
+  try {
+    const ids = JSON.parse(window.localStorage.getItem(KEY) ?? "[]");
+    /* Numbers only — this key once also held search terms (StoreProvider's old search history). */
+    return Array.isArray(ids) ? ids.filter((id) => typeof id === "number") : [];
+  } catch { return []; }
+}
+
 /**
  * Recently viewed is per-person, so it can't live in a statically cached page.
  * The list is kept in the browser and the cards are fetched on mount — which
@@ -17,13 +26,7 @@ export default function RecentlyViewed({
   const [items, setItems] = useState<Product[]>([]);
 
   useEffect(() => {
-    let ids: number[] = [];
-    try {
-      ids = JSON.parse(window.localStorage.getItem(KEY) ?? "[]");
-      /* Numbers only — this key once also held search terms (StoreProvider's old search history). */
-      ids = Array.isArray(ids) ? ids.filter((id) => typeof id === "number") : [];
-    } catch { ids = []; }
-
+    const ids = readRecent();
     const others = ids.filter((id) => id !== productId);
 
     // Record this visit for next time before rendering the previous ones.

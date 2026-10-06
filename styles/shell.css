@@ -656,3 +656,33 @@ a.sm-switch__opt:hover { color: var(--sm-ink); }
   .sm-sub { transition: none; }
   .sm-list > * { opacity: 1; transform: none; }
 }
+/* --- cart drawer · recently viewed ---
+   A column docked to the drawer's left edge (it slides in with it), its cards
+   drifting endlessly from bottom to top. Wide screens only. */
+.st-crecent{ display:none; }
+@media (min-width:900px){
+  .st-crecent{ position:absolute; top:0; bottom:0; right:100%; width:184px; display:flex; flex-direction:column;
+               background:linear-gradient(180deg,#fdfdfc,#f3f5f4); border-right:1px solid var(--line-2);
+               box-shadow:-24px 0 50px -34px rgba(16,24,32,.55); }
+}
+.st-crecent__head{ flex:none; padding:1.25rem 1rem .8rem; border-bottom:1px solid var(--line-2); }
+.st-crecent__head .st-eyebrow{ font-size:.58rem; }
+.st-crecent__view{ position:relative; flex:1; overflow:hidden;
+                   -webkit-mask-image:linear-gradient(180deg,transparent,#000 9%,#000 91%,transparent);
+                           mask-image:linear-gradient(180deg,transparent,#000 9%,#000 91%,transparent); }
+.st-crecent__track{ display:flex; flex-direction:column; gap:.85rem; padding:.85rem 1rem 0;
+                    animation:crecentUp 30s linear infinite; }
+.st-crecent:hover .st-crecent__track,.st-crecent:focus-within .st-crecent__track{ animation-play-state:paused; }
+/* half the track = one full pass (the gap is mirrored by the track's top padding) */
+@keyframes crecentUp{ to{ transform:translateY(-50%); } }
+
+.st-crecent__card{ display:flex; flex-direction:column; gap:.3rem; color:var(--ink); }
+.st-crecent__ph{ display:block; aspect-ratio:4/5; border-radius:12px; overflow:hidden; background:var(--paper-2);
+                 box-shadow:0 10px 22px -14px rgba(16,24,32,.45); }
+.st-crecent__ph img{ width:100%; height:100%; object-fit:cover; transition:transform .6s var(--ease); }
+.st-crecent__card:hover .st-crecent__ph img{ transform:scale(1.07); }
+.st-crecent__name{ font-size:.72rem; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2;
+                   -webkit-box-orient:vertical; overflow:hidden; transition:color .25s; }
+.st-crecent__card:hover .st-crecent__name{ color:var(--cobalt); }
+.st-crecent__price{ font-size:.78rem; font-variant-numeric:tabular-nums; }
+@media (prefers-reduced-motion: reduce){ .st-crecent__track{ animation:none; } .st-crecent__view{ overflow-y:auto; } }

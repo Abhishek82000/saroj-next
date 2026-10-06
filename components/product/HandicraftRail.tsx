@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Photo from "@/components/ui/Photo";
-import { useAutoRail } from "@/components/ui/useAutoRail";
+import { useLoopRail } from "@/components/ui/useLoopRail";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
 import { useStore } from "@/components/shell/StoreProvider";
@@ -21,7 +21,7 @@ export default function HandicraftRail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
   const { addProduct, mode, href, wishlist, toggleFav } = useStore();
-  const { rail, nudge, hold } = useAutoRail(items.length);
+  const { rail, nudge, hold, loop, slots } = useLoopRail(items.length);
   const [pos, setPos] = useState({ start: true, end: true, fits: true });
 
   const measure = () => {
@@ -61,11 +61,11 @@ export default function HandicraftRail({
         <div className="hnd-stage">
           {!pos.fits && (
             <>
-              <button type="button" className="hnd-arrow hnd-arrow--prev" data-off={pos.start}
+              <button type="button" className="hnd-arrow hnd-arrow--prev" data-off={!loop && pos.start}
                 onClick={() => nudge(-1)} aria-label="Previous pieces">
                 <Icon name="left" size={16} strokeWidth={1.4} />
               </button>
-              <button type="button" className="hnd-arrow hnd-arrow--next" data-off={pos.end}
+              <button type="button" className="hnd-arrow hnd-arrow--next" data-off={!loop && pos.end}
                 onClick={() => nudge(1)} aria-label="Next pieces">
                 <Icon name="right" size={16} strokeWidth={1.4} />
               </button>
@@ -73,7 +73,7 @@ export default function HandicraftRail({
           )}
 
           <div className="hnd-rail" ref={rail} onScroll={measure} {...hold}>
-            {items.map((p) => {
+            {slots(items).map(({ item: p, clone }) => {
               const view = priced(p, mode === "wholesale");
               /* A piece the API sent without a price shows no price, never a made-up ₹0. */
               const known = view.price > 0;
@@ -82,7 +82,7 @@ export default function HandicraftRail({
               const canBuy = known && mode !== "wholesale";
               const second = p.images[1];
               return (
-                <article className="hnd-card" key={p.slug}>
+                <article className="hnd-card" key={clone ? `c-${p.slug}` : p.slug} aria-hidden={clone || undefined} inert={clone}>
                   <div className="hnd-media">
                     <Link href={href(`/product/${p.slug}`)} className="hnd-ph ph" aria-label={p.name}>
                       <span className="hnd-img hnd-img--a">
@@ -105,16 +105,21 @@ export default function HandicraftRail({
                   </div>
 
                   <div className="hnd-body">
+                    <span className="hnd-kicker">{p.label || "Hand-finished"}</span>
                     <Link href={href(`/product/${p.slug}`)} className="hnd-name">{p.name}</Link>
+                    <span className="hnd-orn" aria-hidden><i /></span>
                     {known && (
                       <div className="hnd-price">
                         <b>{inr(view.price)}</b>
-                        {view.mrp > 0 && <s>{inr(view.mrp)}</s>}
+                        {view.mrp > view.price && <s>{inr(view.mrp)}</s>}
                       </div>
                     )}
+                    {known && view.mrp > view.price && <span className="hnd-save">Save {inr(view.mrp - view.price)}</span>}
+                    {p.stock === "low" && <span className="hnd-stock">Only a few left</span>}
                     {canBuy && (
                       <button type="button" className="hnd-add" aria-label={`Add ${p.name} to cart`} onClick={() => addProduct(p)}>
-                        Add to cart
+                        <span>Add to cart</span>
+                        <Icon name="plus" size={13} strokeWidth={1.8} />
                       </button>
                     )}
                   </div>

@@ -5,6 +5,8 @@ import { useEffect, useRef } from "react";
 import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
 import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
 import FabricStrip from "./FabricStrip";
+import FabricTrade from "./FabricTrade";
+import HandicraftSeo from "./HandicraftSeo";
 import Rail from "@/components/product/Rail";
 import Reels from "@/components/home/Reels";
 import Voices from "@/components/home/Voices";
@@ -365,10 +367,15 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <div className="hero__scrim" />
         <div className="hero__content">
           <div className="hero__ey rv">Saroj Textile · Jaipur · Est. Block &amp; Dye</div>
-          <h1>
+          <h1 className="rv" data-d="1">
             <span className="maskrow"><span>The craft</span></span>{" "}
             <span className="maskrow"><span>of <span className="italic">Jaipur.</span></span></span>
           </h1>
+          <p className="hero__sub rv" data-d="2">Hand-blocked, hand-dyed, hand-finished by the kaarigars of Rajasthan.</p>
+          <div className="hero__cta rv" data-d="3">
+            <Link href="/shop" className="hc-btn hc-btn--solid">Shop handicraft</Link>
+            <a href="#wheel" className="hc-btn hc-btn--light">Meet the kaarigars</a>
+          </div>
         </div>
         <div className="hero__scroll" aria-hidden="true"><span>Scroll</span><span className="l" /></div>
       </section>
@@ -430,7 +437,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       {/* ================= TAG RAILS — New Arrivals, Best Seller, … ================= */}
       {data.tagRails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
       {/* ================= THE SECOND HOUSE — a jharokha facade under a toran ================= */}
-      <section className="hj" id="hero" aria-labelledby="hj-title">
+      <section className="hj mb-5" id="hero" aria-labelledby="hj-title">
         <span className="hj__jali" aria-hidden="true" />
 
         {/* the toran: the prints strung across the doorway, as over every Jaipur door on a festival morning */}
@@ -495,7 +502,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
                   </span>
                 </Link>
               ))}
-              <span className="hj-ledge" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -544,43 +550,18 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         </div>
       </section>
       {/* ================= FABRIC HOUSE ================= */}
-      <section className="hc-sec hc-cloth" id="cloth">
-        <div className="hc-wrap hc-cloth__grid">
+      <section className="hc-sec hc-cloth mb-5" id="cloth">
+        <span className="hc-cloth__mark hc-dv" aria-hidden="true">कपड़ा</span>
+        <div className="hc-wrap hc-cloth__head">
           <div>
             <div className="hc-eyebrow rv">The house that built this</div>
-            <h2 className="hc-h2 rv" data-d="1">Still, and always,<br />cloth.</h2>
-            <p className="hc-lede rv" data-d="2">Handicraft is the new wing. The looms are the load-bearing wall. Pick a bolt — every one is on the shelf today, retail or wholesale.</p>
-            <div className="hc-cloth__stats rv" data-d="2">
-              <div><span>{collections}</span><small>Collections</small></div>
-              <div><span>₹80</span><small>Wholesale / metre</small></div>
-              <div><span>576</span><small>Reviews</small></div>
-            </div>
-            <div className="hc-cloth__cta rv" data-d="3">
-              <Link href="/shop/jaipur-cotton" className="hc-btn hc-btn--light">Shop fabrics</Link>
-              <Link href="/wholesale-fabric" className="hc-btn hc-btn--light">Wholesale from ₹80</Link>
-            </div>
+            <h2 className="hc-h2 rv" data-d="1">Still, and always, <em>cloth.</em></h2>
           </div>
-
-          <div className="rv" data-d="2">
-            <div className="hc-fan">
-              <div className="hc-fan__out" aria-live="polite">
-                <h4 id="fanName">{bolts[0].name}</h4>
-                <p id="fanDesc">{bolts[0].desc}</p>
-                <b id="fanPrice">{bolts[0].price}</b>
-              </div>
-
-              <div className="hc-fan__inner" id="fanInner">
-                {bolts.map((b) => (
-                  <button key={b.name} className="hc-bolt" data-name={b.name} data-desc={b.desc} data-price={b.price} aria-label={`Show ${b.name}`}>
-                    <img src={b.img} alt={b.alt} loading="lazy" />
-                    <span className="hc-bolt__lbl">{b.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="hc-fantabs" id="fanTabs">
-              {bolts.map((b) => <button key={b.name} type="button" className="hc-fantab">{b.name}</button>)}
+          <div className="hc-cloth__side">
+            <p className="hc-lede rv" data-d="2">Handicraft is the new wing. The looms are the load-bearing wall. Pick a bolt — every one is on the shelf today, retail or wholesale.</p>
+            <div className="hc-cloth__cta rv" data-d="3">
+              <Link href="/shop" className="hc-btn hc-btn--solid">Shop all fabrics</Link>
+              <span className="hc-cloth__count"><b>{fabricSlides.length}</b> collections on the line</span>
             </div>
           </div>
         </div>
@@ -589,14 +570,21 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <FabricStrip slides={fabricSlides} />
       </section>
 
-    
-
+      {/* ================= RETAIL + WHOLESALE — two photo-led full-screen panels ================= */}
       {/* ================= REELS — handicraft on film, shoppable like the home page ================= */}
       {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}
       {data.reels.length > 0 && <Reels items={data.reels} />}
+      <FabricTrade />
+
+    
+
+      
 
       {/* ================= VOICES — the home page's review wall, fed by the API's testimonials ================= */}
       <Voices items={data.voices} />
+
+      {/* ================= SEO — long-form copy in a fixed-height scroll box ================= */}
+      <HandicraftSeo />
     </main>
   );
 }

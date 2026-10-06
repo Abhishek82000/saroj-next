@@ -13,18 +13,15 @@ export default function FabricStrip({ slides }: { slides: HcSlide[] }) {
 
   return (
     <div className="hc-fstrip">
-      <div className="hc-fstrip__head">
-        <span className="hc-fstrip__label">All {slides.length} collections</span>
-        <Link href="/shop" className="hc-fstrip__all">Shop every fabric →</Link>
-      </div>
-
       <div className="hc-fstrip__view">
+        <span className="hc-fstrip__line" aria-hidden="true" />
         {/* Duration scales with the count so the drift speed stays the same however many there are. */}
         <ul className="hc-fstrip__track" style={{ animationDuration: `${slides.length * 5}s` }}>
           {loop.map((s, i) => {
             const copy = i >= slides.length;
             const body = (
               <>
+                <span className="hc-fstrip__peg" aria-hidden="true" />
                 <span className="hc-fstrip__ph"><img src={s.img} alt={copy ? "" : s.name} loading="lazy" draggable={false} /></span>
                 <span className="hc-fstrip__name">{s.name}</span>
               </>

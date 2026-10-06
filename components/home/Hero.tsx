@@ -74,7 +74,7 @@ export default function Hero() {
           <div className="st-plates__row" ref={row}>
             {plates.map((p) => (
               <Link key={p.cls} href={categoryHref(p.slug)} className={`st-plate ${p.cls} ph`}>
-                <Photo src={p.src} alt={p.alt} note={p.note} priority sizes="(max-width:900px) 40vw, 340px" />
+                <Photo src={p.src} alt={p.alt} note={p.note} priority sizes="(max-width:900px) 40vw, 300px" />
                 <span className="st-plate__cap">{p.cap}</span>
               </Link>
             ))}
@@ -82,14 +82,20 @@ export default function Hero() {
         </div>
 
         <div className="st-hero__strip fade f4">
-          {swatches.map(([file, title, slug]) => (
-            <Link key={file} href={categoryHref(slug)} className="st-swatch-item" title={title}>
-              <span className="st-hero-swatch ph">
-                <Photo src={CDN + file + ".webp"} alt={title} sizes="100px" />
-              </span>
-              <span className="st-swatch__label">{title}</span>
-            </Link>
-          ))}
+          {/* Two copies so the marquee loops seamlessly; the second is hidden from screen readers and tabbing. */}
+          <div className="st-hero__track">
+            {[0, 1].map((copy) =>
+              swatches.map(([file, title, slug]) => (
+                <Link key={`${copy}-${file}`} href={categoryHref(slug)} className="st-swatch-item" title={title}
+                  aria-hidden={copy === 1 || undefined} tabIndex={copy === 1 ? -1 : undefined}>
+                  <span className="st-hero-swatch ph">
+                    <Photo src={CDN + file + ".webp"} alt={copy === 1 ? "" : title} sizes="155px" />
+                  </span>
+                  <span className="st-swatch__label">{title}</span>
+                </Link>
+              ))
+            )}
+          </div>
         </div>
 
       </div>
