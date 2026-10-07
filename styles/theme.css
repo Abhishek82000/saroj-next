@@ -1,0 +1,98 @@
+/* ============================================================
+   THEME — loaded last. Points every section's own colours at the
+   shared palette in tokens.css and lines every section up on the
+   same column (1280px, --pad gutters) so the page reads as one piece.
+   Styling only: no section is reordered and no behaviour changes.
+   ============================================================ */
+
+/* ---------- ground ---------- */
+/* Retail used a cool pearl sheen; give it the same warm cotton as the rest. */
+body:has([data-shop-mode="retail"]){ background:var(--paper); }
+body:has([data-shop-mode="retail"])::before{
+  background:
+    radial-gradient(ellipse 60% 45% at 10% 0%, rgba(255,255,255,.85), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 90% 100%, rgba(243,236,225,.7), transparent 70%),
+    var(--paper);
+}
+
+/* ---------- one heading voice ---------- */
+/* Every section opens the same way: indigo eyebrow with a rule, display heading, muted lede. */
+.st-eyebrow, .hnd-eyebrow{ font-size:.63rem; letter-spacing:.32em; font-weight:700; color:var(--cobalt); }
+.hnd-eyebrow::before{ width:26px; background:currentColor; opacity:.6; }
+.hnd-title{ font-size:clamp(2.05rem,8vw,4rem); line-height:1.02; letter-spacing:-.018em; color:var(--ink); }
+.hnd-lede{ color:var(--mute); }
+.st-h2 em, .hnd-title em{ font-style:normal; color:var(--lac); }
+
+/* ---------- one column ---------- */
+/* Handicraft rails used their own gutter; voices padded inside the wrap; the shelf was wider. */
+.hnd-inner{ width:min(1280px, calc(100% - 2 * var(--pad))); }
+.st-voices__head{ padding-inline:0; width:min(1280px, calc(100% - 2 * var(--pad))); }
+.coll-inner{ max-width:calc(1280px + 2 * var(--pad)); padding-inline:var(--pad); }
+.st-vbanner__frame{ margin-inline:calc((1 - var(--p)) * var(--pad)); }
+
+/* ---------- craft roll ---------- */
+.st-roll{ background:var(--paper-2); border-color:var(--line); }
+.st-roll li::after{ color:var(--lac); }
+.st-roll li.hi{ color:var(--cobalt); }
+
+/* ---------- product cards ---------- */
+.st-prod{ box-shadow:0 1px 0 var(--line-2), 0 14px 28px -20px rgba(28,38,48,.38); }
+.st-prod__save{ background:rgba(47,111,94,.1); }
+
+/* ---------- dark bands share one night indigo ---------- */
+.coll-root{ --coll-bg:var(--night); --coll-bg-2:var(--night-2); --coll-paper:var(--cream); --coll-brass:var(--brass); }
+.wb-part--ink{ --wb-bg:var(--night); --wb-ink:var(--cream); --wb-accent:var(--brass); --wb-line:var(--brass);
+               --wb-btn-hover-bg:var(--cream); --wb-btn-hover-ink:var(--night); }
+.wb-part--paper{ --wb-bg:var(--paper-2); --wb-ink:var(--night); --wb-muted:rgba(23,36,58,.7);
+                 --wb-btn-hover-bg:var(--night); --wb-btn-hover-ink:var(--cream); }
+.st-vbanner__eyebrow{ color:var(--brass); }
+
+/* ---------- handicraft rails: tinted band, same palette ---------- */
+.hnd{ --hnd-bg:var(--paper-2); --hnd-ink:var(--ink); --hnd-text:var(--mute); --hnd-clay:var(--lac);
+      background-image:none; padding-block:var(--sec-y); }
+.hnd + .hnd{ padding-top:0; } /* consecutive rails read as one band */
+
+/* ---------- offers: tickets dyed in the house colours ---------- */
+.st-ofr--cobalt{ background:linear-gradient(150deg,#2E5585 0%,#1E3A5F 45%,#132740 100%); }
+.st-ofr--lac{ background:linear-gradient(150deg,#C9483B 0%,#B5372B 45%,#7E2219 100%); }
+.st-ofr--teal{ background:linear-gradient(150deg,#3E8A76 0%,#2F6F5E 45%,#1D4A3E 100%); }
+.st-ofr--ink{ background:linear-gradient(150deg,#2A3B57 0%,#17243A 50%,#0E1726 100%); }
+
+/* ---------- bulk + footer read from the same palette ---------- */
+.st-bulk{ --bk-bg:var(--paper-2); --bk-ink:var(--ink); --bk-text:var(--mute); --bk-madder:var(--lac); --bk-indigo:var(--cobalt); }
+.st-bulk .st-eyebrow{ color:var(--cobalt); }
+.st-foot{ --f-bg:var(--paper); --f-ink:var(--ink); --f-text:var(--mute); --f-indigo:var(--cobalt); --f-madder:var(--lac);
+          border-top:1px solid var(--line-2); }
+
+/* ============================================================
+   HANDICRAFT PAGE (.hc) — it carried its own pink-and-crimson palette
+   with red standing in for the accent. Same house colours as home now.
+   ============================================================ */
+.hc{ --paper:#FBF8F3; --paper-2:#F3ECE1; --paper-3:#E7DCCB; --ink:#1C2630; --ink-2:#3F4A54; --mute:#5F6870;
+     --cobalt:#1E3A5F; --teal:#2F6F5E; --lac:#B5372B; --ochre:#A87A2A;
+     --line:rgba(28,38,48,.12); --line-2:rgba(28,38,48,.07); }
+/* Hero sits on photos: keep the call to action in madder, the italic in brass. */
+.hc .hero__cta .hc-btn--solid{ --bg:var(--lac); }
+.hc .hero h1 .italic{ color:#EBCB8B; }
+/* Pink highlights on dark grounds become brass. */
+.hc .hc-vbanner__eyebrow, .hc .hc-fan__out b, .hc .hc-fstrip__label{ color:var(--brass); }
+.hc .hc-fan__out{ border-left-color:var(--brass); }
+.hc .hc-fantab:hover{ border-color:var(--brass); }
+/* The jharokha facade: warm cotton instead of blush. */
+.hc .hj{ background:radial-gradient(ellipse 55% 50% at 72% 58%, rgba(233,204,134,.32), transparent 70%),
+                    linear-gradient(180deg, var(--paper), var(--paper-2)); }
+/* Wholesale panel: night indigo like the dark bands on home, not crimson. */
+.hc .hc-trade--dark{ background:radial-gradient(ellipse 70% 80% at 20% 30%, #2A4470 0%, var(--night) 50%, #0E1726 100%); }
+.hc .hc-trade--dark .hc-eyebrow, .hc .hc-trade--dark .hc-h2 em{ color:#EBCB8B; }
+.hc .hc-trade--dark .hc-btn--solid:hover{ color:var(--night); }
+.hc .hc-h2 em{ color:var(--lac); }
+.hc .hc-seo{ background:var(--paper-2); }
+.hc .hc-seo .hc-h2 em{ font-style:normal; color:var(--lac); }
+
+/* ============================================================
+   WHOLESALE PAGE — its dark blocks were three different near-blacks.
+   ============================================================ */
+.st-bolts{ --bt-bg:var(--night); --bt-gold:#E2C27D; }
+.st-swb{ --board:var(--night); }
+.st-whcta__box{ background:radial-gradient(ellipse 70% 120% at 0% 0%, var(--night-2), transparent 60%), var(--night); color:var(--cream); }
+.st-whcta__box .st-h2{ color:var(--cream); }

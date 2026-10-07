@@ -180,24 +180,40 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
     (() => {
       const wheel = $("#wheelEl"), stage = $("#stage"), dots = $("#dots");
       if (!wheel || !stage || !dots) return;
-      const faces = $$(".hc-face", wheel), N = faces.length, STEP = 360 / N;
-      const dotEls = $$(".hc-dot", dots);
-      let radius = 0, angle = 0, dragging = false, startX = 0, startAngle = 0, moved = 0;
+      /* The ring always has at most SLOTS seats, 60° apart, however many crafts there are —
+         sizing it to every craft turns a long list into a near-flat strip that just slides sideways.
+         Only the front card and its neighbours sit on the ring; the rest wait out of sight
+         and take a seat behind the wheel as it turns, so it reads as one wheel spinning on its hub. */
+      const SLOTS = 6;
+      const faces = $$(".hc-face", wheel), N = faces.length, STEP = 360 / Math.min(N, SLOTS);
+      const dotEls = $$(".hc-dot", dots), count = $("#wheelCount", dots);
+      const mod = (a: number, m: number) => ((a % m) + m) % m;
+      let radius = 0, angle = 0, dragging = false, locked = false, startX = 0, startY = 0, startAngle = 0, moved = 0, lastW = 0;
       let auto: number | null = null;
 
       const apply = (animate: boolean) => {
         wheel.classList.toggle("drag", !animate);
         wheel.style.transform = "translateZ(" + -radius + "px) rotateY(" + -angle + "deg)";
-        const live = ((Math.round(angle / STEP) % N) + N) % N;
-        faces.forEach((f, i) => f.classList.toggle("on", i === live));
+        const steps = Math.round(angle / STEP), live = mod(steps, N);
+        faces.forEach((f, i) => {
+          let d = mod(i - live, N);
+          if (d > N / 2) d -= N;
+          const seated = N <= SLOTS || Math.abs(d) <= 2;
+          f.style.visibility = seated ? "" : "hidden";
+          if (seated) f.style.transform = "rotateY(" + (steps + d) * STEP + "deg) translateZ(" + radius + "px)";
+          f.classList.toggle("on", d === 0);
+        });
         dotEls.forEach((d, i) => d.classList.toggle("on", i === live));
+        if (count) count.textContent = String(live + 1).padStart(2, "0") + " / " + String(N).padStart(2, "0");
       };
       const measure = () => {
         const w = stage.clientWidth;
+        /* Mobile browsers fire resize as the URL bar shows/hides while scrolling — only re-lay out on a real width change. */
+        if (w === lastW) return;
+        lastW = w;
         const fw = Math.min(300, Math.max(196, w * (w < 640 ? 0.6 : 0.29)));
         wheel.style.setProperty("--fw", fw + "px");
-        radius = Math.round((fw + (w < 640 ? 24 : 52)) / (2 * Math.tan(Math.PI / N)));
-        faces.forEach((f, i) => { f.style.transform = "rotateY(" + i * STEP + "deg) translateZ(" + radius + "px)"; });
+        radius = Math.round((fw + (w < 640 ? 24 : 52)) / (2 * Math.tan(Math.PI / Math.min(N, SLOTS))));
         apply(false);
       };
       const goTo = (i: number, animate = true) => { angle = i * STEP; apply(animate); };
@@ -207,19 +223,37 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
 
       dotEls.forEach((d, i) => listen(d, "click", () => { stopAuto(); goTo(i); startAuto(); }));
 
+      const release = () => {
+        if (!dragging) return;
+        dragging = false;
+        if (locked) goTo(Math.round(angle / STEP));
+        locked = false;
+        startAuto();
+      };
       listen(stage, "pointerdown", ((e: PointerEvent) => {
-        dragging = true; moved = 0; startX = e.clientX; startAngle = angle;
-        stopAuto(); wheel.classList.add("drag");
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        /* Don't touch the wheel yet — a touch may just be the start of a page scroll. */
+        dragging = true; locked = false; moved = 0;
+        startX = e.clientX; startY = e.clientY; startAngle = angle;
+        stopAuto();
       }) as EventListener);
       listen(stage, "pointermove", ((e: PointerEvent) => {
         if (!dragging) return;
-        const dx = e.clientX - startX; moved = Math.abs(dx);
-        /* Capture only once it's really a drag — capturing on pointerdown would
-           retarget the click to the stage, and a tap on a card's link would go nowhere. */
-        if (moved > 4 && !stage.hasPointerCapture(e.pointerId)) stage.setPointerCapture(e.pointerId);
+        /* The button came up outside the stage — never spin on a plain hover. */
+        if (e.pointerType === "mouse" && e.buttons === 0) { release(); return; }
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        if (!locked) {
+          if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+          /* Mostly vertical: it's a scroll, let the page have it. */
+          if (Math.abs(dy) >= Math.abs(dx)) { release(); return; }
+          /* Capture only once it's really a drag — capturing on pointerdown would
+             retarget the click to the stage, and a tap on a card's link would go nowhere. */
+          locked = true;
+          if (!stage.hasPointerCapture(e.pointerId)) stage.setPointerCapture(e.pointerId);
+        }
+        moved = Math.abs(dx);
         angle = startAngle - dx * 0.35; apply(false);
       }) as EventListener);
-      const release = () => { if (!dragging) return; dragging = false; goTo(Math.round(angle / STEP)); startAuto(); };
       listen(stage, "pointerup", release);
       listen(stage, "pointercancel", release);
       listen(stage, "lostpointercapture", release);
@@ -423,9 +457,11 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 5l-7 7 7 7" /></svg>
             </button>
             <div className="hc-dots" id="dots">
-              {faces.map((f, i) => (
-                <button key={f.name} className="hc-dot" type="button" aria-label={`Show craft ${i + 1}`} />
-              ))}
+              {faces.length > 10
+                ? <span className="hc-count" id="wheelCount" aria-live="polite">01 / {String(faces.length).padStart(2, "0")}</span>
+                : faces.map((f, i) => (
+                  <button key={f.name} className="hc-dot" type="button" aria-label={`Show craft ${i + 1}`} />
+                ))}
             </div>
             <button className="hc-arrow" id="next" aria-label="Next craft">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 5l7 7-7 7" /></svg>
