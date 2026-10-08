@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/components/shell/StoreProvider";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
+import { SkCards } from "@/components/ui/Skeleton";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import ProdCard from "@/components/product/ProdCard";
 import Filters from "./Filters";
@@ -212,6 +213,8 @@ export default function ShopListing({
                   {slice.map((p, i) => (
                     <ProdCard key={p.slug} p={p} priority={i < 4} sizes="(max-width:640px) 50vw, (max-width:1000px) 33vw, 280px" />
                   ))}
+                  {/* Placeholder cards where the next page of products will land. */}
+                  {loadingMore && <SkCards count={Number(cols)} />}
                 </div>
                 <div className="st-more">
                   {f.shown >= list.length && !hasMore ? (

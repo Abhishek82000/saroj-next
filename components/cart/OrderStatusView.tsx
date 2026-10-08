@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
+import { ThankYouSkeleton } from "@/components/ui/Skeleton";
 import { useStore } from "@/components/shell/StoreProvider";
 import ThankYouView from "@/components/cart/ThankYouView";
 import { getPaymentStatus, type OrderPaymentStatus } from "@/lib/checkout";
@@ -112,7 +113,10 @@ export default function OrderStatusView() {
           </ol>
         </div>
       </div>
-      <div className="st-wrap st-co"><div className="st-co__empty" aria-live="polite">{body}</div></div>
+      {view.kind === "loading"
+        /* While the payment is checked, the outline of the thank-you page it will most likely become. */
+        ? <div aria-live="polite"><ThankYouSkeleton note={<><h2>Checking your payment…</h2><p>This takes a few seconds.</p></>} /></div>
+        : <div className="st-wrap st-co"><div className="st-co__empty" aria-live="polite">{body}</div></div>}
     </main>
   );
 }

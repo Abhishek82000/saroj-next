@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
+import { CheckoutBodySkeleton } from "@/components/ui/Skeleton";
 import { useStore } from "@/components/shell/StoreProvider";
 import { Totals, orderTotal } from "@/components/cart/CartView";
 import { useCartPrice } from "@/components/cart/useCartPrice";
@@ -190,7 +191,7 @@ export default function CheckoutView() {
     </div>
   );
 
-  if (!hydrated) return <main id="main">{head}<div style={{ minHeight: "50vh" }} aria-busy="true" /></main>;
+  if (!hydrated) return <main id="main">{head}<div className="st-wrap st-co" aria-busy="true"><CheckoutBodySkeleton /></div></main>;
 
   if (wholesale && !user) {
     return (

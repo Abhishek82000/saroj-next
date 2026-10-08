@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
+import { CartBodySkeleton } from "@/components/ui/Skeleton";
 import { useStore } from "@/components/shell/StoreProvider";
 import { inr, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
@@ -120,7 +121,7 @@ export default function CartView() {
         )}
 
         {!hydrated ? (
-          <div style={{ minHeight: "40vh" }} aria-busy="true" />
+          <div aria-busy="true"><CartBodySkeleton /></div>
         ) : wholesale && !user ? (
           <div className="st-co__empty">
             <Icon name="lock" size={32} strokeWidth={1.3} />
