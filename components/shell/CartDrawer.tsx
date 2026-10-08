@@ -95,7 +95,6 @@ export default function CartDrawer() {
                 <button type="button" className="st-line__x" onClick={() => remove(l.id)}>Remove</button>
               </div>
             ))}
-            {!wholesale && <CouponBox offers={offers} compact />}
           </div>
         )}
       </div>

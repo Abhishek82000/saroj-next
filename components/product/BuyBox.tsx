@@ -240,6 +240,19 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
         </div>
       )}
 
+      {/* Nothing to nudge toward when you're already on the wholesale page,
+          or when this product has no trade rate. */}
+      {mode === "length" && !wholesale && live && live.wholesale.sellingPrice > 0 && live.wholesale.sellingPrice < price && (
+        <div className="st-whole">
+          <p>
+            {qty >= site.wholesaleFrom
+              ? <>At this length the wholesale rate is <b>{inr(live.wholesale.sellingPrice)} a metre</b> — {inr(live.wholesale.sellingPrice * qty)} instead of {inr(total)}.</>
+              : <>Taking <b>{site.wholesaleFrom} m</b> or more? The wholesale rate is {inr(live.wholesale.sellingPrice)} a metre.</>}
+          </p>
+          <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale →</a>
+        </div>
+      )}
+
       {live?.wholesale.lFoldNote && (
         <p className="st-cart__note" style={{ marginTop: ".8rem" }}>
           Cut in an L fold, so a metre measures 95–98 cm on the bolt.

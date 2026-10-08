@@ -81,12 +81,12 @@ export default function ProductView({
           items={also}
         />
       )}
-
+      <RecentlyViewed slug={p.slug} productId={detail?.live.id} wholesale={wholesale} />
       {rails.map((rail) => (
         <Rail key={rail.id} eyebrow="From the counter" heading={`${rail.name}.`} items={rail.products} />
       ))}
 
-      <RecentlyViewed slug={p.slug} productId={detail?.live.id} wholesale={wholesale} />
+      
 
       <JsonLd data={graph([
         productLd(p),

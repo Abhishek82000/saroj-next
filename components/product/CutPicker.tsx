@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { makes, quickMakes } from "@/lib/content";
-import { inr, site } from "@/lib/site";
+import { inr } from "@/lib/site";
 import type { Product } from "@/lib/types";
 
 /**
@@ -80,19 +80,6 @@ export default function CutPicker({
           </button>
         ))}
       </div>
-
-      {/* Nothing to nudge toward when you're already on the wholesale page,
-          or when this product has no trade rate. */}
-      {cut.wholesale > 0 && cut.wholesale < p.price && (
-      <div className="st-whole">
-        <p>
-          {value >= site.wholesaleFrom
-            ? <>At this length the wholesale rate is <b>{inr(cut.wholesale)} a metre</b> — {inr(cut.wholesale * value)} instead of {inr(total)}.</>
-            : <>Taking <b>{site.wholesaleFrom} m</b> or more? The wholesale rate is {inr(cut.wholesale)} a metre.</>}
-        </p>
-        <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale</a>
-      </div>
-      )}
     </>
   );
 }

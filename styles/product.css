@@ -117,8 +117,10 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
            border:1px dashed var(--line); border-radius:12px; background:var(--paper-2); }
 .st-whole p{ margin:0; font-size:.74rem; color:var(--ink-2); }
 .st-whole b{ color:var(--ochre); }
-.st-whole a{ margin-left:auto; flex:none; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase;
-             font-weight:700; color:var(--cobalt); border-bottom:1px solid currentColor; white-space:nowrap; }
+.st-whole a{ margin-left:auto; flex:none; font-size:.66rem; letter-spacing:.14em; text-transform:uppercase;
+             font-weight:700; color:var(--paper); background:var(--cobalt); padding:.55rem .95rem; border-radius:99px;
+             white-space:nowrap; transition:.3s var(--ease); }
+.st-whole a:hover{ background:var(--lac); }
 
 .st-buy{ display:flex; gap:.5rem; margin-top:1.4rem; }
 .st-buy .st-btn--solid{ flex:1; }
@@ -370,7 +372,9 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 
 /* --- retail ⇄ wholesale --- */
 .st-crosslink{ margin:1rem 0 0; font-size:.78rem; color:var(--ink-2); }
-.st-crosslink a{ color:var(--cobalt); border-bottom:1px solid currentColor; font-weight:600; }
+.st-crosslink a{ color:var(--lac); border-bottom:2px solid currentColor; font-weight:700; padding:0 .1rem;
+                 background:color-mix(in srgb, var(--lac) 10%, transparent); transition:.3s var(--ease); }
+.st-crosslink a:hover{ background:color-mix(in srgb, var(--lac) 18%, transparent); }
 
 /* --- enquiry-only products --- */
 .st-enquire{ border:1px dashed var(--line); border-radius:16px; background:var(--paper-2);
