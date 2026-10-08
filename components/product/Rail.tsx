@@ -9,7 +9,7 @@ import type { Product } from "@/lib/types";
 export default function Rail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
-  const { rail, nudge, hold, slots } = useLoopRail(items.length);
+  const { rail, track, nudge, hold, slots } = useLoopRail(items.length);
 
   return (
     <section className="st-sec" id={id} style={{ paddingBlock: "0 54px" }}>
@@ -29,9 +29,11 @@ export default function Rail({
           ref={rail}
           {...hold}
         >
-          {slots(items).map(({ item: p, clone }) => (
-            <ProdCard key={clone ? `c-${p.slug}` : p.slug} p={p} clone={clone} />
-          ))}
+          <div className="loop-track" ref={track}>
+            {slots(items).map(({ item: p, clone }) => (
+              <ProdCard key={clone ? `c-${p.slug}` : p.slug} p={p} clone={clone} />
+            ))}
+          </div>
         </div>
         </div>
       </div>

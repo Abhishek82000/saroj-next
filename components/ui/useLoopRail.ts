@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react";
  */
 export function useLoopRail(count: number, speed = 32 /* px per second */) {
   const rail = useRef<HTMLDivElement>(null);
+  /** The flex row inside `rail` that holds the cards — the one element the drift moves. */
+  const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const busyUntil = useRef(0);
   /** Folds the running drift into scrollLeft; set by the drift effect. */
@@ -18,10 +20,10 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
 
   /** Width of one copy of the cards: where the second copy starts. */
   const period = () => {
-    const el = rail.current;
-    if (!el || !loop || el.children.length < count * 2) return 0;
-    const a = el.children[0] as HTMLElement;
-    const b = el.children[count] as HTMLElement;
+    const row = track.current;
+    if (!row || !loop || row.children.length < count * 2) return 0;
+    const a = row.children[0] as HTMLElement;
+    const b = row.children[count] as HTMLElement;
     return b.offsetLeft - a.offsetLeft;
   };
 
@@ -70,7 +72,7 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
 
   /* The drift itself. scrollLeft only takes whole pixels, so at ~0.5px a frame
      driving it directly moves in uneven 1px hops — a visible shake. Instead the
-     drift is a sub-pixel `translate` on the cards (--drift, see base.css), and
+     drift is a sub-pixel transform on the one track element (its own GPU layer), and
      the scroll position is left to swipes and the arrows. Whenever the visitor
      takes over, the drift is folded back into scrollLeft so the two never fight. */
   /* The frame loop never reads layout: with a dozen rails on a page, one rail's
@@ -84,7 +86,8 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0, last = 0, drift = 0;
     let per = period(), sl = el.scrollLeft, shown = true;
-    const paint = () => el.style.setProperty("--drift", `${-drift}px`);
+    const row = track.current;
+    const paint = () => { if (row) row.style.transform = drift ? `translate3d(${-drift}px,0,0)` : ""; };
     const fold = () => {
       if (!drift) return;
       sl = Math.round(sl + drift);
@@ -93,13 +96,12 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
       paint();
     };
     foldRef.current = fold;
-    el.setAttribute("data-drift", "");
 
     const onScroll = () => { sl = el.scrollLeft; };
     el.addEventListener("scroll", onScroll, { passive: true });
     const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => { per = period(); sl = el.scrollLeft; });
     ro?.observe(el);
-    if (el.firstElementChild) ro?.observe(el.firstElementChild);
+    if (row) ro?.observe(row);
     const io = typeof IntersectionObserver === "undefined" ? null
       : new IntersectionObserver(([e]) => { shown = e.isIntersecting; last = 0; }, { rootMargin: "100px 0px" });
     io?.observe(el);
@@ -127,8 +129,6 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
       io?.disconnect();
       fold();
       foldRef.current = () => {};
-      el.removeAttribute("data-drift");
-      el.style.removeProperty("--drift");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loop, count, speed]);
@@ -166,5 +166,5 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
   const slots = <T,>(items: T[]) =>
     (loop ? [...items, ...items] : items).map((item, i) => ({ item, clone: i >= items.length }));
 
-  return { rail, nudge, hold, loop, slots };
+  return { rail, track, nudge, hold, loop, slots };
 }

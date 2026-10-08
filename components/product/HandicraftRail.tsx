@@ -21,7 +21,7 @@ export default function HandicraftRail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
   const { addProduct, mode, href, wishlist, toggleFav } = useStore();
-  const { rail, nudge, hold, loop, slots } = useLoopRail(items.length);
+  const { rail, track, nudge, hold, loop, slots } = useLoopRail(items.length);
   const [pos, setPos] = useState({ start: true, end: true, fits: true });
 
   const measure = () => {
@@ -73,6 +73,7 @@ export default function HandicraftRail({
           )}
 
           <div className="hnd-rail" ref={rail} onScroll={measure} {...hold}>
+            <div className="loop-track" ref={track}>
             {slots(items).map(({ item: p, clone }) => {
               const view = priced(p, mode === "wholesale");
               /* A piece the API sent without a price shows no price, never a made-up ₹0. */
@@ -126,6 +127,7 @@ export default function HandicraftRail({
                 </article>
               );
             })}
+            </div>
           </div>
         </div>
       </div>

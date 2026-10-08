@@ -190,6 +190,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       const dotEls = $$(".hc-dot", dots), count = $("#wheelCount", dots);
       const mod = (a: number, m: number) => ((a % m) + m) % m;
       let radius = 0, angle = 0, dragging = false, locked = false, startX = 0, startY = 0, startAngle = 0, moved = 0, lastW = 0;
+      /* Degrees of turn per pixel dragged — set in measure() so the front card follows the finger 1:1. */
+      let dragK = 0.25, lastX = 0, lastT = 0, vel = 0, frame = 0;
       let auto: number | null = null;
 
       const apply = (animate: boolean) => {
@@ -215,19 +217,28 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         const fw = Math.min(300, Math.max(196, w * (w < 640 ? 0.6 : 0.29)));
         wheel.style.setProperty("--fw", fw + "px");
         radius = Math.round((fw + (w < 640 ? 24 : 52)) / (2 * Math.tan(Math.PI / Math.min(N, SLOTS))));
+        dragK = STEP / (fw + (w < 640 ? 24 : 52));
         apply(false);
       };
       const goTo = (i: number, animate = true) => { angle = i * STEP; apply(animate); };
       const startAuto = () => { if (RM || auto) return; auto = window.setInterval(() => goTo(Math.round(angle / STEP) + 1), 4800); };
       const stopAuto = () => { if (auto) { clearInterval(auto); auto = null; } };
-      cleanups.push(stopAuto);
+      cleanups.push(stopAuto, () => cancelAnimationFrame(frame));
 
       dotEls.forEach((d, i) => listen(d, "click", () => { stopAuto(); goTo(i); startAuto(); }));
 
       const release = () => {
         if (!dragging) return;
         dragging = false;
-        if (locked) goTo(Math.round(angle / STEP));
+        cancelAnimationFrame(frame);
+        if (locked) {
+          /* Land where the flick was heading, and never back on the same card after a real
+             swipe — a short quick swipe used to fall short of half a step and spring back. */
+          const from = Math.round(startAngle / STEP);
+          let to = Math.round((angle - vel * 180 * dragK) / STEP);
+          if (to === from && moved > 30) to = from + (angle > startAngle ? 1 : -1);
+          goTo(Math.max(from - 2, Math.min(from + 2, to)));
+        }
         locked = false;
         startAuto();
       };
@@ -235,7 +246,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         if (e.pointerType === "mouse" && e.button !== 0) return;
         /* Don't touch the wheel yet — a touch may just be the start of a page scroll. */
         dragging = true; locked = false; moved = 0;
-        startX = e.clientX; startY = e.clientY; startAngle = angle;
+        startX = lastX = e.clientX; startY = e.clientY; startAngle = angle; lastT = e.timeStamp; vel = 0;
         stopAuto();
       }) as EventListener);
       listen(stage, "pointermove", ((e: PointerEvent) => {
@@ -253,11 +264,20 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           if (!stage.hasPointerCapture(e.pointerId)) stage.setPointerCapture(e.pointerId);
         }
         moved = Math.abs(dx);
-        angle = startAngle - dx * 0.35; apply(false);
+        /* Finger speed in px/ms, smoothed, for the flick on release. */
+        const dt = e.timeStamp - lastT;
+        if (dt > 0) { vel = vel * 0.6 + ((e.clientX - lastX) / dt) * 0.4; lastX = e.clientX; lastT = e.timeStamp; }
+        angle = startAngle - dx * dragK;
+        /* Phones fire pointermove several times a frame; lay the wheel out once per frame. */
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => apply(false));
       }) as EventListener);
       listen(stage, "pointerup", release);
       listen(stage, "pointercancel", release);
-      listen(stage, "lostpointercapture", release);
+      /* Only the stage's own capture ending counts. On touch the card under the finger holds an
+         implicit capture; taking it over fires lostpointercapture on that card, which bubbles
+         here and used to end every touch drag the moment it began. */
+      listen(stage, "lostpointercapture", (e) => { if (e.target === stage) release(); });
       listen(stage, "click", (e) => { if (moved > 8) e.preventDefault(); }, true);
 
       const next = $("#next"), prev = $("#prev");
