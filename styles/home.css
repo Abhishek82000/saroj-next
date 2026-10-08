@@ -891,3 +891,23 @@
 .st-ofrs__reveal .st-ofrs__slide{ opacity:0; transform:translateX(40px) rotate(2deg); }
 .st-ofrs__reveal.in .st-ofrs__slide{ opacity:1; transform:none;
   transition:opacity .8s var(--ease), transform .9s var(--ease); transition-delay:calc(var(--i,0) * 110ms); }
+
+/* ---------- middle_slider: small banners between the category rails ----------
+   Three to a view on desktop, one and a fifth on phones. Scroll-snapped so a swipe
+   or the auto-step always lands on a banner edge. */
+.st-midb{ padding-block:0 clamp(34px,6vw,54px); }
+.st-midb__rail{ --gap:clamp(10px,1.4vw,18px); display:flex; gap:var(--gap); overflow-x:auto; scroll-snap-type:x mandatory;
+                scroll-behavior:smooth; scrollbar-width:none; -ms-overflow-style:none; padding-block:6px 14px; }
+.st-midb__rail::-webkit-scrollbar{ display:none; }
+.st-midb__card{ flex:0 0 calc((100% - 2 * var(--gap)) / 3); scroll-snap-align:start; display:block; position:relative;
+                aspect-ratio:16/9; border-radius:14px; overflow:hidden; background:var(--paper-2);
+                box-shadow:0 14px 28px -18px rgba(16,24,32,.4); transition:transform .4s var(--ease), box-shadow .4s var(--ease); }
+.st-midb__card picture,.st-midb__card img{ display:block; width:100%; height:100%; }
+.st-midb__card img{ object-fit:fill; transition:transform .9s var(--ease); }
+.st-midb__card:hover{ transform:translateY(-4px); box-shadow:0 22px 36px -18px rgba(16,24,32,.5); }
+.st-midb__card:hover img{ transform:scale(1.04); }
+@media (max-width:640px){
+  /* 1 + 1/5: each banner takes 5/6 of the row, so a fifth of the next one shows */
+  .st-midb__card{ flex-basis:calc((100% - var(--gap)) / 1.2); border-radius:12px; }
+}
+@media (prefers-reduced-motion: reduce){ .st-midb__rail{ scroll-behavior:auto; } }

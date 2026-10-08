@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Fragment } from "react";
+import MidBanners from "@/components/home/MidBanners";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Rail from "@/components/product/Rail";
@@ -53,8 +55,12 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
       ))}
       
 
-      {page.rails.map((r) => (
-        <Rail key={r.id} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
+      {page.rails.map((r, n) => (
+        <Fragment key={r.id}>
+          <Rail id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
+          {/* `middle_slider` banners after the second category rail (or the only one). */}
+          {n === Math.min(1, page.rails.length - 1) && <MidBanners slides={page.midSlides} />}
+        </Fragment>
       ))}
 {page.collections.length > 0 && (
         <section className="st-bolts" aria-labelledby="bolts-h">

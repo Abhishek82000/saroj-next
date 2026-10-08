@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
 import AccountMenu from "./AccountMenu";
-import { resolveHref, isMega, splitMegaChildren, type CommonMenuItem } from "@/lib/nav";
+import { resolveHref, isMega, navAccent, splitMegaChildren, type CommonMenuItem } from "@/lib/nav";
 
 function getImage(item: CommonMenuItem): string | null {
   return (item as unknown as { image?: string | null }).image ?? null;
@@ -142,9 +142,10 @@ function NavItem({ item, resolve, link }: {
   // No children -> just a link, nothing to open.
   if (children.length === 0) {
     const l = link({ label: item.name, href: resolveHref(item) });
+    const accent = navAccent(resolveHref(item), l.label);
     return (
       <li>
-        <Link href={l.href}>{l.label}</Link>
+        <Link href={l.href} className={accent ? `st-hl st-hl--${accent}` : undefined}>{l.label}</Link>
       </li>
     );
   }

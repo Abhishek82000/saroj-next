@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import Hero from "@/components/home/Hero";
+import MidBanners from "@/components/home/MidBanners";
 import CraftRoll from "@/components/home/CraftRoll";
 import WaysToBuy from "@/components/home/WaysToBuy";
 import OffersSlider from "@/components/home/OffersSlider";
@@ -58,8 +60,12 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       
       <Reels items={apiReels} />
       <Shelf categories={featuredCategories} />
-      {categoryRails.map((cat) => (
-        <Rail key={cat.id} id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
+      {categoryRails.map((cat, n) => (
+        <Fragment key={cat.id}>
+          <Rail id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
+          {/* `middle_slider` banners after the second category rail (or the only one, if there's just one). */}
+          {n === Math.min(1, categoryRails.length - 1) && <MidBanners slides={homeData.midSlides} />}
+        </Fragment>
       ))}
       <VideoBanner />      
       {homeData.handicraftSections.map((hc) => (

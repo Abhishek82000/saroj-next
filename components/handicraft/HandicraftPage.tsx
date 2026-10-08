@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
+import MidBanners from "@/components/home/MidBanners";
 import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
 import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
 import FabricStrip from "./FabricStrip";
@@ -544,7 +545,13 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       </section>
 
       {/* ================= CATEGORY RAILS — one per stocked category ================= */}
-      {data.categoryRails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
+      {data.categoryRails.map((r, n) => (
+        <Fragment key={r.id}>
+          <Rail id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />
+          {/* `middle_slider` banners after the second category rail (or the only one). */}
+          {n === Math.min(1, data.categoryRails.length - 1) && <MidBanners slides={data.midSlides} />}
+        </Fragment>
+      ))}
 
       {/* ================= VIDEO BANNER ================= */}
       <section className="hc-vbanner" id="film">

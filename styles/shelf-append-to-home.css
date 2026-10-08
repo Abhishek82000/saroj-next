@@ -14,8 +14,8 @@
 
   box-sizing: border-box;
   display: flex;
-  height: min(calc(100svh - var(--coll-offset)), 54rem);
-  min-height: 31rem;
+  /* height: min(calc(100svh - var(--coll-offset)), 54rem);
+  min-height: 31rem; */
   background:
     radial-gradient(120% 70% at 50% 0%, var(--coll-bg-2), transparent 70%),
     var(--coll-bg);
@@ -29,7 +29,7 @@
   padding: clamp(28px,5vw,54px);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 3rem;
+  gap: 2rem;
   min-height: 0;
 }
 

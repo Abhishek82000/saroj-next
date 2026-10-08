@@ -1,4 +1,4 @@
-import { apiProductToProduct, getHomeData } from "./home";
+import { apiProductToProduct, getHomeData, toSlides } from "./home";
 import { site } from "./site";
 import { wholesaleCategoryHref } from "./wholesale";
 import { homePrices, withRates } from "./wholesalePrices";
@@ -21,6 +21,8 @@ export interface WholesalePage {
   rails: WholesaleRail[];
   /** Tag rails ("New Arrivals", "Best Seller", ...), shown above the category rails. */
   tagRails: WholesaleRail[];
+  /** `middle_slider` — small banners after the second category rail. */
+  midSlides: BannerSlide[];
 }
 
 const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&quot;": '"', "&#39;": "'", "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&ndash;": "–", "&mdash;": "—" };
@@ -105,6 +107,7 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
           items: s.products.map((p) => toProduct(p, rates)),
         })),
       tagRails: await tagRails(d, rates),
+      midSlides: toSlides(d.middle_slider, wholesaleCategoryHref),
     };
   } catch {
     return null;

@@ -12,6 +12,8 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
   const rail = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const busyUntil = useRef(0);
+  /** Folds the running drift into scrollLeft; set by the drift effect. */
+  const foldRef = useRef(() => {});
   const [loop, setLoop] = useState(false);
 
   /** Width of one copy of the cards: where the second copy starts. */
@@ -53,6 +55,8 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
     if (!el || !loop) return;
     let t = 0;
     const settle = () => {
+      /* Only after the visitor scrolled (paused or arrow-busy) — not the drift's own wrap-around. */
+      if (!paused.current && performance.now() > busyUntil.current) return;
       const p = period();
       if (!p) return;
       if (el.scrollLeft >= p) el.scrollLeft -= p;
@@ -64,32 +68,75 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loop, count]);
 
-  /* The drift itself. Tracks its own fractional position, re-syncing if the visitor scrolled. */
+  /* The drift itself. scrollLeft only takes whole pixels, so at ~0.5px a frame
+     driving it directly moves in uneven 1px hops — a visible shake. Instead the
+     drift is a sub-pixel `translate` on the cards (--drift, see base.css), and
+     the scroll position is left to swipes and the arrows. Whenever the visitor
+     takes over, the drift is folded back into scrollLeft so the two never fight. */
+  /* The frame loop never reads layout: with a dozen rails on a page, one rail's
+     write followed by the next rail's offsetLeft/scrollLeft read forces a
+     full-page layout per rail per frame, and the dropped frames show as shake.
+     So the copy width and scroll position are cached (measured on resize and
+     on scroll), and rails off screen don't tick at all. */
   useEffect(() => {
     const el = rail.current;
     if (!el || !loop) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let raf = 0, last = 0, pos = el.scrollLeft;
+    let raf = 0, last = 0, drift = 0;
+    let per = period(), sl = el.scrollLeft, shown = true;
+    const paint = () => el.style.setProperty("--drift", `${-drift}px`);
+    const fold = () => {
+      if (!drift) return;
+      sl = Math.round(sl + drift);
+      el.scrollLeft = sl;
+      drift = 0;
+      paint();
+    };
+    foldRef.current = fold;
+    el.setAttribute("data-drift", "");
+
+    const onScroll = () => { sl = el.scrollLeft; };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => { per = period(); sl = el.scrollLeft; });
+    ro?.observe(el);
+    if (el.firstElementChild) ro?.observe(el.firstElementChild);
+    const io = typeof IntersectionObserver === "undefined" ? null
+      : new IntersectionObserver(([e]) => { shown = e.isIntersecting; last = 0; }, { rootMargin: "100px 0px" });
+    io?.observe(el);
+
     const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      if (!shown || document.hidden) { last = 0; return; }
       const dt = last ? Math.min(now - last, 64) : 0;
       last = now;
-      if (!paused.current && !document.hidden && now > busyUntil.current) {
-        if (Math.abs(el.scrollLeft - pos) > 2) pos = el.scrollLeft;
-        pos += (speed * dt) / 1000;
-        const p = period();
-        if (p && pos >= p) pos -= p;
-        el.scrollLeft = pos;
+      if (paused.current || now <= busyUntil.current) { fold(); return; }
+      drift += (speed * dt) / 1000;
+      /* Past one copy's width: jump back a copy. Both copies look the same, so it's seamless. */
+      if (per && sl + drift >= per) {
+        drift = sl + drift - per;
+        sl = 0;
+        el.scrollLeft = 0;
       }
-      raf = requestAnimationFrame(tick);
+      paint();
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("scroll", onScroll);
+      ro?.disconnect();
+      io?.disconnect();
+      fold();
+      foldRef.current = () => {};
+      el.removeAttribute("data-drift");
+      el.style.removeProperty("--drift");
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loop, count, speed]);
 
   const nudge = (dir: 1 | -1) => {
     const el = rail.current;
     if (!el) return;
+    foldRef.current();
     const step = Math.round(el.clientWidth * 0.8);
     const p = period();
     busyUntil.current = performance.now() + 900;
@@ -107,11 +154,11 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
   };
 
   const hold = {
-    onMouseEnter: () => { paused.current = true; },
+    onMouseEnter: () => { paused.current = true; foldRef.current(); },
     onMouseLeave: () => { paused.current = false; },
-    onTouchStart: () => { paused.current = true; },
+    onTouchStart: () => { paused.current = true; foldRef.current(); },
     onTouchEnd: () => { setTimeout(() => { paused.current = false; }, 3000); },
-    onFocus: () => { paused.current = true; },
+    onFocus: () => { paused.current = true; foldRef.current(); },
     onBlur: () => { paused.current = false; },
   };
 

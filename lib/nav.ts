@@ -188,3 +188,16 @@ export function splitMegaChildren(children: CommonMenuItem[]) {
   const textChildren = children.filter((c) => !imageIds.has(c.id));
   return { textChildren, imageChildren };
 }
+
+/**
+ * The menu links that get a highlight: Handicraft, Wholesale, and — in
+ * wholesale mode, where navItem turns the Wholesale link into one — Retail.
+ * Takes the menu's own href and the label navItem settled on.
+ */
+export function navAccent(href: string, label: string): "craft" | "wholesale" | "retail" | null {
+  if (label === "Retail") return "retail";
+  const path = href.replace(/^https?:\/\/[^/]+/, "").replace(/\/+$/, "");
+  if (path === "/handicraft" || path.startsWith("/handicraft/")) return "craft";
+  if (path === "/wholesale-fabric") return "wholesale";
+  return null;
+}

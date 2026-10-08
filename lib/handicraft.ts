@@ -1,7 +1,7 @@
-import { apiProductToProduct, buildReels } from "./home";
+import { apiProductToProduct, buildReels, toSlides } from "./home";
 import { categoryHref } from "./nav";
 import { site } from "./site";
-import type { Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeTagSection, HomeVideoProduct } from "./types";
+import type { BannerSlide, HomeApiSlide, Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeTagSection, HomeVideoProduct } from "./types";
 
 export interface HandicraftApiTestimonial {
   id: number;
@@ -25,6 +25,8 @@ export interface HandicraftApiResponse {
     handicraftFeatCategory?: HandicraftApiFeatCategory[];
     /** The fabric categories for the sliding shelf. */
     fabricCategory?: HandicraftApiFeatCategory[];
+    /** Small banners between the category rails — the same shape as /api/home's. */
+    middle_slider?: HomeApiSlide[];
   };
 }
 
@@ -86,10 +88,12 @@ export interface HandicraftData {
   categoryRails: HcRail[];
   /** Shoppable reels of handicraft pieces, drawn like the home page's. */
   reels: Reel[];
+  /** `middle_slider` — small banners after the second category rail. */
+  midSlides: BannerSlide[];
 }
 
 const EMPTY: HandicraftData = {
-  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, tagRails: [], categoryRails: [], reels: [],
+  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, tagRails: [], categoryRails: [], reels: [], midSlides: [],
 };
 
 const productHref = (slug: string) => `/product/${slug}`;
@@ -166,6 +170,7 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       tagRails: (d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
         .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
       categoryRails: stocked.map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
+      midSlides: toSlides(d.middle_slider),
     };
   } catch {
     return EMPTY;

@@ -758,3 +758,26 @@ a.sm-switch__opt:hover { color: var(--sm-ink); }
 .st-crecent__card:hover .st-crecent__name{ color:var(--cobalt); }
 .st-crecent__price{ font-size:.78rem; font-variant-numeric:tabular-nums; }
 @media (prefers-reduced-motion: reduce){ .st-crecent__track{ animation:none; } .st-crecent__view{ overflow-y:auto; } }
+
+/* ---------- highlighted menu links: Handicraft, Wholesale, and Retail (in wholesale mode) ----------
+   Each gets its own colour as a soft pill that fills solid on hover. */
+.st-links a.st-hl{ --hl:var(--cobalt); color:var(--hl); padding:.42rem .9rem; border-radius:99px;
+  background:color-mix(in srgb, var(--hl) 10%, transparent); border:1px solid color-mix(in srgb, var(--hl) 35%, transparent);
+  transition:background .3s var(--ease), color .3s, box-shadow .3s; }
+.st-links a.st-hl::after{ display:none; }
+.st-links a.st-hl:hover{ background:var(--hl); color:#fff; box-shadow:0 8px 18px -10px var(--hl); }
+.st-links a.st-hl--craft{ --hl:#891226; }
+.st-links a.st-hl--wholesale{ --hl:#9a6b1c; background:linear-gradient(120deg, #fbefd2, #f6dfaa); }
+.st-links a.st-hl--wholesale:hover{ background:linear-gradient(120deg, #b88a2e, #8a5e14); }
+.st-links a.st-hl--retail{ --hl:var(--cobalt); }
+/* a small spark before the label so the pills read as special at a glance */
+.st-links a.st-hl::before{ content:''; width:6px; height:6px; border-radius:50%; background:currentColor; flex:none; }
+
+/* the same three in the mobile menu: coloured label and a tag on the right */
+.sm-row--hl{ --hl:var(--sm-accent); color:var(--hl); }
+.sm-row--craft{ --hl:#891226; }
+.sm-row--wholesale{ --hl:#9a6b1c; }
+.sm-row--retail{ --hl:#1E3A5F; }
+.sm-row--hl .sm-row__label{ font-weight:600; display:inline-flex; align-items:center; gap:.55rem; }
+.sm-row--hl .sm-row__label::before{ content:''; width:8px; height:8px; border-radius:50%; background:var(--hl);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--hl) 18%, transparent); }

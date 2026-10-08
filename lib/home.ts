@@ -1,7 +1,7 @@
 import { categoryHref, getFeaturedCategories } from "./nav";
 import { site } from "./site";
 import type {
-  BannerSlide, CommonCategoryRef, HomeApiProduct, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
+  BannerSlide, CommonCategoryRef, HomeApiProduct, HomeApiSlide, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
   Product, ProductDetailApiResponse, ProductsApiResponse, ProductsApiSaleProduct, ProductsApiTag,
   Reel, SaleProduct,
 } from "./types";
@@ -9,6 +9,8 @@ import type {
 export interface HomeData {
   /** `top_slider` — the banners across the top of the page. */
   slides: BannerSlide[];
+  /** `middle_slider` — the small banners between the category rails. */
+  midSlides: BannerSlide[];
   tagSections: HomeTagSection[];
   categorySections: HomeCategorySection[];
   /** `handicraft_show_home_page` — drawn by HandicraftRail. */
@@ -16,11 +18,22 @@ export interface HomeData {
   videoProducts: HomeVideoProduct[];
 }
 
-const EMPTY_HOME_DATA: HomeData = { slides: [], tagSections: [], categorySections: [], handicraftSections: [], videoProducts: [] };
+const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftSections: [], videoProducts: [] };
 
 /** Handicraft rails may come tag-shaped (id/name/slug) or category-shaped (cat_*); read either. */
 const toSection = (s: HomeTagSection | HomeCategorySection): HomeTagSection =>
   "cat_id" in s ? { id: s.cat_id, name: s.cat_name, slug: s.cat_slug, products: s.products ?? [] } : { ...s, products: s.products ?? [] };
+
+/** API banners (`top_slider`, `middle_slider`) into BannerSlide; one without an image is dropped.
+    `catHref` lets the wholesale page point category banners at its own listings. */
+export const toSlides = (list: HomeApiSlide[] | undefined, catHref: (slug: string) => string = categoryHref): BannerSlide[] =>
+  (list ?? []).filter((s) => s.image_web).map((s) => ({
+    id: s.id,
+    alt: s.category?.name ?? s.tag?.name ?? s.name,
+    image: s.image_web,
+    mobileImage: s.image_mobile || s.image_web,
+    href: s.url || (s.category ? catHref(s.category.slug) : s.tag ? `/shop/${s.tag.slug}` : null),
+  }));
 
 /**
  * Everything the homepage pulls live from the storefront: the tag rails
@@ -35,13 +48,8 @@ export async function getHomeData(): Promise<HomeData> {
     if (!res.ok) return EMPTY_HOME_DATA;
     const json: HomeApiResponse = await res.json();
     return {
-      slides: (json.data?.top_slider ?? []).filter((s) => s.image_web).map((s) => ({
-        id: s.id,
-        alt: s.category?.name ?? s.tag?.name ?? s.name,
-        image: s.image_web,
-        mobileImage: s.image_mobile || s.image_web,
-        href: s.url || (s.category ? categoryHref(s.category.slug) : s.tag ? `/shop/${s.tag.slug}` : null),
-      })),
+      slides: toSlides(json.data?.top_slider),
+      midSlides: toSlides(json.data?.middle_slider),
       tagSections: json.data?.tag_show_home_page ?? [],
       // Some categories aren't stocked yet, so the API lists them with no products.
       categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),

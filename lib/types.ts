@@ -312,6 +312,8 @@ export interface HomeApiResponse {
   success: boolean;
   data: {
     top_slider?: HomeApiSlide[];
+    /** Small banners shown between the category rails. Same shape as top_slider. */
+    middle_slider?: HomeApiSlide[];
     tag_show_home_page: HomeTagSection[];
     category_show_home_page: HomeCategorySection[];
     /** Handicraft rails — the same product payload as the tag/category rails. */
@@ -507,6 +509,8 @@ export interface WholesalePageApiResponse {
     category_list: WholesaleApiCategory[];
     testimonials: WholesaleApiTestimonial[];
     category_show_home_page: { cat_id: number; cat_name: string; cat_slug: string; products: WholesaleApiProduct[] }[];
+    /** Small banners between the category rails — the same shape as /api/home's. */
+    middle_slider?: HomeApiSlide[];
     /** Tag rails ("New Arrivals", "Best Seller", ...) — being added on the backend
         and not live yet, so the key and field names are a best guess covering
         both the /api/home shape and the raw tag_* columns. */

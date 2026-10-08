@@ -4,7 +4,7 @@ import Link from "next/link";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import { useStore } from "./StoreProvider";
 import { site } from "@/lib/site";
-import { resolveHref, type CommonMenuItem } from "@/lib/nav";
+import { navAccent, resolveHref, type CommonMenuItem } from "@/lib/nav";
 
 export default function MenuDrawer({ navMenu = [] }: { navMenu?: CommonMenuItem[] }) {
   const { menuOpen, setMenuOpen, user, openLogin, logout, href, navItem, mode } = useStore();
@@ -51,8 +51,10 @@ export default function MenuDrawer({ navMenu = [] }: { navMenu?: CommonMenuItem[
             const style = { ["--i" as string]: idx + 1 };
 
             if (children.length === 0) {
+              const accent = navAccent(resolveHref(m), target.label);
               return (
-                <Link key={m.id} href={target.href} onClick={close} className="sm-row" style={style}>
+                <Link key={m.id} href={target.href} onClick={close} style={style}
+                  className={`sm-row${accent ? ` sm-row--hl sm-row--${accent}` : ""}`}>
                   <span className="sm-row__label">{target.label}</span>
                 </Link>
               );

@@ -176,3 +176,7 @@ a.st-contact__card:hover{ border-color:var(--cobalt); transform:translateY(-2px)
 .st-wh__quote blockquote{ margin:0; font-size:.88rem; color:var(--ink-2); line-height:1.6; }
 .st-wh__quote figcaption{ font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--mute); }
 
+
+/* Looping product rails drift by a sub-pixel translate (useLoopRail sets --drift);
+   `translate` is separate from `transform`, so the cards' hover lift still works. */
+[data-drift] > *{ translate:var(--drift, 0px) 0; will-change:translate; }
