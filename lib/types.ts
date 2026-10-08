@@ -178,6 +178,8 @@ export interface ProductDetail {
   recentlyViewed: Product[];
   recentlyViewedIds: number[];
   categoryRails: CategoryRail[];
+  /** Handicraft categories (cat_type 1) for the strip at the foot of the page. */
+  handicraftCategories: { id: number; name: string; slug: string; image: string }[];
   isFavorite: boolean;
   /** Wholesale carts are gated behind a login, as in the Blade. */
   requiresLogin: boolean;

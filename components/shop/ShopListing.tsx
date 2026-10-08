@@ -6,7 +6,7 @@ import { useStore } from "@/components/shell/StoreProvider";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
-import ProductCard from "./ProductCard";
+import ProdCard from "@/components/product/ProdCard";
 import Filters from "./Filters";
 import { emptyFilters, useShopFilters, type SortKey } from "./useShopFilters";
 import { inr, site } from "@/lib/site";
@@ -209,7 +209,9 @@ export default function ShopListing({
             ) : (
               <>
                 <div className="st-grid" data-cols={cols}>
-                  {slice.map((p, i) => <ProductCard key={p.slug} p={p} priority={i < 4} />)}
+                  {slice.map((p, i) => (
+                    <ProdCard key={p.slug} p={p} priority={i < 4} sizes="(max-width:640px) 50vw, (max-width:1000px) 33vw, 280px" />
+                  ))}
                 </div>
                 <div className="st-more">
                   {f.shown >= list.length && !hasMore ? (

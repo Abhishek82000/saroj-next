@@ -69,6 +69,7 @@ interface RawDetail {
   recently_viewed: RawCard[];
   recently_viewed_ids: number[];
   category_rails: { id: number; name: string; slug: string; products: RawCard[] }[];
+  handicraft_categories?: { id: number; name: string; slug: string; image: string | null }[];
   shipping: { estimate: string; free_shipping_above: number | null; minimum: string | null };
 }
 
@@ -230,6 +231,8 @@ export async function getProductDetail(
     recentlyViewed: (raw.recently_viewed ?? []).map(mapCard),
     recentlyViewedIds: raw.recently_viewed_ids ?? [],
     categoryRails: rails,
+    handicraftCategories: (raw.handicraft_categories ?? [])
+      .filter((c): c is { id: number; name: string; slug: string; image: string } => !!c.image),
     isFavorite: raw.is_favorite,
     requiresLogin: raw.requires_login,
     shipping: raw.shipping,

@@ -137,17 +137,42 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-trust b{ display:block; font-size:.7rem; font-weight:700; }
 .st-trust small{ font-size:.58rem; color:var(--mute); }
 
-.st-coupons{ display:grid; gap:.5rem; margin-top:1.2rem; }
+/* Offers: each coupon is a coloured ticket — tinted ground, notched sides, a perforation
+   between the icon stub and the body. Four tints cycle so neighbouring tickets never match. */
+.st-offers{ margin-top:1.3rem; }
+.st-offers__head{ display:flex; align-items:center; gap:.45rem; margin:0 0 .65rem; font-size:.62rem; letter-spacing:.2em;
+                  text-transform:uppercase; font-weight:700; color:var(--lac); }
+.st-offers__head span{ margin-left:auto; font-size:.56rem; letter-spacing:.12em; color:#fff; background:var(--lac);
+                       padding:.3em .75em; border-radius:99px; }
+.st-coupons{ display:grid; gap:.6rem; }
 @media(min-width:520px){ .st-coupons{ grid-template-columns:1fr 1fr; } }
-.st-coupon{ border:1px dashed var(--line); border-radius:12px; background:#fff; padding:.75rem .9rem;
-            text-align:left; cursor:pointer; transition:.3s var(--ease); position:relative; }
-.st-coupon:hover{ border-color:var(--cobalt); transform:translateY(-2px); }
-.st-coupon b{ display:block; font-size:.76rem; line-height:1.35; }
-.st-coupon code{ display:inline-block; margin-top:.45rem; font-family:var(--b); font-weight:700;
-                 font-size:.66rem; letter-spacing:.18em; color:var(--cobalt);
-                 background:var(--paper-2); border-radius:6px; padding:.28em .6em; }
+.st-coupon{ --tint:var(--lac); --wash:#fdeeea; position:relative; display:flex; align-items:stretch; text-align:left;
+            border:1.5px dashed color-mix(in srgb, var(--tint) 45%, transparent); border-radius:14px; padding:0;
+            background:linear-gradient(135deg, var(--wash), #fff 70%); cursor:pointer; overflow:hidden;
+            transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s; }
+.st-coupon:nth-child(4n+2){ --tint:var(--teal); --wash:#e6f2ee; }
+.st-coupon:nth-child(4n+3){ --tint:var(--ochre); --wash:#fbf1dc; }
+.st-coupon:nth-child(4n+4){ --tint:var(--cobalt); --wash:#e8eef6; }
+/* the ticket notches */
+.st-coupon::before,.st-coupon::after{ content:''; position:absolute; left:42px; width:14px; height:14px; border-radius:50%;
+            background:var(--paper); border:1.5px dashed color-mix(in srgb, var(--tint) 45%, transparent); translate:-50% 0; z-index:1; }
+.st-coupon::before{ top:-8px; } .st-coupon::after{ bottom:-8px; }
+.st-coupon:hover{ transform:translateY(-3px); border-color:var(--tint);
+                  box-shadow:0 14px 26px -16px color-mix(in srgb, var(--tint) 70%, transparent); }
+.st-coupon__ic{ flex:none; width:42px; display:grid; place-items:center; color:#fff;
+                background:linear-gradient(160deg, var(--tint), color-mix(in srgb, var(--tint) 70%, #000)); }
+.st-coupon__body{ flex:1; min-width:0; padding:.75rem .85rem .7rem 1rem; border-left:2px dotted color-mix(in srgb, var(--tint) 35%, transparent); }
+.st-coupon b{ display:block; font-size:.78rem; line-height:1.35; color:var(--ink); }
+.st-coupon__row{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-top:.5rem; }
+.st-coupon code{ font-family:var(--b); font-weight:800; font-size:.7rem; letter-spacing:.16em; color:var(--tint);
+                 background:#fff; border:1px solid color-mix(in srgb, var(--tint) 40%, transparent);
+                 border-radius:6px; padding:.3em .65em; }
+.st-coupon em{ display:inline-flex; align-items:center; gap:.25em; font-style:normal; font-size:.58rem; font-weight:700;
+               letter-spacing:.1em; text-transform:uppercase; color:var(--tint); white-space:nowrap; }
 .st-coupon small{ display:block; font-size:.58rem; color:var(--mute); margin-top:.4rem; }
-.st-coupon.copied code{ background:var(--teal); color:#fff; }
+.st-coupon.copied{ border-style:solid; border-color:var(--teal); }
+.st-coupon.copied code{ background:var(--teal); border-color:var(--teal); color:#fff; }
+.st-coupon.copied em{ color:var(--teal); }
 
 .st-quiet{ display:flex; flex-wrap:wrap; gap:1.4rem; margin-top:1.4rem; }
 .st-quiet button{ border:0; background:transparent; padding:0; cursor:pointer; color:var(--ink-2);
@@ -321,21 +346,29 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-pd__rating:hover span{ color:var(--cobalt); border-color:currentColor; }
 
 /* --- category promo clock --- */
-.st-promo{ margin-top:1.1rem; border:1px solid var(--line); border-radius:14px;
-           background:var(--paper-2); padding:.95rem 1.1rem; }
-.st-promo__head{ margin:0 0 .6rem; font-size:.57rem; letter-spacing:.24em;
-                 text-transform:uppercase; font-weight:700; color:var(--lac); }
-.st-promo__clock{ display:flex; gap:.5rem; }
-.st-promo__clock span{ display:grid; justify-items:center; min-width:52px; padding:.45rem .3rem;
-                       background:#fff; border-radius:10px; border:1px solid var(--line-2); }
-.st-promo__clock b{ font-family:var(--d); font-weight:400; font-size:1.35rem; line-height:1;
+/* Category deal: a warm madder-to-ochre band with the clock in white tiles. */
+.st-promo{ position:relative; overflow:hidden; margin-top:1.1rem; border-radius:16px; padding:1rem 1.15rem 1.05rem; color:#fff;
+           background:
+             radial-gradient(circle at 1px 1px, rgba(255,255,255,.14) 1px, transparent 0) 0 0/16px 16px,
+             linear-gradient(120deg, var(--lac) 0%, #c9542f 55%, var(--ochre) 100%);
+           box-shadow:0 18px 32px -20px rgba(181,55,43,.75); }
+.st-promo::after{ content:''; position:absolute; right:-40px; top:-40px; width:140px; height:140px; border-radius:50%;
+                  background:rgba(255,255,255,.12); pointer-events:none; }
+.st-promo__head{ display:flex; align-items:center; gap:.5rem; margin:0 0 .7rem; font-size:.6rem; letter-spacing:.22em;
+                 text-transform:uppercase; font-weight:700; color:#fff; }
+.st-promo__head i{ width:8px; height:8px; border-radius:50%; background:#ffe08a; box-shadow:0 0 0 4px rgba(255,224,138,.3);
+                   animation:pulse 1.6s ease-in-out infinite; }
+.st-promo__clock{ position:relative; z-index:1; display:flex; gap:.45rem; }
+.st-promo__clock span{ display:grid; justify-items:center; min-width:54px; padding:.5rem .3rem .4rem;
+                       background:#fff; border-radius:10px; box-shadow:0 6px 14px -8px rgba(0,0,0,.35); }
+.st-promo__clock b{ font-family:var(--d); font-weight:400; font-size:1.45rem; line-height:1; color:var(--lac);
                     font-variant-numeric:tabular-nums; }
-.st-promo__clock small{ font-size:.52rem; letter-spacing:.16em; text-transform:uppercase;
+.st-promo__clock small{ font-size:.5rem; letter-spacing:.16em; text-transform:uppercase;
                         color:var(--mute); margin-top:.25rem; }
-.st-promo__note{ margin:.75rem 0 0; font-size:.78rem; color:var(--ink-2); }
-.st-promo__code{ margin:.4rem 0 0; font-size:.72rem; color:var(--mute); }
-.st-promo__code code{ font-family:var(--b); font-weight:700; letter-spacing:.16em; color:var(--cobalt);
-                      background:#fff; border-radius:6px; padding:.24em .55em; }
+.st-promo__note{ position:relative; z-index:1; margin:.8rem 0 0; font-size:.8rem; font-weight:500; color:#fff; }
+.st-promo__code{ position:relative; z-index:1; margin:.45rem 0 0; font-size:.72rem; color:rgba(255,255,255,.85); }
+.st-promo__code code{ font-family:var(--b); font-weight:800; letter-spacing:.16em; color:var(--ink);
+                      background:#ffe08a; border-radius:6px; padding:.28em .6em; }
 
 /* --- variant pickers --- */
 .st-variants{ display:grid; gap:1.2rem; margin-bottom:1.4rem; }
@@ -529,3 +562,8 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 @media (prefers-reduced-motion: reduce){
   .st-prod__add::after{ display:none; }
 }
+
+/* The same card in the shop grid: it fills its cell instead of the rail's fixed width. */
+.st-grid .st-prod{ min-width:0; }
+.st-prod__add:disabled{ background:var(--line); color:var(--mute); cursor:not-allowed; }
+.st-prod__add:disabled::after{ display:none; }

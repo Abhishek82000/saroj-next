@@ -24,7 +24,7 @@ export default function Countdown({
 
   return (
     <div className="st-promo">
-      <p className="st-promo__head">Offer ends in</p>
+      <p className="st-promo__head"><i aria-hidden /> Today’s deal · ends in</p>
       <div className="st-promo__clock" role="timer" aria-live="off">
         {d > 0 && <span><b>{pad(d)}</b><small>days</small></span>}
         <span><b>{pad(h)}</b><small>hrs</small></span>

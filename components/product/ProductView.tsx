@@ -4,6 +4,7 @@ import BuyBox from "./BuyBox";
 import Rail from "./Rail";
 import ProductTabs from "./ProductTabs";
 import RecentlyViewed from "./RecentlyViewed";
+import HandicraftHouse from "./HandicraftHouse";
 import JsonLd from "@/components/seo/JsonLd";
 import { productHref, WHOLESALE_BASE } from "@/lib/product-api";
 import { categoryHref } from "@/lib/nav";
@@ -86,7 +87,7 @@ export default function ProductView({
         <Rail key={rail.id} eyebrow="From the counter" heading={`${rail.name}.`} items={rail.products} />
       ))}
 
-      
+      {detail && <HandicraftHouse categories={detail.handicraftCategories} />}
 
       <JsonLd data={graph([
         productLd(p),

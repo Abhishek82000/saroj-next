@@ -281,15 +281,27 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
 
       {/* ---------- coupons ---------- */}
       {coupons.length > 0 && (
-        <div className="st-coupons">
-          {coupons.slice(0, 4).map((c) => (
-            <button type="button" key={c.code} className={`st-coupon${copied === c.code ? " copied" : ""}`}
-              onClick={() => copy(c.code)}>
-              <b>{c.description}</b>
-              <code>{c.code}</code>
-              <small>Valid till {c.valid_to} · tap to copy</small>
-            </button>
-          ))}
+        <div className="st-offers">
+          <p className="st-offers__head">
+            <Icon name="gift" size={15} strokeWidth={1.7} /> Offers for you
+            <span>{Math.min(coupons.length, 4)} available</span>
+          </p>
+          <div className="st-coupons">
+            {coupons.slice(0, 4).map((c) => (
+              <button type="button" key={c.code} className={`st-coupon${copied === c.code ? " copied" : ""}`}
+                onClick={() => copy(c.code)}>
+                <span className="st-coupon__ic" aria-hidden><Icon name="percent" size={16} strokeWidth={1.8} /></span>
+                <span className="st-coupon__body">
+                  <b>{c.description}</b>
+                  <span className="st-coupon__row">
+                    <code>{c.code}</code>
+                    <em>{copied === c.code ? <><Icon name="check" size={12} strokeWidth={2.2} /> Copied</> : "Tap to copy"}</em>
+                  </span>
+                  <small>Valid till {c.valid_to}</small>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
