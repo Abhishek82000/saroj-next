@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ProductView from "@/components/product/ProductView";
 import { getProductDetail } from "@/lib/product-api";
 import { productMeta } from "@/lib/product-page";
+import { hasWholesalePrice } from "@/lib/wholesale";
 
 type Params = Promise<{ slug: string }>;
 
@@ -29,7 +30,8 @@ export default async function WholesaleProductPage({ params }: { params: Params 
   const { slug } = await params;
 
   const detail = await getProductDetail(slug, { wholesale: true, strict: true });
-  if (!detail) notFound();
+  /* No wholesale selling price (product_wh_selling_price null or 0): not sold wholesale, so no wholesale page. */
+  if (!detail || !hasWholesalePrice(detail.product)) notFound();
 
   return <ProductView p={detail.product} detail={detail} />;
 }

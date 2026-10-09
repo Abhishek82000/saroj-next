@@ -5,7 +5,7 @@ import { useStore } from "./StoreProvider";
 import { readRecent } from "@/components/product/RecentlyViewed";
 import { fetchCards } from "@/lib/product-api";
 import { inrExact } from "@/lib/site";
-import { priced } from "@/lib/wholesale";
+import { forMode, priced } from "@/lib/wholesale";
 import type { Product } from "@/lib/types";
 
 /** Cards per loop pass — enough to overfill the panel's height so the loop never shows a gap. */
@@ -27,7 +27,7 @@ export default function CartRecent({ open, onPick }: { open: boolean; onPick: ()
     const ids = readRecent();
     if (!ids.length) return setItems([]);
     let live = true;
-    fetchCards(ids, mode === "wholesale").then((cards) => { if (live) setItems(cards); });
+    fetchCards(ids, mode === "wholesale").then((cards) => { if (live) setItems(forMode(cards, mode === "wholesale")); });
     return () => { live = false; };
   }, [open, mode]);
 

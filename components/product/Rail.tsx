@@ -4,12 +4,18 @@ import { useLoopRail } from "@/components/ui/useLoopRail";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
 import type { Product } from "@/lib/types";
+import { useStore } from "@/components/shell/StoreProvider";
+import { forMode } from "@/lib/wholesale";
 
 /** Horizontal product scroller, used under the product detail and on the home page. */
 export default function Rail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
-  const { rail, track, nudge, hold, slots } = useLoopRail(items.length);
+  /* At wholesale, a piece with no wholesale price isn't for sale — and a rail left empty isn't drawn. */
+  const { mode } = useStore();
+  const shown = forMode(items, mode === "wholesale");
+  const { rail, track, nudge, hold, slots } = useLoopRail(shown.length);
+  if (shown.length === 0) return null;
 
   return (
     <section className="st-sec" id={id} style={{ paddingBlock: "0 54px" }}>
@@ -30,7 +36,7 @@ export default function Rail({
           {...hold}
         >
           <div className="loop-track" ref={track}>
-            {slots(items).map(({ item: p, clone }) => (
+            {slots(shown).map(({ item: p, clone }) => (
               <ProdCard key={clone ? `c-${p.slug}` : p.slug} p={p} clone={clone} />
             ))}
           </div>

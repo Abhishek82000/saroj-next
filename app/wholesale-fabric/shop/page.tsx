@@ -1,4 +1,9 @@
-/** /wholesale-fabric/shop — the whole counter, at trade rates. The URL is what
-    flips the site into wholesale mode, so the prices and links come from the
-    components; this is the ordinary shop page, not a second copy of it. */
-export { default, generateMetadata } from "../../shop/page";
+import { ShopView } from "../../shop/page";
+
+/** /wholesale-fabric/shop — the whole counter, at trade rates. The URL flips the
+    site into wholesale mode; ShopView prices the first page at wholesale, and only
+    pieces with a wholesale price are shown. */
+export { generateMetadata } from "../../shop/page";
+export default function WholesaleShopPage(props: Parameters<typeof ShopView>[0]) {
+  return ShopView({ ...props, wholesale: true });
+}

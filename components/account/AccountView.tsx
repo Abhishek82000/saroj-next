@@ -10,6 +10,7 @@ import OrdersTab from "@/components/account/OrdersTab";
 import { isValidEmail } from "@/lib/auth";
 import { getProductDetail } from "@/lib/product-api";
 import { site } from "@/lib/site";
+import { forMode } from "@/lib/wholesale";
 import type { Product } from "@/lib/types";
 
 const TABS = [
@@ -48,10 +49,12 @@ function WishlistTab({ slugs, mode }: { slugs: string[]; mode: Mode }) {
 
   if (slugs.length === 0) return <p className="st-account__empty">Nothing saved yet — tap the heart on any piece.</p>;
 
-  const cards = slugs.map((s) => live[s]).filter((p): p is Product => !!p);
+  /* The wholesale wishlist shows only pieces still sold wholesale (with a wholesale price). */
+  const cards = forMode(slugs.map((s) => live[s]).filter((p): p is Product => !!p), mode === "wholesale");
   const loading = slugs.some((s) => live[s] === undefined);
 
   if (cards.length === 0 && loading) return <p className="st-account__empty">Loading your wishlist…</p>;
+  if (cards.length === 0 && mode === "wholesale") return <p className="st-account__empty">Nothing saved here is sold wholesale right now.</p>;
 
   return (
     <>

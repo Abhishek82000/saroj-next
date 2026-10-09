@@ -3,6 +3,7 @@ import type {
   ReviewSummary, Stock, VariantGroup,
 } from "./types";
 import { site } from "./site";
+import { WHOLESALE_MIN_METRES } from "./wholesale";
 
 /**
  * Talks to ProductApiDetailController.
@@ -53,6 +54,8 @@ interface RawCard {
   id: number; name: string; slug: string; image: string; image_alt: string;
   mrp: number; selling: number; discount: number; label: string | null;
   rating: number; review_count: number; stock: number; style_type: number; lgap: number;
+  /** Wholesale cards only: the smallest order line (0 = the site default). */
+  wh_min_qty?: number;
 }
 
 interface RawDetail {
@@ -148,8 +151,13 @@ function mapProduct(raw: RawProduct): Product {
   };
 }
 
-function mapCard(raw: RawCard): Product {
+/** A rail card. Cards asked for at wholesale are priced from the wholesale columns, so in
+    wholesale mode the price is the trade rate and goes on `wholesale`, where the cards read it. */
+function mapCard(raw: RawCard, wholesale = false): Product {
   return {
+    ...(wholesale && raw.selling > 0
+      ? { wholesale: { price: raw.selling, mrp: raw.mrp > raw.selling ? raw.mrp : 0, minQty: raw.wh_min_qty || WHOLESALE_MIN_METRES } }
+      : {}),
     productId: raw.id,
     slug: raw.slug,
     name: raw.name,
@@ -213,9 +221,10 @@ export async function getProductDetail(
   const query = opts.recent?.length ? `?recent=${opts.recent.join(",")}` : "";
   const raw = await get<RawDetail>(base + encodeURIComponent(slug) + query, opts.strict);
   if (!raw) return null;
+  const wholesale = raw.mode === "wholesale";
 
   const rails: CategoryRail[] = (raw.category_rails ?? []).map((c) => ({
-    id: c.id, name: c.name, slug: c.slug, products: c.products.map(mapCard),
+    id: c.id, name: c.name, slug: c.slug, products: c.products.map((p) => mapCard(p, wholesale)),
   }));
 
   return {
@@ -227,8 +236,8 @@ export async function getProductDetail(
     coupons: raw.coupons ?? [],
     reviews: raw.reviews,
     faqs: raw.faqs ?? [],
-    related: (raw.related ?? []).map(mapCard),
-    recentlyViewed: (raw.recently_viewed ?? []).map(mapCard),
+    related: (raw.related ?? []).map((p) => mapCard(p, wholesale)),
+    recentlyViewed: (raw.recently_viewed ?? []).map((p) => mapCard(p, wholesale)),
     recentlyViewedIds: raw.recently_viewed_ids ?? [],
     categoryRails: rails,
     handicraftCategories: (raw.handicraft_categories ?? [])
@@ -270,7 +279,7 @@ export async function fetchCards(ids: number[], wholesale = false): Promise<Prod
   const raw = await get<RawCard[]>(
     `/api/products/cards?ids=${ids.join(",")}${wholesale ? "&wholesale=1" : ""}`,
   );
-  return (raw ?? []).map(mapCard);
+  return (raw ?? []).map((p) => mapCard(p, wholesale));
 }
 
 /**

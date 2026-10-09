@@ -19,6 +19,14 @@ export function priced(p: Product, wholesale: boolean) {
   return { price: rate?.price ?? 0, mrp: rate?.mrp ?? 0, minQty: rate?.minQty ?? WHOLESALE_MIN_METRES, wholesale: true as const };
 }
 
+/** A piece is sold wholesale only with a wholesale selling price: product_wh_selling_price
+    null or 0 means it isn't, and the wholesale side never shows it. */
+export const hasWholesalePrice = (p: Product) => (p.wholesale?.price ?? 0) > 0;
+
+/** The pieces to show in a mode: everything at retail; only priced pieces at wholesale. */
+export const forMode = <T extends Product>(items: T[], wholesale: boolean): T[] =>
+  wholesale ? items.filter(hasWholesalePrice) : items;
+
 export const wholesaleNote = `Wholesale · from ${WHOLESALE_MIN_METRES} m · GST extra`;
 
 /* ---------- where wholesale lives in the URL ----------

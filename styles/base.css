@@ -163,3 +163,21 @@ button{ font-family:inherit; }
 /* The row of cards inside a looping product rail (useLoopRail). It takes the
    rail's gap, and the drift moves it as one GPU layer. */
 .loop-track{ display:flex; gap:inherit; flex:none; width:max-content; will-change:transform; }
+
+/* ---------- scrollbars: a slim indigo-to-madder thread on a clear track ----------
+   No arrow buttons, no grey gutter. The thumb is a 4px pill that thickens to 6px
+   under the pointer (a transparent border clipped away, so it grows without
+   shifting the layout). Strips that hide their bar keep their own rules. */
+:root{ --sb-thumb:linear-gradient(160deg, var(--cobalt), var(--lac)); --sb-firefox:color-mix(in srgb, var(--cobalt) 60%, transparent); }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:var(--sb-thumb); border-radius:99px; border:3px solid transparent; background-clip:padding-box; }
+::-webkit-scrollbar-thumb:hover{ border-width:2px; }
+::-webkit-scrollbar-thumb:active{ border-width:2px; background:var(--lac); background-clip:padding-box; }
+::-webkit-scrollbar-button{ display:none; width:0; height:0; }
+::-webkit-scrollbar-corner{ background:transparent; }
+/* Browsers without the WebKit hooks (Firefox) get the standard thin bar in the same ink.
+   Chrome is left out on purpose: setting these there would switch its styled bar off. */
+@supports not selector(::-webkit-scrollbar){
+  *{ scrollbar-width:thin; scrollbar-color:var(--sb-firefox) transparent; }
+}

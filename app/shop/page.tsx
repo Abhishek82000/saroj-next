@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProductsPage, type ProductsApiSort } from "@/lib/home";
+import { attachWholesale } from "@/lib/wholesalePrices";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
 type Search = Promise<{ q?: string; sort?: string }>;
@@ -33,10 +34,19 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
  * bursts, so the server sends page one and the listing fetches the rest as
  * the visitor scrolls. `?q=` narrows by name (the nav's non-category entries).
  */
-export default async function ShopPage({ searchParams }: { searchParams: Search }) {
+export default function ShopPage({ searchParams }: { searchParams: Search }) {
+  return ShopView({ searchParams });
+}
+
+/** The shop body, shared with /wholesale-fabric/shop. Wholesale prices its first
+    page here, so pieces without a wholesale price are hidden from the start
+    rather than flashing up and vanishing. */
+export async function ShopView({ searchParams, wholesale }: { searchParams: Search; wholesale?: boolean }) {
   const { q = "", sort: rawSort } = await searchParams;
   const sort = toSort(rawSort);
-  const { products, categories, tags, priceRange, saleProducts, lastPage, total } = await getProductsPage(sort);
+  const page = await getProductsPage(sort);
+  const { categories, tags, priceRange, saleProducts, lastPage, total } = page;
+  const products = wholesale ? await attachWholesale(page.products) : page.products;
 
   return (
     <main id="main">

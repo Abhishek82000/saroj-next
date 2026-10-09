@@ -1,6 +1,6 @@
 import { apiProductToProduct, getHomeData, toSlides } from "./home";
 import { site } from "./site";
-import { WHOLESALE_MIN_METRES, wholesaleCategoryHref } from "./wholesale";
+import { WHOLESALE_MIN_METRES, forMode, wholesaleCategoryHref } from "./wholesale";
 import { attachWholesale } from "./wholesalePrices";
 import type { BannerSlide, HomeVideoProduct, Product, Reel, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse } from "./types";
 
@@ -60,7 +60,8 @@ function toProduct(p: WholesaleApiProduct): Product {
 function toReels(videos: HomeVideoProduct[], rails: WholesaleRail[]): Reel[] {
   const imageById = new Map<number, string>();
   for (const r of rails) for (const p of r.items) if (p.productId) imageById.set(p.productId, p.images[0]?.src ?? "");
-  return videos.filter((v) => v.product_video_cdn).map((v) => {
+  /* A clip of a piece with no wholesale price isn't shown. */
+  return videos.filter((v) => v.product_video_cdn && Number(v.product_selling_price) > 0).map((v) => {
     const price = Number(v.product_selling_price) || 0;
     const mrp = Number(v.product_price) || 0;
     return {
@@ -71,11 +72,14 @@ function toReels(videos: HomeVideoProduct[], rails: WholesaleRail[]): Reel[] {
   });
 }
 
-/** Every rail's products, with any still unpriced given their wholesale rate. */
+/** Every rail's products, with any still unpriced given their wholesale rate — then only
+    the priced ones kept (no wholesale price, not for sale wholesale), and empty rails dropped. */
 async function priceRails(rails: WholesaleRail[]): Promise<WholesaleRail[]> {
   const flat = await attachWholesale(rails.flatMap((r) => r.items));
   const byId = new Map(flat.map((p) => [p.productId ?? p.slug, p]));
-  return rails.map((r) => ({ ...r, items: r.items.map((p) => byId.get(p.productId ?? p.slug) ?? p) }));
+  return rails
+    .map((r) => ({ ...r, items: forMode(r.items.map((p) => byId.get(p.productId ?? p.slug) ?? p), true) }))
+    .filter((r) => r.items.length > 0);
 }
 
 /** The feed's tag rails, or — until the feed carries them — the storefront's own

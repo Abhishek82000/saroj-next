@@ -6,7 +6,7 @@ import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { discount } from "@/lib/price";
 import { inr } from "@/lib/site";
-import { priced } from "@/lib/wholesale";
+import { forMode, priced } from "@/lib/wholesale";
 import { categoryHref } from "@/lib/nav";
 import type { Product } from "@/lib/types";
 
@@ -24,7 +24,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
  */
 export default function HandicraftRail({ sections, id = "handicraft" }: { sections: CraftSection[]; id?: string }) {
   const { addProduct, mode, href, wishlist, toggleFav } = useStore();
-  const live = sections.filter((s) => s.items.length > 0);
+  /* At wholesale, only pieces with a wholesale price; a category left empty drops out. */
+  const live = sections
+    .map((s) => ({ ...s, items: forMode(s.items, mode === "wholesale") }))
+    .filter((s) => s.items.length > 0);
   const [tab, setTab] = useState(0);
   const [pick, setPick] = useState(0);
   const [added, setAdded] = useState(false);

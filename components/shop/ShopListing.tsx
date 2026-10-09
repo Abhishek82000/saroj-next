@@ -3,10 +3,11 @@
 import Link from "@/components/ui/SiteLink";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/components/shell/StoreProvider";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { SkCards } from "@/components/ui/Skeleton";
 import { wholesaleRates, withRates } from "@/lib/wholesalePrices";
+import { forMode } from "@/lib/wholesale";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import ProdCard from "@/components/product/ProdCard";
 import Filters from "./Filters";
@@ -98,7 +99,9 @@ export default function ShopListing({
     }
   };
 
-  const f = useShopFilters(emptyFilters(q), all, {
+  /* At wholesale, only pieces with a wholesale price are for sale; the rest stay hidden. */
+  const sellable = useMemo(() => forMode(all, mode === "wholesale"), [all, mode]);
+  const f = useShopFilters(emptyFilters(q), sellable, {
     initialSort: liveSort, sortLocally: !isLiveSort,
   });
   const [cols, setCols] = useState<"3" | "4">("3");
@@ -112,7 +115,7 @@ export default function ShopListing({
   /** True when the source list itself (a category's live products) is empty —
       as opposed to filters narrowing a non-empty list down to nothing — so the
       empty state doesn't tell someone to "clear filters" they never set. */
-  const sourceEmpty = all.length === 0;
+  const sourceEmpty = sellable.length === 0;
 
   /* More of the list reveals itself as the sentinel below the grid nears the
      viewport — no "load more" click needed. Once everything loaded is shown,
