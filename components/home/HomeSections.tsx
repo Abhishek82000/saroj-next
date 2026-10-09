@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import Hero from "@/components/home/Hero";
 import MidBanners from "@/components/home/MidBanners";
+import CraftHouse from "@/components/home/CraftHouse";
 import CraftRoll from "@/components/home/CraftRoll";
 import WaysToBuy from "@/components/home/WaysToBuy";
 import OffersSlider from "@/components/home/OffersSlider";
@@ -67,17 +68,21 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
           {n === Math.min(1, categoryRails.length - 1) && <MidBanners slides={homeData.midSlides} />}
         </Fragment>
       ))}
-      <VideoBanner />      
-      {homeData.handicraftSections.map((hc) => (
-        <HandicraftRail key={`hc-${hc.id}`} id={hc.slug} eyebrow="Shaped by hand" heading={hc.name} items={hc.products.map(apiProductToProduct)} />
-      ))}
+      <VideoBanner />
+      {/* The handicraft categories, then the handicraft rails — retail only. */}
+      {!isWholesale && <CraftHouse categories={homeData.handCategories} />}
+      {/* Every handicraft category in one showcase, one screen tall. */}
+      <HandicraftRail sections={homeData.handicraftSections.map((hc) => ({
+        id: hc.id, name: hc.name, slug: hc.slug, items: hc.products.map(apiProductToProduct),
+      }))} />
       
       {/* `top_slider` banners — their own section under the hero, retail only. */}
-      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}      
+      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}    
+      <Voices />  
       {offers.length > 1 && <OffersSlider slides={offers} />}
       {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
       {!isWholesale && <WaysToBuy />}
-      <Voices />
+      
       <Bulk />
       <Journal posts={journalPosts} />
 

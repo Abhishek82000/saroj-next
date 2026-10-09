@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import JsonLd from "@/components/seo/JsonLd";
-import { categoryPrices, withRates } from "@/lib/wholesalePrices";
+import { attachWholesale } from "@/lib/wholesalePrices";
 import { getCategoryProducts, getTagProducts, type ProductsApiSort } from "@/lib/home";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
@@ -49,8 +49,8 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
   const sort = toSort((await searchParams).sort);
   const listing = await resolveListing(slug, sort);
   const { name, categories, tags, priceRange, saleProducts } = listing;
-  /* Wholesale pages carry the wholesale rates, when the storefront has them. */
-  const products = wholesale ? withRates(listing.products, await categoryPrices(slug)) : listing.products;
+  /* Wholesale pages carry each piece's wholesale rate (product_wh_* columns, via the cards API). */
+  const products = wholesale ? await attachWholesale(listing.products) : listing.products;
   const title = name || titleFromSlug(slug);
 
   return (

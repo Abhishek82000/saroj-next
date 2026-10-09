@@ -1,7 +1,7 @@
 import { categoryHref, getFeaturedCategories } from "./nav";
 import { site } from "./site";
 import type {
-  BannerSlide, CommonCategoryRef, HomeApiProduct, HomeApiSlide, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
+  BannerSlide, CommonCategoryRef, CommonFeaturedCategory, HomeApiProduct, HomeApiSlide, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
   Product, ProductDetailApiResponse, ProductsApiResponse, ProductsApiSaleProduct, ProductsApiTag,
   Reel, SaleProduct,
 } from "./types";
@@ -15,10 +15,12 @@ export interface HomeData {
   categorySections: HomeCategorySection[];
   /** `handicraft_show_home_page` — drawn by HandicraftRail. */
   handicraftSections: HomeTagSection[];
+  /** `handcategories` — the handicraft categories, drawn by CraftHouse. */
+  handCategories: CommonFeaturedCategory[];
   videoProducts: HomeVideoProduct[];
 }
 
-const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftSections: [], videoProducts: [] };
+const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftSections: [], handCategories: [], videoProducts: [] };
 
 /** Handicraft rails may come tag-shaped (id/name/slug) or category-shaped (cat_*); read either. */
 const toSection = (s: HomeTagSection | HomeCategorySection): HomeTagSection =>
@@ -54,6 +56,7 @@ export async function getHomeData(): Promise<HomeData> {
       // Some categories aren't stocked yet, so the API lists them with no products.
       categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),
       handicraftSections: (json.data?.handicraft_show_home_page ?? []).map(toSection).filter((s) => s.products.length > 0),
+      handCategories: (json.data?.handcategories ?? []).filter((c) => c.image && c.slug),
       videoProducts: json.data?.video_products ?? [],
     };
   } catch {

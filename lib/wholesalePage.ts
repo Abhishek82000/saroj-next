@@ -1,8 +1,8 @@
 import { apiProductToProduct, getHomeData, toSlides } from "./home";
 import { site } from "./site";
-import { wholesaleCategoryHref } from "./wholesale";
-import { homePrices, withRates } from "./wholesalePrices";
-import type { BannerSlide, Product, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse, WholesaleRate } from "./types";
+import { WHOLESALE_MIN_METRES, wholesaleCategoryHref } from "./wholesale";
+import { attachWholesale } from "./wholesalePrices";
+import type { BannerSlide, Product, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse } from "./types";
 
 export type WholesaleSlide = BannerSlide;
 export interface WholesaleCollection { id: number; name: string; heading: string; slug: string; blurb: string; image: string; banner: string }
@@ -43,30 +43,39 @@ const toCollection = (c: WholesaleApiCategory): WholesaleCollection => ({
   blurb: plain(c.cat_short_desc ?? "", 150), image: c.cat_cdn_url, banner: c.cat_banner_cdn || c.cat_cdn_url,
 });
 
-/** A wholesale-feed product as a card. Takes the feed's own trade price when
-    it sends one (it currently sends none), else the scraped rate. */
-function toProduct(p: WholesaleApiProduct, rates: Map<string, WholesaleRate>): Product {
-  const item = withRates([apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 })], rates)[0];
+/** A wholesale-feed product as a card. The feed prices its products from the
+    wholesale columns (WholesaleApiController::useWholesalePrices), so its
+    price / selling_price are the trade rate; a product without one is left
+    for attachWholesale to look up. */
+function toProduct(p: WholesaleApiProduct): Product {
+  const item = apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 });
   const price = Number(p.selling_price ?? p.price);
-  return price > 0 ? { ...item, wholesale: { price, mrp: Number(p.price) > price ? Number(p.price) : 0, minQty: p.moq || 10 } } : item;
+  return price > 0 ? { ...item, wholesale: { price, mrp: Number(p.price) > price ? Number(p.price) : 0, minQty: p.moq || WHOLESALE_MIN_METRES } } : item;
+}
+
+/** Every rail's products, with any still unpriced given their wholesale rate. */
+async function priceRails(rails: WholesaleRail[]): Promise<WholesaleRail[]> {
+  const flat = await attachWholesale(rails.flatMap((r) => r.items));
+  const byId = new Map(flat.map((p) => [p.productId ?? p.slug, p]));
+  return rails.map((r) => ({ ...r, items: r.items.map((p) => byId.get(p.productId ?? p.slug) ?? p) }));
 }
 
 /** The feed's tag rails, or — until the feed carries them — the storefront's own
-    from GET /api/home (same catalogue, wholesale rates attached where known). */
-async function tagRails(d: WholesalePageApiResponse["data"], rates: Map<string, WholesaleRate>): Promise<WholesaleRail[]> {
+    from GET /api/home (same catalogue; priceRails gives them wholesale rates). */
+async function tagRails(d: WholesalePageApiResponse["data"]): Promise<WholesaleRail[]> {
   const own = (d.tag_show_home_page ?? [])
     .map((t) => ({
       id: t.tag_id ?? t.id ?? 0,
       slug: t.tag_slug ?? t.slug ?? "",
       name: t.tag_name ?? t.name ?? "",
-      items: (t.products ?? []).map((p) => toProduct(p, rates)),
+      items: (t.products ?? []).map(toProduct),
     }))
     .filter((t) => t.slug && t.name && t.items.length > 0);
   if (own.length) return own;
   const { tagSections } = await getHomeData();
   return tagSections
     .filter((t) => t.products.length > 0)
-    .map((t) => ({ id: t.id, slug: t.slug, name: t.name, items: withRates(t.products.map(apiProductToProduct), rates) }));
+    .map((t) => ({ id: t.id, slug: t.slug, name: t.name, items: t.products.map(apiProductToProduct) }));
 }
 
 /**
@@ -74,9 +83,6 @@ async function tagRails(d: WholesalePageApiResponse["data"], rates: Map<string, 
  * highlighted collections, every wholesale category, testimonials, a product
  * rail per tag and one per category. Returns null on any failure so
  * /wholesale-fabric can fall back to its plain explainer.
- *
- * The rail products currently come with no price (`price`/`selling_price` are
- * null); see toProduct.
  */
 export async function getWholesalePage(): Promise<WholesalePage | null> {
   try {
@@ -84,7 +90,12 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
     if (!res.ok) return null;
     const { data: d }: WholesalePageApiResponse = await res.json();
     if (!d) return null;
-    const rates = await homePrices();
+    const [rails, tags] = await Promise.all([
+      priceRails((d.category_show_home_page ?? [])
+        .filter((s) => s.products.length > 0)
+        .map((s) => ({ id: s.cat_id, slug: s.cat_slug, name: s.cat_name, items: s.products.map(toProduct) }))),
+      tagRails(d).then(priceRails),
+    ]);
 
     return {
       slides: (d.top_slider ?? []).map((s) => ({
@@ -100,13 +111,8 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
       testimonials: (d.testimonials ?? [])
         .filter((t) => t.testimonial_status === 1)
         .map((t) => ({ id: t.testimonial_id, name: t.testimonial_name, rating: t.testimonial_rating, quote: plain(t.testimonial_desc) })),
-      rails: (d.category_show_home_page ?? [])
-        .filter((s) => s.products.length > 0)
-        .map((s) => ({
-          id: s.cat_id, slug: s.cat_slug, name: s.cat_name,
-          items: s.products.map((p) => toProduct(p, rates)),
-        })),
-      tagRails: await tagRails(d, rates),
+      rails,
+      tagRails: tags,
       midSlides: toSlides(d.middle_slider, wholesaleCategoryHref),
     };
   } catch {

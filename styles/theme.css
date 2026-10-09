@@ -17,15 +17,11 @@ body:has([data-shop-mode="retail"])::before{
 
 /* ---------- one heading voice ---------- */
 /* Every section opens the same way: indigo eyebrow with a rule, display heading, muted lede. */
-.st-eyebrow, .hnd-eyebrow{ font-size:.63rem; letter-spacing:.32em; font-weight:700; color:var(--cobalt); }
-.hnd-eyebrow::before{ width:26px; background:currentColor; opacity:.6; }
-.hnd-title{ font-size:clamp(2.05rem,8vw,4rem); line-height:1.02; letter-spacing:-.018em; color:var(--ink); }
-.hnd-lede{ color:var(--mute); }
-.st-h2 em, .hnd-title em{ font-style:normal; color:var(--lac); }
+.st-eyebrow{ font-size:.63rem; letter-spacing:.32em; font-weight:700; color:var(--cobalt); }
+.st-h2 em{ font-style:normal; color:var(--lac); }
 
 /* ---------- one column ---------- */
 /* Handicraft rails used their own gutter; voices padded inside the wrap; the shelf was wider. */
-.hnd-inner{ width:min(1280px, calc(100% - 2 * var(--pad))); }
 .st-voices__head{ padding-inline:0; width:min(1280px, calc(100% - 2 * var(--pad))); }
 .coll-inner{ max-width:calc(1280px + 2 * var(--pad)); padding-inline:var(--pad); }
 .st-vbanner__frame{ margin-inline:calc((1 - var(--p)) * var(--pad)); }
@@ -47,10 +43,6 @@ body:has([data-shop-mode="retail"])::before{
                  --wb-btn-hover-bg:var(--night); --wb-btn-hover-ink:var(--cream); }
 .st-vbanner__eyebrow{ color:var(--brass); }
 
-/* ---------- handicraft rails: tinted band, same palette ---------- */
-.hnd{ --hnd-bg:var(--paper-2); --hnd-ink:var(--ink); --hnd-text:var(--mute); --hnd-clay:var(--lac);
-      background-image:none; padding-block:var(--sec-y); }
-.hnd + .hnd{ padding-top:0; } /* consecutive rails read as one band */
 
 /* ---------- offers: tickets dyed in the house colours ---------- */
 .st-ofr--cobalt{ background:linear-gradient(150deg,#2E5585 0%,#1E3A5F 45%,#132740 100%); }

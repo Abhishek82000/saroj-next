@@ -318,6 +318,8 @@ export interface HomeApiResponse {
     category_show_home_page: HomeCategorySection[];
     /** Handicraft rails — the same product payload as the tag/category rails. */
     handicraft_show_home_page?: (HomeTagSection | HomeCategorySection)[];
+    /** Handicraft categories (id, name, slug, image) for the home page's craft house. */
+    handcategories?: CommonFeaturedCategory[];
     video_products: HomeVideoProduct[];
   };
 }

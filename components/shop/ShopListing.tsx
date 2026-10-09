@@ -6,6 +6,7 @@ import { useStore } from "@/components/shell/StoreProvider";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { SkCards } from "@/components/ui/Skeleton";
+import { wholesaleRates, withRates } from "@/lib/wholesalePrices";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import ProdCard from "@/components/product/ProdCard";
 import Filters from "./Filters";
@@ -13,7 +14,7 @@ import { emptyFilters, useShopFilters, type SortKey } from "./useShopFilters";
 import { inr, site } from "@/lib/site";
 import { apiProductToProduct } from "@/lib/home";
 import type { ProductsApiResponse } from "@/lib/types";
-import type { CommonCategoryRef, Product, ProductsApiTag, SaleProduct } from "@/lib/types";
+import type { CommonCategoryRef, Product, ProductsApiTag, SaleProduct, WholesaleRate } from "@/lib/types";
 
 const sorts: [SortKey, string][] = [
   ["best_selling", "Best Selling"],
@@ -47,7 +48,7 @@ export default function ShopListing({
   paging?: { lastPage: number; total: number };
 }) {
   const router = useRouter();
-  const { href } = useStore();
+  const { href, mode } = useStore();
   /** A category or tag page's list arrives already sorted by the API (it has
       the real sold/new-arrival data the static catalogue's `sold`/`fresh`
       proxy fields don't) — so it just gets filtered here, not re-sorted. */
@@ -58,8 +59,28 @@ export default function ShopListing({
   const [all, setAll] = useState(items);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  useEffect(() => { setAll(items); setPage(1); }, [items]);
+  /* Wholesale rates already fetched, kept so a fresh list from the server is re-priced at once. */
+  const rates = useRef(new Map<number, WholesaleRate>());
+  useEffect(() => { setAll(withRates(items, rates.current)); setPage(1); }, [items]);
   const hasMore = !!paging && page < paging.lastPage;
+
+  /* Wholesale: the listing APIs price at retail, so any piece still without a
+     wholesale rate (the whole of /shop, and every page loaded on scroll) gets
+     its rate from the cards API. Each id is asked for once, and an answer is
+     kept even if the list grew meanwhile — only unmounting drops it. */
+  const asked = useRef(new Set<number>());
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(() => {
+    if (mode !== "wholesale") return;
+    const ids = all.filter((p) => !p.wholesale && p.productId && !asked.current.has(p.productId)).map((p) => p.productId as number);
+    if (ids.length === 0) return;
+    ids.forEach((id) => asked.current.add(id));
+    wholesaleRates(ids).then((got) => {
+      got.forEach((v, k) => rates.current.set(k, v));
+      if (mounted.current && got.size) setAll((prev) => withRates(prev, rates.current));
+    });
+  }, [all, mode]);
 
   const loadMore = async () => {
     if (!hasMore || loadingMore) return;
