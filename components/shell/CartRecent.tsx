@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useStore } from "./StoreProvider";
 import { readRecent } from "@/components/product/RecentlyViewed";
 import { fetchCards } from "@/lib/product-api";
-import { inr } from "@/lib/site";
+import { inrExact } from "@/lib/site";
 import { priced } from "@/lib/wholesale";
 import type { Product } from "@/lib/types";
 
@@ -56,7 +56,7 @@ export default function CartRecent({ open, onPick }: { open: boolean; onPick: ()
                     <img src={p.images[0]?.src} alt="" loading="lazy" />
                   </span>
                   <span className="st-crecent__name">{p.name}</span>
-                  {price > 0 && <b className="st-crecent__price">{inr(price)}</b>}
+                  {price > 0 && <b className="st-crecent__price">{inrExact(price)}</b>}
                 </Link>
               );
             })

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { readOrderSnapshot, type OrderPaymentStatus, type ReceiptItem } from "@/lib/checkout";
-import { inr, site } from "@/lib/site";
+import { inrExact, site } from "@/lib/site";
 
 /**
  * The thank-you page — shown by OrderStatusView once an order is paid (or,
@@ -220,7 +220,7 @@ export default function ThankYouView({ order }: { order: OrderPaymentStatus }) {
           </button>
           <div className="ty-chip ty-chip--amt">
             <small>{bank ? "To transfer" : "Paid"}</small>
-            <b>{inr(amount)}</b>
+            <b>{inrExact(amount)}</b>
             {order.wholesale && <span className="ty-chip__note">+ GST</span>}
           </div>
         </div>
@@ -239,18 +239,18 @@ export default function ThankYouView({ order }: { order: OrderPaymentStatus }) {
                   <ItemPhoto src={it.photo} name={it.name} />
                   <span className="ty-item__n">
                     {it.name}
-                    <small>{it.variant ? `${it.variant} · ` : ""}{it.qty} × {inr(it.price)}{it.price === 0 ? " · free gift" : ""}</small>
+                    <small>{it.variant ? `${it.variant} · ` : ""}{it.qty} × {inrExact(it.price)}{it.price === 0 ? " · free gift" : ""}</small>
                   </span>
-                  <b>{it.total === 0 ? "Free" : inr(it.total)}</b>
+                  <b>{it.total === 0 ? "Free" : inrExact(it.total)}</b>
                 </li>
               ))}
             </ul>
             <dl className="ty-receipt__tot">
-              {saved > 0 && <div><dt>Total MRP</dt><dd>{inr(mrpTotal)}</dd></div>}
-              {saved > 0 && <div><dt>Discount{r?.couponCode ? <code>{r.couponCode}</code> : null}</dt><dd className="ty-off">−{inr(saved)}</dd></div>}
-              <div><dt>Shipping</dt><dd>{r && r.shipping > 0 ? inr(r.shipping) : <span className="ty-off">Free</span>}</dd></div>
+              {saved > 0 && <div><dt>Total MRP</dt><dd>{inrExact(mrpTotal)}</dd></div>}
+              {saved > 0 && <div><dt>Discount{r?.couponCode ? <code>{r.couponCode}</code> : null}</dt><dd className="ty-off">−{inrExact(saved)}</dd></div>}
+              <div><dt>Shipping</dt><dd>{r && r.shipping > 0 ? inrExact(r.shipping) : <span className="ty-off">Free</span>}</dd></div>
               {order.wholesale && <div><dt>GST</dt><dd><small>On the invoice</small></dd></div>}
-              <div className="ty-receipt__grand"><dt>{bank ? "Amount due" : "Amount paid"}</dt><dd>{inr(order.amount)}</dd></div>
+              <div className="ty-receipt__grand"><dt>{bank ? "Amount due" : "Amount paid"}</dt><dd>{inrExact(order.amount)}</dd></div>
             </dl>
             {r && (
               <p className="ty-receipt__pay">
@@ -258,7 +258,7 @@ export default function ThankYouView({ order }: { order: OrderPaymentStatus }) {
                 {r.paymentRef && <> · Ref <code>{r.paymentRef}</code></>}
               </p>
             )}
-            {saved > 0 && <div className="ty-saved" aria-label={`You saved ${inr(saved)}`}><small>You saved</small>{inr(saved)}</div>}
+            {saved > 0 && <div className="ty-saved" aria-label={`You saved ${inrExact(saved)}`}><small>You saved</small>{inrExact(saved)}</div>}
           </section>
         )}
 

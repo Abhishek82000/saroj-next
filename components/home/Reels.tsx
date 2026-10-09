@@ -44,7 +44,9 @@ export default function Reels({ items }: { items?: Reel[] }) {
 }
 
 function ReelCard({ reel }: { reel: Reel }) {
-  const { add } = useStore();
+  const { add, href, mode } = useStore();
+  /* Wholesale orders go through the piece's own page (minimums, login), never straight into the retail cart. */
+  const wholesale = mode === "wholesale";
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [sound, setSound] = useState(false);
@@ -74,7 +76,7 @@ function ReelCard({ reel }: { reel: Reel }) {
     else { v.pause(); setPlaying(false); }
   };
 
-  const link = reel.slug ? `/product/${reel.slug}` : reel.href!;
+  const link = reel.slug ? href(`/product/${reel.slug}`) : reel.href!;
 
   return (
     <article className={`st-reel${playing ? "" : " paused"}`}>
@@ -112,7 +114,9 @@ function ReelCard({ reel }: { reel: Reel }) {
           <span className="st-reel__price">
             <b>{inr(reel.price)}</b>{reel.mrp > 0 && <s>{inr(reel.mrp)}</s>}
           </span>
-          <button className="st-reel__buy"
+          {wholesale ? (
+            <Link className="st-reel__buy" href={link}>View piece</Link>
+          ) : <button className="st-reel__buy"
             onClick={() => add({
               id: reel.slug ?? reel.id,
               name: reel.name,
@@ -125,7 +129,7 @@ function ReelCard({ reel }: { reel: Reel }) {
               productId: reel.productId,
             })}>
             Add to Cart
-          </button>
+          </button>}
         </div>
       </div>
     </article>

@@ -2,7 +2,7 @@ import { apiProductToProduct, getHomeData, toSlides } from "./home";
 import { site } from "./site";
 import { WHOLESALE_MIN_METRES, wholesaleCategoryHref } from "./wholesale";
 import { attachWholesale } from "./wholesalePrices";
-import type { BannerSlide, Product, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse } from "./types";
+import type { BannerSlide, HomeVideoProduct, Product, Reel, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse } from "./types";
 
 export type WholesaleSlide = BannerSlide;
 export interface WholesaleCollection { id: number; name: string; heading: string; slug: string; blurb: string; image: string; banner: string }
@@ -23,6 +23,8 @@ export interface WholesalePage {
   tagRails: WholesaleRail[];
   /** `middle_slider` — small banners after the second category rail. */
   midSlides: BannerSlide[];
+  /** `video_products` — shoppable reels, shown after the tag rails. */
+  reels: Reel[];
 }
 
 const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&quot;": '"', "&#39;": "'", "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&ndash;": "–", "&mdash;": "—" };
@@ -51,6 +53,22 @@ function toProduct(p: WholesaleApiProduct): Product {
   const item = apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 });
   const price = Number(p.selling_price ?? p.price);
   return price > 0 ? { ...item, wholesale: { price, mrp: Number(p.price) > price ? Number(p.price) : 0, minQty: p.moq || WHOLESALE_MIN_METRES } } : item;
+}
+
+/** The feed's video products as reels — what buildReels does for the retail home,
+    with each clip's poster taken from the same piece on a rail. */
+function toReels(videos: HomeVideoProduct[], rails: WholesaleRail[]): Reel[] {
+  const imageById = new Map<number, string>();
+  for (const r of rails) for (const p of r.items) if (p.productId) imageById.set(p.productId, p.images[0]?.src ?? "");
+  return videos.filter((v) => v.product_video_cdn).map((v) => {
+    const price = Number(v.product_selling_price) || 0;
+    const mrp = Number(v.product_price) || 0;
+    return {
+      id: `reel-${v.product_id}`, video: v.product_video_cdn, kind: "Fabric", name: v.product_name,
+      price, mrp: mrp > price ? mrp : 0, unit: "metre",
+      image: imageById.get(v.product_id) ?? "", slug: v.product_slug, productId: v.product_id,
+    };
+  });
 }
 
 /** Every rail's products, with any still unpriced given their wholesale rate. */
@@ -114,6 +132,8 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
       rails,
       tagRails: tags,
       midSlides: toSlides(d.middle_slider, wholesaleCategoryHref),
+      /* The feed sends wholesale rates under the usual price names; thumbnails come from the rails. */
+      reels: toReels(d.video_products ?? [], [...rails, ...tags]),
     };
   } catch {
     return null;

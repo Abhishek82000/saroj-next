@@ -4,6 +4,7 @@ import MidBanners from "@/components/home/MidBanners";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Rail from "@/components/product/Rail";
+import Reels from "@/components/home/Reels";
 import BannerSlider from "@/components/home/BannerSlider";
 import BoltTable from "@/components/wholesale/BoltTable";
 import SwatchBook from "@/components/wholesale/SwatchBook";
@@ -34,7 +35,7 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
       {page.slides.length > 0 && <BannerSlider slides={page.slides} label="Wholesale offers" />}
 
 
-{page.categories.length > 0 && (
+      {page.categories.length > 0 && (
         <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
           <div className="st-wrap">
             <Reveal className="st-eyebrow">Every category</Reveal>
@@ -53,7 +54,9 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
       {page.tagRails.map((r) => (
         <Rail key={`tag-${r.id}`} id={r.slug} eyebrow="Wholesale" heading={r.name} items={r.items} />
       ))}
-      
+
+      {/* `video_products` — the same reels as the retail home, at wholesale rates. */}
+      {page.reels.length > 0 && <Reels items={page.reels} />}
 
       {page.rails.map((r, n) => (
         <Fragment key={r.id}>

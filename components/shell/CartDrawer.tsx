@@ -3,7 +3,7 @@ import Link from "next/link";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
-import { inr, unitLabel } from "@/lib/site";
+import { inrExact, unitLabel } from "@/lib/site";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import { CartProgress, CouponBox } from "@/components/cart/Offers";
 import CartRecent from "./CartRecent";
@@ -76,7 +76,7 @@ export default function CartDrawer() {
                   {l.href ? <Link href={l.href} className="st-line__n" onClick={close}>{l.name}</Link>
                           : <span className="st-line__n">{l.name}</span>}
                   <small className="st-line__m">
-                    {inr(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}
+                    {inrExact(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}
                   </small>
                   {errors[l.id] && <small className="st-co__err">{errors[l.id]}</small>}
                   <div className="st-line__foot">
@@ -89,7 +89,7 @@ export default function CartDrawer() {
                       <span>{l.qty}{l.unit === "metre" ? " m" : ""}</span>
                       <button type="button" onClick={() => setQty(l.id, l.qty + l.step)} aria-label="More">+</button>
                     </span>
-                    <span className="st-line__p">{inr(l.price * l.qty)}</span>
+                    <span className="st-line__p">{inrExact(l.price * l.qty)}</span>
                   </div>
                 </div>
                 <button type="button" className="st-line__x" onClick={() => remove(l.id)}>Remove</button>
@@ -104,11 +104,11 @@ export default function CartDrawer() {
           <div className="st-cart__sum">
             <small>{saved > 0 ? "Total after offers" : "Subtotal"}</small>
             <b>
-              {saved > 0 && <s className="st-cart__was">{inr(totals?.subtotal ?? subtotal)}</s>}
-              {inr(offers?.total ?? totals?.subtotal ?? subtotal)}
+              {saved > 0 && <s className="st-cart__was">{inrExact(totals?.subtotal ?? subtotal)}</s>}
+              {inrExact(offers?.total ?? totals?.subtotal ?? subtotal)}
             </b>
           </div>
-          {saved > 0 && <p className="st-cart__note st-cart__saved">You save {inr(saved)} with offers.</p>} 
+          {saved > 0 && <p className="st-cart__note st-cart__saved">You save {inrExact(saved)} with offers.</p>} 
           {hasErrors && <p className="st-cart__note st-co__err">Remove the unavailable items to check out.</p>}
                     
           {hasErrors

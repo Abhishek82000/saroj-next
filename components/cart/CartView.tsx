@@ -3,7 +3,7 @@ import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { CartBodySkeleton } from "@/components/ui/Skeleton";
 import { useStore } from "@/components/shell/StoreProvider";
-import { inr, unitLabel } from "@/lib/site";
+import { inrExact, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
 import type { CartTotals } from "@/lib/cart";
 import { REWARD, type CartOffers } from "@/lib/offers";
@@ -77,9 +77,9 @@ export function Totals({ subtotal: local, wholesale, server, offers }: {
       {wholesale && <div><dt>GST</dt><dd><small>Added on the invoice</small></dd></div>}
       <div className="st-tot__grand">
         <dt>{wholesale ? "Total Amount (before GST)" : "Total Amount"}</dt>
-        <dd>{inr(orderTotal(subtotal, server, offers))}</dd>
+        <dd>{inrExact(orderTotal(subtotal, server, offers))}</dd>
       </div>
-      {saved > 0 && <div className="st-tot__saved st-co__saved"><dt>You save</dt><dd>{inr(saved)} on this order</dd></div>}
+      {saved > 0 && <div className="st-tot__saved st-co__saved"><dt>You save</dt><dd>{inrExact(saved)} on this order</dd></div>}
     </dl>
   );
 }
@@ -152,14 +152,14 @@ export default function CartView() {
                       : <span className="st-co__ph">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={l.image} alt="" /></span>}
                     <div className="st-co__lt">
                       {l.href ? <Link href={l.href} className="st-co__n">{l.name}</Link> : <span className="st-co__n">{l.name}</span>}
-                      <small>{inr(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}{l.minQty ? ` · min ${l.minQty} m` : ""}</small>
+                      <small>{inrExact(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}{l.minQty ? ` · min ${l.minQty} m` : ""}</small>
                       {errors[l.id] && <em className="st-co__err">{errors[l.id]} Remove it to continue.</em>}
                       <div className="st-co__lf">
                         <LineQty l={l} />
                         <button type="button" className="st-co__x" onClick={() => remove(l.id)}>Remove</button>
                       </div>
                     </div>
-                    <b className="st-co__lp">{inr(l.price * l.qty)}</b>
+                    <b className="st-co__lp">{inrExact(l.price * l.qty)}</b>
                   </li>
                 ))}
               </ul>

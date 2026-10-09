@@ -3,7 +3,7 @@ import { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { applyCouponRemote, REWARD, type CartOffers, type Milestone, type OfferCard } from "@/lib/offers";
-import { inr, site } from "@/lib/site";
+import { inrExact, site } from "@/lib/site";
 
 /**
  * The retail cart's offers — used by the cart drawer, the cart page and checkout.
@@ -35,7 +35,7 @@ function ShippingBar({ offers, compact }: { offers: CartOffers | null; compact: 
     ? <><b>Free shipping</b> on every prepaid order.</>
     : reached
       ? compact ? <><b>Shipping is on us.</b> Cut and posted from Jhotwara in two working days.</> : <><b>Shipping is on us</b> on this order.</>
-      : <><b>{inr(short)}</b> more and the shipping is on us.</>;
+      : <><b>{inrExact(short)}</b> more and the shipping is on us.</>;
 
   if (!compact) {
     return (
@@ -77,8 +77,8 @@ function MilestoneBar({ m, compact }: { m: Milestone; compact: boolean }) {
         <span>
           {m.message ?? (
             m.next
-              ? <>{reached && <>Unlocked <b className="st-ms__ok">{reached.label}</b> · </>}Add <b>{inr(m.next.short_by)}</b> more to unlock <b>{m.next.label}</b></>
-              : reached ? <>You&apos;ve unlocked <b className="st-ms__ok">{reached.label}</b>{m.discount > 0 && <> — saving {inr(m.discount)}</>}</> : null
+              ? <>{reached && <>Unlocked <b className="st-ms__ok">{reached.label}</b> · </>}Add <b>{inrExact(m.next.short_by)}</b> more to unlock <b>{m.next.label}</b></>
+              : reached ? <>You&apos;ve unlocked <b className="st-ms__ok">{reached.label}</b>{m.discount > 0 && <> — saving {inrExact(m.discount)}</>}</> : null
           )}
         </span>
       </p>
@@ -92,7 +92,7 @@ function MilestoneBar({ m, compact }: { m: Milestone; compact: boolean }) {
       <ol className="st-ms__tiers" style={{ gridTemplateColumns: `repeat(${m.tiers.length}, minmax(0,1fr))` }}>
         {m.tiers.map((t) => (
           <li key={t.id} className={t.unlocked ? "on" : ""}>
-            <b>{t.unlocked && <Icon name="check" size={11} strokeWidth={2.4} />}{inr(t.min_amount)}</b>
+            <b>{t.unlocked && <Icon name="check" size={11} strokeWidth={2.4} />}{inrExact(t.min_amount)}</b>
             <span>{t.label}</span>
           </li>
         ))}
@@ -171,7 +171,7 @@ export function CouponBox({ offers, compact = false }: { offers: CartOffers | nu
           <span>
             <b>{coupon}</b>
             <small>
-              {!current ? "Checking…" : current.applied ? <>You save <b>{inr(current.discount)}</b></> : current.message}
+              {!current ? "Checking…" : current.applied ? <>You save <b>{inrExact(current.discount)}</b></> : current.message}
             </small>
           </span>
           <button type="button" className="st-co__x" onClick={remove}>Remove</button>
@@ -196,7 +196,7 @@ export function CouponBox({ offers, compact = false }: { offers: CartOffers | nu
 function CouponCard({ o, on, busy, apply }: { o: OfferCard; on: boolean; busy: boolean; apply: (code: string) => Promise<boolean> }) {
   const short = o.short_by ?? 0;
   const terms = [
-    o.min_purchase ? `On orders over ${inr(o.min_purchase)}` : null,
+    o.min_purchase ? `On orders over ${inrExact(o.min_purchase)}` : null,
     o.first_order ? "First order only" : null,
     o.weekday ? `${o.weekday}s only` : null,
     o.cashback ? "Cashback" : null,
@@ -209,8 +209,8 @@ function CouponCard({ o, on, busy, apply }: { o: OfferCard; on: boolean; busy: b
         <b>{o.headline}</b>
         {o.description && <p>{o.description}</p>}
         {terms && <small>{terms}</small>}
-        {!on && short > 0 && <small className="st-cp__short">Add {inr(short)} more to use this</small>}
-        {!on && o.eligible && !!o.saves && <small className="st-cp__save">Saves {inr(o.saves)} on this cart</small>}
+        {!on && short > 0 && <small className="st-cp__short">Add {inrExact(short)} more to use this</small>}
+        {!on && o.eligible && !!o.saves && <small className="st-cp__save">Saves {inrExact(o.saves)} on this cart</small>}
       </div>
       <button type="button" className="st-cp__btn" disabled={on || busy || o.eligible === false} onClick={() => apply(o.code)}>
         {on ? "Applied" : "Apply"}

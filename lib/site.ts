@@ -43,5 +43,14 @@ export const site = {
 export const inr = (n: number) =>
   "₹" + Math.round(n).toLocaleString("en-IN");
 
+/** Money in the cart, at checkout and on the order confirmation: never rounded
+    to the rupee. Paise show as two decimals (₹238.75, ₹240.50); whole amounts
+    stay whole (₹240). */
+export const inrExact = (n: number) => {
+  const v = Math.round(n * 100) / 100;
+  const whole = Number.isInteger(v);
+  return "₹" + v.toLocaleString("en-IN", { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
+};
+
 /** "metre" reads better with a preposition; "set of 6" does not. */
 export const unitLabel = (u: string) => (u === "metre" ? "per metre" : u);

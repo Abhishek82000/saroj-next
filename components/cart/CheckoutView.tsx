@@ -14,7 +14,7 @@ import {
 } from "@/lib/checkout";
 import { getMe } from "@/lib/auth";
 import { openCashfree } from "@/lib/cashfree";
-import { inr, unitLabel } from "@/lib/site";
+import { inrExact, unitLabel } from "@/lib/site";
 
 /** Payment choices, shown as an accordion above "Pay Now": the chosen one opens to say what happens next. */
 const PAYMENTS: Record<"retail" | "wholesale", { key: PaymentMethod; title: string; note: string }[]> = {
@@ -230,10 +230,10 @@ export default function CheckoutView() {
           </span>
           <span className="st-co__mn">
             {l.name}
-            <small>{inr(l.price)} · {unitLabel(l.unit)}</small>
+            <small>{inrExact(l.price)} · {unitLabel(l.unit)}</small>
             {errors[l.id] && <em className="st-co__err">{errors[l.id]}</em>}
           </span>
-          <b>{inr(l.price * l.qty)}</b>
+          <b>{inrExact(l.price * l.qty)}</b>
         </li>
       ))}
     </ul>
@@ -259,7 +259,7 @@ export default function CheckoutView() {
       <details className="st-co__msum">
         <summary>
           <span><Icon name="cart" size={16} /> Show order summary</span>
-          <b>{inr(total)}</b>
+          <b>{inrExact(total)}</b>
         </summary>
         <div className="st-wrap">{lines}<Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} /></div>
       </details>
@@ -369,7 +369,7 @@ export default function CheckoutView() {
             </p>
             {hasErrors && <p className="st-co__err" style={{ marginBottom: ".8rem" }}>Some items are no longer available. <Link href={href("/cart")}>Fix your cart</Link>.</p>}
             <button type="submit" className="st-btn st-btn--solid st-co__pay" disabled={busy || hasErrors}>
-              {busy ? "Placing order…" : f.payment === "online" ? <>Pay {inr(total)} <Icon name="right" size={15} strokeWidth={2} /></> : "Place Order"}
+              {busy ? "Placing order…" : f.payment === "online" ? <>Pay {inrExact(total)} <Icon name="right" size={15} strokeWidth={2} /></> : "Place Order"}
             </button>
             <p className="st-co__safe"><Icon name="shield" size={14} /> 100% secure payment · your details stay with us</p>
           </aside>
