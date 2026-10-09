@@ -57,7 +57,7 @@
 .hc .hj__grid{ position:relative; display:grid; gap:clamp(40px,6vw,64px); align-items:center; }
 @media(min-width:960px){ .hc .hj__grid{ grid-template-columns:minmax(0,5fr) minmax(0,6.4fr); } }
 .hc .hj__type{ display:grid; justify-items:start; position:relative; z-index:2; }
-.hc .hj__title{ font-family:var(--d); font-weight:400; margin:.7rem 0 0; font-size:clamp(2.5rem,5.3vw,5rem); line-height:.98; letter-spacing:-.03em; }
+.hc .hj__title{ font-family:var(--d); font-weight:400; margin:.7rem 0 0; font-size:clamp(2.5rem,3.7vw,5rem); line-height:.98; letter-spacing:-.03em; }
 .hc .hj__title .ln{ display:block; overflow:hidden; padding-bottom:.08em; }
 .hc .hj__title .ln>span{ display:block; white-space:nowrap; transform:translateY(105%); transition:transform 1.1s var(--ease); }
 .hc .lit .hj__title .ln>span{ transform:none; }

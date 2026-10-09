@@ -181,12 +181,13 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
     (() => {
       const wheel = $("#wheelEl"), stage = $("#stage"), dots = $("#dots");
       if (!wheel || !stage || !dots) return;
-      /* The ring always has at most SLOTS seats, 60° apart, however many crafts there are —
-         sizing it to every craft turns a long list into a near-flat strip that just slides sideways.
-         Only the front card and its neighbours sit on the ring; the rest wait out of sight
-         and take a seat behind the wheel as it turns, so it reads as one wheel spinning on its hub. */
-      const SLOTS = 6;
-      const faces = $$(".hc-face", wheel), N = faces.length, STEP = 360 / Math.min(N, SLOTS);
+      /* The ring always has SLOTS seats, 45° apart, however many crafts there are. Seats are
+         given relative to the front card, so the ring needn't be full: only the front card and
+         two either side sit on it, the rest wait out of sight and take a seat as it turns.
+         A fixed 45° keeps the side cards turned only part-way, so they stay wide and readable —
+         sizing the ring to a short list (5 crafts → 72°) turned them nearly edge-on. */
+      const SLOTS = 8;
+      const faces = $$(".hc-face", wheel), N = faces.length, STEP = 360 / SLOTS;
       const dotEls = $$(".hc-dot", dots), count = $("#wheelCount", dots);
       const mod = (a: number, m: number) => ((a % m) + m) % m;
       let radius = 0, angle = 0, dragging = false, locked = false, startX = 0, startY = 0, startAngle = 0, moved = 0, lastW = 0;
@@ -201,7 +202,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         faces.forEach((f, i) => {
           let d = mod(i - live, N);
           if (d > N / 2) d -= N;
-          const seated = N <= SLOTS || Math.abs(d) <= 2;
+          const seated = Math.abs(d) <= 2;
           f.style.visibility = seated ? "" : "hidden";
           if (seated) f.style.transform = "rotateY(" + (steps + d) * STEP + "deg) translateZ(" + radius + "px)";
           f.classList.toggle("on", d === 0);
@@ -214,9 +215,10 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         /* Mobile browsers fire resize as the URL bar shows/hides while scrolling — only re-lay out on a real width change. */
         if (w === lastW) return;
         lastW = w;
-        const fw = Math.min(300, Math.max(196, w * (w < 640 ? 0.6 : 0.29)));
+        /* A slightly narrower front card on phones leaves room for the side cards to show. */
+        const fw = Math.min(300, Math.max(180, w * (w < 640 ? 0.52 : 0.27)));
         wheel.style.setProperty("--fw", fw + "px");
-        radius = Math.round((fw + (w < 640 ? 24 : 52)) / (2 * Math.tan(Math.PI / Math.min(N, SLOTS))));
+        radius = Math.round((fw + (w < 640 ? 24 : 52)) / (2 * Math.tan(Math.PI / SLOTS)));
         dragK = STEP / (fw + (w < 640 ? 24 : 52));
         apply(false);
       };
@@ -421,15 +423,15 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         </div>
         <div className="hero__scrim" />
         <div className="hero__content">
-          <div className="hero__ey rv">Saroj Textile · Jaipur · Est. Block &amp; Dye</div>
+          <div className="hero__ey rv">Saroj Textile · The Art of Jaipur</div>
           <h1 className="rv" data-d="1">
-            <span className="maskrow"><span>The craft</span></span>{" "}
-            <span className="maskrow"><span>of <span className="italic">Jaipur.</span></span></span>
+            <span className="maskrow"><span>Good Things</span></span>{" "}
+            <span className="maskrow"><span>comes <span className="italic">Handmade!</span></span></span>
           </h1>
-          <p className="hero__sub rv" data-d="2">Hand-blocked, hand-dyed, hand-finished by the kaarigars of Rajasthan.</p>
+          <p className="hero__sub rv" data-d="2">Redesigning everyday essentials with creativity, color, and a handcrafted touch that keeps you connected to Jaipur art.</p>
           <div className="hero__cta rv" data-d="3">
             <Link href="/shop" className="hc-btn hc-btn--solid">Shop handicraft</Link>
-            <a href="#wheel" className="hc-btn hc-btn--light">Meet the kaarigars</a>
+            <a href="#wheel" className="hc-btn hc-btn--light">Explore Collection</a>
           </div>
         </div>
         <div className="hero__scroll" aria-hidden="true"><span>Scroll</span><span className="l" /></div>
@@ -439,9 +441,9 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <div className="hc-wrap">
           <div className="hc-wheel-head">
             <div className="hc-eyebrow mid rv">The Kaarigar Wheel</div>
-            <h2 className="hc-h2 rv" data-d="1">{countWord(faces.length)} crafts.<br />One turn of the wheel.</h2>
+            <h2 className="hc-h2 rv" data-d="1">A Happy Little<br /> World of Handmade</h2>
             <p className="hc-lede rv" data-d="2" style={{ textAlign: "center" }}>
-              Every discipline we&apos;ve taken on, and the lane in Jaipur it comes out of.
+              One shop destination for traditional handmade printed cotton bags, boxes, stationery & journals, lifestyle organisation, and corporate or customised gifting.
             </p>
           </div>
 
@@ -488,7 +490,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
-          <p className="hc-hint rv">Drag · swipe · arrow keys</p>
         </div>
       </section>
       {/* ================= TAG RAILS — New Arrivals, Best Seller, … ================= */}
@@ -521,12 +522,11 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           <div className="hj__type">
             <div className="hc-eyebrow fade f1">A second house opens · Jaipur</div>
             <h2 className="hj__title" id="hj-title">
-              <span className="ln"><span>Woven, then</span></span>
-              <span className="ln"><span>Fired &amp; <em className="hc-dv">ढाला</em></span></span>
+              <span className="ln"><span>Rooted in Textiles.</span></span>
+              <span className="ln"><span>Inspired to Create  <em className="hc-dv">More.</em></span></span>
             </h2>
             <p className="hj__sub fade f2">
-              The lanes that print our Ajrakh also throw the pottery and beat the brass.{" "}
-              <b>Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
+              After excelling in the textile industry for <b>30 years of dedication and hard work</b>, we are now ready to introduce a new category with the same passion and commitment.
             </p>
             <div className="hc-hero__cta hj__cta fade f3">
               <Link href="/shop" className="hc-btn hc-btn--solid">Shop handicraft</Link>
@@ -584,8 +584,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             aria-label="Fabric moving on the bolt"
           />
 
-          <span className="hc-vbanner__cap">Jhotwara · 06:40</span>
-
           <div className="hc-vbanner__ctrl">
             <button className="hc-vctrl" id="vPlay" aria-label="Play or pause the film">
               <svg className="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z" /></svg>
@@ -599,8 +597,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
 
           <div className="hc-vbanner__in">
             <div className="hc-vbanner__eyebrow"><i /> Filmed at the workshop</div>
-            <h2>Six-forty in the morning, before the heat.</h2>
-            <p>The quartz is mixed while it&apos;s still cool enough to work. By nine the brushes are out. Nothing on this page was made anywhere else.</p>
+            <h2>Paper and <br/>Fabric Creations.</h2>
+            <p>Our range of products is divided into two main categories: Paper creations and Fabric Creations. We bring them together to design products that are as useful as they are delightful.</p>
             <div className="hc-vbanner__chips">
               <span>No stock footage</span><span>Same lanes as our cloth</span><span>42 families</span>
             </div>
