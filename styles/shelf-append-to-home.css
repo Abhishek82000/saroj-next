@@ -154,13 +154,17 @@
   .coll-cell:nth-child(n + 4) { aspect-ratio: 5 / 5; }
 }
 
-/* Laptops: one row of five, centre arch tallest, outer arches shortest. */
+/* Laptops: one row of five, centre arch tallest, outer arches shortest.
+   The arches' heights are percentages of the row, so the grid needs a height
+   of its own — without one (the section's fixed height is switched off above)
+   the row is 0 tall and every arch collapses to just its name. */
 @media (min-width: 900px) {
   .coll-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     grid-template-rows: minmax(0, 1fr);
     align-items: end;
     align-content: stretch;
+    height: clamp(22rem, 58vh, 34rem);
   }
   .coll-cell,
   .coll-cell:nth-child(n + 4) {

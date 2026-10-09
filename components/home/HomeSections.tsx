@@ -73,15 +73,10 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       ))}
       
       {/* `top_slider` banners — their own section under the hero, retail only. */}
-      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}
-      
+      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}      
       {offers.length > 1 && <OffersSlider slides={offers} />}
       {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
-      
-      
       {!isWholesale && <WaysToBuy />}
-      
-      
       <Voices />
       <Bulk />
       <Journal posts={journalPosts} />
