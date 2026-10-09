@@ -486,7 +486,7 @@
            padding:clamp(26px,5vw,44px) var(--pad) 1.3rem; margin-inline:calc(var(--pad) * -1);
            scrollbar-width:none; -ms-overflow-style:none; }
 .st-reels::-webkit-scrollbar{ display:none; }
-.st-reel{ flex:0 0 min(62vw,262px); scroll-snap-align:center; position:relative; aspect-ratio:9/16;
+.st-reel{ flex:0 0 min(62vw,200px); scroll-snap-align:center; position:relative; aspect-ratio:9/16;
           border-radius:16px; overflow:hidden; background:linear-gradient(160deg,#16212B,#0B1116);
           box-shadow:0 20px 40px -22px rgba(16,24,32,.5); transform:scale(.94);
           transition:opacity .55s var(--ease), transform .55s var(--ease), box-shadow .55s var(--ease); }
