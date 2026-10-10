@@ -17,7 +17,7 @@
 .hc .hc-eyebrow.mid{ justify-content:center; }
 .hc .hc-eyebrow.mid::after{ content:''; width:26px; height:1px; background:currentColor; opacity:.6; flex:none; }
 .hc .hc-h2{ font-family:var(--d); font-weight:400; line-height:1.02; letter-spacing:-.018em; font-size:clamp(2.05rem,7vw,3rem); margin:.27em 0 0; }
-.hc .hc-lede{ color:var(--mute); font-weight:300; font-size:clamp(.95rem,3.4vw,1.08rem); max-width:72ch; margin:1.05rem 0 0; }
+.hc .hc-lede{ color:var(--mute); font-weight:300; font-size:clamp(.95rem,3.4vw,1.08rem); max-width:72ch; margin:0.85rem 0 0;line-height: 1.4; }
 .hc .hc-dv{ font-family:var(--dv); }
 .hc .hc-sec{ padding:var(--sec-y) var(--pad); position:relative; }
 .hc .hc-wrap{ max-width:1280px; margin-inline:auto; width:100%; }
@@ -47,7 +47,7 @@
 .hc .hc-roll:hover ul{ animation-play-state:paused; }
 .hc .hc-wheel-head{ text-align:center; display:grid; justify-items:center; }
 .hc #wheel{ overflow:hidden; overflow:clip; }
-.hc .hc-stage{ margin-top:clamp(32px,6vw,54px); perspective:1300px; perspective-origin:50% 44%; touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
+.hc .hc-stage{ margin-top:clamp(32px,6vw,44px); perspective:1300px; perspective-origin:50% 44%; touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
 .hc .hc-stage img{ -webkit-user-drag:none; pointer-events:none; }
 .hc .hc-stage:active{ cursor:grabbing; }
 .hc .hc-wheel{ position:relative; height:clamp(360px,78vw,440px); transform-style:preserve-3d; transition:transform .85s var(--ease); margin-inline:auto; width:min(100%,980px); }

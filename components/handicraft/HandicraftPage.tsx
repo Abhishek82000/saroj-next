@@ -430,20 +430,22 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           </h1>
           <p className="hero__sub rv" data-d="2">Redesigning everyday essentials with creativity, color, and a handcrafted touch that keeps you connected to Jaipur art.</p>
           <div className="hero__cta rv" data-d="3">
-            <Link href="/shop" className="hc-btn hc-btn--solid">Shop handicraft</Link>
-            <a href="#wheel" className="hc-btn hc-btn--light">Explore Collection</a>
+            <Link href="#wheel" className="hc-btn hc-btn--solid">Explore Collection</Link>
+            {/* <a href="#wheel" className="hc-btn hc-btn--light">Explore Collection</a> */}
           </div>
         </div>
         <div className="hero__scroll" aria-hidden="true"><span>Scroll</span><span className="l" /></div>
       </section>
 {/* ================= WHEEL ================= */}
-      <section className="hc-sec pt-4" id="wheel">
+      <section className="hc-sec pt-5" id="wheel">
         <div className="hc-wrap">
           <div className="hc-wheel-head">
             <div className="hc-eyebrow mid rv">The Collection Wheel</div>
             <h2 className="hc-h2 rv" data-d="1">A Happy Little<br /> World of Handmade</h2>
             <p className="hc-lede rv" data-d="2" style={{ textAlign: "center" }}>
               One shop destination for traditional handmade printed cotton bags, boxes, stationery & journals, lifestyle organisation, and corporate or customised gifting.
+            </p>
+            <p className="hc-lede rv" data-d="2" style={{ textAlign: "center", fontSize:"16px", fontWeight:"600", marginTop:"4px" }}>A quick reminder that each piece passes a high-quality standard and is made by human hands, not factory lines.
             </p>
           </div>
 
@@ -532,9 +534,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
               <Link href="/shop" className="hc-btn hc-btn--solid">Shop handicraft</Link>
               <a href="#cloth" className="hc-btn">Fabrics, as always</a>
             </div>
-            <p className="hj__note fade f4">
-              <span>Six crafts</span><i aria-hidden="true" /><span>212 pieces</span><i aria-hidden="true" /><span>One counter in Jhotwara</span>
-            </p>
           </div>
 
           {/* three windows of a jharokha, each framing a piece */}
