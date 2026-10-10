@@ -437,10 +437,10 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <div className="hero__scroll" aria-hidden="true"><span>Scroll</span><span className="l" /></div>
       </section>
 {/* ================= WHEEL ================= */}
-      <section className="hc-sec" id="wheel">
+      <section className="hc-sec pt-4" id="wheel">
         <div className="hc-wrap">
           <div className="hc-wheel-head">
-            <div className="hc-eyebrow mid rv">The Kaarigar Wheel</div>
+            <div className="hc-eyebrow mid rv">The Collection Wheel</div>
             <h2 className="hc-h2 rv" data-d="1">A Happy Little<br /> World of Handmade</h2>
             <p className="hc-lede rv" data-d="2" style={{ textAlign: "center" }}>
               One shop destination for traditional handmade printed cotton bags, boxes, stationery & journals, lifestyle organisation, and corporate or customised gifting.
