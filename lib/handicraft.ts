@@ -25,6 +25,10 @@ export interface HandicraftApiResponse {
     handicraftFeatCategory?: HandicraftApiFeatCategory[];
     /** The fabric categories for the sliding shelf. */
     fabricCategory?: HandicraftApiFeatCategory[];
+    /** Every handicraft category (cat_type 1). */
+    handicraftCategory?: HandicraftApiFeatCategory[];
+    /** Handicraft categories with their products — the page's product rails. */
+    handicraft_show_home_page?: HomeCategorySection[];
     /** Small banners between the category rails — the same shape as /api/home's. */
     middle_slider?: HomeApiSlide[];
   };
@@ -131,6 +135,10 @@ export async function getHandicraftData(): Promise<HandicraftData> {
     // Some categories aren't stocked yet, so the API lists them with no products.
     const stocked = (d.category_show_home_page ?? []).filter((c) => c.products.length > 0);
     const categories = (d.categories ?? []).filter((c) => c.image);
+    /* This endpoint sends its handicraft categories as handicraftCategory (CategoryResource shape). */
+    const handCats = (d.handicraftCategory ?? []).map(toFace).filter((f): f is HcFace => f !== null);
+    /* The product rails: handicraft categories with products; until the API sends those, the general ones. */
+    const handRails = (d.handicraft_show_home_page ?? []).filter((c) => c.products.length > 0);
 
     const everyProduct: HomeApiProduct[] = [
       ...(d.tag_show_home_page ?? []).flatMap((t) => t.products),
@@ -143,13 +151,17 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       return { href: productHref(p.slug), src: p.image, cap: c.cat_name, alt: p.image_alt || p.name };
     });
 
-    const faces = (d.handicraftFeatCategory ?? []).map(toFace).filter((f): f is HcFace => f !== null);
+    /* The wheel shows every handicraft category (handicraftCategory) — the strip below reuses the same list. */
+    const faces = handCats;
     const fabricSlides = (d.fabricCategory?.length ? d.fabricCategory : categories)
       .map(toFace).filter((f): f is HcFace => f !== null)
       .map((f) => ({ name: f.name, href: f.href, img: f.img, count: f.count }));
-    const swatches = categories.slice(0, 6).map((c) => ({ href: categoryHref(c.slug), src: c.image, title: c.name }));
+    const swatches = handCats.length
+      ? handCats.slice(0, 6).map((c) => ({ href: c.href ?? "/handicraft", src: c.img, title: c.name }))
+      : categories.slice(0, 6).map((c) => ({ href: categoryHref(c.slug), src: c.image, title: c.name }));
 
-    const v = d.video_products?.[0];
+    /* This endpoint sends its clips as video_handicraft_products. */
+    const v = d.video_handicraft_products?.[0] ?? d.video_products?.[0];
 
     return {
       columnImages,
@@ -160,7 +172,7 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       bolts: stocked.slice(0, 5).map(toBolt),
       video: v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
       voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content, rating: t.rating })),
-      collections: d.categories?.length ?? 0,
+      collections: handCats.length || (d.categories?.length ?? 0),
       // Thumbnails are borrowed from the rails by product id, same as on the home page.
       reels: buildReels({
         tagSections: d.tag_show_home_page ?? [],
@@ -169,7 +181,8 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       }).map((r) => ({ ...r, kind: "Handicraft" as const, unit: "piece" })),
       tagRails: (d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
         .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
-      categoryRails: stocked.map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
+      categoryRails: (handRails.length ? handRails : stocked)
+        .map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
       midSlides: toSlides(d.middle_slider),
     };
   } catch {
