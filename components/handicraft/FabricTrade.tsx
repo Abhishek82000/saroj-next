@@ -1,34 +1,33 @@
-import Link from "next/link";
-
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 
 type Trade = {
   id: string;
   num: string;
   tone: "light" | "dark";
-  eyebrow: string;
   title: [string, string];
-  lede: string;
-  points: [string, string][];
-  cta: { href: string; label: string };
-  alt: { href: string; label: string };
+  /** A line under the heading, when the panel has one. */
+  sub?: string;
+  body: string[];
+  /** The closing line, set apart from the paragraphs. */
+  signoff: string;
   stamp: string;
   main: { src: string; alt: string };
   inset: { src: string; alt: string };
 };
 
-/* The two ways the fabric leaves the shop — by the metre, and by the thaan. */
+/* The two ways the shop sells — to you, and to the trade. */
 const TRADES: Trade[] = [
   {
     id: "retail",
     num: "01",
     tone: "light",
-    eyebrow: "Retail · by the metre",
-    title: ["Cut to your length,", "one print at a time."],
-    lede: "Block-printed and hand-dyed in Jaipur, measured off the bolt for a single kurta, a set of cushions or a whole wardrobe. Pick the print, pick the length — we cut it the day you order.",
-    points: [["₹129", "per metre, from"], ["40+", "prints on the shelf"], ["1 m", "order by the metre"]],
-    cta: { href: "/shop", label: "Shop retail" },
-    alt: { href: "#cloth", label: "Browse collections" },
+    title: ["A Little Something", "to Love"],
+    body: [
+      "At Saroj, we understand that every purchase is more than just a thing to you; it's an experience as well. So we make products that complement your personality and style.",
+      "We design products that bring colorful prints, thoughtful designs, and practical functionality together to add charm to your daily life. We design our products to suit every mood, moment, and occasion. From bags for fashion, organizers for lifestyle, and unique journals for your work, we design to make everyday living more colorful.",
+      "Explore our range of paper and fabric collections to find your new favorites. Whether you're treating yourself or looking for a gift, get the best designs to make ordinary moments feel a little more special.",
+    ],
+    signoff: "Bring home a little creativity. Add a little joy. Make every day special.",
     stamp: "Retail · Saroj Textile · Jaipur · ",
     main: { src: CDN + "47691780986642.webp", alt: "Pink base jaal printed Jaipuri cotton" },
     inset: { src: CDN + "94351785567420.webp", alt: "Red multicolour paisley Kalamkari print" },
@@ -37,12 +36,14 @@ const TRADES: Trade[] = [
     id: "wholesale",
     num: "02",
     tone: "dark",
-    eyebrow: "Wholesale · by the thaan",
     title: ["Wholesale", "Wonders Await!"],
-    lede: "In the handicraft category we bring together 3 decades of textile industry experience and passion for exploring new possibilities. If you are a reseller looking for an exclusive range of personalized products or gift hampers, we are bringing new designs every day for you to choose from.",
-    points: [["Thaan", "full rolls & bulk"], ["Trade", "pricing for resellers"], ["Repeat", "the same print, again"]],
-    cta: { href: "/wholesale-fabric", label: "Enter wholesale" },
-    alt: { href: "/contact", label: "Talk to us" },
+    sub: "Start your next big collection with the right products!",
+    body: [
+      "In the handicraft category, we bring together 3 decades of textile industry experience and passion for exploring new possibilities. If you are a reseller looking for an exclusive range of personalized products or gift hampers, we are bringing new designs every day for you to choose from.",
+      "We understand that every business has its own vision, customers, and requirements. That's why we offer wholesale ordering and customization options on selected products, subject to minimum order quantities and product specifications.",
+      "Our goal is to build lasting business relationships by bringing together product variety, thoughtful designs, and a commitment to quality.",
+    ],
+    signoff: "Connect with us to discuss bulk requirements and request wholesale pricing.",
     stamp: "Wholesale · Thaan · Trade · ",
     main: { src: CDN + "63141785559833.webp", alt: "Red over-dye Ajrakh block printed cotton" },
     inset: { src: CDN + "2201780380811.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
@@ -73,16 +74,12 @@ export default function FabricTrade() {
 
             <div className="hc-trade__copy">
               <span className="hc-trade__num" aria-hidden="true">{t.num}</span>
-              <div className="hc-eyebrow rv">{t.eyebrow}</div>
               <h2 id={`${t.id}-title`} className="hc-h2 rv" data-d="1">{t.title[0]} <em>{t.title[1]}</em></h2>
-              <p className="hc-lede rv" data-d="2">{t.lede}</p>
-              <ul className="hc-trade__pts rv" data-d="3">
-                {t.points.map(([big, small]) => <li key={small}><b>{big}</b><small>{small}</small></li>)}
-              </ul>
-              <div className="hc-trade__cta rv" data-d="4">
-                <Link href={t.cta.href} className={`hc-btn hc-btn--solid`}>{t.cta.label}</Link>
-                <Link href={t.alt.href} className={`hc-btn${t.tone === "dark" ? " hc-btn--light" : ""}`}>{t.alt.label}</Link>
-              </div>
+              {t.sub && <p className="hc-trade__sub rv" data-d="2">{t.sub}</p>}
+              {t.body.map((para, i) => (
+                <p key={i} className="hc-lede hc-trade__p rv" data-d={Math.min(i + 2, 4)}>{para}</p>
+              ))}
+              <p className="hc-trade__signoff rv" data-d="4">{t.signoff}</p>
             </div>
           </div>
         </section>

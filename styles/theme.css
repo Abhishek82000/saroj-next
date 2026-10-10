@@ -75,7 +75,8 @@ body:has([data-shop-mode="retail"])::before{
                     linear-gradient(180deg, var(--paper), var(--paper-2)); }
 /* Wholesale panel: night indigo like the dark bands on home, not crimson. */
 .hc .hc-trade--dark{ background:radial-gradient(ellipse 70% 80% at 20% 30%, #2A4470 0%, var(--night) 50%, #0E1726 100%); }
-.hc .hc-trade--dark .hc-eyebrow, .hc .hc-trade--dark .hc-h2 em{ color:#EBCB8B; }
+.hc .hc-trade--dark .hc-eyebrow, .hc .hc-trade--dark .hc-h2 em, .hc .hc-trade--dark .hc-trade__sub{ color:#EBCB8B; }
+.hc .hc-trade--dark .hc-trade__signoff::before{ background:#EBCB8B; }
 .hc .hc-trade--dark .hc-btn--solid:hover{ color:var(--night); }
 .hc .hc-h2 em{ color:var(--lac); }
 .hc .hc-seo{ background:var(--paper-2); }

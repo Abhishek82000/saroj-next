@@ -605,10 +605,10 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <div className="hc-wrap hc-cloth__head">
           <div>
             <div className="hc-eyebrow rv">The house that built this</div>
-            <h2 className="hc-h2 rv" data-d="1">Still, and always, <em>cloth.</em></h2>
+            <h2 className="hc-h2 rv" data-d="1">Prints That Never Go <em>Out of Style.</em></h2>
           </div>
           <div className="hc-cloth__side">
-            <p className="hc-lede rv" data-d="2">Handicraft is the new wing. The looms are the load-bearing wall. Pick a bolt — every one is on the shelf today, retail or wholesale.</p>
+            <p className="hc-lede rv" data-d="2">Do not forget to explore our established textile category with a huge range of printed cotton fabric. We bring fabric that has ruled the industry over the last 30 years.</p>
             <div className="hc-cloth__cta rv" data-d="3">
               <Link href="/shop" className="hc-btn hc-btn--solid">Shop all fabrics</Link>
               <span className="hc-cloth__count"><b>{fabricSlides.length}</b> collections on the line</span>
