@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Fragment, useEffect, useRef } from "react";
 import MidBanners from "@/components/home/MidBanners";
 import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
-import type { HandicraftData, HcBolt, HcFace, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
+import type { HandicraftData, HcBolt, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
 import FabricStrip from "./FabricStrip";
 import FabricTrade from "./FabricTrade";
 import HandicraftSeo from "./HandicraftSeo";
@@ -13,7 +13,6 @@ import Reels from "@/components/home/Reels";
 import Voices from "@/components/home/Voices";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
-const PIC = "https://picsum.photos/seed/";
 
 /* Everything below is the page's own copy, used wherever /api/handicraft-data comes back short. */
 
@@ -34,15 +33,6 @@ const ARCH = "M0 150V58C0 40 10 30 22 24C30 20 38 16 44 9C47 5 49 2 50 0C51 2 53
 const ARCH_FRAME = ARCH.slice(0, -1);
 const ARCH_SIDES = ["l", "c", "r"];
 const ROMAN = ["i", "ii", "iii"];
-
-const FACES: HcFace[] = [
-  { name: "Blue Pottery", hi: "नीली मिट्टी", meta: "Kot Jewar", count: "46 pieces", img: PIC + "saroj-craft-pottery/700/900", alt: "Blue pottery from Kot Jewar", swap: "Blue pottery vase, cobalt floral, plain backdrop" },
-  { name: "Meenakari", hi: "मीनाकारी", meta: "Johari Bazaar", count: "28 pieces", img: PIC + "saroj-craft-meena/700/900", alt: "Meenakari enamel work", swap: "Meenakari enamel plate, macro, raking light" },
-  { name: "Bagru Block", hi: "बगरू छपाई", meta: "Bagru village", count: "63 pieces", img: CDN + "48561785562288.webp", alt: "Mustard and dark block Ajrakh print", swap: "Wooden Bagru blocks stacked, or a block mid-stamp" },
-  { name: "Lac & Brass", hi: "लाख और पीतल", meta: "Tripolia Bazaar", count: "34 pieces", img: PIC + "saroj-craft-brass/700/900", alt: "Lac and brass work from Tripolia Bazaar", swap: "Brass vessels or lac bangle stack, warm light" },
-  { name: "Marble Jali", hi: "संगमरमर जाली", meta: "Kishanpole", count: "19 pieces", img: PIC + "saroj-craft-marble/700/900", alt: "Carved marble jali", swap: "Carved marble jali screen, backlit so the lattice reads" },
-  { name: "Kathputli", hi: "कठपुतली", meta: "Shilpgram", count: "22 pieces", img: PIC + "saroj-craft-puppet/700/900", alt: "Kathputli puppets", swap: "Kathputli puppets hung in a row against a plain wall" },
-];
 
 const BOLTS: HcBolt[] = [
   { name: "Ajrakh", desc: "Resist-printed in indigo and madder, both sides, sixteen steps.", price: "from ₹150 / m", img: CDN + "63141785559833.webp", alt: "Red over-dye Ajrakh block printed cotton" },
@@ -83,7 +73,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
   const columns = Array.from({ length: 5 }, (_, c) => images.slice(c * 3, c * 3 + 3));
   const plates = data.plates.length === 3 ? data.plates : PLATES;
   const swatches = data.swatches.length >= 3 ? data.swatches : SWATCHES;
-  const faces = data.faces.length >= 3 ? data.faces : FACES;
+  /* The wheel shows the API's handicraft categories only; with none, the section is left out. */
+  const faces = data.faces;
   const fabricSlides = data.fabricSlides.length >= 3 ? data.fabricSlides : FABRIC_SLIDES;
   const bolts = data.bolts.length >= 3 ? data.bolts : BOLTS;
   const video = data.video ?? VIDEO;
@@ -430,13 +421,14 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           </h1>
           <p className="hero__sub rv" data-d="2">Redesigning everyday essentials with creativity, color, and a handcrafted touch that keeps you connected to Jaipur art.</p>
           <div className="hero__cta rv" data-d="3">
-            <Link href="#wheel" className="hc-btn hc-btn--solid">Explore Collection</Link>
+            <Link href={faces.length > 0 ? "#wheel" : "/shop"} className="hc-btn hc-btn--solid">Explore Collection</Link>
             {/* <a href="#wheel" className="hc-btn hc-btn--light">Explore Collection</a> */}
           </div>
         </div>
         <div className="hero__scroll" aria-hidden="true"><span>Scroll</span><span className="l" /></div>
       </section>
-{/* ================= WHEEL ================= */}
+{/* ================= WHEEL — only with categories from the API ================= */}
+      {faces.length > 0 && (
       <section className="hc-sec pt-5" id="wheel">
         <div className="hc-wrap">
           <div className="hc-wheel-head">
@@ -444,8 +436,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             <h2 className="hc-h2 rv" data-d="1">A Happy Little<br /> World of Handmade</h2>
             <p className="hc-lede rv" data-d="2" style={{ textAlign: "center" }}>
               One shop destination for traditional handmade printed cotton bags, boxes, stationery & journals, lifestyle organisation, and corporate or customised gifting.
-            </p>
-            <p className="hc-lede rv" data-d="2" style={{ textAlign: "center", fontSize:"16px", fontWeight:"600", marginTop:"4px" }}>A quick reminder that each piece passes a high-quality standard and is made by human hands, not factory lines.
             </p>
           </div>
 
@@ -458,7 +448,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
                       <img src={f.img} alt={f.alt} loading="lazy" />
                     </div>
                     <div className="hc-face__body">
-                      <span className="hc-face__num">{String(i + 1).padStart(2, "0")}</span>
+                      {/* <span className="hc-face__num">{String(i + 1).padStart(2, "0")}</span> */}
                       <h3 className="hc-face__name">{f.name}</h3>
                       {f.hi && <p className="hc-face__hi hc-dv">{f.hi}</p>}
                       <p className="hc-face__meta">{f.meta}{f.count && <> · <b>{f.count}</b></>}</p>
@@ -494,6 +484,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           </div>
         </div>
       </section>
+      )}
       {/* ================= TAG RAILS — New Arrivals, Best Seller, … ================= */}
       {data.tagRails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
       {/* ================= THE SECOND HOUSE — a jharokha facade under a toran ================= */}
@@ -598,9 +589,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             <div className="hc-vbanner__eyebrow"><i /> Filmed at the workshop</div>
             <h2>Paper and <br/>Fabric Creations.</h2>
             <p>Our range of products is divided into two main categories: Paper creations and Fabric Creations. We bring them together to design products that are as useful as they are delightful.</p>
-            <div className="hc-vbanner__chips">
-              <span>No stock footage</span><span>Same lanes as our cloth</span><span>42 families</span>
-            </div>
+            <p className="hc-lede rv" data-d="2" style={{ textAlign: "center", fontSize:"16px", fontWeight:"600", marginTop:"4px" }}>A quick reminder that each piece passes a high-quality standard and is made by human hands, not factory lines.
+            </p>
             {video.href && (
               <div className="hc-hero__cta" style={{ justifyContent: "flex-start" }}>
                 <Link href={video.href} className="hc-btn hc-btn--light">Shop this print</Link>
@@ -630,16 +620,9 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <FabricStrip slides={fabricSlides} />
       </section>
 
-      {/* ================= RETAIL + WHOLESALE — two photo-led full-screen panels ================= */}
-      {/* ================= REELS — handicraft on film, shoppable like the home page ================= */}
       {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}
       {data.reels.length > 0 && <Reels items={data.reels} />}
       <FabricTrade />
-
-    
-
-      
-
       {/* ================= VOICES — the home page's review wall, fed by the API's testimonials ================= */}
       <Voices items={data.voices} />
 
