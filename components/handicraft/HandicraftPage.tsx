@@ -589,8 +589,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             <div className="hc-vbanner__eyebrow"><i /> Filmed at the workshop</div>
             <h2>Paper and <br/>Fabric Creations.</h2>
             <p>Our range of products is divided into two main categories: Paper creations and Fabric Creations. We bring them together to design products that are as useful as they are delightful.</p>
-            <p className="hc-lede rv" data-d="2" style={{ textAlign: "center", fontSize:"16px", fontWeight:"600", marginTop:"4px" }}>A quick reminder that each piece passes a high-quality standard and is made by human hands, not factory lines.
-            </p>
+            <p className="hc-lede rv" data-d="2" style={{fontSize:"16px", fontWeight:"600", marginTop:"4px" }}><em>A quick reminder that each piece passes a high-quality standard and is made by human hands, not factory lines.</em></p>
             {video.href && (
               <div className="hc-hero__cta" style={{ justifyContent: "flex-start" }}>
                 <Link href={video.href} className="hc-btn hc-btn--light">Shop this print</Link>
@@ -604,7 +603,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         <span className="hc-cloth__mark hc-dv" aria-hidden="true">कपड़ा</span>
         <div className="hc-wrap hc-cloth__head">
           <div>
-            <div className="hc-eyebrow rv">The house that built this</div>
             <h2 className="hc-h2 rv" data-d="1">Prints That Never Go <em>Out of Style.</em></h2>
           </div>
           <div className="hc-cloth__side">

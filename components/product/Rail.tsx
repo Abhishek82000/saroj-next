@@ -2,28 +2,19 @@
 import ProdCard from "./ProdCard";
 import { useLoopRail } from "@/components/ui/useLoopRail";
 import Icon from "@/components/ui/Icon";
-import Reveal from "@/components/ui/Reveal";
+import SectionHead from "@/components/ui/SectionHead";
 import type { Product } from "@/lib/types";
-import { useStore } from "@/components/shell/StoreProvider";
-import { forMode } from "@/lib/wholesale";
 
 /** Horizontal product scroller, used under the product detail and on the home page. */
 export default function Rail({
   eyebrow, heading, items, id,
 }: { eyebrow: string; heading: string; items: Product[]; id?: string }) {
-  /* At wholesale, a piece with no wholesale price isn't for sale — and a rail left empty isn't drawn. */
-  const { mode } = useStore();
-  const shown = forMode(items, mode === "wholesale");
-  const { rail, track, nudge, hold, slots } = useLoopRail(shown.length);
-  if (shown.length === 0) return null;
+  const { rail, track, nudge, hold, slots } = useLoopRail(items.length);
 
   return (
     <section className="st-sec" id={id} style={{ paddingBlock: "0 54px" }}>
       <div className="st-wrap st-railhead">
-        <div>
-          <Reveal className="st-eyebrow">{eyebrow}</Reveal>
-          <Reveal as="h2" delay={1} className="st-h2">{heading}</Reveal>
-        </div>
+        <SectionHead title={heading} />
       </div>
 
       <div className="st-wrap">
@@ -36,7 +27,7 @@ export default function Rail({
           {...hold}
         >
           <div className="loop-track" ref={track}>
-            {slots(shown).map(({ item: p, clone }) => (
+            {slots(items).map(({ item: p, clone }) => (
               <ProdCard key={clone ? `c-${p.slug}` : p.slug} p={p} clone={clone} />
             ))}
           </div>

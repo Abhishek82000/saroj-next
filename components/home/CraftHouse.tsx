@@ -26,7 +26,6 @@ export default function CraftHouse({ categories }: { categories: CommonFeaturedC
       <span className="chs__mark" aria-hidden="true">हस्तशिल्प</span>
       <div className="chs__in">
         <div className="chs__copy">
-          <span className="chs__eyebrow">The second house · Jaipur</span>
           <h2 className="chs__title" id="chs-title">Made by hand, <em>in the lanes of Jaipur.</em></h2>
           <p className="chs__lede">
             Boxes, frames and keepsakes from the families who work beside our printers —

@@ -1,4 +1,4 @@
-import Reveal from "@/components/ui/Reveal";
+import SectionHead from "@/components/ui/SectionHead";
 
 const reviews: [string, string, number][] = [
   ["Ordered three metres of the maroon paisley for a kurta. Colour is exactly the photo.", "Santosh Selam", 5],
@@ -46,8 +46,7 @@ export default function Voices({ items }: { items?: VoiceItem[] }) {
   return (
     <section className="st-voices" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-voices__head st-wrap">
-        <Reveal className="st-eyebrow">What came back</Reveal>
-        <Reveal as="h2" delay={1} className="st-h2">Voices.</Reveal>
+        <SectionHead title="Voices." />
       </div>
       <div className="st-vrow st-vrow--a">
         {[...a, ...a].map((r, i) => <Card key={`a${i}`} text={r[0]} who={r[1]} rating={r[2]} />)}

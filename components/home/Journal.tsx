@@ -1,6 +1,6 @@
 "use client";
 import Photo from "@/components/ui/Photo";
-import Reveal from "@/components/ui/Reveal";
+import SectionHead from "@/components/ui/SectionHead";
 import Icon from "@/components/ui/Icon";
 import { useAutoRail } from "@/components/ui/useAutoRail";
 import type { BlogSummary } from "@/lib/blogs";
@@ -14,8 +14,7 @@ export default function Journal({ posts }: { posts: BlogSummary[] }) {
   return (
     <section className="st-sec" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-wrap">
-        <Reveal className="st-eyebrow">From the workshop</Reveal>
-        <Reveal as="h2" delay={1} className="st-h2">The journal.</Reveal>
+        <SectionHead title="The journal." />
       </div>
 
       <div className="st-wrap">

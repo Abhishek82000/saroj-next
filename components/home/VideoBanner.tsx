@@ -107,11 +107,11 @@ export default function VideoBanner() {
         </div>
 
         <div className="st-vbanner__in">
-          <Reveal className="st-vbanner__eyebrow"><i /> Filmed at the workshop</Reveal>
-          <Reveal as="h2" delay={1}>Six-forty in the morning, before the heat.</Reveal>
+          <Reveal as="h2" delay={1}>We Deal in Bulk Too.</Reveal>
           <Reveal as="p" delay={2}>
-            The quartz is mixed while it’s still cool enough to work. By nine the brushes are out.
-            Nothing on this page was made anywhere else.
+            We not only deal with retailers, but we are also a leading provider of bulk fabrics at wholesale prices. Bulk orders are an economical solution for businesses, industries, and individuals who want to buy wholesale fabric.
+          </Reveal><Reveal as="p" delay={2}>
+Our inventory includes an exclusive selection of Designer Fabric Online, including cotton, rayon, rayon crepe, mulmul, and more.
           </Reveal>
           <Reveal className="st-vbanner__chips" delay={3}>
             <span>No stock footage</span><span>Same lanes as our cloth</span><span>42 families</span>

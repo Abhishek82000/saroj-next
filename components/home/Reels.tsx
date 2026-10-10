@@ -3,7 +3,7 @@
 import Link from "@/components/ui/SiteLink";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
-import Reveal from "@/components/ui/Reveal";
+import SectionHead from "@/components/ui/SectionHead";
 import { useStore } from "@/components/shell/StoreProvider";
 import { inr } from "@/lib/site";
 import type { Reel } from "@/lib/types";
@@ -28,10 +28,7 @@ export default function Reels({ items }: { items?: Reel[] }) {
   return (
     <section className="st-sec" id="reels" style={{ paddingBlock: "0 clamp(30px,5vw,54px)" }}>
       <div className="st-wrap st-railhead">
-        <div>
-          <Reveal className="st-eyebrow">See it move</Reveal>
-          <Reveal as="h2" delay={1} className="st-h2">Shoppable reels.</Reveal>
-        </div>
+        <SectionHead title="Shoppable reels." />
       </div>
 
       <div className="st-wrap">

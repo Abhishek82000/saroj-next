@@ -55,19 +55,13 @@ export default function Hero() {
     <section className={`st-hero${lit ? " lit" : ""}`} id="hero">
       <div className="st-wrap">
         <div className="st-hero__type">
-          <div className="st-eyebrow fade f1">A second house opens · Jaipur</div>
+          <div className="st-eyebrow fade f1">Our Collections</div>
           <h1 className="st-hero__title">
-            <span className="ln"><span>Woven, then</span></span>
-            <span className="ln"><span>Fired &amp; <em>ढाला</em></span></span>
+            <span className="ln"><span>Textile Treasure</span></span>
           </h1>
           <p className="st-hero__sub fade f2">
-            The lanes that print our Ajrakh also throw the pottery and beat the brass.
-            <b> Handicraft is on the shelf now</b> — sitting beside the cloth it was always made next to.
+            Unveiling fabrics from tradition to trend that define culture and style
           </p>
-          <div className="st-hero__cta fade f3">
-            <Link href="/handicraft" className="st-btn st-btn--solid">Shop handicraft</Link>
-            <Link href="/shop" className="st-btn">Fabrics, as always</Link>
-          </div>
         </div>
 
         <div className="st-plates fade f4">

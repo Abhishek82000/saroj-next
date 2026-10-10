@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import MidBanners from "@/components/home/MidBanners";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
+import SectionHead from "@/components/ui/SectionHead";
 import Rail from "@/components/product/Rail";
 import Reels from "@/components/home/Reels";
 import BannerSlider from "@/components/home/BannerSlider";
@@ -38,8 +39,7 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
       {page.categories.length > 0 && (
         <section className="st-sec" style={{ paddingBlock: "clamp(28px,5vw,54px)" }}>
           <div className="st-wrap">
-            <Reveal className="st-eyebrow">Every category</Reveal>
-            <Reveal as="h2" delay={1} className="st-h2">Shop by fabric.</Reveal>
+            <SectionHead title="Shop by fabric." />
             <div className="st-whcats">
               {page.categories.map((c) => (
                 <Link key={c.id} href={shop(c.slug)} className="st-whcat">

@@ -302,7 +302,7 @@
 .hc .hc-seo__box::-webkit-scrollbar-thumb{ background:var(--cobalt); border-radius:99px; }
 .hc .hc-seo__box::-webkit-scrollbar-track{ background:transparent; }
 .hc .hc-seo__box:focus-visible{ outline:2px solid var(--cobalt); outline-offset:3px; }
-.hc .hc-seo__block{ scroll-margin-top:16px; padding-bottom:1.6rem; margin-bottom:1.6rem; border-bottom:1px solid var(--line-2); }
+.hc .hc-seo__block{ scroll-margin-top:16px; padding-bottom:1rem; margin-bottom:1rem; border-bottom:1px solid #1c263036; }
 .hc .hc-seo__block:last-child{ border-bottom:0; margin-bottom:0; padding-bottom:56px; }
 .hc .hc-seo__block h3{ font-family:var(--d); font-weight:400; font-size:clamp(1.2rem,2.2vw,1.5rem); line-height:1.2; margin:0 0 .7rem; color:var(--ink); }
 .hc .hc-seo__block p{ margin:0 0 .8rem; font-size:.95rem; line-height:1.75; color:var(--ink-2); }
