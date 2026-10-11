@@ -586,7 +586,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           </div>
 
           <div className="hc-vbanner__in">
-            <div className="hc-vbanner__eyebrow"><i /> Filmed at the workshop</div>
             <h2>Paper and <br/>Fabric Creations.</h2>
             <p>Our range of products is divided into two main categories: Paper creations and Fabric Creations. We bring them together to design products that are as useful as they are delightful.</p>
             <p className="hc-lede rv" data-d="2" style={{fontSize:"16px", fontWeight:"600", marginTop:"4px" }}><em>A quick reminder that each piece passes a high-quality standard and is made by human hands, not factory lines.</em></p>
