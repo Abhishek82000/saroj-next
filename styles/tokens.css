@@ -15,6 +15,11 @@
   --dv:var(--font-dv),'Tiro Devanagari Hindi',serif;
 
   --pad:clamp(18px,5vw,64px);
+  /* Where section content starts on every page: the 1280px column's edge on wide
+     screens, the page padding on narrow ones. Use it as padding-inline on a
+     full-width element (the % is that element's own width), and it lines up with
+     every .st-wrap section. */
+  --edge:max(var(--pad), calc((100% - 1280px) / 2));
   --sec-y:clamp(25px,6vw,50px);
   --ease:cubic-bezier(.22,.68,.24,1);
   --shadow:0 24px 50px -18px rgba(16,24,32,.28);

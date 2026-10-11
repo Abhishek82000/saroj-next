@@ -37,7 +37,8 @@ export default function ProductView({
         <b>{p.short}</b>
       </nav>
 
-      <section className="st-wrap">
+      {/* Full width: .st-pd pads itself to the page edge, like every other section. */}
+      <section>
         <div className="st-pd">
           <Gallery p={p} />
           <div>

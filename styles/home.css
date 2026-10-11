@@ -437,7 +437,7 @@
 .st-vbanner__frame{
   position:relative; overflow:hidden; background:#0B1116;
   height:clamp(430px,78vh,720px);
-  margin-inline:calc((1 - var(--p)) * clamp(14px, 5vw, 64px));
+  margin-inline:calc((1 - var(--p)) * var(--edge));
   border-radius:calc((1 - var(--p)) * 26px);
   box-shadow:0 40px 80px -40px rgba(16,24,32,.6);
 }
@@ -459,7 +459,7 @@
 .st-vbanner h2{ font-family:var(--d); font-weight:400; line-height:1.02; letter-spacing:-.02em;
                 font-size:clamp(2rem,7.6vw,4.2rem); margin:.5rem 0 0; max-width:16ch; }
 .st-vbanner p{ font-size:clamp(.9rem,3.3vw,1.02rem); font-weight:300;
-               color:rgba(255,255,255,.72); margin:.9rem 0 0; max-width:44ch; }
+               color:rgba(255,255,255,.72); margin:.9rem 0 0; max-width:60ch; }
 .st-vbanner__chips{ display:flex; flex-wrap:wrap; gap:.45rem; margin-top:1.3rem; }
 .st-vbanner__chips span{ font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
                          padding:.46em .95em; border:1px solid rgba(255,255,255,.34);
@@ -572,7 +572,9 @@
   height: min(calc(100svh - var(--wb-offset)), 54rem);
   min-height: 33rem;
   display: grid;
-  /* Phones: picture on top, words below. */
+  /* Phones: picture on top, words below — in a column that fits the screen
+     (left to auto it took its widest child and pushed the page sideways). */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1.1fr) auto;
   gap: clamp(0.9rem, 3vh, 1.5rem);
   padding: clamp(1.1rem, 3.5vh, 2.5rem) clamp(1.25rem, 6vw, 4rem);
@@ -671,6 +673,7 @@
   gap: clamp(0.4rem, 1.4vh, 0.9rem);
   justify-items: start;
   min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .wb-kicker {
@@ -737,7 +740,8 @@
     grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
     gap: clamp(2rem, 6vw, 6rem);
-    padding-inline: clamp(2rem, 7vw, 7rem);
+    /* the arch frame (drawn .8rem outside the art) lands on the page edge */
+    padding-inline: calc(var(--edge) + 0.8rem);
   }
   .wb-part--flip .wb-art  { order: 2; }
   .wb-part--flip .wb-text { order: 1; }

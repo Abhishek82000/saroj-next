@@ -21,7 +21,7 @@
 .chs__mark{ position:absolute; left:-.04em; bottom:-.2em; font-family:var(--dv); font-size:clamp(120px,20vw,300px); line-height:1;
   color:var(--chs-gold); opacity:.07; pointer-events:none; user-select:none; white-space:nowrap; }
 
-.chs__in{ position:relative; z-index:1; width:min(1280px, 100%); margin-inline:auto; padding:clamp(40px,6vw,64px) var(--pad);
+.chs__in{ position:relative; z-index:1; width:100%; margin-inline:auto; padding:clamp(40px,6vw,64px) var(--edge);
   box-sizing:border-box; display:grid; gap:clamp(28px,4vw,56px); align-items:center; }
 @media(min-width:960px){ .chs__in{ grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); } }
 

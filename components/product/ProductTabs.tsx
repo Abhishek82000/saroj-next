@@ -13,7 +13,7 @@ export default function ProductTabs({ p, reviews, faqs }: { p: Product; reviews?
   const [review, setReview] = useState(false);
 
   return (
-    <section className="st-wrap st-pdtabs">
+    <section className="st-pdtabs">
       <Tabs p={p} reviews={reviews} faqs={faqs}
         onWriteReview={() => withLogin("Log in to write a review", () => setReview(true))} />
       <Modal open={review} onClose={() => setReview(false)} title="Write a review">

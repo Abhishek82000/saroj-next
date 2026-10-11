@@ -18,9 +18,14 @@
 .hcs__mark{ position:absolute; right:-.03em; bottom:-.22em; font-family:var(--dv); font-size:clamp(160px,24vw,360px); line-height:1;
   color:var(--hcs-madder); opacity:.06; pointer-events:none; user-select:none; }
 
-.hcs__in{ position:relative; z-index:1; width:min(1280px,100%); margin-inline:auto; box-sizing:border-box;
-  padding:clamp(36px,5vw,56px) var(--pad); display:grid; gap:clamp(24px,4vw,64px); align-items:center; }
-@media(min-width:900px){ .hcs__in{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+.hcs__in{ position:relative; z-index:1; width:100%; margin-inline:auto; box-sizing:border-box;
+  padding:clamp(36px,5vw,56px) var(--edge); display:grid; gap:clamp(24px,4vw,64px); align-items:center; }
+@media(min-width:900px){
+  .hcs__in{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  /* the window starts on the page edge, like every other section */
+  .hcs__in .hcs__stage{ justify-self:start; }
+  .hcs__stage .hcs__arch{ margin-inline:0; }
+}
 .hcs :where(a,button){ font:inherit; color:inherit; text-decoration:none; }
 .hcs button{ cursor:pointer; }
 

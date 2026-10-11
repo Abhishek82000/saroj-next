@@ -60,7 +60,7 @@ export default function Hero() {
             <span className="ln"><span>Textile Treasure</span></span>
           </h1>
           <p className="st-hero__sub fade f2">
-            Unveiling fabrics from tradition to trend that define culture and style
+            Unveiling fabrics from tradition to trend that define culture and style.
           </p>
         </div>
 

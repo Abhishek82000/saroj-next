@@ -171,7 +171,8 @@ export default function ShopListing({
       </div>
 
 
-      <div className="st-wrap">
+      {/* Full width: the grid pads itself to the page edge, in line with the heading above. */}
+      <div>
         <div className="st-plp__grid">
           <aside className="st-filters" aria-label="Filters"><Filters {...filterProps} /></aside>
 

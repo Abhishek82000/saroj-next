@@ -30,7 +30,7 @@
 .st-craft.on small{ color:rgba(241,243,242,.6); }
 
 .st-plp__grid{ display:grid; gap:clamp(18px,3vw,30px);
-               padding:clamp(20px,3vw,32px) var(--pad) clamp(50px,8vw,90px); }
+               padding:clamp(20px,3vw,32px) var(--edge) clamp(50px,8vw,90px); }
 @media(min-width:1000px){ .st-plp__grid{ grid-template-columns:236px 1fr; gap:2.6rem; } }
 
 .st-filters{ display:none; }
