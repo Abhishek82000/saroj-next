@@ -10,7 +10,7 @@
 .lit .st-hero__title .ln>span{ transform:none; opacity:1; }
 .lit .st-hero__title .ln:nth-child(2)>span{ transition-delay:.1s; }
 .st-hero__title em{ font-style:italic; font-family:var(--dv); font-size:.72em; color:var(--cobalt); }
-.st-hero__sub{ color:var(--mute); font-weight:300; max-width:52ch; margin:1.25rem 0 0; font-size:clamp(.95rem,3.5vw,1.1rem); }
+.st-hero__sub{ color:var(--mute); font-weight:300; max-width:52ch; margin:0.8rem 0 0; font-size:clamp(.95rem,3.5vw,1.1rem); }
 .st-hero__sub b{ font-weight:500; color:var(--ink); }
 .st-hero__cta{ display:flex; flex-wrap:wrap; gap:.65rem; justify-content:center; margin-top:1.8rem; }
 .fade{ opacity:0; transform:translateY(20px); transition:opacity .9s var(--ease), transform .9s var(--ease); }

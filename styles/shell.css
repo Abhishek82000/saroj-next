@@ -43,7 +43,7 @@
 .st-mega__image{ display:flex; flex-direction:column; gap:.5rem; width:100%; }
 .st-mega__image img{ width:100%; aspect-ratio:1/1; object-fit:fill; border-radius:8px; }
 .st-mega__image span{ font-size:.8rem; text-align:center; }
-.st-mega__col a{font-size: .7rem;}
+.st-mega__col a{font-size: .8rem;}
 .st-dropdown{ position:absolute; left:0; right:0; top:calc(100% - .9rem); padding-top:.9rem;
               opacity:0; visibility:hidden; pointer-events:none;
               transition:opacity .25s var(--ease); z-index:90; }
