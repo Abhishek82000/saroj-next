@@ -13,7 +13,8 @@ interface Way {
   id: string;
   kicker: string;
   title: string;
-  copy: string;
+  /** one string per paragraph */
+  copy: string[];
   badge: string;
   cta: string;
   href: string;
@@ -25,8 +26,10 @@ const WAYS: Way[] = [
   {
     id: "wholesale",
     kicker: "Wholesale fabric",
-    title: "The trade counter.",
-    copy: "Hand block printed Ajrakh, Kalamkari and Jaipuri cotton at trade rates, for boutiques, tailors and labels who buy by the bolt.",
+    title: "We Deal in Bulk Too.",
+    copy: [
+      "We not only deal with retailers, but we are also a leading provider of bulk fabrics at wholesale prices. Bulk orders are an economical solution for businesses, industries, and individuals who want to buy wholesale fabric.", "Our inventory includes an exclusive selection of Designer Fabric Online, including cotton, rayon, rayon crepe, mulmul, and more."
+    ],
     badge: "Since 1998",
     cta: "Explore wholesale",
     href: WHOLESALE_HOME,
@@ -37,7 +40,9 @@ const WAYS: Way[] = [
     id: "handicraft",
     kicker: "Jaipur handicraft",
     title: "The craft house.",
-    copy: "Blue pottery from Kot Jewar, meenakari from Johari Bazaar, hand-beaten brass and marble, straight from the lanes that print our cloth.",
+    copy: [
+      "Blue pottery from Kot Jewar, meenakari from Johari Bazaar, hand-beaten brass and marble, straight from the lanes that print our cloth.",
+    ],
     badge: "Made in Jaipur",
     cta: "Explore handicraft",
     href: "/handicraft",
@@ -79,7 +84,9 @@ export default function WaysToBuy() {
           <div className="wb-text">
             <Reveal as="p" delay={1} className="wb-kicker">{w.kicker}</Reveal>
             <Reveal as="h2" delay={2} className="wb-heading" id={`wb-${w.id}`}>{w.title}</Reveal>
-            <Reveal as="p" delay={3} className="wb-copy">{w.copy}</Reveal>
+            <Reveal delay={3} className="wb-copy">
+              {w.copy.map((para) => <p key={para}>{para}</p>)}
+            </Reveal>
             <Reveal delay={4} className="wb-actions">
               <Link href={w.href} className="wb-cta">
                 {w.cta}

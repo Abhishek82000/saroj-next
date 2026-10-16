@@ -71,7 +71,7 @@
 
 @media (min-width: 900px) {
   .coll-top-main {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 31rem);
   }
   .coll-intro {
     -webkit-line-clamp: 3;

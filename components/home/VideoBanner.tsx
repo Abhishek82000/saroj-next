@@ -107,15 +107,10 @@ export default function VideoBanner() {
         </div>
 
         <div className="st-vbanner__in">
-          <Reveal as="h2" delay={1}>We Deal in Bulk Too.</Reveal>
-          <Reveal as="p" delay={2}>
-            We not only deal with retailers, but we are also a leading provider of bulk fabrics at wholesale prices. Bulk orders are an economical solution for businesses, industries, and individuals who want to buy wholesale fabric.
-          </Reveal><Reveal as="p" delay={2}>
-Our inventory includes an exclusive selection of Designer Fabric Online, including cotton, rayon, rayon crepe, mulmul, and more.
-          </Reveal>
-          <Reveal className="st-vbanner__chips" delay={3}>
-            <span>No stock footage</span><span>Same lanes as our cloth</span><span>42 families</span>
-          </Reveal>
+          <Reveal as="h2" delay={1} style={{fontSize: "clamp(2rem, 4.6vw, 3.2rem)"}}>A Little Inspiration for Your Next Creation</Reveal>
+          <Reveal as="p" delay={2} style={{maxWidth: "90ch"}}>
+            We understand every beautiful design comes from some inspiration. And finding the right fabric for your creation creates a big difference. At Saroj Textile, we help to provide life to your inspiration and imagination. Our diverse range of printed cotton fabrics, traditional fabrics, and designs, from Ajarkh to charming Jaipuri florals and paisley patterns, helps you find the perfect fabric for your imagination. Select fabric mixes and match prints, explore color combinations, and discover new possibilities with fabrics that suit your needs.</Reveal>
+            <Reveal as="p" delay={2} style={{maxWidth: "90ch"}}>We are working hard to build a textile haven for sewing enthusiasts and creative minds. We offer a huge range of designs of cotton fabrics that match different needs. The inconvenience of buying fabric according to the requirement is a deal with the heart. That creates more opportunities to experiment and express creativity.</Reveal>
         </div>
       </div>
     </section>

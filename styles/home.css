@@ -309,63 +309,90 @@
 .st-voice__who small{ font-size:.58rem; color:var(--mute); letter-spacing:.1em; text-transform:uppercase; }
 
 /* ============================================================
-   BULK & GIFTING
+   BULK & GIFTING — one photo of craft in quantity, the options beside it.
+   Never taller than one screen: the photo gives way, the words don't.
    ============================================================ */
 .st-bulk{ --bk-bg:#F6F0E6; --bk-ink:#1C2630; --bk-text:#55606A; --bk-madder:#B5372B; --bk-indigo:#1E3A5F;
-           background:var(--bk-bg); color:var(--bk-ink); padding-block:clamp(30px,5vw,58px); }
+          --bk-offset:4rem; /* sticky header height */
+          box-sizing:border-box; height:min(calc(100svh - var(--bk-offset)), 52rem); min-height:30rem;
+          display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr) auto;
+          gap:clamp(14px,2.5vh,22px); padding:clamp(16px,3vh,28px) var(--pad);
+          background:var(--bk-bg); color:var(--bk-ink); overflow:hidden; }
 .st-bulk .st-eyebrow{ color:var(--bk-madder); }
+.st-bulk .st-h2{ font-size:clamp(1.9rem,4.4vw,3.4rem); }
 .st-bulk .st-h2 em{ font-style:normal; color:var(--bk-madder); }
-.st-bulk .st-lede{ color:var(--bk-text); margin:0; }
-.st-bulk__head{ display:grid; gap:.9rem; align-items:end; }
-@media(min-width:820px){ .st-bulk__head{ grid-template-columns:1fr minmax(0,44ch); gap:3rem; } }
+.st-bulk .st-lede{ color:var(--bk-text); margin:.6rem 0 0; }
 
-/* Dockets torn off the counter pad: perforated top, tick-box list, minimum, and a rubber stamp. */
-.st-bulk__grid{ display:grid; gap:clamp(14px,2vw,22px); margin-top:clamp(24px,4vw,40px); }
-@media(min-width:820px){ .st-bulk__grid{ grid-template-columns:repeat(3,1fr); } }
-/* Phones: the dockets slide like a fanned pad instead of stacking three tall cards. */
-@media(max-width:819px){
-  .st-bulk__grid{ grid-auto-flow:column; grid-auto-columns:min(82%,340px); overflow-x:auto; scroll-snap-type:x mandatory;
-                  scrollbar-width:none; margin-inline:calc(var(--pad) * -1); padding:0 var(--pad) 20px; scroll-padding-inline:var(--pad); }
-  .st-bulk__grid::-webkit-scrollbar{ display:none; }
-  .st-bulkcard{ scroll-snap-align:start; }
-}
-.st-bulkcard{ position:relative; background:#fff; border-radius:0 0 14px 14px; padding:1.5rem clamp(18px,2.4vw,26px) 1.2rem;
-              box-shadow:0 1px 0 rgba(28,38,48,.06), 0 18px 34px -24px rgba(28,38,48,.4);
-              transition:transform .5s var(--ease), box-shadow .5s var(--ease); }
-.st-bulkcard::before{ content:''; position:absolute; left:0; right:0; top:0; height:8px;
-                      background:radial-gradient(circle at 7px 0, var(--bk-bg) 4px, transparent 4.5px) 0 0 / 14px 8px repeat-x; }
-.st-bulkcard:hover{ transform:translateY(-4px) rotate(-.4deg); box-shadow:0 1px 0 rgba(28,38,48,.06), 0 26px 40px -24px rgba(28,38,48,.45); }
-.st-bulkcard__top{ display:flex; justify-content:space-between; font-size:.58rem; letter-spacing:.24em; text-transform:uppercase;
-                   font-weight:700; color:#9AA2A8; padding-bottom:.7rem; border-bottom:1px dashed rgba(28,38,48,.16); }
-.st-bulkcard__n{ color:var(--bk-indigo); }
-.st-bulkcard h3{ font-family:var(--d); font-weight:400; font-size:clamp(1.3rem,2.2vw,1.55rem); margin:.9rem 0 0; line-height:1.15; }
-.st-bulkcard p{ font-size:.86rem; color:var(--bk-text); margin:.45rem 0 0; line-height:1.55; }
-.st-bulkcard ul{ list-style:none; margin:.9rem 0 0; padding:0; display:grid; gap:.42rem; }
-.st-bulkcard li{ font-size:.78rem; color:var(--bk-ink); display:flex; align-items:center; gap:.55rem; }
-.st-bulkcard li::before{ content:''; flex:none; width:13px; height:13px; border:1.5px solid var(--bk-indigo); border-radius:3px;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%231E3A5F' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 10px no-repeat; }
-.st-bulkcard__min{ margin-top:1.1rem; padding-top:.8rem; border-top:1px dashed rgba(28,38,48,.16); }
-.st-bulkcard__min span{ display:block; font-size:.56rem; letter-spacing:.24em; text-transform:uppercase; font-weight:700; color:#9AA2A8; }
-.st-bulkcard__min b{ font-family:var(--d); font-weight:400; font-size:2.1rem; line-height:1; color:var(--bk-ink); }
-.st-bulkcard__min small{ font-family:var(--b); font-size:.72rem; color:var(--bk-text); margin-left:.4rem; letter-spacing:.04em; }
-.st-bulkcard__stamp{ position:absolute; right:16px; bottom:16px; width:78px; height:78px; border-radius:50%; display:grid; place-content:center;
-                     text-align:center; color:var(--bk-madder); border:2px solid currentColor; box-shadow:inset 0 0 0 3px #fff, inset 0 0 0 4px currentColor;
-                     font-family:var(--d); font-size:1.05rem; line-height:1; transform:rotate(-14deg); opacity:.82;
-                     transition:transform .5s var(--ease), opacity .4s; }
-.st-bulkcard__stamp small{ display:block; font-family:var(--b); font-size:.46rem; letter-spacing:.2em; text-transform:uppercase; font-weight:800; margin-top:.25rem; }
-.st-bulkcard:hover .st-bulkcard__stamp{ transform:rotate(-6deg) scale(1.06); opacity:1; }
+/* the photo */
+.st-bulk__art{ position:relative; min-height:0; border-radius:18px; overflow:hidden; background:#E8DFD1;
+               box-shadow:0 26px 50px -30px rgba(28,38,48,.55); }
+.st-bulk__img{ object-fit:cover; }
+.st-bulk__stamp{ position:absolute; right:14px; bottom:14px; width:76px; height:76px; border-radius:50%; display:grid; place-content:center;
+                 text-align:center; color:var(--bk-madder); background:var(--bk-bg); border:2px solid currentColor;
+                 box-shadow:inset 0 0 0 3px var(--bk-bg), inset 0 0 0 4px currentColor;
+                 font-family:var(--d); font-size:1.2rem; line-height:1; transform:rotate(-12deg); }
+.st-bulk__stamp small{ display:block; font-family:var(--b); font-size:.46rem; letter-spacing:.2em; text-transform:uppercase; font-weight:800; margin-top:.25rem; }
 
-/* Call to the counter */
-.st-bulk__cta{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.9rem 1.5rem;
-               margin-top:clamp(18px,3vw,28px); padding:1rem clamp(16px,2.4vw,24px); border-radius:14px;
-               background:#fff; border:1px dashed rgba(181,55,43,.35); }
-.st-bulk__cta p{ margin:0; font-size:.88rem; color:var(--bk-text); }
-.st-bulk__cta p b{ color:var(--bk-ink); font-weight:700; }
-.st-bulk__cta > div{ display:flex; flex-wrap:wrap; gap:.55rem; }
+/* the words */
+.st-bulk__body{ display:flex; flex-direction:column; justify-content:center; min-width:0; }
+.st-bulk__list{ list-style:none; margin:clamp(12px,2.4vh,26px) 0 0; padding:0; border-top:1px solid rgba(28,38,48,.14); }
+.st-bulk__list li{ border-bottom:1px solid rgba(28,38,48,.14); }
+.st-bulk__list summary{ display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:1rem;
+                        padding:clamp(.55rem,1.4vh,.95rem) 0; cursor:pointer; list-style:none; }
+.st-bulk__list summary::-webkit-details-marker{ display:none; }
+.st-bulk__list summary:focus-visible{ outline:2px solid var(--bk-indigo); outline-offset:3px; border-radius:4px; }
+.st-bulk__n{ font-size:.62rem; letter-spacing:.2em; font-weight:700; color:var(--bk-indigo); }
+.st-bulk__list h3{ margin:0; font-family:var(--d); font-weight:400; font-size:clamp(1.05rem,1.7vw,1.35rem); line-height:1.15;
+                   transition:color .3s; }
+.st-bulk__list summary:hover h3, .st-bulk__list details[open] h3{ color:var(--bk-madder); }
+/* lined up under the title, past the number */
+.st-bulk__list p{ margin:0; padding:0 0 clamp(.7rem,1.6vh,1rem) calc(1.6rem + 1rem); max-width:52ch;
+                  font-size:.86rem; line-height:1.6; color:var(--bk-text); }
+/* + that turns into − */
+.st-bulk__toggle{ position:relative; width:26px; height:26px; border-radius:50%; border:1px solid rgba(28,38,48,.2);
+                  transition:background .3s, border-color .3s; }
+.st-bulk__toggle::before, .st-bulk__toggle::after{ content:''; position:absolute; left:50%; top:50%; width:10px; height:1.5px;
+                  background:var(--bk-ink); translate:-50% -50%; transition:rotate .35s var(--ease), background .3s; }
+.st-bulk__toggle::after{ rotate:90deg; }
+.st-bulk__list details[open] .st-bulk__toggle{ background:var(--bk-madder); border-color:var(--bk-madder); }
+.st-bulk__list details[open] .st-bulk__toggle::before, .st-bulk__list details[open] .st-bulk__toggle::after{ background:#fff; rotate:0deg; }
+/* Smooth open where the browser can animate to auto height; elsewhere it simply snaps. */
+.st-bulk__list details{ interpolate-size:allow-keywords; }
+.st-bulk__list details::details-content{ block-size:0; overflow:hidden;
+                  transition:block-size .4s var(--ease), content-visibility .4s allow-discrete; }
+.st-bulk__list details[open]::details-content{ block-size:auto; }
+.st-bulk__min{ text-align:right; line-height:1; }
+.st-bulk__min b{ display:block; font-family:var(--d); font-weight:400; font-size:clamp(1.4rem,2.4vw,1.9rem); color:var(--bk-madder); }
+.st-bulk__min small{ font-size:.56rem; letter-spacing:.18em; text-transform:uppercase; font-weight:700; color:var(--bk-text); }
+
+.st-bulk__cta{ display:flex; flex-wrap:wrap; gap:.55rem; margin-top:clamp(14px,2.6vh,28px); }
 .st-bulk__wa{ display:inline-flex; align-items:center; gap:.55rem; padding:.92em 1.5em; border-radius:999px; background:#1FA855; color:#fff;
               font-size:.71rem; letter-spacing:.14em; text-transform:uppercase; font-weight:700; transition:background .3s, transform .3s var(--ease); }
 .st-bulk__wa:hover{ background:#1a9349; color:#fff; transform:translateY(-2px); }
-@media(max-width:560px){ .st-bulk__cta > div, .st-bulk__cta > div > *{ width:100%; } .st-bulk__wa{ justify-content:center; } }
+
+/* Phones: photo on top takes whatever the words leave; the option blurbs go so it all fits. */
+@media(max-width:899px){
+  .st-bulk__list p{ padding-left:0; font-size:.82rem; }
+  .st-bulk .st-lede{ font-size:.9rem; }
+  .st-bulk__stamp{ width:64px; height:64px; font-size:1rem; }
+  .st-bulk__cta > *{ flex:1 1 auto; justify-content:center; }
+}
+/* Short phones: drop the lede too. */
+@media(max-width:899px) and (max-height:700px){
+  .st-bulk .st-lede{ display:none; }
+}
+
+/* Laptops: side by side, photo left. */
+@media(min-width:900px){
+  .st-bulk{ grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); grid-template-rows:minmax(0,1fr);
+            gap:clamp(2rem,5vw,5rem); padding:clamp(20px,4vh,40px) var(--edge); }
+  .st-bulk__art{ border-radius:24px; }
+  .st-bulk__stamp{ right:22px; bottom:22px; width:92px; height:92px; font-size:1.45rem; }
+}
+/* Short laptop screens. */
+@media(min-width:900px) and (max-height:720px){
+  .st-bulk .st-h2{ font-size:2.6rem; }
+}
 
 /* ============================================================
    JOURNAL
@@ -569,8 +596,8 @@
 .wb-part {
   --wb-arch-r: 50% 50% 0.35rem 0.35rem / 30% 30% 0.35rem 0.35rem;
   box-sizing: border-box;
-  height: min(calc(100svh - var(--wb-offset)), 54rem);
-  min-height: 33rem;
+  /* a floor, not a cap: longer copy grows the screen instead of spilling out */
+  min-height: max(min(calc(100svh - var(--wb-offset)), 54rem), 33rem);
   display: grid;
   /* Phones: picture on top, words below — in a column that fits the screen
      (left to auto it took its widest child and pushed the page sideways). */
@@ -696,15 +723,14 @@
 
 .wb-copy {
   margin: 0;
-  max-width: 28rem;
+  max-width: 40rem;
+  display: grid;
+  gap: 0.8em;
   font-size: clamp(0.875rem, 0.4vw + 0.78rem, 1.0625rem);
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--wb-muted);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
+.wb-copy p { margin: 0; }
 
 .wb-actions { margin-top: clamp(0.25rem, 1vh, 0.75rem); }
 
@@ -736,13 +762,15 @@
 
 @media (min-width: 900px) {
   .wb-part {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    /* the words get the wider column */
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
     grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
     gap: clamp(2rem, 6vw, 6rem);
     /* the arch frame (drawn .8rem outside the art) lands on the page edge */
     padding-inline: calc(var(--edge) + 0.8rem);
   }
+  .wb-part--flip { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
   .wb-part--flip .wb-art  { order: 2; }
   .wb-part--flip .wb-text { order: 1; }
 
@@ -767,13 +795,11 @@
 /* Short laptop screens. */
 @media (min-width: 900px) and (max-height: 720px) {
   .wb-heading { font-size: 3rem; }
-  .wb-copy { -webkit-line-clamp: 2; }
 }
 
 /* Short phones. */
 @media (max-width: 899px) and (max-height: 700px) {
   .wb-heading { font-size: 2rem; }
-  .wb-copy { -webkit-line-clamp: 2; }
   .wb-badge { display: none; }
 }
 

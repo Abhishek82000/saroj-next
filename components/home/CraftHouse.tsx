@@ -26,19 +26,17 @@ export default function CraftHouse({ categories }: { categories: CommonFeaturedC
       <span className="chs__mark" aria-hidden="true">हस्तशिल्प</span>
       <div className="chs__in">
         <div className="chs__copy">
-          <h2 className="chs__title" id="chs-title">Made by hand, <em>in the lanes of Jaipur.</em></h2>
-          <p className="chs__lede">
-            Boxes, frames and keepsakes from the families who work beside our printers —
-            every piece cut, painted and finished by hand.
+          <h2 className="chs__title" id="chs-title">Handmade Finds, <em>You’ll Love</em></h2>
+          <p className="chs__lede"> 
+            After establishing our name in the textile industry, we are now ready to take opportunities. We used our 30 years of knowledge, hard work, and love of textiles to make something special for you. Check out our brand-new handicrafts section.
+          </p>
+          <p className="chs__lede"> 
+            The product you use every day says a lot about you. Products that are meant to add a classic touch to your everyday life.
           </p>
           <div className="chs__cta">
             <Link href="/handicraft" className="chs__btn">Shop handicraft</Link>
             <span className="chs__count"><b>{categories.length}</b> {categories.length === 1 ? "craft" : "crafts"} on the shelf</span>
           </div>
-          {/* Every category as a plain link too — the lanes are decoration for the eye. */}
-          <ul className="chs__list">
-            {categories.map((c) => <li key={c.id}><Link href={categoryHref(c.slug)}>{c.name}</Link></li>)}
-          </ul>
         </div>
 
         <div className="chs__lanes" aria-hidden="true">

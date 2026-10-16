@@ -1,159 +1,142 @@
 /* ============================================================
-   Handicraft showcase (namespace: hcs-) — components/product/HandicraftRail.tsx
-   One screen: a big arched window on the left holds the piece in the
-   spotlight; the counter on the right has the category tabs, the piece,
-   its price and add button, and the other pieces as thumbnails.
-   Ivory ground and madder ink, so it reads apart from the maroon
-   craft house above it.
+   Handicraft bazaar (namespace: hcs-) — components/product/HandicraftRail.tsx
+   One screen tall. Each handicraft category is a titled lane; under the
+   title its pieces hang from a gold cord like hand-tied shop tags and drift
+   along it in an endless loop, alternate lanes running opposite ways.
+   Cards shrink with the number of lanes (--hcs-lanes) so it all fits.
+   Ivory ground and madder ink, so it reads apart from the maroon craft
+   house above it.
    ============================================================ */
 .hcs{ --hcs-ink:var(--ink,#101820); --hcs-ink-2:var(--ink-2,#3a4750); --hcs-mute:var(--mute,#6c7a82);
-  --hcs-madder:#a8322a; --hcs-madder-2:#891226; --hcs-gold:#c89a45; --hcs-ivory:#fbf5ee; --hcs-rose:#f6e4dc;
+  --hcs-madder:#a8322a; --hcs-madder-2:#891226; --hcs-gold:#c89a45; --hcs-gold-2:#9c7330; --hcs-ivory:#fbf5ee; --hcs-rose:#f6e4dc;
+  --hcs-kraft:#e9d3ae; --hcs-gap:26px; --hcs-drop:24px;
+  /* card width: the screen, less the heading, shared between the lanes, less each lane's title and cord */
+  --hcs-card:clamp(150px, calc(((100svh - 270px) / var(--hcs-lanes, 1) - 220px) / 1.05), 240px);
   position:relative; overflow:hidden; color:var(--hcs-ink);
-  min-height:min(calc(100svh - 90px), 900px); display:flex; align-items:center;
+  min-height:min(calc(100svh - 90px), 1000px); box-sizing:border-box; padding-block:clamp(28px,4vw,40px);
+  display:flex; flex-direction:column; justify-content:center;
   background:
     radial-gradient(circle at 50% 50%, rgba(168,50,42,.08) 1.2px, transparent 1.6px) 0 0/24px 24px,
-    radial-gradient(ellipse 55% 75% at 22% 50%, var(--hcs-rose), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 100% 0%, rgba(200,154,69,.16), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 12% 20%, var(--hcs-rose), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 100% 100%, rgba(200,154,69,.16), transparent 70%),
     var(--hcs-ivory); }
-.hcs__mark{ position:absolute; right:-.03em; bottom:-.22em; font-family:var(--dv); font-size:clamp(160px,24vw,360px); line-height:1;
-  color:var(--hcs-madder); opacity:.06; pointer-events:none; user-select:none; }
-
-.hcs__in{ position:relative; z-index:1; width:100%; margin-inline:auto; box-sizing:border-box;
-  padding:clamp(36px,5vw,56px) var(--edge); display:grid; gap:clamp(24px,4vw,64px); align-items:center; }
-@media(min-width:900px){
-  .hcs__in{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
-  /* the window starts on the page edge, like every other section */
-  .hcs__in .hcs__stage{ justify-self:start; }
-  .hcs__stage .hcs__arch{ margin-inline:0; }
-}
+.hcs__mark{ position:absolute; right:-.04em; top:-.18em; font-family:var(--dv); font-size:clamp(120px,18vw,280px); line-height:1;
+  color:var(--hcs-madder); opacity:.055; pointer-events:none; user-select:none; white-space:nowrap; }
 .hcs :where(a,button){ font:inherit; color:inherit; text-decoration:none; }
 .hcs button{ cursor:pointer; }
+.hcs :where(ul){ list-style:none; margin:0; padding:0; }
 
-/* ---------- the stage: an arched window inside a gold-lined frame ---------- */
-.hcs__stage{ position:relative; justify-self:center; width:min(100%, 500px); }
-.hcs__arch{ position:relative; aspect-ratio:4/5; max-height:calc(100svh - 230px); margin-inline:auto;
-  padding:12px; border-radius:50% 50% 22px 22px / 32% 32% 22px 22px;
-  background:linear-gradient(160deg, #fff, #fff4ee); border:1px solid rgba(200,154,69,.55);
-  box-shadow:0 40px 70px -40px rgba(137,18,38,.55), inset 0 0 0 6px rgba(255,255,255,.7); }
-/* a second, offset arch behind, like a niche cut into the wall */
-.hcs__arch::before{ content:''; position:absolute; inset:-18px 18px 18px -18px; z-index:-1; border-radius:inherit;
-  border:1px dashed rgba(168,50,42,.35); }
-.hcs__img{ position:absolute; inset:12px; overflow:hidden; border-radius:50% 50% 14px 14px / 31% 31% 14px 14px;
-  opacity:0; transform:scale(1.04); transition:opacity .8s var(--ease), transform 1.4s var(--ease); pointer-events:none; }
-.hcs__img.on{ opacity:1; transform:none; pointer-events:auto; }
-.hcs__img img{ width:100%; height:100%; object-fit:cover; }
-.hcs__off{ position:absolute; top:18%; left:-14px; z-index:3; width:74px; height:74px; border-radius:50%;
-  display:grid; place-content:center; text-align:center; color:#fff; line-height:1;
-  background:radial-gradient(circle at 35% 30%, #c94a3a, var(--hcs-madder-2)); box-shadow:0 12px 24px -10px rgba(137,18,38,.8);
-  outline:2px dashed rgba(255,255,255,.55); outline-offset:-7px; }
-.hcs__off b{ font-family:var(--d); font-weight:400; font-size:1.4rem; }
-.hcs__off small{ font-size:.55rem; letter-spacing:.2em; text-transform:uppercase; margin-top:.15rem; }
-.hcs__fav{ position:absolute; right:22px; bottom:24px; z-index:3; width:46px; height:46px; border-radius:50%; border:0;
-  display:grid; place-items:center; background:rgba(255,255,255,.95); color:var(--hcs-ink); box-shadow:0 8px 20px -8px rgba(16,24,32,.4);
-  transition:transform .3s var(--ease), background .25s, color .25s; }
-.hcs__fav:hover{ transform:scale(1.08); background:var(--hcs-madder); color:#fff; }
-.hcs__fav.on{ color:var(--hcs-madder); }
-.hcs__fav.on:hover{ color:#fff; }
-
-.hcs__count{ display:flex; align-items:center; gap:.6rem; margin-top:1.3rem; justify-content:center; font-variant-numeric:tabular-nums; }
-.hcs__count b{ font-family:var(--d); font-weight:400; font-size:1.6rem; color:var(--hcs-madder); }
-.hcs__count span{ font-size:.8rem; color:var(--hcs-mute); }
-.hcs__bar{ position:relative; width:110px; height:2px; background:rgba(168,50,42,.15); border-radius:2px; overflow:hidden; }
-.hcs__bar i{ position:absolute; inset:0 auto 0 0; background:var(--hcs-madder); transition:width .6s var(--ease); }
-
-/* ---------- the counter ---------- */
+/* ---------- heading ---------- */
+.hcs__head{ position:relative; z-index:1; padding-inline:var(--edge); }
 .hcs__eyebrow{ display:inline-flex; align-items:center; gap:.7rem; font-size:.63rem; font-weight:700; letter-spacing:.3em; text-transform:uppercase; color:var(--hcs-madder); }
 .hcs__eyebrow::before{ content:''; width:28px; height:1px; background:currentColor; }
-.hcs__title{ font-family:var(--d); font-weight:400; font-size:clamp(2.2rem,4.6vw,3.8rem); line-height:1.02; letter-spacing:-.02em; margin:.45em 0 0; }
+.hcs__title{ font-family:var(--d); font-weight:400; font-size:clamp(2rem,4vw,3.2rem); line-height:1.02; letter-spacing:-.02em; margin:.3em 0 0; }
 .hcs__title em{ font-style:italic; color:var(--hcs-madder); }
 
-.hcs__tabs{ display:flex; gap:.45rem; margin-top:1.4rem; overflow-x:auto; scrollbar-width:none; }
-.hcs__tabs::-webkit-scrollbar{ display:none; }
-.hcs__tab{ flex:none; display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .95rem; border-radius:99px; background:#fff;
-  border:1px solid rgba(168,50,42,.22); font-size:.78rem; font-weight:600; color:var(--hcs-ink-2); transition:background .25s, color .25s, border-color .25s; }
-.hcs__tab small{ font-size:.62rem; padding:.1rem .45rem; border-radius:99px; background:var(--hcs-rose); color:var(--hcs-madder); }
-.hcs__tab:hover{ border-color:var(--hcs-madder); color:var(--hcs-madder); }
-.hcs__tab.on{ background:var(--hcs-madder); border-color:var(--hcs-madder); color:#fff; box-shadow:0 10px 20px -12px var(--hcs-madder); }
-.hcs__tab.on small{ background:rgba(255,255,255,.22); color:#fff; }
+/* ---------- one lane per category: its title, then its pieces ---------- */
+.hcs__lanes{ position:relative; z-index:1; display:grid; gap:clamp(14px,2vw,24px); margin-top:clamp(16px,2.4vw,28px); }
+.hcs__lanehead{ display:flex; align-items:center; gap:.85rem; padding-inline:var(--edge); }
+.hcs__no{ flex:none; display:grid; place-items:center; width:2.1rem; height:2.1rem; border-radius:50%;
+  border:1px solid rgba(156,115,48,.5); font-family:var(--d); font-size:.85rem; color:var(--hcs-gold-2); font-variant-numeric:tabular-nums; }
+.hcs__cat{ margin:0; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--d); font-weight:400; font-size:clamp(1.4rem,2.6vw,2rem); line-height:1.1; letter-spacing:-.01em; }
+.hcs__qty{ flex:none; font-size:.62rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; padding:.25rem .65rem; border-radius:99px;
+  background:var(--hcs-rose); color:var(--hcs-madder); }
+.hcs__rule{ flex:1; min-width:20px; height:1px; background:linear-gradient(90deg, rgba(168,50,42,.3), transparent); }
+.hcs__all{ flex:none; display:inline-flex; align-items:center; gap:.35rem; font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--hcs-madder); border-bottom:1px solid currentColor; padding-bottom:.12rem; }
+.hcs__all:hover{ color:var(--hcs-madder-2); }
 
-/* The piece fades up each time it changes (it is re-keyed per piece). */
-.hcs__piece{ margin-top:1.5rem; padding:1.4rem 1.5rem; border-radius:20px; background:#fff; border:1px solid rgba(168,50,42,.14);
-  box-shadow:0 24px 44px -32px rgba(137,18,38,.5); animation:hcs-in .6s var(--ease) both; }
-@keyframes hcs-in{ from{ opacity:0; transform:translateY(10px); } }
-.hcs__kicker{ font-size:.6rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--hcs-gold); }
-.hcs__name{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:.45rem;
-  font-family:var(--d); font-size:clamp(1.3rem,2.2vw,1.7rem); line-height:1.2; color:var(--hcs-ink); transition:color .25s; }
-.hcs__name:hover{ color:var(--hcs-madder); }
-.hcs__price{ display:flex; flex-wrap:wrap; align-items:baseline; gap:.3rem .7rem; margin-top:.8rem; font-variant-numeric:tabular-nums; }
-.hcs__price b{ font-size:1.6rem; font-weight:700; }
-.hcs__price s{ font-size:.95rem; color:var(--hcs-mute); }
-.hcs__save{ padding:.25rem .65rem; border-radius:99px; background:rgba(31,157,85,.1); color:#17834a; font-size:.7rem; font-weight:700; }
-.hcs__low{ display:block; margin-top:.4rem; font-size:.72rem; font-style:italic; color:var(--hcs-madder); }
-.hcs__acts{ display:flex; flex-wrap:wrap; align-items:center; gap:.6rem 1.2rem; margin-top:1.2rem; }
-.hcs__add{ position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:.55rem; padding:.95rem 1.6rem; border:0; border-radius:99px;
-  color:#fff; font-size:.72rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
-  background:linear-gradient(110deg, var(--hcs-madder), var(--hcs-madder-2)); box-shadow:0 16px 28px -16px rgba(137,18,38,.95);
-  transition:transform .2s, box-shadow .3s; }
-.hcs__add::after{ content:''; position:absolute; top:0; bottom:0; left:-60%; width:45%;
-  background:linear-gradient(100deg, transparent, rgba(255,255,255,.3), transparent); transform:skewX(-18deg); transition:left .7s var(--ease); }
-.hcs__add:hover::after{ left:120%; }
-.hcs__add:active{ transform:scale(.97); }
-.hcs__view{ display:inline-flex; align-items:center; gap:.35rem; font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--hcs-madder); border-bottom:1px solid currentColor; padding-bottom:.15rem; }
+/* The cord: a twisted gold rope that stays put while the tags slide along it. */
+.hcs__rope{ position:relative; overflow:hidden; padding:8px 0 22px;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.hcs__rope::before{ content:''; position:absolute; left:0; right:0; top:12px; height:5px; border-radius:5px; z-index:0;
+  background:repeating-linear-gradient(115deg, var(--hcs-gold) 0 4px, var(--hcs-gold-2) 4px 6px, #e2bd73 6px 9px);
+  box-shadow:0 3px 4px -2px rgba(90,60,20,.45); }
 
-.hcs__more{ display:flex; align-items:center; gap:1rem; margin-top:1.3rem; }
-.hcs__strip{ flex:1; min-width:0; display:flex; gap:.55rem; overflow-x:auto; scrollbar-width:none; padding:4px 2px; }
-.hcs__strip::-webkit-scrollbar{ display:none; }
-.hcs__thumb{ position:relative; flex:none; width:64px; height:64px; padding:0; border-radius:14px; overflow:hidden; border:2px solid transparent;
-  background:var(--hcs-rose); opacity:.6; transition:opacity .25s, border-color .25s, transform .25s var(--ease); }
-.hcs__thumb img{ width:100%; height:100%; object-fit:cover; }
-.hcs__thumb:hover{ opacity:1; transform:translateY(-2px); }
-.hcs__thumb.on{ opacity:1; border-color:var(--hcs-madder); }
-.hcs__nav{ flex:none; display:flex; gap:.4rem; }
-.hcs__nav button{ width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background:#fff; color:var(--hcs-madder);
-  border:1px solid rgba(168,50,42,.25); transition:background .25s, color .25s; }
-.hcs__nav button:hover{ background:var(--hcs-madder); color:#fff; }
-.hcs__all{ display:inline-flex; align-items:center; gap:.4rem; margin-top:1.2rem; font-size:.78rem; font-weight:600; color:var(--hcs-ink-2); }
-.hcs__all:hover{ color:var(--hcs-madder); }
+.hcs__track{ position:relative; z-index:1; display:flex; gap:var(--hcs-gap); width:max-content; padding-left:var(--hcs-gap);
+  animation:hcs-run var(--hcs-dur,40s) linear infinite; animation-play-state:paused; }
+.hcs__rope[data-run] .hcs__track{ animation-play-state:running; }
+.hcs__lane.rev .hcs__track{ animation-direction:reverse; }
+/* hovering, touching or tabbing into a lane holds it still */
+.hcs__rope:hover .hcs__track, .hcs__rope:active .hcs__track, .hcs__rope:focus-within .hcs__track{ animation-play-state:paused; }
+/* the track holds the pass twice; its leading padding evens out the gaps, so sliding by exactly half loops with no seam */
+@keyframes hcs-run{ to{ transform:translateX(-50%); } }
 
-/* ---------- phones: window on top, the counter tightened underneath ---------- */
-@media(max-width:899px){
-  .hcs{ min-height:calc(100svh - 70px); align-items:flex-start; }
-  /* the counter opens up so its parts can sit either side of the window: heading and tabs above, the piece below */
-  .hcs__in{ gap:0; padding-block:16px 18px; }
-  .hcs__info{ display:contents; }
-  .hcs__eyebrow{ order:1; justify-self:start; }
-  .hcs__title{ order:2; }
-  .hcs__tabs{ order:3; }
-  .hcs__stage{ order:4; margin-top:22px; }
-  .hcs__piece{ order:5; margin-top:16px; padding:1rem 1.1rem; }
-  .hcs__more{ order:6; margin-top:.9rem; }
-  .hcs__all{ order:7; justify-self:start; }
-  .hcs__stage{ width:min(78%, 360px); }
-  .hcs__arch{ max-height:40svh; aspect-ratio:4/4.6; padding:8px; }
-  .hcs__arch::before{ inset:-10px 10px 10px -10px; }
-  .hcs__img{ inset:8px; }
-  .hcs__off{ width:58px; height:58px; left:-10px; }
-  .hcs__off b{ font-size:1.1rem; }
-  .hcs__fav{ width:40px; height:40px; right:14px; bottom:16px; }
-  .hcs__count{ margin-top:.8rem; }
-  .hcs__title{ font-size:2rem; }
-  .hcs__tabs{ margin-top:.9rem; margin-inline:calc(var(--pad) * -1); padding-inline:var(--pad); }
+/* Each tag hangs on its own thread from a brass ring on the cord, and sways a little. */
+.hcs__slot{ position:relative; flex:none; width:var(--hcs-card); padding-top:var(--hcs-drop); transform-origin:50% 6px;
+  animation:hcs-sway 3.2s ease-in-out var(--hcs-d,0s) infinite alternate; }
+.hcs__slot::before{ content:''; position:absolute; left:50%; top:6px; height:calc(var(--hcs-drop) + 4px); width:1.5px; translate:-50% 0;
+  background:linear-gradient(var(--hcs-gold-2), rgba(156,115,48,.55)); }
+.hcs__slot:hover{ animation-play-state:paused; }
+@keyframes hcs-sway{ from{ transform:rotate(-1.6deg); } to{ transform:rotate(1.6deg); } }
+.hcs__ring{ position:absolute; left:50%; top:calc(var(--hcs-drop) * -1 - 2px); width:16px; height:16px; translate:-50% 0; border-radius:50%;
+  border:3px solid var(--hcs-gold-2); box-shadow:inset 0 0 0 1px rgba(255,255,255,.35); pointer-events:none; }
+
+/* ---------- the tag (a piece) — the whole card is one link ---------- */
+.hcs__tag{ position:relative; display:flex; flex-direction:column; box-sizing:border-box; padding:8px 8px 12px; border-radius:18px; cursor:pointer;
+  background:#fff; border:1px solid rgba(200,154,69,.45); box-shadow:0 22px 36px -26px rgba(137,18,38,.55);
+  transition:transform .45s var(--ease), box-shadow .45s var(--ease); }
+/* the punched hole the thread goes through */
+.hcs__tag::before{ content:''; position:absolute; left:50%; top:-5px; width:12px; height:12px; translate:-50% 0; border-radius:50%; z-index:2;
+  background:var(--hcs-ivory); border:1.5px solid var(--hcs-gold); }
+.hcs__slot:hover .hcs__tag{ transform:translateY(-6px); box-shadow:0 34px 44px -26px rgba(137,18,38,.65); }
+.hcs__img{ position:relative; display:block; aspect-ratio:1/1.05; overflow:hidden; border-radius:50% 50% 12px 12px / 30% 30% 12px 12px; }
+.hcs__img img{ width:100%; height:100%; object-fit:cover; transition:transform 1.1s var(--ease); }
+.hcs__slot:hover .hcs__img img{ transform:scale(1.06); }
+.hcs__badge{ position:absolute; left:8px; bottom:8px; z-index:1; padding:.25rem .55rem; border-radius:99px; background:rgba(255,255,255,.94);
+  font-size:.55rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--hcs-madder); }
+
+/* heart in the card's white top-right corner, beside the arch; cart on the photo's lower right */
+.hcs__fav, .hcs__add{ position:absolute; z-index:3; display:grid; place-items:center; border-radius:50%; border:0;
+  transition:transform .25s var(--ease), background .25s, color .25s; }
+.hcs__fav{ top:6px; right:6px; width:30px; height:30px; background:#fff; color:var(--hcs-madder); box-shadow:0 0 0 1px rgba(168,50,42,.18); }
+.hcs__fav:hover{ transform:scale(1.1); background:var(--hcs-madder); color:#fff; }
+.hcs__fav.on{ background:var(--hcs-madder); color:#fff; }
+.hcs__add{ right:14px; top:calc(8px + (var(--hcs-card) - 16px) * 1.05 - 48px); width:38px; height:38px; color:#fff;
+  background:linear-gradient(140deg, var(--hcs-madder), var(--hcs-madder-2)); box-shadow:0 10px 18px -8px rgba(137,18,38,.9); }
+.hcs__add:hover{ transform:scale(1.1); }
+.hcs__add.on{ background:#17834a; }
+
+.hcs__name{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin:.65rem .3rem 0; min-height:2.5em;
+  font-family:var(--d); font-size:.95rem; line-height:1.25; color:var(--hcs-ink); transition:color .25s; }
+.hcs__name::after{ content:''; position:absolute; inset:0; z-index:1; border-radius:inherit; }
+.hcs__slot:hover .hcs__name{ color:var(--hcs-madder); }
+
+/* the price tag: kraft paper with a notched end, tied to the card */
+.hcs__price{ position:relative; align-self:flex-start; display:inline-flex; flex-wrap:wrap; align-items:baseline; gap:.1rem .45rem;
+  margin:.55rem 0 0 .3rem; padding:.34rem .7rem .34rem 1.1rem; font-variant-numeric:tabular-nums;
+  background:var(--hcs-kraft); color:#4a3417; rotate:-2.5deg;
+  clip-path:polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%); filter:drop-shadow(0 3px 3px rgba(90,60,20,.18)); }
+.hcs__price::before{ content:''; position:absolute; left:8px; top:50%; width:5px; height:5px; translate:0 -50%; border-radius:50%; background:#fff; }
+.hcs__price b{ font-size:.95rem; font-weight:700; }
+.hcs__price s{ font-size:.7rem; opacity:.65; }
+.hcs__price small{ font-size:.58rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--hcs-madder); }
+
+/* ---------- phones ---------- */
+@media(max-width:700px){
+  .hcs{ --hcs-gap:18px; --hcs-drop:20px; min-height:calc(100svh - 70px);
+    --hcs-card:clamp(140px, calc(((100svh - 220px) / var(--hcs-lanes, 1) - 200px) / 1.05), 200px); }
+  .hcs__title{ font-size:1.9rem; }
+  .hcs__lanehead{ gap:.6rem; }
+  .hcs__no{ width:1.8rem; height:1.8rem; font-size:.75rem; }
+  .hcs__cat{ font-size:1.3rem; }
+  .hcs__rule, .hcs__qty{ display:none; }
+  .hcs__all{ margin-left:auto; }
+  .hcs__name{ font-size:.86rem; }
+  .hcs__fav{ width:28px; height:28px; }
+  .hcs__add{ width:34px; height:34px; right:12px; top:calc(8px + (var(--hcs-card) - 16px) * 1.05 - 42px); }
+  .hcs__price b{ font-size:.85rem; }
 }
-/* phones, continued: everything trimmed so the whole showcase fits one screen */
-@media(max-width:899px){
-  .hcs__arch{ max-height:33svh; }
-  .hcs__stage{ margin-top:16px; }
-  .hcs__count{ display:none; }
-  .hcs__title{ font-size:1.8rem; }
-  .hcs__name{ font-size:1.12rem; margin-top:.3rem; }
-  .hcs__price{ margin-top:.5rem; }
-  .hcs__price b{ font-size:1.3rem; }
-  .hcs__acts{ margin-top:.8rem; }
-  .hcs__add{ padding:.8rem 1.25rem; }
-  .hcs__thumb{ width:50px; height:50px; border-radius:12px; }
-  .hcs__nav button{ width:38px; height:38px; }
-  .hcs__all{ margin-top:.8rem; }
+
+/* ---------- reduced motion: nothing drifts or sways; each lane is a plain scroller of its real pieces ---------- */
+@media(prefers-reduced-motion: reduce){
+  .hcs__track, .hcs__slot{ animation:none; }
+  .hcs__rope{ overflow-x:auto; scrollbar-width:thin; -webkit-mask-image:none; mask-image:none; }
+  .hcs__slot[aria-hidden]{ display:none; }
+  .hcs__tag, .hcs__img img{ transition:none; }
 }
-@media(prefers-reduced-motion: reduce){ .hcs__img, .hcs__piece, .hcs__bar i{ transition:none; animation:none; } }
 .hcs a:focus-visible, .hcs button:focus-visible{ outline:2px solid var(--hcs-madder); outline-offset:3px; }
+.hcs__name:focus-visible{ outline:none; }
+.hcs__name:focus-visible::after{ outline:2px solid var(--hcs-madder); outline-offset:3px; }

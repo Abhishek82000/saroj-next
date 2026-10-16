@@ -22,7 +22,7 @@ export default function Shelf({
   /* Only promise "the rest" when there actually is a rest. */
   const intro =
     shown.length < categories.length
-      ? `${categories.length} collections make up the counter. These ${spell(shown.length)} open the shelf — the rest are a search away.`
+      ? `Explore our most loved fabric categories, timely updated with beautiful traditional prints, timeless patterns, and amazing designs.`
       : "Every collection on the counter, each one printed, cut and folded in Jaipur.";
 
   const count =
@@ -36,7 +36,7 @@ export default function Shelf({
         <header className="coll-top">
           <div className="coll-top-main">
             <Reveal as="h2" className="coll-title" id="coll-title">
-              The first shelf.
+              Our Popular Collections
             </Reveal>
             <Reveal as="p" delay={1} className="coll-intro">
               {intro}

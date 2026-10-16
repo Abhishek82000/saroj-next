@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
@@ -13,156 +13,134 @@ import type { Product } from "@/lib/types";
 export interface CraftSection { id: number | string; name: string; slug: string; items: Product[] }
 
 const pad = (n: number) => String(n).padStart(2, "0");
+/** A lane needs at least this many tags in one pass, so the loop is wider than the screen with no gap. */
+const MIN_SLOTS = 10;
+/** Seconds each tag takes to drift its own width; sets the speed no matter how many pieces a lane has. */
+const SECS_PER_SLOT = 4.2;
+
+/** One pass of a lane: every piece, repeated until the pass is wide enough.
+    Only the first round is real to assistive tech; the repeats are visual filler. */
+const passOf = (items: Product[]) => {
+  const out: { p: Product; copy: boolean }[] = [];
+  for (let round = 0; out.length < MIN_SLOTS; round++) for (const p of items) out.push({ p, copy: round > 0 });
+  return out;
+};
 
 /**
- * The handicraft showcase — every handicraft category in one screen. A big
- * arched window holds the piece in the spotlight; beside it, the category
- * tabs, the piece's name, price and add button, and a strip of the other
- * pieces in that category. It moves on by itself every few seconds (not on
- * hover, focus, or for reduced motion), and works as well with one piece as
- * with twenty. Wholesale mode shows no add button, as elsewhere.
+ * The handicraft bazaar, one screen tall: each handicraft category is a
+ * titled lane, and under the title its pieces hang from a cord like
+ * hand-tied shop tags, drifting along in an endless loop. Neighbouring lanes
+ * run in opposite directions. A lane stops while it is hovered or focused,
+ * stops when it is off screen, and doesn't move at all for reduced motion
+ * (it becomes a plain scroller instead). Cards shrink with the number of
+ * lanes so the whole section fits the screen. Wholesale mode shows no add
+ * button, as elsewhere.
  */
 export default function HandicraftRail({ sections, id = "handicraft" }: { sections: CraftSection[]; id?: string }) {
-  const { addProduct, mode, href, wishlist, toggleFav } = useStore();
+  const { mode } = useStore();
   /* At wholesale, only pieces with a wholesale price; a category left empty drops out. */
   const live = sections
     .map((s) => ({ ...s, items: forMode(s.items, mode === "wholesale") }))
     .filter((s) => s.items.length > 0);
-  const [tab, setTab] = useState(0);
-  const [pick, setPick] = useState(0);
+  if (!live.length) return null;
+
+  return (
+    <section className="hcs" id={id} aria-label="Handicraft" style={{ "--hcs-lanes": live.length } as CSSProperties}>
+      <span className="hcs__mark" aria-hidden="true">हस्तकला</span>
+      <header className="hcs__head">
+        <span className="hcs__eyebrow">Shaped by hand · Jaipur</span>
+        <h2 className="hcs__title">The craft <em>bazaar.</em></h2>
+      </header>
+      <div className="hcs__lanes">
+        {live.map((s, k) => <Lane key={s.id} sec={s} index={k} />)}
+      </div>
+    </section>
+  );
+}
+
+function Lane({ sec, index }: { sec: CraftSection; index: number }) {
+  const { href } = useStore();
+  const rope = useRef<HTMLDivElement>(null);
+  const [seen, setSeen] = useState(false);
+
+  /* Only drift while the lane is on screen. */
+  useEffect(() => {
+    const el = rope.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setSeen(e.isIntersecting), { rootMargin: "80px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const pass = passOf(sec.items);
+  const n = sec.items.length;
+  const style = { "--hcs-dur": `${pass.length * SECS_PER_SLOT}s` } as CSSProperties;
+  const titleId = `hcs-cat-${sec.id}`;
+
+  return (
+    <div className={`hcs__lane${index % 2 ? " rev" : ""}`} role="group" aria-labelledby={titleId}>
+      {/* the category's own title, above its pieces */}
+      <div className="hcs__lanehead">
+        <span className="hcs__no">{pad(index + 1)}</span>
+        <h3 className="hcs__cat" id={titleId}>{sec.name}</h3>
+        <span className="hcs__qty">{n} {n === 1 ? "piece" : "pieces"}</span>
+        <span className="hcs__rule" aria-hidden="true" />
+        <Link href={href(categoryHref(sec.slug))} className="hcs__all">View all <Icon name="right" size={14} strokeWidth={1.9} /></Link>
+      </div>
+      <div className="hcs__rope" ref={rope} data-run={seen || undefined}>
+        <ul className="hcs__track" style={style}>
+          {/* The pass twice over: the track slides by exactly one pass, then starts again, with no seam. */}
+          {[0, 1].map((half) => pass.map(({ p, copy }, k) => (
+            <Tag key={`${half}-${k}`} p={p} copy={half === 1 || copy}
+              style={{ "--hcs-d": `${-((k * 0.73) % 3.2).toFixed(2)}s` } as CSSProperties} />
+          )))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function Tag({ p, copy, style }: { p: Product; copy: boolean; style: CSSProperties }) {
+  const { addProduct, mode, href, wishlist, toggleFav } = useStore();
   const [added, setAdded] = useState(false);
-  const held = useRef(false);
-  const strip = useRef<HTMLDivElement>(null);
-
-  const sec = live[Math.min(tab, live.length - 1)];
-  const items = sec?.items ?? [];
-  const n = items.length;
-  const i = n ? pick % n : 0;
-
-  /* Step through the pieces of this category, then on to the next category. */
-  const step = (dir: 1 | -1) => {
-    if (dir === 1 && i === n - 1 && live.length > 1) { setTab((t) => (t + 1) % live.length); setPick(0); return; }
-    if (dir === -1 && i === 0 && live.length > 1) {
-      const prev = (tab - 1 + live.length) % live.length;
-      setTab(prev); setPick(live[prev].items.length - 1); return;
-    }
-    setPick((i + dir + n) % n);
-  };
-
-  useEffect(() => {
-    if (n + live.length <= 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setInterval(() => { if (!held.current && !document.hidden) step(1); }, 5200);
-    return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, i, n, live.length]);
-
-  /* Keep the active thumbnail in view inside its strip (never scroll the page). */
-  useEffect(() => {
-    const el = strip.current?.children[i] as HTMLElement | undefined;
-    const box = strip.current;
-    if (el && box) box.scrollTo({ left: el.offsetLeft - box.clientWidth / 2 + el.clientWidth / 2, behavior: "smooth" });
-  }, [i, tab]);
-
-  if (!sec) return null;
-  const p = items[i];
   const view = priced(p, mode === "wholesale");
   const known = view.price > 0;
   const off = known ? discount(view.wholesale ? { ...p, price: view.price, mrp: view.mrp } : p) : 0;
   const saved = !!wishlist[mode][p.slug];
   const canBuy = known && mode !== "wholesale" && p.stock !== "out";
-  const pieceHref = href(`/product/${p.slug}`);
-  const hold = (on: boolean) => () => { held.current = on; };
+  /* Repeats stay clickable with the mouse, but are skipped by keyboard and screen readers. */
+  const tab = copy ? -1 : undefined;
+  const badge = p.stock === "low" ? "Only a few left" : p.stock === "out" ? "Sold out" : p.label;
 
   return (
-    <section className="hcs" id={id} aria-label="Handicraft"
-      onMouseEnter={hold(true)} onMouseLeave={hold(false)} onFocus={hold(true)} onBlur={hold(false)}>
-      <span className="hcs__mark" aria-hidden="true">हाथ</span>
-      <div className="hcs__in">
-        {/* ---------- the stage ---------- */}
-        <div className="hcs__stage">
-          <div className="hcs__arch">
-            {/* Every piece is in the window; only the active one shows, so switching cross-fades. */}
-            {items.map((q, k) => (
-              <Link key={`${sec.id}-${q.slug}`} href={href(`/product/${q.slug}`)} className={`hcs__img ph${k === i ? " on" : ""}`}
-                aria-hidden={k !== i} tabIndex={k === i ? 0 : -1} aria-label={q.name}>
-                <Photo src={q.images[0].src} alt={k === i ? q.name : ""} note={q.images[0].note}
-                  sizes="(max-width:900px) 90vw, 520px" priority={false} />
-              </Link>
-            ))}
-            {off > 0 && <span className="hcs__off"><b>{off}%</b><small>off</small></span>}
-            <button type="button" className={`hcs__fav${saved ? " on" : ""}`} aria-pressed={saved}
-              aria-label={`Save ${p.name}`} onClick={() => toggleFav(p, mode)}>
-              <Icon name="heart" size={18} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
-            </button>
-          </div>
-          <div className="hcs__count" aria-live="polite">
-            <b>{pad(i + 1)}</b><span>/ {pad(n)}</span>
-            <span className="hcs__bar" aria-hidden="true"><i style={{ width: `${((i + 1) / n) * 100}%` }} /></span>
-          </div>
+    <li className="hcs__slot" style={style} aria-hidden={copy || undefined}>
+      <article className="hcs__tag">
+        <span className="hcs__ring" aria-hidden="true" />
+        <div className="hcs__img ph">
+          <Photo src={p.images[0].src} alt="" note={p.images[0].note} sizes="(max-width:700px) 160px, 230px" />
+          {badge && <span className="hcs__badge">{badge}</span>}
         </div>
-
-        {/* ---------- the counter ---------- */}
-        <div className="hcs__info">
-          <span className="hcs__eyebrow">Shaped by hand · Jaipur</span>
-          <h2 className="hcs__title">From the <em>craft house.</em></h2>
-
-          {live.length > 1 && (
-            <div className="hcs__tabs" role="tablist" aria-label="Handicraft categories">
-              {live.map((s, k) => (
-                <button key={s.id} type="button" role="tab" aria-selected={k === tab}
-                  className={`hcs__tab${k === tab ? " on" : ""}`} onClick={() => { setTab(k); setPick(0); }}>
-                  {s.name}<small>{s.items.length}</small>
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="hcs__piece" key={`${sec.id}-${p.slug}`}>
-            <span className="hcs__kicker">{p.label || sec.name}</span>
-            <Link href={pieceHref} className="hcs__name">{p.name}</Link>
-            {known && (
-              <div className="hcs__price">
-                <b>{inr(view.price)}</b>
-                {view.mrp > view.price && <s>{inr(view.mrp)}</s>}
-                {view.mrp > view.price && <span className="hcs__save">You save {inr(view.mrp - view.price)}</span>}
-              </div>
-            )}
-            {p.stock === "low" && <span className="hcs__low">Only a few left</span>}
-            <div className="hcs__acts">
-              {canBuy && (
-                <button type="button" className="hcs__add" onClick={() => {
-                  addProduct(p); setAdded(true); setTimeout(() => setAdded(false), 1600);
-                }}>
-                  <Icon name={added ? "check" : "cart"} size={16} strokeWidth={1.9} />
-                  {added ? "In your cart" : "Add to cart"}
-                </button>
-              )}
-              <Link href={pieceHref} className="hcs__view">View piece <Icon name="right" size={14} strokeWidth={1.9} /></Link>
-            </div>
-          </div>
-
-          <div className="hcs__more">
-            <div className="hcs__strip" ref={strip}>
-              {items.map((q, k) => (
-                <button key={q.slug} type="button" className={`hcs__thumb ph${k === i ? " on" : ""}`}
-                  onClick={() => setPick(k)} aria-label={`Show ${q.name}`} aria-current={k === i}>
-                  <Photo src={q.images[0].src} alt="" sizes="84px" />
-                </button>
-              ))}
-            </div>
-            {n + live.length > 2 && (
-              <div className="hcs__nav">
-                <button type="button" onClick={() => step(-1)} aria-label="Previous piece"><Icon name="left" size={16} strokeWidth={1.8} /></button>
-                <button type="button" onClick={() => step(1)} aria-label="Next piece"><Icon name="right" size={16} strokeWidth={1.8} /></button>
-              </div>
-            )}
-          </div>
-
-          <Link href={href(categoryHref(sec.slug))} className="hcs__all">
-            All of {sec.name} <Icon name="right" size={14} strokeWidth={1.9} />
-          </Link>
-        </div>
-      </div>
-    </section>
+        <button type="button" className={`hcs__fav${saved ? " on" : ""}`} aria-pressed={saved} tabIndex={tab}
+          aria-label={`Save ${p.name}`} onClick={() => toggleFav(p, mode)}>
+          <Icon name="heart" size={15} fill={saved ? "currentColor" : "none"} strokeWidth={1.7} />
+        </button>
+        {canBuy && (
+          <button type="button" className={`hcs__add${added ? " on" : ""}`} tabIndex={tab}
+            aria-label={added ? `${p.name} is in your cart` : `Add ${p.name} to cart`}
+            onClick={() => { addProduct(p); setAdded(true); setTimeout(() => setAdded(false), 1600); }}>
+            <Icon name={added ? "check" : "cart"} size={16} strokeWidth={1.9} />
+          </button>
+        )}
+        {/* the name's link stretches over the whole card, so anywhere on it opens the piece */}
+        <Link href={href(`/product/${p.slug}`)} className="hcs__name" tabIndex={tab}>{p.name}</Link>
+        {known && (
+          <span className="hcs__price">
+            <b>{inr(view.price)}</b>
+            {view.mrp > view.price && <s>{inr(view.mrp)}</s>}
+            {off > 0 && <small>{off}% off</small>}
+          </span>
+        )}
+      </article>
+    </li>
   );
 }
