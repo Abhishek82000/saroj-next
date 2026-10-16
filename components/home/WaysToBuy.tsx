@@ -39,9 +39,9 @@ const WAYS: Way[] = [
   {
     id: "handicraft",
     kicker: "Jaipur handicraft",
-    title: "The craft house.",
+    title: "Discover the Art of Handmade",
     copy: [
-      "Blue pottery from Kot Jewar, meenakari from Johari Bazaar, hand-beaten brass and marble, straight from the lanes that print our cloth.",
+      "Saroj has now explored areas beyond just fabric. We have already launched new categories of handicrafts, including paper and fabric products. The categories are thoughtfully designed to be sustainable and complement everyday life.", "Discover our paper handicraft category with handicraft journals and stationery, created with handmade paper, printed photo frames, pen stands, book holders, and gift hampers innovatively designed. Add personality to your daily essentials with our fabric collection of trendy tote bags, duffle bags, sling bags, wash bags, cotton scrunchies, handmade keychains and other adorable accessories."
     ],
     badge: "Made in Jaipur",
     cta: "Explore handicraft",

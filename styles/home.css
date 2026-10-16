@@ -1,6 +1,6 @@
 /* Home page sections only. */
 /* ---------- hero ---------- */
-.st-hero{ padding:clamp(34px,7vw,66px) var(--pad) clamp(46px,8vw,74px); position:relative; overflow:hidden; }
+.st-hero{ padding:clamp(34px,7vw,42px) var(--pad) clamp(46px,8vw,60px); position:relative; overflow:hidden; }
 .st-hero__type{ position:relative; z-index:4; text-align:center; display:grid; justify-items:center; }
 .st-hero__title{ font-family:var(--d); font-weight:400; margin:.55rem 0 0;
                  font-size:clamp(2.7rem,10.5vw,5.2rem); line-height:.92; letter-spacing:-.03em; }
@@ -310,13 +310,12 @@
 
 /* ============================================================
    BULK & GIFTING — one photo of craft in quantity, the options beside it.
-   Never taller than one screen: the photo gives way, the words don't.
+   Same top/bottom spacing as every other section (--sec-y); the photo keeps
+   its own shape rather than shrinking to whatever the words leave.
    ============================================================ */
 .st-bulk{ --bk-bg:#F6F0E6; --bk-ink:#1C2630; --bk-text:#55606A; --bk-madder:#B5372B; --bk-indigo:#1E3A5F;
-          --bk-offset:4rem; /* sticky header height */
-          box-sizing:border-box; height:min(calc(100svh - var(--bk-offset)), 52rem); min-height:30rem;
-          display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr) auto;
-          gap:clamp(14px,2.5vh,22px); padding:clamp(16px,3vh,28px) var(--pad);
+          box-sizing:border-box; display:grid; grid-template-columns:minmax(0,1fr); align-items:center;
+          gap:clamp(20px,4vw,32px); padding:var(--sec-y) var(--pad);
           background:var(--bk-bg); color:var(--bk-ink); overflow:hidden; }
 .st-bulk .st-eyebrow{ color:var(--bk-madder); }
 .st-bulk .st-h2{ font-size:clamp(1.9rem,4.4vw,3.4rem); }
@@ -324,7 +323,7 @@
 .st-bulk .st-lede{ color:var(--bk-text); margin:.6rem 0 0; }
 
 /* the photo */
-.st-bulk__art{ position:relative; min-height:0; border-radius:18px; overflow:hidden; background:#E8DFD1;
+.st-bulk__art{ position:relative; aspect-ratio:1; border-radius:18px; overflow:hidden; background:#E8DFD1;
                box-shadow:0 26px 50px -30px rgba(28,38,48,.55); }
 .st-bulk__img{ object-fit:cover; }
 .st-bulk__stamp{ position:absolute; right:14px; bottom:14px; width:76px; height:76px; border-radius:50%; display:grid; place-content:center;
@@ -370,23 +369,19 @@
               font-size:.71rem; letter-spacing:.14em; text-transform:uppercase; font-weight:700; transition:background .3s, transform .3s var(--ease); }
 .st-bulk__wa:hover{ background:#1a9349; color:#fff; transform:translateY(-2px); }
 
-/* Phones: photo on top takes whatever the words leave; the option blurbs go so it all fits. */
+/* Phones: a full-width photo on top, the words under it. */
 @media(max-width:899px){
   .st-bulk__list p{ padding-left:0; font-size:.82rem; }
   .st-bulk .st-lede{ font-size:.9rem; }
   .st-bulk__stamp{ width:64px; height:64px; font-size:1rem; }
   .st-bulk__cta > *{ flex:1 1 auto; justify-content:center; }
 }
-/* Short phones: drop the lede too. */
-@media(max-width:899px) and (max-height:700px){
-  .st-bulk .st-lede{ display:none; }
-}
 
-/* Laptops: side by side, photo left. */
+/* Laptops: side by side, photo left — a tall frame, most of the screen high, and never shorter than the words beside it. */
 @media(min-width:900px){
-  .st-bulk{ grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); grid-template-rows:minmax(0,1fr);
-            gap:clamp(2rem,5vw,5rem); padding:clamp(20px,4vh,40px) var(--edge); }
-  .st-bulk__art{ border-radius:24px; }
+  .st-bulk{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:stretch;
+            gap:clamp(2rem,5vw,5rem); padding:var(--sec-y) var(--edge); }
+  .st-bulk__art{ aspect-ratio:auto; height:auto; min-height:min(80svh, 760px); border-radius:24px; }
   .st-bulk__stamp{ right:22px; bottom:22px; width:92px; height:92px; font-size:1.45rem; }
 }
 /* Short laptop screens. */

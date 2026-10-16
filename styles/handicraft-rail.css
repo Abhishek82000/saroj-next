@@ -10,8 +10,8 @@
 .hcs{ --hcs-ink:var(--ink,#101820); --hcs-ink-2:var(--ink-2,#3a4750); --hcs-mute:var(--mute,#6c7a82);
   --hcs-madder:#a8322a; --hcs-madder-2:#891226; --hcs-gold:#c89a45; --hcs-gold-2:#9c7330; --hcs-ivory:#fbf5ee; --hcs-rose:#f6e4dc;
   --hcs-kraft:#e9d3ae; --hcs-gap:26px; --hcs-drop:24px;
-  /* card width: the screen, less the heading, shared between the lanes, less each lane's title and cord */
-  --hcs-card:clamp(150px, calc(((100svh - 270px) / var(--hcs-lanes, 1) - 220px) / 1.05), 240px);
+  /* card width: seven tags (each with its gap) across the screen; fewer on smaller screens, below */
+  --hcs-per:6; --hcs-card:calc((100vw - 16px) / var(--hcs-per) - var(--hcs-gap));
   position:relative; overflow:hidden; color:var(--hcs-ink);
   min-height:min(calc(100svh - 90px), 1000px); box-sizing:border-box; padding-block:clamp(28px,4vw,40px);
   display:flex; flex-direction:column; justify-content:center;
@@ -34,23 +34,28 @@
 .hcs__title em{ font-style:italic; color:var(--hcs-madder); }
 
 /* ---------- one lane per category: its title, then its pieces ---------- */
-.hcs__lanes{ position:relative; z-index:1; display:grid; gap:clamp(14px,2vw,24px); margin-top:clamp(16px,2.4vw,28px); }
-.hcs__lanehead{ display:flex; align-items:center; gap:.85rem; padding-inline:var(--edge); }
+/* minmax(0,1fr) + min-width:0 keep each lane as wide as the page — otherwise it grows to the
+   track's full (thousands of px) width and the title's page-edge padding pushes it off screen */
+.hcs__lanes{ position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1fr); gap:clamp(14px,2vw,24px); margin-top:clamp(16px,2.4vw,28px); }
+.hcs__lane{ min-width:0; }
+/* same page edges as the heading above: the category title on the left, its "View all" on the right */
+.hcs__lanehead{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-inline:var(--edge); }
+.hcs__lanetitle{ display:flex; align-items:center; gap:.85rem; min-width:0; }
 .hcs__no{ flex:none; display:grid; place-items:center; width:2.1rem; height:2.1rem; border-radius:50%;
   border:1px solid rgba(156,115,48,.5); font-family:var(--d); font-size:.85rem; color:var(--hcs-gold-2); font-variant-numeric:tabular-nums; }
 .hcs__cat{ margin:0; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   font-family:var(--d); font-weight:400; font-size:clamp(1.4rem,2.6vw,2rem); line-height:1.1; letter-spacing:-.01em; }
 .hcs__qty{ flex:none; font-size:.62rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; padding:.25rem .65rem; border-radius:99px;
   background:var(--hcs-rose); color:var(--hcs-madder); }
-.hcs__rule{ flex:1; min-width:20px; height:1px; background:linear-gradient(90deg, rgba(168,50,42,.3), transparent); }
-.hcs__all{ flex:none; display:inline-flex; align-items:center; gap:.35rem; font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--hcs-madder); border-bottom:1px solid currentColor; padding-bottom:.12rem; }
-.hcs__all:hover{ color:var(--hcs-madder-2); }
+.hcs__all{ flex:none; margin-left:auto; display:inline-flex; align-items:center; gap:.4rem; padding:.6rem 1.1rem; border-radius:99px;
+  font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap;
+  color:var(--hcs-madder); background:#fff; border:1px solid rgba(168,50,42,.3); transition:background .25s, color .25s, border-color .25s; }
+.hcs__all:hover{ background:var(--hcs-madder); border-color:var(--hcs-madder); color:#fff; }
 
 /* The cord: a twisted gold rope that stays put while the tags slide along it. */
 .hcs__rope{ position:relative; overflow:hidden; padding:8px 0 22px;
-  -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
-          mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent); }
 .hcs__rope::before{ content:''; position:absolute; left:0; right:0; top:12px; height:5px; border-radius:5px; z-index:0;
   background:repeating-linear-gradient(115deg, var(--hcs-gold) 0 4px, var(--hcs-gold-2) 4px 6px, #e2bd73 6px 9px);
   box-shadow:0 3px 4px -2px rgba(90,60,20,.45); }
@@ -115,15 +120,17 @@
 .hcs__price small{ font-size:.58rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--hcs-madder); }
 
 /* ---------- phones ---------- */
+@media(max-width:1199px){ .hcs{ --hcs-per:5; } }
+@media(max-width:899px){ .hcs{ --hcs-per:4; } }
 @media(max-width:700px){
-  .hcs{ --hcs-gap:18px; --hcs-drop:20px; min-height:calc(100svh - 70px);
-    --hcs-card:clamp(140px, calc(((100svh - 220px) / var(--hcs-lanes, 1) - 200px) / 1.05), 200px); }
+  .hcs{ --hcs-gap:18px; --hcs-drop:20px; min-height:calc(100svh - 70px); --hcs-per:2.4; }
   .hcs__title{ font-size:1.9rem; }
   .hcs__lanehead{ gap:.6rem; }
   .hcs__no{ width:1.8rem; height:1.8rem; font-size:.75rem; }
   .hcs__cat{ font-size:1.3rem; }
-  .hcs__rule, .hcs__qty{ display:none; }
-  .hcs__all{ margin-left:auto; }
+  .hcs__qty{ display:none; }
+  .hcs__lanetitle{ gap:.6rem; }
+  .hcs__all{ padding:.45rem .8rem; font-size:.62rem; }
   .hcs__name{ font-size:.86rem; }
   .hcs__fav{ width:28px; height:28px; }
   .hcs__add{ width:34px; height:34px; right:12px; top:calc(8px + (var(--hcs-card) - 16px) * 1.05 - 42px); }

@@ -81,10 +81,11 @@ function Lane({ sec, index }: { sec: CraftSection; index: number }) {
     <div className={`hcs__lane${index % 2 ? " rev" : ""}`} role="group" aria-labelledby={titleId}>
       {/* the category's own title, above its pieces */}
       <div className="hcs__lanehead">
-        <span className="hcs__no">{pad(index + 1)}</span>
-        <h3 className="hcs__cat" id={titleId}>{sec.name}</h3>
-        <span className="hcs__qty">{n} {n === 1 ? "piece" : "pieces"}</span>
-        <span className="hcs__rule" aria-hidden="true" />
+        <div className="hcs__lanetitle">
+          <span className="hcs__no">{pad(index + 1)}</span>
+          <h3 className="hcs__cat" id={titleId}>{sec.name}</h3>
+          <span className="hcs__qty">{n} {n === 1 ? "piece" : "pieces"}</span>
+        </div>
         <Link href={href(categoryHref(sec.slug))} className="hcs__all">View all <Icon name="right" size={14} strokeWidth={1.9} /></Link>
       </div>
       <div className="hcs__rope" ref={rope} data-run={seen || undefined}>

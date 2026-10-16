@@ -19,13 +19,13 @@ const options = [
 
 /**
  * Home: bulk & gifting — one photo of handicraft in quantity, the options beside it.
- * Capped at a single screen on every size.
+ * Spaced like every other section; the photo keeps its shape (square on phones; on laptops most of the screen high, beside the words).
  */
 export default function Bulk() {
   return (
     <section className="st-bulk" id="bulk" aria-labelledby="bulk-title">
       <Reveal className="st-bulk__art">
-        <Image src={PHOTO.src} alt={PHOTO.alt} fill sizes="(max-width:900px) 100vw, 45vw" className="st-bulk__img" />
+        <Image src={PHOTO.src} alt={PHOTO.alt} fill sizes="(max-width:900px) 100vw, 50vw" className="st-bulk__img" />
         <span className="st-bulk__stamp" aria-hidden="true">50+<small>pieces</small></span>
       </Reveal>
 
