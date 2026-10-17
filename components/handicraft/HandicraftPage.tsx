@@ -180,6 +180,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       const SLOTS = 8;
       const faces = $$(".hc-face", wheel), N = faces.length, STEP = 360 / SLOTS;
       const dotEls = $$(".hc-dot", dots), count = $("#wheelCount", dots);
+      const nowEls = $$(".hc-wheel-now__item");
       const mod = (a: number, m: number) => ((a % m) + m) % m;
       let radius = 0, angle = 0, dragging = false, locked = false, startX = 0, startY = 0, startAngle = 0, moved = 0, lastW = 0;
       /* Degrees of turn per pixel dragged — set in measure() so the front card follows the finger 1:1. */
@@ -199,6 +200,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           f.classList.toggle("on", d === 0);
         });
         dotEls.forEach((d, i) => d.classList.toggle("on", i === live));
+        nowEls.forEach((d, i) => d.classList.toggle("on", i === live));
         if (count) count.textContent = String(live + 1).padStart(2, "0") + " / " + String(N).padStart(2, "0");
       };
       const measure = () => {
@@ -207,7 +209,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         if (w === lastW) return;
         lastW = w;
         /* A slightly narrower front card on phones leaves room for the side cards to show. */
-        const fw = Math.min(300, Math.max(180, w * (w < 640 ? 0.52 : 0.27)));
+        /* Beside the words on desktop the stage is narrower, so the front card takes a larger share of it. */
+        const fw = Math.min(310, Math.max(180, w * (w < 640 ? 0.52 : w < 1000 ? 0.36 : 0.27)));
         wheel.style.setProperty("--fw", fw + "px");
         radius = Math.round((fw + (w < 640 ? 24 : 52)) / (2 * Math.tan(Math.PI / SLOTS)));
         dragK = STEP / (fw + (w < 640 ? 24 : 52));
@@ -430,41 +433,44 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
 {/* ================= WHEEL — only with categories from the API ================= */}
       {faces.length > 0 && (
       <section className="hc-sec pt-5" id="wheel">
-        <div className="hc-wrap">
+        {/* Desktop: the words and controls on the left, the wheel filling the right. Phones: stacked, centred. */}
+        <div className="hc-wrap hc-wheel-grid">
+          <div className="hc-wheel-side">
           <div className="hc-wheel-head">
+            <span className="hc-wheel-mark hc-dv" aria-hidden="true">हस्तकला</span>
             <div className="hc-eyebrow mid rv">The Collection Wheel</div>
-            <h2 className="hc-h2 rv" data-d="1">A Happy Little<br /> World of Handmade</h2>
-            <p className="hc-lede rv" data-d="2" style={{ textAlign: "center" }}>
-              One shop destination for traditional handmade printed cotton bags, boxes, stationery & journals, lifestyle organisation, and corporate or customised gifting.
+            <h2 className="hc-h2 hc-wheel-title rv" data-d="1">
+              <span className="hc-wheel-title__pre">A happy little</span>
+              World of{" "}
+              <em>
+                Handmade.
+                {/* a brush stroke under the word, drawn on as the heading comes in */}
+                <svg className="hc-wheel-swash" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M4 15C46 6 104 3 196 9M30 19C80 13 132 12 172 14" />
+                </svg>
+              </em>
+            </h2>
+            <p className="hc-lede rv" data-d="2">
+              One shop destination for traditional handmade printed cotton <b>bags, boxes, stationery &amp; journals</b>, lifestyle organisation, and corporate or customised gifting.
             </p>
+            <ul className="hc-wheel-chips rv" data-d="2">
+              <li><b>{faces.length}</b> {faces.length === 1 ? "craft" : "crafts"}</li>
+              <li>Block-printed cotton</li>
+              <li>Made in Jaipur</li>
+            </ul>
           </div>
 
-          <div className="hc-stage rv" data-d="2" id="stage" role="group" aria-label="Craft categories, draggable carousel" tabIndex={0}>
-            <div className="hc-wheel" id="wheelEl">
-              {faces.map((f, i) => {
-                const card = (
-                  <>
-                    <div className="hc-face__ph ph" data-swap={f.swap ?? f.alt}>
-                      <img src={f.img} alt={f.alt} loading="lazy" />
-                    </div>
-                    <div className="hc-face__body">
-                      {/* <span className="hc-face__num">{String(i + 1).padStart(2, "0")}</span> */}
-                      <h3 className="hc-face__name">{f.name}</h3>
-                      {f.hi && <p className="hc-face__hi hc-dv">{f.hi}</p>}
-                      <p className="hc-face__meta">{f.meta}{f.count && <> · <b>{f.count}</b></>}</p>
-                    </div>
-                  </>
-                );
-                return (
-                  <article className="hc-face" key={f.name}>
-                    {/* A drag that ends on a card is swallowed by the stage's click guard, so only a real tap navigates. */}
-                    {f.href
-                      ? <Link href={f.href} className="hc-face__card" draggable={false}>{card}</Link>
-                      : <div className="hc-face__card">{card}</div>}
-                  </article>
-                );
-              })}
-            </div>
+          {/* the craft at the front of the wheel — the wheel script marks the matching one .on */}
+          <div className="hc-wheel-now rv" data-d="3" aria-live="polite">
+            {faces.map((f, i) => (
+              <div className="hc-wheel-now__item" key={f.name}>
+                <span className="hc-wheel-now__no">{String(i + 1).padStart(2, "0")}<small> / {String(faces.length).padStart(2, "0")}</small></span>
+                <h3 className="hc-wheel-now__name">{f.name}</h3>
+                {f.hi && <p className="hc-wheel-now__hi hc-dv">{f.hi}</p>}
+                <p className="hc-wheel-now__meta">{f.meta}{f.count && <> · <b>{f.count}</b></>}</p>
+                {f.href && <Link href={f.href} className="hc-btn hc-btn--solid hc-wheel-now__go">Shop this craft</Link>}
+              </div>
+            ))}
           </div>
 
           <div className="hc-ctrl rv">
@@ -481,6 +487,38 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             <button className="hc-arrow" id="next" aria-label="Next craft">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 5l7 7-7 7" /></svg>
             </button>
+          </div>
+          </div>
+
+          <div className="hc-stage rv" data-d="2" id="stage" role="group" aria-label="Craft categories, draggable carousel" tabIndex={0}>
+            <div className="hc-wheel" id="wheelEl">
+              {faces.map((f, i) => {
+                const card = (
+                  <>
+                    <div className="hc-face__ph ph" data-swap={f.swap ?? f.alt}>
+                      <img src={f.img} alt={f.alt} loading="lazy" />
+                      <span className="hc-face__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                    </div>
+                    {/* an arched, hand-stitched label sewn onto the foot of the photo */}
+                    <div className="hc-face__body">
+                      <h3 className="hc-face__name">{f.name}</h3>
+                      {f.hi && <p className="hc-face__hi hc-dv">{f.hi}</p>}
+                      <span className="hc-face__rule" aria-hidden="true"><i /></span>
+                      <p className="hc-face__meta">{f.meta}{f.count && <> · <b>{f.count}</b></>}</p>
+                      {f.href && <span className="hc-face__go" aria-hidden="true">Explore <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>}
+                    </div>
+                  </>
+                );
+                return (
+                  <article className="hc-face" key={f.name}>
+                    {/* A drag that ends on a card is swallowed by the stage's click guard, so only a real tap navigates. */}
+                    {f.href
+                      ? <Link href={f.href} className="hc-face__card" draggable={false}>{card}</Link>
+                      : <div className="hc-face__card">{card}</div>}
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>

@@ -27,15 +27,24 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
     return b.offsetLeft - a.offsetLeft;
   };
 
-  /* Loop only when one copy is wider than the rail — otherwise there's nothing to scroll. */
+  /* Loop only when one copy is wider than the rail — otherwise there's nothing to scroll.
+     Both directions measure the same thing (one copy of the cards, with its trailing gap):
+     testing scrollWidth on the way in counted the rail's side padding, which the copy width
+     on the way out doesn't, so a row that only overflowed by its padding flipped on and off forever. */
   useEffect(() => {
     const el = rail.current;
     if (!el || count < 2) return setLoop(false);
+    const oneCopy = () => {
+      if (loop) return period();
+      const row = track.current;
+      if (!row) return 0;
+      return row.offsetWidth + (parseFloat(getComputedStyle(row).columnGap) || 0);
+    };
     const check = () => {
-      if (loop) {
-        const p = period();
-        if (p && p <= el.clientWidth) setLoop(false);
-      } else if (el.scrollWidth > el.clientWidth + 4) setLoop(true);
+      const w = oneCopy();
+      if (!w) return;
+      if (loop && w <= el.clientWidth) setLoop(false);
+      else if (!loop && w > el.clientWidth + 4) setLoop(true);
     };
     check();
     if (typeof ResizeObserver === "undefined") return;
