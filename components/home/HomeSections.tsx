@@ -60,6 +60,12 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       ))}
       
       <Reels items={apiReels} />
+      {/* The handicraft categories, then the handicraft rails — retail only. */}
+      {!isWholesale && <CraftHouse categories={homeData.handCategories} />}
+      {/* Every handicraft category in one showcase, one screen tall. */}
+      <HandicraftRail sections={homeData.handicraftSections.map((hc) => ({
+        id: hc.id, name: hc.name, slug: hc.slug, items: hc.products.map(apiProductToProduct),
+      }))} />
       <Shelf categories={featuredCategories} />
       {categoryRails.map((cat, n) => (
         <Fragment key={cat.id}>
@@ -69,21 +75,16 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
         </Fragment>
       ))}
       <VideoBanner />
-      {/* The handicraft categories, then the handicraft rails — retail only. */}
-      {!isWholesale && <CraftHouse categories={homeData.handCategories} />}
-      {/* Every handicraft category in one showcase, one screen tall. */}
-      <HandicraftRail sections={homeData.handicraftSections.map((hc) => ({
-        id: hc.id, name: hc.name, slug: hc.slug, items: hc.products.map(apiProductToProduct),
-      }))} />
+      
       
       {/* `top_slider` banners — their own section under the hero, retail only. */}
       {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}    
-      <Voices />  
       {offers.length > 1 && <OffersSlider slides={offers} />}
+      <Bulk />
+      <Voices />  
       {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
       {!isWholesale && <WaysToBuy />}
       
-      <Bulk />
       <Journal posts={journalPosts} />
 
       <JsonLd data={graph([
