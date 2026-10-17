@@ -58,15 +58,16 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
             items={tag.products.map(apiProductToProduct)}
           />
       ))}
-      
-      <Reels items={apiReels} />
       {/* The handicraft categories, then the handicraft rails — retail only. */}
       {!isWholesale && <CraftHouse categories={homeData.handCategories} />}
       {/* Every handicraft category in one showcase, one screen tall. */}
       <HandicraftRail sections={homeData.handicraftSections.map((hc) => ({
         id: hc.id, name: hc.name, slug: hc.slug, items: hc.products.map(apiProductToProduct),
       }))} />
+      <Reels items={apiReels} />
       <Shelf categories={featuredCategories} />
+      
+      
       {categoryRails.map((cat, n) => (
         <Fragment key={cat.id}>
           <Rail id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />

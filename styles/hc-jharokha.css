@@ -133,6 +133,9 @@
 .hc .hj-seal .hj-seal__glyph{ font-family:var(--dv); font-size:36px; font-weight:400; letter-spacing:0; }
 
 @media(max-width:959px){
+  /* one column no wider than the screen — without minmax(0,…) it grows to the unbroken title and everything spills off the right */
+  .hc .hj__grid{ grid-template-columns:minmax(0,1fr); gap:clamp(28px,7vw,48px); }
+  .hc .hj__type, .hc .hj__stage{ min-width:0; }
   .hc .hj__type{ justify-items:center; text-align:center; }
   .hc .hj__cta,.hc .hj__note{ justify-content:center; }
   .hc .hj-facade{ gap:12px; }
@@ -141,6 +144,25 @@
   .hc .hj-arch::before{ top:-24px; width:9px; height:15px; margin-left:-4.5px; }
   .hc .hj-seal{ left:-4%; top:-2%; }
 }
+/* Phones: the title scales with the screen and may wrap, the buttons share the row, the seal steps back from the windows. */
+@media(max-width:600px){
+  .hc .hj{ --toran-h:48px; }
+  .hc .hj .hc-eyebrow{ letter-spacing:.22em; font-size:.58rem; flex-wrap:wrap; justify-content:center; }
+  .hc .hj__title{ font-size:clamp(1.9rem,9.2vw,2.6rem); line-height:1.06; letter-spacing:-.02em; }
+  .hc .hj__title .ln>span{ white-space:normal; }
+  .hc .hj__sub{ font-size:.95rem; line-height:1.65; margin-top:1rem; max-width:none; }
+  .hc .hj__cta{ width:100%; margin-top:1.4rem; }
+  .hc .hj__cta .hc-btn{ flex:1 1 140px; padding-inline:1em; letter-spacing:.14em; font-size:.66rem; }
+  .hc .hj-facade{ gap:8px; padding:34px 6px 18px; }
+  .hc .hj-arch__line{ left:-6px; top:-6px; width:calc(100% + 12px); height:calc(100% + 6px); }
+  .hc .hj-arch__line--out{ left:-12px; top:-12px; width:calc(100% + 24px); height:calc(100% + 12px); }
+  .hc .hj-arch__plaque{ bottom:6px; padding:.3rem .3rem .35rem; border-radius:24px 24px 8px 8px; }
+  .hc .hj-arch__plaque small{ font-size:.7rem; }
+  .hc .hj-arch__plaque span{ font-size:.42rem; letter-spacing:.08em; }
+  .hc .hj-seal{ width:64px; left:-2%; top:-6%; }
+}
+/* touch screens: the labels always show, so they sit clear below the tassels instead of on top of them */
+@media(hover:none){ .hc .hj-flag__label{ top:calc(100% + 26px); } }
 
 @keyframes hjSun{ from{ -webkit-mask-position:10% 25%; mask-position:10% 25%; } to{ -webkit-mask-position:2% 40%; mask-position:2% 40%; } }
 @keyframes hjDrop{ to{ opacity:1; translate:-50% 0; } }
