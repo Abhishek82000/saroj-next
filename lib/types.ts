@@ -226,6 +226,14 @@ export interface HomeTagSection {
   products: HomeApiProduct[];
 }
 
+/** A `handicraft_show_home_page` entry. `cat_handi_type`: 1 = paper handicraft, 2 = quilted handicraft, 0 = neither (not shown). */
+export interface HomeHandiCategory {
+  cat_id: number;
+  cat_name: string;
+  cat_slug: string;
+  cat_handi_type: number;
+}
+
 export interface HomeCategorySection {
   cat_id: number;
   cat_name: string;
@@ -316,8 +324,8 @@ export interface HomeApiResponse {
     middle_slider?: HomeApiSlide[];
     tag_show_home_page: HomeTagSection[];
     category_show_home_page: HomeCategorySection[];
-    /** Handicraft rails — the same product payload as the tag/category rails. */
-    handicraft_show_home_page?: (HomeTagSection | HomeCategorySection)[];
+    /** Handicraft categories for HandicraftRail — no products or image; the image comes from `handcategories`. */
+    handicraft_show_home_page?: HomeHandiCategory[];
     /** Handicraft categories (id, name, slug, image) for the home page's craft house. */
     handcategories?: CommonFeaturedCategory[];
     video_products: HomeVideoProduct[];

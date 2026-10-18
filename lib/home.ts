@@ -1,7 +1,7 @@
 import { categoryHref, getFeaturedCategories } from "./nav";
 import { site } from "./site";
 import type {
-  BannerSlide, CommonCategoryRef, CommonFeaturedCategory, HomeApiProduct, HomeApiSlide, HomeApiResponse, HomeCategorySection, HomeTagSection, HomeVideoProduct,
+  BannerSlide, CommonCategoryRef, CommonFeaturedCategory, HomeApiProduct, HomeApiSlide, HomeApiResponse, HomeCategorySection, HomeHandiCategory, HomeTagSection, HomeVideoProduct,
   Product, ProductDetailApiResponse, ProductsApiResponse, ProductsApiSaleProduct, ProductsApiTag,
   Reel, SaleProduct,
 } from "./types";
@@ -13,18 +13,26 @@ export interface HomeData {
   midSlides: BannerSlide[];
   tagSections: HomeTagSection[];
   categorySections: HomeCategorySection[];
-  /** `handicraft_show_home_page` — drawn by HandicraftRail. */
-  handicraftSections: HomeTagSection[];
+  /** `handicraft_show_home_page` — paper (type 1) and quilted (type 2) handicraft categories, drawn by HandicraftRail. */
+  handicraftCats: HandiCat[];
   /** `handcategories` — the handicraft categories, drawn by CraftHouse. */
   handCategories: CommonFeaturedCategory[];
   videoProducts: HomeVideoProduct[];
 }
 
-const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftSections: [], handCategories: [], videoProducts: [] };
+const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftCats: [], handCategories: [], videoProducts: [] };
 
-/** Handicraft rails may come tag-shaped (id/name/slug) or category-shaped (cat_*); read either. */
-const toSection = (s: HomeTagSection | HomeCategorySection): HomeTagSection =>
-  "cat_id" in s ? { id: s.cat_id, name: s.cat_name, slug: s.cat_slug, products: s.products ?? [] } : { ...s, products: s.products ?? [] };
+/** A handicraft category for HandicraftRail: 1 = paper handicraft, 2 = quilted handicraft. */
+export interface HandiCat { id: number; name: string; slug: string; type: 1 | 2; image: string }
+
+/** `handicraft_show_home_page` carries no image, so each category borrows its picture from
+    `handcategories` by id (empty when it has none). Types other than 1 and 2 aren't shown. */
+const toHandiCats = (list: HomeHandiCategory[] | undefined, images: CommonFeaturedCategory[] | undefined): HandiCat[] => {
+  const imageById = new Map((images ?? []).map((c) => [c.id, c.image ?? ""]));
+  return (list ?? [])
+    .filter((c) => (c.cat_handi_type === 1 || c.cat_handi_type === 2) && c.cat_slug)
+    .map((c) => ({ id: c.cat_id, name: c.cat_name, slug: c.cat_slug, type: c.cat_handi_type as 1 | 2, image: imageById.get(c.cat_id) ?? "" }));
+};
 
 /** API banners (`top_slider`, `middle_slider`) into BannerSlide; one without an image is dropped.
     `catHref` lets the wholesale page point category banners at its own listings. */
@@ -55,7 +63,7 @@ export async function getHomeData(): Promise<HomeData> {
       tagSections: json.data?.tag_show_home_page ?? [],
       // Some categories aren't stocked yet, so the API lists them with no products.
       categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),
-      handicraftSections: (json.data?.handicraft_show_home_page ?? []).map(toSection).filter((s) => s.products.length > 0),
+      handicraftCats: toHandiCats(json.data?.handicraft_show_home_page, json.data?.handcategories),
       handCategories: (json.data?.handcategories ?? []).filter((c) => c.image && c.slug),
       videoProducts: json.data?.video_products ?? [],
     };

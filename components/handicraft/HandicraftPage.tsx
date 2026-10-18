@@ -451,7 +451,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
               </em>
             </h2>
             <p className="hc-lede rv" data-d="2">
-              One shop destination for traditional handmade printed cotton <b>bags, boxes, stationery &amp; journals</b>, lifestyle organisation, and corporate or customised gifting.
+              We are working to build one shop destination for traditional <b>handmade printed cotton bags, boxes, stationery & journals, lifestyle organisation, and corporate or customised gifting.</b>
             </p>
             <ul className="hc-wheel-chips rv" data-d="2">
               <li><b>{faces.length}</b> {faces.length === 1 ? "craft" : "crafts"}</li>

@@ -1,8 +1,8 @@
 /** The scrolling band of craft names under the hero. */
 export default function CraftRoll() {
   const names = [
-    ["Blue Pottery", "hi"], ["मीनाकारी", "st-dv"], ["Bagru Block", ""],
-    ["Lac & Brass", "hi"], ["संगमरमर जाली", "st-dv"], ["Kathputli", ""],
+    ["Ajrakh", "hi"], ["कलमकारी", "st-dv"], ["Hakoba & Dobby", ""],
+    ["Flower Garden Collection", "hi"], ["जुगलबंदी", "st-dv"], ["Jaipuri Cotton", ""],
   ];
   return (
     <div className="st-roll mb-5" aria-hidden="true">

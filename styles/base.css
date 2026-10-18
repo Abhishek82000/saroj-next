@@ -126,7 +126,7 @@ button{ font-family:inherit; }
 .st-wh__tiles{ display:grid; gap:.8rem; grid-template-columns:repeat(2,1fr); }
 @media(min-width:640px){ .st-wh__tiles{ grid-template-columns:repeat(4,1fr); } }
 .st-wh__tile{ display:grid; gap:.6rem; }
-.st-wh__tile-ph{ aspect-ratio:4/5; border-radius:14px; }
+.st-wh__tile-ph{ aspect-ratio:3/4; border-radius:14px; }
 .st-wh__tile:hover img{ transform:scale(1.05); }
 .st-wh__tile b{ font-size:.82rem; font-weight:600; }
 

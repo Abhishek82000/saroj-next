@@ -61,7 +61,7 @@
   border:1px solid rgba(231,184,101,.45); background:rgba(255,255,255,.04); color:var(--chs-cream);
   transition:border-color .35s, background .35s, transform .45s var(--ease); }
 .chs__tile:hover{ border-color:var(--chs-gold); background:rgba(231,184,101,.1); transform:scale(1.02); }
-.chs__ph{ display:block; aspect-ratio:4/5; overflow:hidden; border-radius:50% 50% 9px 9px / 29% 29% 9px 9px; background:#4a0c16; }
+.chs__ph{ display:block; aspect-ratio:3/4; overflow:hidden; border-radius:50% 50% 9px 9px / 29% 29% 9px 9px; background:#4a0c16; }
 .chs__ph img{ width:100%; height:100%; object-fit:cover; transition:transform 1s var(--ease); }
 .chs__tile:hover .chs__ph img{ transform:scale(1.07); }
 .chs__name{ display:block; padding:.7rem .4rem .45rem; text-align:center; font-family:var(--d); font-size:clamp(.95rem,1.3vw,1.15rem); line-height:1.2; }

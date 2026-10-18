@@ -151,7 +151,7 @@
           transition:opacity .55s var(--ease), transform .55s var(--ease), box-shadow .45s var(--ease); }
 .st-card.in{ opacity:1; transform:none; }
 .st-card.in:hover{ transform:translateY(-5px); box-shadow:0 28px 46px -22px rgba(16,24,32,.42); }
-.st-card__ph{ aspect-ratio:4/5; position:relative; display:block; }
+.st-card__ph{ aspect-ratio:3/4; position:relative; display:block; }
 .st-card:hover .st-card__ph img{ transform:scale(1.06); }
 .st-card:hover .st-card__p{ margin-bottom: 5px; }
 .st-card__kind{ position:absolute; top:.55rem; left:.55rem; z-index:3; font-size:.5rem; letter-spacing:.16em;

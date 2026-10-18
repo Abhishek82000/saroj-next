@@ -24,7 +24,7 @@
 
 /* product card + rail + grid */
 .sk-card{ background:#fff; border:1px solid var(--line-2); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
-.sk-card__ph{ aspect-ratio:1; border-radius:0; }
+.sk-card__ph{ aspect-ratio:3/4; border-radius:0; }
 .sk-card__body{ display:grid; gap:7px; padding:1rem .9rem .9rem; }
 .sk-rail{ padding-block:clamp(20px,4vw,34px) 54px; }
 .sk-rail__row{ display:flex; gap:.75rem; margin-top:clamp(22px,4vw,34px); overflow:hidden; }
@@ -50,9 +50,9 @@
 /* product page */
 .sk-pd{ display:grid; gap:clamp(26px,4vw,46px); padding-block:clamp(18px,3vw,30px) clamp(40px,6vw,70px); }
 @media(min-width:940px){ .sk-pd{ grid-template-columns:1.06fr .94fr; gap:clamp(34px,4vw,64px); } }
-.sk-pd__main{ aspect-ratio:1; border-radius:16px; }
+.sk-pd__main{ aspect-ratio:3/4; border-radius:16px; }
 .sk-pd__thumbs{ display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin-top:.7rem; }
-.sk-pd__thumb{ aspect-ratio:1; border-radius:10px; }
+.sk-pd__thumb{ aspect-ratio:3/4; border-radius:10px; }
 .sk-pd__chips{ display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; margin-top:14px; }
 .sk-pd__cta{ display:flex; gap:.5rem; margin-top:24px; }
 .sk-pd__trust{ display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-top:20px; }
@@ -120,6 +120,6 @@
 @media(max-width:999px){ .sk-whcat:nth-child(n+6){ display:none; } }
 @media(max-width:639px){ .sk-whcat:nth-child(n+4){ display:none; } }
 .sk-whcat{ display:flex; flex-direction:column; align-items:center; gap:.6rem; }
-.sk-whcat__ph{ width:100%; aspect-ratio:1; border-radius:50%; }
+.sk-whcat__ph{ width:100%; aspect-ratio:3/4; border-radius:50%; }
 /* the hero's title bars sit above the scrim, a shade brighter than the photo tiles */
 .sk-hchero__content .sk.sk--dark{ --sk-base:rgba(255,255,255,.2); --sk-hi:rgba(255,255,255,.32); }

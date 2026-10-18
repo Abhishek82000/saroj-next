@@ -138,7 +138,7 @@ export async function getHandicraftData(): Promise<HandicraftData> {
     /* This endpoint sends its handicraft categories as handicraftCategory (CategoryResource shape). */
     const handCats = (d.handicraftCategory ?? []).map(toFace).filter((f): f is HcFace => f !== null);
     /* The product rails: handicraft categories with products; until the API sends those, the general ones. */
-    const handRails = (d.handicraft_show_home_page ?? []).filter((c) => c.products.length > 0);
+    const handRails = (d.handicraft_show_home_page ?? []).filter((c) => (c.products ?? []).length > 0);
 
     const everyProduct: HomeApiProduct[] = [
       ...(d.tag_show_home_page ?? []).flatMap((t) => t.products),
