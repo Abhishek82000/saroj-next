@@ -84,7 +84,7 @@ function Lane({ title, cats, index }: { title: string; cats: HandiCat[]; index: 
         </div>
       </div>
       <div className="hcs__rope" ref={rope} data-run={seen || undefined}>
-        <ul className="hcs__track" style={style}>
+        <ul className="hcs__track" style={style} data-marquee>
           {/* The pass twice over: the track slides by exactly one pass, then starts again, with no seam. */}
           {[0, 1].map((half) => pass.map(({ c, copy }, k) => (
             <Tag key={`${half}-${k}`} c={c} copy={half === 1 || copy}

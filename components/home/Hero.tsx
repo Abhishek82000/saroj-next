@@ -77,7 +77,7 @@ export default function Hero() {
 
         <div className="st-hero__strip fade f4">
           {/* Two copies so the marquee loops seamlessly; the second is hidden from screen readers and tabbing. */}
-          <div className="st-hero__track">
+          <div className="st-hero__track" data-marquee>
             {[0, 1].map((copy) =>
               swatches.map(([file, title, slug]) => (
                 <Link key={`${copy}-${file}`} href={categoryHref(slug)} className="st-swatch-item" title={title}

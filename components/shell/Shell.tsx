@@ -8,6 +8,7 @@ import Footer from "./Footer";
 import WhatsApp from "./WhatsApp";
 import StoreProvider from "./StoreProvider";
 import LoginModal from "./LoginModal";
+import MarqueeDrag from "@/components/ui/MarqueeDrag";
 import { getMenuTree } from "@/lib/nav";
 
 /** Everything that wraps every page. Mounted once, in the root layout. */
@@ -26,6 +27,7 @@ export default async function Shell({ children }: { children: React.ReactNode })
       <SearchSheet navMenu={navMenu} />
       <LoginModal />
       <Toast />
+      <MarqueeDrag />
     </StoreProvider>
   );
 }

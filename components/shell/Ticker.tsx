@@ -7,7 +7,7 @@ export default async function Ticker() {
 
   return (
     <div className="st-top" aria-hidden="true">
-      <ul>
+      <ul data-marquee>
         {marquee
           ? [marquee, marquee].map((text, i) => <li key={i}>{text}</li>)
           : [...site.ticker, ...site.ticker].map(([lead, strong], i) => <li key={i}>{lead}<b>{strong}</b></li>)}

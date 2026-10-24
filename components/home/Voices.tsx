@@ -48,10 +48,10 @@ export default function Voices({ items }: { items?: VoiceItem[] }) {
       <div className="st-voices__head st-wrap">
         <SectionHead title="Voices." />
       </div>
-      <div className="st-vrow st-vrow--a">
+      <div className="st-vrow st-vrow--a" data-marquee>
         {[...a, ...a].map((r, i) => <Card key={`a${i}`} text={r[0]} who={r[1]} rating={r[2]} />)}
       </div>
-      <div className="st-vrow st-vrow--b">
+      <div className="st-vrow st-vrow--b" data-marquee>
         {[...b, ...b].map((r, i) => <Card key={`b${i}`} text={r[0]} who={r[1]} rating={r[2]} />)}
       </div>
     </section>

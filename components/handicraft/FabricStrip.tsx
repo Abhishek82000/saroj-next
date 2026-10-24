@@ -16,7 +16,7 @@ export default function FabricStrip({ slides }: { slides: HcSlide[] }) {
       <div className="hc-fstrip__view">
         <span className="hc-fstrip__line" aria-hidden="true" />
         {/* Duration scales with the count so the drift speed stays the same however many there are. */}
-        <ul className="hc-fstrip__track" style={{ animationDuration: `${slides.length * 5}s` }}>
+        <ul className="hc-fstrip__track" data-marquee style={{ animationDuration: `${slides.length * 5}s` }}>
           {loop.map((s, i) => {
             const copy = i >= slides.length;
             const body = (

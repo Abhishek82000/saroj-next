@@ -6,7 +6,7 @@ export default function CraftRoll() {
   ];
   return (
     <div className="st-roll mb-5" aria-hidden="true">
-      <ul>
+      <ul data-marquee>
         {[...names, ...names].map(([name, cls], i) => (
           <li key={i} className={cls}>{name}</li>
         ))}

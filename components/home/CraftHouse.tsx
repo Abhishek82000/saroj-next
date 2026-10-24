@@ -42,7 +42,7 @@ export default function CraftHouse({ categories }: { categories: CommonFeaturedC
         <div className="chs__lanes" aria-hidden="true">
           {lanes.map((lane, k) => (
             <div className={`chs__lane chs__lane--${k ? "b" : "a"}`} key={k}>
-              <div className="chs__track" style={{ animationDuration: `${lane.length * 6}s` }}>
+              <div className="chs__track" data-marquee style={{ animationDuration: `${lane.length * 6}s` }}>
                 {[...lane, ...lane].map((c, i) => (
                   <Link key={i} href={categoryHref(c.slug)} className="chs__tile" tabIndex={-1}>
                     <span className="chs__ph">
