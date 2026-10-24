@@ -467,7 +467,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
                 <span className="hc-wheel-now__no">{String(i + 1).padStart(2, "0")}<small> / {String(faces.length).padStart(2, "0")}</small></span>
                 <h3 className="hc-wheel-now__name">{f.name}</h3>
                 {f.hi && <p className="hc-wheel-now__hi hc-dv">{f.hi}</p>}
-                <p className="hc-wheel-now__meta">{f.meta}{f.count && <> · <b>{f.count}</b></>}</p>
                 {f.href && <Link href={f.href} className="hc-btn hc-btn--solid hc-wheel-now__go">Shop this craft</Link>}
               </div>
             ))}
@@ -504,7 +503,6 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
                       <h3 className="hc-face__name">{f.name}</h3>
                       {f.hi && <p className="hc-face__hi hc-dv">{f.hi}</p>}
                       <span className="hc-face__rule" aria-hidden="true"><i /></span>
-                      <p className="hc-face__meta">{f.meta}{f.count && <> · <b>{f.count}</b></>}</p>
                       {f.href && <span className="hc-face__go" aria-hidden="true">Explore <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>}
                     </div>
                   </>
