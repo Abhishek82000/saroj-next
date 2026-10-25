@@ -54,6 +54,8 @@ export interface ShippingProgress {
   threshold: number | null;
   free: boolean;
   prepaid_free: boolean;
+  /** Every line ships free on its own (product_shipping_free) — `free` is true whatever the total. */
+  all_items_free?: boolean;
   short_by: number;
   progress: number;
 }

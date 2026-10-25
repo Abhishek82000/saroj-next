@@ -10,7 +10,7 @@
  *   GET    /api/cart?type=<retail|wholesale>   the account's cart (logged in)
  *   POST   /api/cart/price        fresh prices for a list of lines — guests too
  *          { type, items: [{ product_id, variation_id?, qty }] }
- *          → { items: [line…], totals: { mrp, discount, subtotal }, has_errors }
+ *          → { items: [line…], totals: { mrp, discount, subtotal }, has_errors, offers, shipping, gst, payable }
  *          (checked live: works without a token; a gone piece comes back with `error`)
  *   POST   /api/cart/sync         after login / registration: hands the guest
  *          cart to the account — { type, items: [{ product_id, variation_id?, qty }] }
@@ -30,7 +30,7 @@
  * The local cart in StoreProvider stays what the UI shows; these mirror it.
  */
 import type { CartLine } from "./types";
-import type { CartOffers } from "./offers";
+import type { CartOffers, ShippingProgress } from "./offers";
 import { wholesaleHref } from "./wholesale";
 import { site } from "./site";
 import { fetchRetrying } from "./retry";
@@ -46,7 +46,15 @@ export interface ServerCartLine {
   cart_id: number | null; key: string; product_id: number; variation_id: number | null; qty: number;
   name: string | null; slug: string | null; image: string | null; unit: string | null; step: number | null;
   min_qty: number | null; mrp: number; price: number; line_total: number; error: string | null;
+  /** The product's product_shipping_free (1 / true = ships free), under either name.
+      Checked live on 2026-10-24: /api/cart/price doesn't send it yet, so every line reads as not free. */
+  shipping_free?: boolean | number | string | null;
+  product_shipping_free?: boolean | number | string | null;
 }
+
+/** Whether a server line ships free — the flag may come as 1, "1" or true. */
+export const shipsFree = (l: Pick<ServerCartLine, "shipping_free" | "product_shipping_free">) =>
+  Number(l.shipping_free ?? l.product_shipping_free) === 1;
 
 type Fail = { ok: false; message: string };
 
@@ -113,6 +121,7 @@ export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): Car
     productId: l.product_id,
     variationId: l.variation_id,
     ...(l.cart_id ? { cartId: l.cart_id } : {}),
+    ...(shipsFree(l) ? { shippingFree: true } : {}),
   };
 }
 
@@ -150,6 +159,17 @@ export const syncCartRemote = (type: "retail" | "wholesale", lines: CartLine[], 
 
 export interface CartTotals { mrp: number; discount: number; subtotal: number }
 
+/** Shipping, GST and the payable total from POST /api/cart/price (backend ShippingService).
+    Shipping is by weight (ar_shipping_charges) of the pieces that don't ship free; retail is
+    free from admin_min_order up when the admin offer is on; wholesale is never free and adds 5% GST.
+    Older servers send none of it — every field is then null. */
+export interface CartCharges {
+  shipping: (ShippingProgress & { amount: number; weight: number }) | null;
+  gst: { rate: number; amount: number } | null;
+  /** Retail: subtotal − offers + shipping. Wholesale: subtotal + GST + shipping. */
+  payable: number | null;
+}
+
 const itemsOf = (lines: CartLine[]) => lines
   .filter((l) => l.productId)
   .map((l) => ({ product_id: l.productId, variation_id: l.variationId ?? null, qty: l.qty }));
@@ -157,10 +177,14 @@ const itemsOf = (lines: CartLine[]) => lines
 /** Today's prices for these lines, straight from the server — with the retail
     cart's offers (milestone, free shipping, `coupon` re-checked; see lib/offers.ts). */
 export async function priceCartRemote(type: "retail" | "wholesale", lines: CartLine[], token?: string, coupon?: string | null) {
-  const r = await call<{ items?: ServerCartLine[]; totals?: CartTotals; has_errors?: boolean; offers?: CartOffers | null }>(
+  const r = await call<{
+    items?: ServerCartLine[]; totals?: CartTotals; has_errors?: boolean; offers?: CartOffers | null;
+    shipping?: CartCharges["shipping"]; gst?: CartCharges["gst"]; payable?: number | null;
+  }>(
     "price", { method: "POST", body: JSON.stringify({ type, items: itemsOf(lines), ...(coupon ? { coupon } : {}) }) }, token);
   if (!r.ok) return null;
-  return { items: r.items ?? [], totals: r.totals ?? null, hasErrors: !!r.has_errors, offers: r.offers ?? null };
+  const charges: CartCharges = { shipping: r.shipping ?? null, gst: r.gst ?? null, payable: r.payable ?? null };
+  return { items: r.items ?? [], totals: r.totals ?? null, hasErrors: !!r.has_errors, offers: r.offers ?? null, charges };
 }
 
 /** The local line a server line answers for — matched on product + variation. */

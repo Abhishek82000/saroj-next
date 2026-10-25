@@ -49,8 +49,8 @@ export default function CheckoutView() {
   const [errs, setErrs] = useState<Errors>({});
   const [busy, setBusy] = useState(false);
   const [pin, setPin] = useState<{ state: PinState; message?: string }>({ state: "idle" });
-  const { totals, offers, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
-  const total = orderTotal(subtotal, totals, offers);
+  const { totals, offers, charges, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
+  const total = orderTotal(subtotal, totals, offers, charges);
 
   /* The account's saved address, for the pincode lookup below to fall back on. */
   const savedAddress = useRef(user?.address);
@@ -142,7 +142,8 @@ export default function CheckoutView() {
       coupon: applied ? { code: applied.code, id: applied.id, discount: applied.discount } : null,
       subtotal: totals?.subtotal ?? subtotal,
       totalDiscount: (totals?.discount ?? 0) + (wholesale ? 0 : offers?.discount ?? 0),
-      shipping: 0,
+      shipping: charges?.shipping?.amount ?? 0,
+      gst: wholesale ? charges?.gst?.amount ?? 0 : 0,
       finalAmount: total,
     }), user?.token);
     if (!r.ok) { setBusy(false); say(r.message); return; }
@@ -231,6 +232,7 @@ export default function CheckoutView() {
           <span className="st-co__mn">
             {l.name}
             <small>{inrExact(l.price)} · {unitLabel(l.unit)}</small>
+            {l.shippingFree && <span className="st-co__shipfree"><Icon name="truck" size={12} strokeWidth={2} /> Free shipping</span>}
             {errors[l.id] && <em className="st-co__err">{errors[l.id]}</em>}
           </span>
           <b>{inrExact(l.price * l.qty)}</b>
@@ -261,7 +263,7 @@ export default function CheckoutView() {
           <span><Icon name="cart" size={16} /> Show order summary</span>
           <b>{inrExact(total)}</b>
         </summary>
-        <div className="st-wrap">{lines}<Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} /></div>
+        <div className="st-wrap">{lines}<Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} charges={charges} checkout /></div>
       </details>
 
       <form className="st-co st-co--split" onSubmit={submit} noValidate>
@@ -289,7 +291,7 @@ export default function CheckoutView() {
                 {input("firstName", "First Name", { autoComplete: "given-name" })}
                 {input("lastName", "Last Name", { autoComplete: "family-name" })}
               </div>
-              {input("email", "Email (optional)", { type: "email", autoComplete: "email" })}
+              {input("email", "Email", { type: "email", autoComplete: "email", required: true })}
               {wholesale && (
                 <div className="st-co__row">
                   {input("business", "Business name (optional)", { autoComplete: "organization" })}
@@ -300,7 +302,7 @@ export default function CheckoutView() {
 
             <section className="st-co__sec">
               <h2><b>3</b>Delivery Details</h2>
-              {input("address", "Address", { autoComplete: "address-line1" })}
+              {input("address", "Address", { autoComplete: "address-line1", required: true })}
               {input("landmark", "Apartment/Landmark etc. (optional)", { autoComplete: "address-line2" })}
               <div className="st-co__row">
                 {input("country", "Country", { readOnly: true, tabIndex: -1 })}
@@ -340,7 +342,7 @@ export default function CheckoutView() {
             <h2>Your order</h2>
             {lines}
             {!wholesale && <CouponBox offers={offers} compact />}
-            <Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} />
+            <Totals subtotal={subtotal} wholesale={wholesale} server={totals} offers={offers} charges={charges} checkout />
 
             <div className="st-pay" role="radiogroup" aria-label="Payment method">
               {payments.map((p) => (

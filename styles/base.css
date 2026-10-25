@@ -22,7 +22,7 @@ button{ font-family:inherit; }
 ::selection{ background:var(--cobalt); color:#fff; }
 
 .ph{ position:relative; overflow:hidden; background:linear-gradient(150deg,var(--paper-2),var(--paper-3)); }
-.ph img{ width:100%; height:100%; object-fit:cover; transition:transform 1.1s var(--ease), opacity .7s ease; }
+.ph img{ width:100%; height:100%; object-fit:fill; transition:transform 1.1s var(--ease), opacity .7s ease; }
 .ph img[data-loading]{ opacity:0; }
 
 .st-eyebrow{ font-size:.63rem; letter-spacing:.32em; text-transform:uppercase; font-weight:700;

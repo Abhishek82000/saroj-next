@@ -78,6 +78,7 @@ export default function CartDrawer() {
                   <small className="st-line__m">
                     {inrExact(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}
                   </small>
+                  {l.shippingFree && <span className="st-co__shipfree"><Icon name="truck" size={12} strokeWidth={2} /> Free shipping</span>}
                   {errors[l.id] && <small className="st-co__err">{errors[l.id]}</small>}
                   <div className="st-line__foot">
                     <span className="st-qty">
@@ -108,7 +109,8 @@ export default function CartDrawer() {
               {inrExact(offers?.total ?? totals?.subtotal ?? subtotal)}
             </b>
           </div>
-          {saved > 0 && <p className="st-cart__note st-cart__saved">You save {inrExact(saved)} with offers.</p>} 
+          {saved > 0 && <p className="st-cart__note st-cart__saved">You save {inrExact(saved)} with offers.</p>}
+          <p className="st-cart__note">{wholesale ? "Shipping is calculated at checkout." : "Shipping is calculated at checkout."}</p>
           {hasErrors && <p className="st-cart__note st-co__err">Remove the unavailable items to check out.</p>}
                     
           {hasErrors

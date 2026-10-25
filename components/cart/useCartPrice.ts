@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useStore } from "@/components/shell/StoreProvider";
-import { priceCartRemote, sameLine, type CartTotals } from "@/lib/cart";
+import { priceCartRemote, sameLine, type CartCharges, type CartTotals } from "@/lib/cart";
 import type { CartOffers } from "@/lib/offers";
 
 /**
@@ -17,6 +17,8 @@ export function useCartPrice(active = true) {
   const { cart, mode, reprice, user, coupon } = useStore();
   const [totals, setTotals] = useState<CartTotals | null>(null);
   const [offers, setOffers] = useState<CartOffers | null>(null);
+  /* Shipping, wholesale GST and the payable total — both modes. */
+  const [charges, setCharges] = useState<CartCharges | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [checking, setChecking] = useState(false);
 
@@ -29,7 +31,7 @@ export function useCartPrice(active = true) {
   useEffect(() => {
     if (!active) return;
     const priced = cart.filter((l) => l.productId);
-    if (!priced.length) { setTotals(null); setOffers(null); setErrors({}); return; }
+    if (!priced.length) { setTotals(null); setOffers(null); setCharges(null); setErrors({}); return; }
     let live = true;
     setChecking(true);
     const t = setTimeout(async () => {
@@ -46,10 +48,11 @@ export function useCartPrice(active = true) {
       const whole = priced.length === cart.length;
       setTotals(whole ? r.totals : null);
       setOffers(whole ? r.offers : null);
+      setCharges(whole ? r.charges : null);
     }, 350);
     return () => { live = false; clearTimeout(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, key, mode, token, code]);
 
-  return { totals, offers, errors, checking, hasErrors: Object.keys(errors).length > 0 };
+  return { totals, offers, charges, errors, checking, hasErrors: Object.keys(errors).length > 0 };
 }

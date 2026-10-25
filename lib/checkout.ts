@@ -8,8 +8,9 @@ import { site } from "./site";
  * are); wholesale is for logged-in accounts only.
  *
  * Tax and offers differ by mode: retail prices include GST and can take a
- * coupon; wholesale prices exclude GST (added on the invoice) and take no coupon.
- * Coupons and offers are worked out on the server (lib/offers.ts).
+ * coupon; wholesale prices exclude GST (5% added on the subtotal at checkout)
+ * and take no coupon. Coupons, offers, shipping (by weight) and GST are all
+ * worked out on the server (lib/offers.ts, backend ShippingService).
  *
  * "Pay Now" posts to /api/cart/paynow — see `buildPayNowPayload` / `placeOrder` below.
  */
@@ -70,7 +71,8 @@ export function validateCheckout(f: CheckoutForm, wholesale: boolean): Partial<R
   const e: Partial<Record<keyof CheckoutForm, string>> = {};
   if (!isValidMobile(f.mobile.trim())) e.mobile = "Enter a 10-digit mobile number.";
   if (!f.firstName.trim()) e.firstName = "Add your first name.";
-  if (f.email.trim() && !isValidEmail(f.email.trim())) e.email = "Enter a valid email address.";
+  if (!f.email.trim()) e.email = "Add your email address.";
+  else if (!isValidEmail(f.email.trim())) e.email = "Enter a valid email address.";
   if (!f.address.trim()) e.address = "Add the delivery address.";
   if (!/^[1-9]\d{5}$/.test(f.pincode.trim())) e.pincode = "Enter a 6-digit pincode.";
   if (!f.state.trim()) e.state = "Add the state.";
@@ -149,8 +151,9 @@ export async function lookupPincode(pin: string): Promise<PincodeResult> {
  *   shipping_address the delivery address (always)
  *   coupon_id / coupon_code / coupon_discount   the applied coupon, retail only
  *   total_discount   MRP discount + offers + coupon
- *   shipping_amount
- *   final_amount     what the page showed as payable
+ *   shipping_amount  by weight (backend ShippingService); 0 when free
+ *   gst_amount       wholesale only: 5% of the subtotal
+ *   final_amount     what the page showed as payable (shipping and GST included)
  *
  * The amounts are what the page showed — the server prices the cart again
  * (POST /api/cart/price) and refuses with 409 if its total has moved more
@@ -175,6 +178,8 @@ export interface PayNowPayload {
   coupon_discount: number;
   total_discount: number;
   shipping_amount: number;
+  /** Wholesale 5% GST — reference only, like the other amounts. */
+  gst_amount: number;
   subtotal: number;
   final_amount: number;
   /** Wholesale only. */
@@ -191,6 +196,8 @@ export function buildPayNowPayload(
     /** Everything taken off: MRP discount + offers + coupon. */
     totalDiscount: number;
     shipping: number;
+    /** Wholesale's 5% GST on the subtotal (0 for retail). */
+    gst: number;
     finalAmount: number;
   },
 ): PayNowPayload {
@@ -213,6 +220,7 @@ export function buildPayNowPayload(
     coupon_discount: coupon?.discount ?? 0,
     total_discount: o.totalDiscount,
     shipping_amount: o.shipping,
+    gst_amount: o.gst,
     subtotal: o.subtotal,
     final_amount: o.finalAmount,
     gst: o.wholesale ? { gstin: f.gstin.trim().toUpperCase(), business_name: f.business.trim() } : null,
@@ -306,6 +314,8 @@ export interface OrderReceipt {
   couponCode: string | null;
   couponDiscount: number;
   shipping: number;
+  /** Wholesale 5% GST billed on the items; 0 for retail (prices include it). */
+  gst: number;
   gstin: string | null;
   items: ReceiptItem[];
 }
@@ -321,7 +331,7 @@ export interface OrderPaymentStatus {
 interface RawReceipt {
   placed_at: string; name: string; email: string | null; mobile: string; delivery_address: string; delivery_phone: string;
   city: string; state: string; pincode: string; payment_method: string; payment_ref: string | null; discount: number;
-  coupon_code: string | null; coupon_discount: number; shipping: number; gstin: string | null; items: ReceiptItem[];
+  coupon_code: string | null; coupon_discount: number; shipping: number; gst?: number; gstin: string | null; items: ReceiptItem[];
 }
 
 const receiptFrom = (r: RawReceipt): OrderReceipt => ({
@@ -329,7 +339,7 @@ const receiptFrom = (r: RawReceipt): OrderReceipt => ({
   deliveryAddress: r.delivery_address, deliveryPhone: r.delivery_phone, city: r.city, state: r.state, pincode: r.pincode,
   paymentMethod: r.payment_method, paymentRef: r.payment_ref,
   discount: Number(r.discount) || 0, couponCode: r.coupon_code, couponDiscount: Number(r.coupon_discount) || 0,
-  shipping: Number(r.shipping) || 0, gstin: r.gstin,
+  shipping: Number(r.shipping) || 0, gst: Number(r.gst) || 0, gstin: r.gstin,
   items: (r.items ?? []).map((i) => ({ ...i, qty: Number(i.qty) || 0, mrp: Number(i.mrp) || 0, price: Number(i.price) || 0, total: Number(i.total) || 0 })),
 });
 

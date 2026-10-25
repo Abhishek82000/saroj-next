@@ -23,11 +23,13 @@ export function CartProgress({ offers, compact = false }: { offers: CartOffers |
 }
 
 function ShippingBar({ offers, compact }: { offers: CartOffers | null; compact: boolean }) {
-  const { shortOfFreeShipping, subtotal } = useStore();
+  const { shortOfFreeShipping, subtotal, cart } = useStore();
   const s = offers?.shipping;
-  if (s && !s.threshold && !s.prepaid_free) return null; // no free-shipping rule set up
-  const short = s ? s.short_by : shortOfFreeShipping;
-  const reached = s ? !!s.threshold && s.short_by <= 0 : short <= 0;
+  /* Every piece ships free on its own (product_shipping_free) — nothing to reach. */
+  const allFree = cart.length > 0 && cart.every((l) => l.shippingFree);
+  if (s && !s.threshold && !s.prepaid_free && !allFree) return null; // no free-shipping rule set up
+  const short = allFree ? 0 : s ? s.short_by : shortOfFreeShipping;
+  const reached = allFree || (s ? !!s.threshold && s.short_by <= 0 : short <= 0);
   const prepaidOnly = !reached && !!s?.prepaid_free;
   const free = reached || prepaidOnly;
   const progress = free ? 1 : s ? s.progress : Math.min(1, subtotal / site.freeShippingOver);
@@ -156,6 +158,7 @@ export function CouponBox({ offers, compact = false }: { offers: CartOffers | nu
   const list = offers?.available ?? [];
 
   const remove = () => { setCoupon(null); say("Coupon removed"); };
+  const submit = async () => { if (await apply(code)) setCode(""); };
 
   const cards = list.length > 0 && (
     <ul className="st-cp__list">
@@ -177,12 +180,15 @@ export function CouponBox({ offers, compact = false }: { offers: CartOffers | nu
           <button type="button" className="st-co__x" onClick={remove}>Remove</button>
         </div>
       ) : (
-        <form className="st-cp__form" onSubmit={async (e) => { e.preventDefault(); if (await apply(code)) setCode(""); }}>
+        /* Not a <form>: on checkout this sits inside the checkout form, and forms can't nest.
+           Enter applies the code instead of submitting the order. */
+        <div className="st-cp__form" role="group" aria-label="Apply a coupon">
           <label className="visually-hidden" htmlFor={compact ? "cp-code-d" : "cp-code"}>Coupon code</label>
           <input id={compact ? "cp-code-d" : "cp-code"} value={code} placeholder="Coupon code" autoComplete="off"
-            onChange={(e) => { setCode(e.target.value.toUpperCase()); if (error) clearError(); }} />
-          <button type="submit" className="st-cp__btn" disabled={busy}>{busy ? "…" : "Apply"}</button>
-        </form>
+            onChange={(e) => { setCode(e.target.value.toUpperCase()); if (error) clearError(); }}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); if (!busy) submit(); } }} />
+          <button type="button" className="st-cp__btn" disabled={busy} onClick={submit}>{busy ? "…" : "Apply"}</button>
+        </div>
       )}
       {error && <em className="st-co__err" role="alert">{error}</em>}
 

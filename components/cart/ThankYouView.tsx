@@ -210,7 +210,7 @@ export default function ThankYouView({ order }: { order: OrderPaymentStatus }) {
         </h1>
         <p className="ty__lead">
           {bank
-            ? <>Your wholesale order is in. Transfer the amount below (plus GST) and we start cutting the moment it lands.</>
+            ? <>Your wholesale order is in. Transfer the amount below (GST and shipping included) and we start cutting the moment it lands.</>
             : <>Your order is confirmed and already on its way to our printing tables in Jaipur.{r?.email ? <> A confirmation is on its way to <b>{r.email}</b>.</> : null}</>}
         </p>
         <div className="ty__chips">
@@ -221,7 +221,7 @@ export default function ThankYouView({ order }: { order: OrderPaymentStatus }) {
           <div className="ty-chip ty-chip--amt">
             <small>{bank ? "To transfer" : "Paid"}</small>
             <b>{inrExact(amount)}</b>
-            {order.wholesale && <span className="ty-chip__note">+ GST</span>}
+            {order.wholesale && <span className="ty-chip__note">incl. GST</span>}
           </div>
         </div>
       </section>
@@ -249,7 +249,7 @@ export default function ThankYouView({ order }: { order: OrderPaymentStatus }) {
               {saved > 0 && <div><dt>Total MRP</dt><dd>{inrExact(mrpTotal)}</dd></div>}
               {saved > 0 && <div><dt>Discount{r?.couponCode ? <code>{r.couponCode}</code> : null}</dt><dd className="ty-off">−{inrExact(saved)}</dd></div>}
               <div><dt>Shipping</dt><dd>{r && r.shipping > 0 ? inrExact(r.shipping) : <span className="ty-off">Free</span>}</dd></div>
-              {order.wholesale && <div><dt>GST</dt><dd><small>On the invoice</small></dd></div>}
+              {order.wholesale && <div><dt>GST (5%)</dt><dd>{r && r.gst > 0 ? inrExact(r.gst) : <small>Included</small>}</dd></div>}
               <div className="ty-receipt__grand"><dt>{bank ? "Amount due" : "Amount paid"}</dt><dd>{inrExact(order.amount)}</dd></div>
             </dl>
             {r && (

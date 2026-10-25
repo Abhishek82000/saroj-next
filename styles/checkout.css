@@ -112,6 +112,9 @@ a.st-co__n:hover{ color:var(--cobalt); }
                background:var(--ink); color:var(--paper); font-style:normal; font-size:.6rem; font-weight:700; display:grid; place-items:center; }
 .st-co__mn{ display:grid; gap:.15rem; line-height:1.35; }
 .st-co__mn small{ color:var(--ink-2); font-size:.72rem; }
+.st-co__shipfree{ justify-self:start; align-self:flex-start; display:inline-flex; align-items:center; gap:.3rem; margin-top:.15rem; padding:.2em .6em; border-radius:99px;
+                  background:color-mix(in srgb, var(--teal) 12%, transparent); color:var(--teal);
+                  font-size:.6rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
 
 /* phones: the order folds out above the form; the side panel follows the form */
 .st-co__msum{ display:none; }

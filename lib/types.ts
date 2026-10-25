@@ -61,6 +61,8 @@ export interface CartLine {
   variationId?: number | null;
   /** The server's id for this line (logged-in accounts only) — what update/remove address. */
   cartId?: number;
+  /** product_shipping_free = 1: ships free and its weight isn't counted towards shipping. From POST /api/cart/price. */
+  shippingFree?: boolean;
 }
 
 /* ============================================================

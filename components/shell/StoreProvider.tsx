@@ -9,7 +9,7 @@ import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate
 import { getWishlist, setWishlistRemote, type Lists } from "@/lib/wishlist";
 import { getCounts, type Counts } from "@/lib/counts";
 import {
-  addToCartRemote, getCartRemote, removeCartRemote, sameLine, syncCartRemote, updateCartRemote,
+  addToCartRemote, getCartRemote, removeCartRemote, sameLine, shipsFree, syncCartRemote, updateCartRemote,
   type ServerCartLine,
 } from "@/lib/cart";
 
@@ -167,6 +167,11 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       Re-read shortly after anything that changes the server's cart or
       wishlist; a burst of changes makes one call. */
   const [counts, setCounts] = useState<Counts | null>(null);
+  /** Which modes' carts have been read back from the account (syncCart). From
+      then on the cart badge counts the lines on screen: count-data also counts
+      rows GET /api/cart drops (a gone piece), so it can read one more than the
+      drawer shows. */
+  const [cartLoaded, setCartLoaded] = useState<Record<Mode, boolean>>({ retail: false, wholesale: false });
   const countsTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const refreshCounts = useCallback(() => {
     clearTimeout(countsTimer.current);
@@ -286,6 +291,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
         ...server,
         ...prev.filter((l) => !onServer.has(l.id) && l.productId && !l.cartId),
       ]);
+      setCartLoaded((p) => ({ ...p, [kind]: true }));
     }
     refreshCounts();
   }, [mutate, refreshCounts]);
@@ -303,8 +309,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
           ...(s.image ? { image: s.image } : {}),
           ...(s.step ? { step: s.step } : {}),
           ...(s.min_qty ? { minQty: s.min_qty } : {}),
+          shippingFree: shipsFree(s),
         };
-        if (upd.price !== l.price || upd.image !== l.image || upd.step !== l.step || upd.name !== l.name || upd.minQty !== l.minQty) changed = true;
+        if (upd.price !== l.price || upd.image !== l.image || upd.step !== l.step || upd.name !== l.name || upd.minQty !== l.minQty
+          || upd.shippingFree !== !!l.shippingFree) changed = true;
         return upd;
       });
       return changed ? next : prev;
@@ -432,6 +440,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setWh({ owner: u.mobile, lines: [] });
     setWishlist(EMPTY_WISHLIST);
     setCounts(null);
+    setCartLoaded({ retail: false, wholesale: false });
     /* The pending action (a heart tapped while logged out) runs below, before re-render. */
     userRef.current = u;
     wishlistRef.current = EMPTY_WISHLIST;
@@ -455,6 +464,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     if (mode === "wholesale") setCartOpen(false);
     setWishlist(EMPTY_WISHLIST);
     setCounts(null);
+    setCartLoaded({ retail: false, wholesale: false });
     wishlistSyncedFor.current = null;
     cartSyncedFor.current = null;
     say("Logged out");
@@ -533,10 +543,11 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const value: Store = {
     cart, add, setQty, remove, clearCart, reprice,
     subtotal,
-    /* Logged in: the account's count from count-data, once it has answered. */
-    count: (user && counts?.cart[mode]) ?? cart.length,
+    /* Logged in: count-data's number until the account's cart has been read, then the lines themselves. */
+    count: (user && !cartLoaded[mode] && counts?.cart[mode]) || cart.length,
     otherCount,
-    shortOfFreeShipping: Math.max(0, site.freeShippingOver - retailSubtotal),
+    /* A cart of nothing but free-shipping pieces (product_shipping_free) is never short. */
+    shortOfFreeShipping: retail.length && retail.every((l) => l.shippingFree) ? 0 : Math.max(0, site.freeShippingOver - retailSubtotal),
     coupon, setCoupon,
     addProduct,
     user, login, logout, hydrated, updateUser, loginOpen, loginReason, openLogin, closeLogin, withLogin,

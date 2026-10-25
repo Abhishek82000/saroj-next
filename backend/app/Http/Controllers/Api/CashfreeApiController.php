@@ -12,6 +12,7 @@ use App\Models\ArTransactionDetails;
 use App\Models\ArTransactions;
 use App\Models\ArUniqueIds;
 use App\Models\ArUsers;
+use App\Services\ShippingService;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -91,7 +92,8 @@ class CashfreeApiController extends Controller
             'user.mobile'               => array_merge([$account ? 'nullable' : 'required'], $mobile),
             'user.first_name'           => [$account ? 'nullable' : 'required', 'string', 'max:100'],
             'user.last_name'            => 'nullable|string|max:100',
-            'user.email'                => 'nullable|email|max:150',
+            // Required for every order — the confirmation and invoice go to it.
+            'user.email'                => 'required|email|max:150',
             'shipping_address'          => 'required|array',
             'shipping_address.address'  => 'required|string|max:255',
             'shipping_address.landmark' => 'nullable|string|max:255',
@@ -108,6 +110,9 @@ class CashfreeApiController extends Controller
             'gst.business_name'         => 'nullable|string|max:150',
         ], [
             'user.mobile.regex'            => 'Enter a 10-digit mobile number.',
+            'user.email.required'          => 'Add your email address.',
+            'user.email.email'             => 'Enter a valid email address.',
+            'shipping_address.address.required' => 'Add the delivery address.',
             'shipping_address.phone.regex' => 'Enter a 10-digit phone for delivery.',
             'shipping_address.pincode.regex' => 'Enter a 6-digit pincode.',
             'gst.gstin.regex'              => "That GSTIN doesn't look right.",
@@ -154,7 +159,9 @@ class CashfreeApiController extends Controller
 
         $totals = $priced['totals'] ?? [];
         $offers = $wholesale ? null : ($priced['offers'] ?? null);
-        $payable = round((float) ($offers['total'] ?? $totals['subtotal'] ?? 0), 2);
+        /* Retail: subtotal − offers + shipping; wholesale: subtotal + 5% GST + shipping (ShippingService). */
+        $shipping = round((float) ($priced['shipping']['amount'] ?? 0), 2);
+        $payable = round((float) ($priced['payable'] ?? $offers['total'] ?? $totals['subtotal'] ?? 0), 2);
         if ($payable <= 0) {
             return $this->fail("Couldn't work out your total — please try again.", 422);
         }
@@ -196,7 +203,7 @@ class CashfreeApiController extends Controller
         /* ---------- the order ---------- */
 
         $order = DB::transaction(function () use (
-            $user, $name, $email, $contact, $ship, $gst, $wholesale, $online, $payable,
+            $user, $name, $email, $contact, $ship, $gst, $wholesale, $online, $payable, $shipping,
             $discount, $appliedCoupon, $lines, $gift, $request
         ) {
             $address = implode(', ', array_filter([
@@ -212,7 +219,7 @@ class CashfreeApiController extends Controller
             $order->trans_gstin = $gst['gstin'] ?? '';
             $order->trans_business_name = $gst['business_name'] ?? null;
             $order->trans_notes = $request->input('notes') ?: null;
-            $order->trans_shipping_amount = '0.00';
+            $order->trans_shipping_amount = number_format($shipping, 2, '.', '');
             $order->trans_discount_amount = number_format($discount, 2, '.', '');
             $order->trans_status = self::PENDING;
             $order->trans_payment_status = self::PENDING;
@@ -368,6 +375,9 @@ class CashfreeApiController extends Controller
             'coupon_code'      => $order->trans_coupon_code ?: null,
             'coupon_discount'  => (float) $order->trans_coupon_dis_amt,
             'shipping'         => (float) $order->trans_shipping_amount,
+            // Wholesale bills 5% GST on the items (ShippingService); retail prices include it.
+            'gst'              => $order->trans_is_wholesale
+                ? round($items->sum('total') * ShippingService::WHOLESALE_GST_PERCENT / 100, 2) : 0.0,
             'gstin'            => $order->trans_gstin ?: null,
             'items'            => $items,
         ];

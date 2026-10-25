@@ -5,7 +5,7 @@ import { CartBodySkeleton } from "@/components/ui/Skeleton";
 import { useStore } from "@/components/shell/StoreProvider";
 import { inrExact, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
-import type { CartTotals } from "@/lib/cart";
+import type { CartCharges, CartTotals } from "@/lib/cart";
 import { REWARD, type CartOffers } from "@/lib/offers";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import { CartProgress, CouponBox } from "@/components/cart/Offers";
@@ -29,29 +29,41 @@ export function LineQty({ l }: { l: CartLine }) {
 /** "1,220.00" — the breakdown reads in rupees with paise. */
 const amt = (n: number) => n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/** What the order comes to: the server's figure when it priced the cart
-    (offers and coupon already taken off), else the plain subtotal. */
-export const orderTotal = (subtotal: number, server?: CartTotals | null, offers?: CartOffers | null) =>
-  offers?.total ?? server?.subtotal ?? subtotal;
+/** What the order comes to: the server's payable figure when it priced the cart
+    (offers and coupon off, shipping and wholesale GST on), else the plain subtotal. */
+export const orderTotal = (subtotal: number, server?: CartTotals | null, offers?: CartOffers | null, charges?: CartCharges | null) =>
+  charges?.payable ?? offers?.total ?? server?.subtotal ?? subtotal;
 
 /**
  * The money breakdown, shared by the cart and checkout: Total MRP / Total
  * Discount | Subtotal | offer + coupon | Shipping | (GST) | Total Amount.
- * `server` is the server's own totals and `offers` its retail offers (POST
- * /api/cart/price — milestone, coupon, free gift, free shipping), both there
- * only when it priced the whole cart. Retail: GST included, offers apply.
- * Wholesale: no offers or coupon, GST added on the invoice.
+ * `server` is the server's own totals, `offers` its retail offers (POST
+ * /api/cart/price — milestone, coupon, free gift, free shipping) and
+ * `charges` its shipping, GST and payable total, all there only when it
+ * priced the whole cart. Retail: GST included, offers apply. Wholesale: no
+ * offers or coupon, shipping never free, 5% GST added on the subtotal.
+ * Shipping and GST amounts are worked out on checkout only (`checkout`);
+ * the cart says they come at checkout and totals the items alone.
  */
-export function Totals({ subtotal: local, wholesale, server, offers }: {
-  subtotal: number; wholesale: boolean; server?: CartTotals | null; offers?: CartOffers | null;
+export function Totals({ subtotal: local, wholesale, server, offers, charges: quoted, checkout = false }: {
+  subtotal: number; wholesale: boolean; server?: CartTotals | null; offers?: CartOffers | null; charges?: CartCharges | null;
+  checkout?: boolean;
 }) {
+  const charges = checkout ? quoted : null;
+  const pending = checkout ? "Calculating…" : "Calculated at checkout";
   const subtotal = server?.subtotal ?? local;
   const mrp = server?.mrp ?? subtotal;
   const mrpOff = server?.discount ?? Math.max(0, mrp - subtotal);
   const milestone = wholesale ? null : offers?.milestone;
   const coupon = !wholesale && offers?.coupon?.applied ? offers.coupon : null;
   const gift = milestone?.tiers.find((t) => t.id === milestone.reached_tier_id && t.reward_type === REWARD.product)?.product;
-  const free = !wholesale && !!offers?.shipping.free;
+  const { cart } = useStore();
+  const ship = charges?.shipping;
+  /* Until the server's quote is in: retail is free past the threshold or when every
+     piece ships free (product_shipping_free). Wholesale shipping is never free. */
+  const free = ship ? ship.free
+    : !wholesale && (!!offers?.shipping.free || (cart.length > 0 && cart.every((l) => l.shippingFree)));
+  const gst = wholesale ? charges?.gst : null;
   const saved = mrpOff + (wholesale ? 0 : offers?.discount ?? 0);
   return (
     <dl className="st-tot">
@@ -72,12 +84,14 @@ export function Totals({ subtotal: local, wholesale, server, offers }: {
       {gift && <div><dt>Free gift · {gift.name}</dt><dd className="st-co__free">Free</dd></div>}
       <div>
         <dt>Shipping Amount</dt>
-        <dd>{free ? <span className="st-co__free">Free</span> : <small>Calculated on your address</small>}</dd>
+        <dd>{free ? <span className="st-co__free">Free</span> : ship ? amt(ship.amount) : <small>{pending}</small>}</dd>
       </div>
-      {wholesale && <div><dt>GST</dt><dd><small>Added on the invoice</small></dd></div>}
+      {wholesale && (
+        <div><dt>GST{gst ? ` (${gst.rate}%)` : ""}</dt><dd>{gst ? amt(gst.amount) : <small>{checkout ? pending : "Added at checkout"}</small>}</dd></div>
+      )}
       <div className="st-tot__grand">
-        <dt>{wholesale ? "Total Amount (before GST)" : "Total Amount"}</dt>
-        <dd>{inrExact(orderTotal(subtotal, server, offers))}</dd>
+        <dt>{wholesale && !gst ? "Total Amount (before GST)" : "Total Amount"}</dt>
+        <dd>{inrExact(orderTotal(subtotal, server, offers, charges))}</dd>
       </div>
       {saved > 0 && <div className="st-tot__saved st-co__saved"><dt>You save</dt><dd>{inrExact(saved)} on this order</dd></div>}
     </dl>
@@ -153,6 +167,7 @@ export default function CartView() {
                     <div className="st-co__lt">
                       {l.href ? <Link href={l.href} className="st-co__n">{l.name}</Link> : <span className="st-co__n">{l.name}</span>}
                       <small>{inrExact(l.price)} · {unitLabel(l.unit)}{wholesale ? " · +GST" : ""}{l.minQty ? ` · min ${l.minQty} m` : ""}</small>
+                      {l.shippingFree && <span className="st-co__shipfree"><Icon name="truck" size={12} strokeWidth={2} /> Free shipping</span>}
                       {errors[l.id] && <em className="st-co__err">{errors[l.id]} Remove it to continue.</em>}
                       <div className="st-co__lf">
                         <LineQty l={l} />
