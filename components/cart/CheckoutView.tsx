@@ -271,8 +271,8 @@ export default function CheckoutView() {
           <div className="st-co__form">
             {!wholesale && !user && (
               <p className="st-co__guest">
-                <Icon name="user" size={15} /> Checking out as a guest ·{" "}
-                <button type="button" onClick={() => openLogin("Log in to fill in your details")}>Log in</button> to fill in your details
+                <Icon name="user" size={15} />
+                Just <button type="button" onClick={() => openLogin("Log in to fill in your details")}>Sign-in</button>& get more coupons·
               </p>
             )}
 

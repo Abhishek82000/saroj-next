@@ -26,6 +26,10 @@ const paths: Record<string, React.ReactNode> = {
   tag: <><path d="M3 12V4h8l10 10-8 8L3 12Z" /><circle cx="7.5" cy="8.5" r="1.5" /></>,
   gift: <><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M5 12v9h14v-9M12 8v13M12 8S10.5 3.5 8 4.5 9 8 12 8Zm0 0s1.5-4.5 4-3.5S15 8 12 8Z" /></>,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  home: <><path d="M3.5 11 12 4l8.5 7" /><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5" /></>,
+  grid: <><rect x="4" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" /></>,
+  /* A clay pot — handicraft. */
+  craft: <><path d="M9 3h6M10 3v3C7 7.5 5 10 5 13.5 5 17.6 8.1 21 12 21s7-3.4 7-7.5C19 10 17 7.5 14 6V3" /><path d="M5.6 12h12.8M6.4 16.5h11.2" /></>,
 };
 
 export default function Icon({ name, size = 17, fill = "none", strokeWidth = 1.5, className }: {
