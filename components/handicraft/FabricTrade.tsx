@@ -1,4 +1,6 @@
-const CDN = "https://saroj-textile-store.b-cdn.net/products/";
+import ShowMore from "@/components/ui/ShowMore";
+
+const CDN ="https://saroj-textile-store.b-cdn.net/products/";
 
 type Trade = {
   id: string;
@@ -76,9 +78,11 @@ export default function FabricTrade() {
               <span className="hc-trade__num" aria-hidden="true">{t.num}</span>
               <h2 id={`${t.id}-title`} className="hc-h2 rv" data-d="1">{t.title[0]} <em>{t.title[1]}</em></h2>
               {t.sub && <p className="hc-trade__sub rv" data-d="2">{t.sub}</p>}
-              {t.body.map((para, i) => (
-                <p key={i} className="hc-lede hc-trade__p rv" data-d={Math.min(i + 2, 4)}>{para}</p>
-              ))}
+              <div className="rv" data-d="2">
+                <ShowMore height="9em">
+                  {t.body.map((para, i) => <p key={i} className="hc-lede hc-trade__p">{para}</p>)}
+                </ShowMore>
+              </div>
               <p className="hc-trade__signoff rv" data-d="4">{t.signoff}</p>
             </div>
           </div>

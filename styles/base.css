@@ -181,3 +181,12 @@ button{ font-family:inherit; }
 @supports not selector(::-webkit-scrollbar){
   *{ scrollbar-width:thin; scrollbar-color:var(--sb-firefox) transparent; }
 }
+
+/* ---------- ShowMore: long copy clamped under a fade, with a toggle (components/ui/ShowMore) ---------- */
+.st-more__box{ overflow:hidden; }
+.st-more.is-clamped .st-more__box{ -webkit-mask-image:linear-gradient(180deg,#000 55%,transparent); mask-image:linear-gradient(180deg,#000 55%,transparent); }
+.st-more__btn{ display:inline-flex; align-items:center; gap:.4em; margin-top:.7rem; padding:0; border:0; background:none; cursor:pointer;
+  font:inherit; font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:inherit;
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.35em; }
+.st-more__btn:hover{ opacity:.75; }
+.st-more__btn:focus-visible{ outline:2px solid currentColor; outline-offset:3px; border-radius:2px; }

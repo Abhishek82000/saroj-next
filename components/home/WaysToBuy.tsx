@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
+import ShowMore from "@/components/ui/ShowMore";
 import { WHOLESALE_HOME } from "@/lib/wholesale";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
@@ -84,8 +85,10 @@ export default function WaysToBuy() {
           <div className="wb-text">
             <Reveal as="p" delay={1} className="wb-kicker">{w.kicker}</Reveal>
             <Reveal as="h2" delay={2} className="wb-heading" id={`wb-${w.id}`}>{w.title}</Reveal>
-            <Reveal delay={3} className="wb-copy">
-              {w.copy.map((para) => <p key={para}>{para}</p>)}
+            <Reveal delay={3}>
+              <ShowMore height="8em">
+                <div className="wb-copy">{w.copy.map((para) => <p key={para}>{para}</p>)}</div>
+              </ShowMore>
             </Reveal>
             <Reveal delay={4} className="wb-actions">
               <Link href={w.href} className="wb-cta">

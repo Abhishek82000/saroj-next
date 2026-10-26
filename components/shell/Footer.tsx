@@ -1,5 +1,10 @@
+"use client";
+import { usePathname } from "next/navigation";
 import Link from "@/components/ui/SiteLink";
 import { site } from "@/lib/site";
+
+/** A handicraft category for the /handicraft footer. */
+export interface FooterCat { name: string; href: string; image: string }
 
 const columns = [
   {
@@ -56,15 +61,24 @@ const Svg = ({ d }: { d: string }) => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={d} /></svg>
 );
 
-export default function Footer() {
+export default function Footer({ handicraftCats = [] }: { handicraftCats?: FooterCat[] }) {
   const [fb, ig] = site.social;
+  /* On the handicraft home, the swatch strip and the first column show handicraft categories instead of fabric. */
+  const craft = usePathname() === "/handicraft" && handicraftCats.length > 0;
+  const strip = craft
+    ? handicraftCats.slice(0, 8).map((c) => ({ name: c.name, href: c.href, src: c.image }))
+    : swatches.map(([name, slug, file]) => ({ name, href: `/shop/${slug}`, src: CAT + file }));
+  const cols = craft
+    ? [{ title: "Handicraft", links: [["/handicraft", "All handicraft"], ...handicraftCats.slice(0, 7).map((c) => [c.href, c.name])] }, ...columns.slice(1)]
+    : columns;
+
   return (
     <footer className="st-foot">
-      <nav className="st-foot__swatches" aria-label="Shop by fabric">
-        {swatches.map(([name, slug, file]) => (
-          <Link key={slug} className="st-foot__sw" href={`/shop/${slug}`}>
-            <img src={CAT + file} alt="" loading="lazy" width={160} height={110} />
-            <span>{name}</span>
+      <nav className="st-foot__swatches" aria-label={craft ? "Shop by handicraft" : "Shop by fabric"}>
+        {strip.map((s) => (
+          <Link key={s.href} className="st-foot__sw" href={s.href}>
+            <img src={s.src} alt="" loading="lazy" width={160} height={110} />
+            <span>{s.name}</span>
           </Link>
         ))}
       </nav>
@@ -78,7 +92,7 @@ export default function Footer() {
           <address>{site.address.street}, {site.address.city} {site.address.postalCode}</address>
         </div>
 
-        {columns.map((c) => (
+        {cols.map((c) => (
           <nav key={c.title} className="st-foot__col" aria-label={c.title}>
             <h2 className="st-foot__h">{c.title}</h2>
             <ul>

@@ -7,14 +7,14 @@ import { useStore } from "./StoreProvider";
 
 /**
  * The phone's bottom tab bar (hidden from 900px up, where the header has room
- * for everything): Home · Handicraft · Account · Wholesale · Cart. It follows
+ * for everything): Home · Handicraft · Wholesale · Cart. It follows
  * the header's rules — Home and Cart stay in the current mode, the Wholesale
- * tab becomes "Retail" while in wholesale (the store's `navItem`), Account
- * opens login when logged out, and Cart opens the drawer. Left out of
+ * tab becomes "Retail" while in wholesale (the store's `navItem`), and Cart
+ * opens the drawer. Left out of
  * checkout, which keeps its own Pay button at the bottom.
  */
 export default function TabBar() {
-  const { count, cartOpen, setCartOpen, href, navItem, mode, user, openLogin, withLogin } = useStore();
+  const { count, cartOpen, setCartOpen, href, navItem, mode, withLogin } = useStore();
   const path = usePathname() ?? "/";
   if (/\/checkout(\/|$)/.test(path)) return null;
 
@@ -33,15 +33,6 @@ export default function TabBar() {
       <Link href="/handicraft" className={on(path.startsWith("/handicraft"))}>
         <Icon name="craft" size={21} /><span>Handicraft</span>
       </Link>
-      {user ? (
-        <Link href="/account" className={on(path.startsWith("/account"))}>
-          <Icon name="user" size={21} /><span>Account</span>
-        </Link>
-      ) : (
-        <button type="button" className="st-tab" onClick={() => openLogin()}>
-          <Icon name="user" size={21} /><span>Account</span>
-        </button>
-      )}
       <Link href={swap.href} className="st-tab">
         <Icon name="grid" size={21} /><span>{swap.label}</span>
       </Link>

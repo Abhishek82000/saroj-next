@@ -1,4 +1,6 @@
-/* Long-form copy for search: real headings and paragraphs in the markup, held in a fixed-height box that scrolls on its own. */
+import ShowMore from "@/components/ui/ShowMore";
+
+/* Long-form copy for search: real headings and paragraphs in the markup, clamped behind a "Show more". */
 const BLOCKS: { h: string; p: string[] }[] = [
   {
     h: "",
@@ -47,13 +49,15 @@ export default function HandicraftSeo() {
           <p className="hc-lede">Growing up, we had traditional handmade prints and designs drying all around in the sun of Rajasthan. Our traditional handicraft items represent a significant step toward integrating craft into everyday life.</p>
           
         </header>
-        <div className="hc-seo__box" tabIndex={0} aria-label="Handicraft and fabric guide">
-          {BLOCKS.map((b, i) => (
-            <article key={i} id={`hc-seo-${i}`} className="hc-seo__block">
-              <h3>{b.h}</h3>
-              {b.p.map((t, j) => <p key={j}>{t}</p>)}
-            </article>
-          ))}
+        <div className="hc-seo__box" aria-label="Handicraft and fabric guide">
+          <ShowMore height="22em">
+            {BLOCKS.map((b, i) => (
+              <article key={i} id={`hc-seo-${i}`} className="hc-seo__block">
+                {b.h && <h3>{b.h}</h3>}
+                {b.p.map((t, j) => <p key={j}>{t}</p>)}
+              </article>
+            ))}
+          </ShowMore>
         </div>
       </div>
     </section>
