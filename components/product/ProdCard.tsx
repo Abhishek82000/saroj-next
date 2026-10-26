@@ -42,11 +42,17 @@ export default function ProdCard({
         {known && (
           <div className="st-prod__price">
             <b>{inr(view.price)}</b>
-            {p.kind === "fabric" && p.unit && <small>/ {p.unit}</small>}
+            {/* Fabric is priced by the metre; handicraft by the piece. */}
+            <small>/ {p.unit === "metre" ? "metre" : "piece"}</small>
             {view.mrp > view.price && <s>{inr(view.mrp)}</s>}
           </div>
         )}
-        {known && view.mrp > view.price && <span className="st-prod__save">You save {inr(view.mrp - view.price)}</span>}
+        {((known && view.mrp > view.price) || p.shippingFree) && (
+          <div className="st-prod__flags">
+            {known && view.mrp > view.price && <span className="st-prod__save">You save {inr(view.mrp - view.price)}</span>}
+            {p.shippingFree && <span className="st-prod__ship"><Icon name="truck" size={11} strokeWidth={1.8} />Free shipping</span>}
+          </div>
+        )}
       </div>
       {known && mode !== "wholesale" && (
         <button type="button" className="st-prod__add" aria-label={`Add ${p.name} to cart`} disabled={out}

@@ -330,10 +330,6 @@ export default function CheckoutView() {
                   onChange={(e) => update({ sameAsContact: e.target.checked, deliveryPhone: e.target.checked ? "" : f.mobile })} />
                 <span>Same as above</span>
               </label>
-              <div className="st-cf">
-                <textarea id="co-notes" rows={3} value={f.notes} onChange={(e) => update({ notes: e.target.value })} placeholder=" " />
-                <label htmlFor="co-notes">Order notes (optional) — cutting or delivery</label>
-              </div>
             </section>
 
           </div>

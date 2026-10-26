@@ -25,9 +25,10 @@ const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], 
 /** A handicraft category for HandicraftRail: 1 = paper handicraft, 2 = quilted handicraft. */
 export interface HandiCat { id: number; name: string; slug: string; type: 1 | 2; image: string }
 
-/** `handicraft_show_home_page` carries no image, so each category borrows its picture from
-    `handcategories` by id (empty when it has none). Types other than 1 and 2 aren't shown. */
-const toHandiCats = (list: HomeHandiCategory[] | undefined, images: CommonFeaturedCategory[] | undefined): HandiCat[] => {
+/** `handicraft_show_home_page` (and /api/handicraft-data's `handicraft_type_show_home_page`) carries
+    no image, so each category borrows its picture by id from another category list (empty when it
+    has none). Types other than 1 and 2 aren't shown. */
+export const toHandiCats = (list: HomeHandiCategory[] | undefined, images: { id?: number; image?: string | null }[] | undefined): HandiCat[] => {
   const imageById = new Map((images ?? []).map((c) => [c.id, c.image ?? ""]));
   return (list ?? [])
     .filter((c) => (c.cat_handi_type === 1 || c.cat_handi_type === 2) && c.cat_slug)
@@ -81,6 +82,21 @@ export interface CategoryProducts {
   priceRange: { min: number; max: number } | null;
   /** A handful of reduced-price picks for the sidebar's "Recommended" rail. */
   saleProducts: SaleProduct[];
+  /** The category's `cat_short_desc` as plain text; empty for tags or when unset. */
+  shortDesc?: string;
+}
+
+const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&quot;": '"', "&#39;": "'", "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&ndash;": "–", "&mdash;": "—" };
+
+/** Editor HTML → one line of plain text. */
+export function plain(html: string, max?: number): string {
+  const text = html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z#0-9]+;/gi, (e) => ENTITIES[e.toLowerCase()] ?? " ")
+    .replace(/\*\*|__/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return max && text.length > max ? text.slice(0, max).trimEnd() + "…" : text;
 }
 
 const EMPTY_CATEGORY: CategoryProducts = {
@@ -196,6 +212,7 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
 
     return {
       name: name(firstJson),
+      shortDesc: plain(firstJson.data?.category?.cat_short_desc ?? ""),
       products: products.map(apiProductToProduct),
       categories: fallback?.categories ?? categories,
       tags: fallback?.tags ?? tags,
@@ -208,7 +225,7 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
 }
 
 export function getCategoryProducts(slug: string, sort: ProductsApiSort = "new_arrival"): Promise<CategoryProducts> {
-  return getListingProducts({ category: slug }, sort, (j) => j.data?.category?.cat_name ?? "");
+  return getListingProducts({ category: slug }, sort, (j) => j.data?.category?.name ?? "");
 }
 
 /** Every product on the counter, all 40-odd pages — the sitemap only (slow; cached hourly). */
@@ -259,20 +276,26 @@ function apiSaleProductToSaleProduct(p: ProductsApiSaleProduct): SaleProduct {
   };
 }
 
-/** Turns an /api/home product into the shape Rail and the product cards expect. */
+/** `shipping` (product_shipping_free) is 1 / true when the piece ships free. */
+export const shipsFree = (v: HomeApiProduct["shipping"]) => Number(v) === 1;
+
+/** Turns an /api/home product into the shape Rail and the product cards expect.
+    style_type 1 is fabric by the metre; anything else is handicraft, sold by the unit. */
 export function apiProductToProduct(p: HomeApiProduct): Product {
   const price = Number(p.selling_price);
   const mrp = Number(p.price);
+  const fabric = p.style_type === 1;
   return {
     slug: p.slug,
     name: p.name,
     short: p.name,
-    kind: "fabric",
+    kind: fabric ? "fabric" : "craft",
     craft: "",
     material: "",
     price,
     mrp: mrp > price ? mrp : 0,
-    unit: "metre",
+    unit: fabric ? "metre" : "unit",
+    ...(shipsFree(p.shipping) ? { shippingFree: true } : {}),
     stock: p.stock <= 0 ? "out" : p.stock < 10 ? "low" : "in",
     images: [{ src: p.image, note: p.image_alt ?? "" }],
     fresh: p.id,

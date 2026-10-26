@@ -56,6 +56,8 @@ interface RawCard {
   rating: number; review_count: number; stock: number; style_type: number; lgap: number;
   /** Wholesale cards only: the smallest order line (0 = the site default). */
   wh_min_qty?: number;
+  /** product_shipping_free (1 = ships free). */
+  shipping?: boolean | number | string | null;
 }
 
 interface RawDetail {
@@ -133,7 +135,7 @@ function mapProduct(raw: RawProduct): Product {
     material: raw.cut.unit === "metre" ? "Cotton" : "—",
     price: raw.price.selling,
     mrp: raw.price.mrp,
-    unit: raw.cut.unit === "metre" ? "metre" : "each",
+    unit: raw.cut.unit === "metre" ? "metre" : "unit",
     stock: stockLevel(raw.stock),
     images,
     fresh: 0,
@@ -167,7 +169,8 @@ function mapCard(raw: RawCard, wholesale = false): Product {
     material: raw.style_type === 1 ? "Cotton" : "—",
     price: raw.selling,
     mrp: raw.mrp,
-    unit: raw.style_type === 1 ? "metre" : "each",
+    unit: raw.style_type === 1 ? "metre" : "unit",
+    ...(Number(raw.shipping) === 1 ? { shippingFree: true } : {}),
     stock: stockLevel(raw.stock),
     images: [{ src: raw.image, note: raw.image_alt || raw.name }],
     fresh: 0,

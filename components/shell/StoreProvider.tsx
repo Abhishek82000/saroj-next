@@ -31,6 +31,8 @@ const COUPON_KEY = "saroj.coupon";
 /** Where older builds kept each account's wholesale cart; cleared on load. */
 const isOldWholesaleCartKey = (k: string) => k.startsWith("saroj.cart.wholesale.");
 const USER_KEY = "saroj.user";
+/** Set once a visitor has been shown the first-visit login popup. */
+const SEEN_COOKIE = "saroj_seen";
 /** The wishlist lives on the server only (lib/wishlist.ts) — nothing about it
     is kept in the browser, and it's empty while logged out. */
 const EMPTY_WISHLIST: Record<Mode, Favs> = { retail: {}, wholesale: {} };
@@ -144,6 +146,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const userRef = useRef<User | null>(null);
   const wishlistRef = useRef(wishlist);
   const [cartOpen, setCartOpen] = useState(false);
+  const cartOpenRef = useRef(cartOpen);
+  cartOpenRef.current = cartOpen;
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -219,6 +223,19 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   useEffect(() => { if (hydrated) safe.write(COUPON_KEY, coupon); }, [hydrated, coupon]);
   useEffect(() => { if (hydrated) safe.write(USER_KEY, user); }, [hydrated, user]);
 
+  /* A first-time visitor (no SEEN_COOKIE) gets the login popup once, 6s in —
+     unless they've logged in, or have the cart or login already open, by then. */
+  useEffect(() => {
+    if (!hydrated || userRef.current || document.cookie.split("; ").some((c) => c.startsWith(SEEN_COOKIE + "="))) return;
+    const t = setTimeout(() => {
+      if (userRef.current || cartOpenRef.current) return;
+      document.cookie = `${SEEN_COOKIE}=1; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+      setLoginReason(null);
+      setLoginOpen(true);
+    }, 6000);
+    return () => clearTimeout(t);
+  }, [hydrated]);
+
   const say = useCallback((message: string) => {
     setToast(message);
     clearTimeout(timer.current);
@@ -270,6 +287,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     });
     setPulse((n) => n + 1);
     say("Added · " + line.name.slice(0, 32));
+    /* Show the cart with the new line in it. */
+    setCartOpen(true);
   }, [mutate, say, refreshCounts]);
 
 

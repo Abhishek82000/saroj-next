@@ -9,6 +9,7 @@ import FabricStrip from "./FabricStrip";
 import FabricTrade from "./FabricTrade";
 import HandicraftSeo from "./HandicraftSeo";
 import Rail from "@/components/product/Rail";
+import HandicraftRail from "@/components/product/HandicraftRail";
 import Reels from "@/components/home/Reels";
 import Voices from "@/components/home/Voices";
 
@@ -590,6 +591,9 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         </div>
       </section>
 
+      {/* ================= CRAFT BAZAAR — paper and quilted handicraft categories ================= */}
+      <HandicraftRail cats={data.handiCats} id="bazaar" />
+
       {/* ================= CATEGORY RAILS — one per stocked category ================= */}
       {data.categoryRails.map((r, n) => (
         <Fragment key={r.id}>
@@ -627,7 +631,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             <p className="hc-lede rv" data-d="2" style={{fontSize:"16px", fontWeight:"600", marginTop:"4px" }}><em>A quick reminder that each piece passes a high-quality standard and is made by human hands, not factory lines.</em></p>
             {video.href && (
               <div className="hc-hero__cta" style={{ justifyContent: "flex-start" }}>
-                <Link href={video.href} className="hc-btn hc-btn--light">Shop this print</Link>
+                <Link href={video.href} className="hc-btn hc-btn--light">Shop Handicraft</Link>
               </div>
             )}
           </div>

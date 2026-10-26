@@ -42,6 +42,8 @@ export interface Product {
   label?: string;
   /** Trade terms for this piece. Absent when the wholesale feed gave none. */
   wholesale?: WholesaleRate;
+  /** product_shipping_free = 1: the card flags it as shipping free. */
+  shippingFree?: boolean;
 }
 
 export interface CartLine {
@@ -219,6 +221,8 @@ export interface HomeApiProduct {
   review_count: number;
   style_type: number;
   gallery: string[];
+  /** ProductResource's product_shipping_free (1 = ships free). */
+  shipping?: boolean | number | string | null;
 }
 
 export interface HomeTagSection {
@@ -261,7 +265,8 @@ export interface ProductsApiSaleProduct {
 export interface ProductsApiResponse {
   success: boolean;
   data: {
-    category?: CommonCategoryRef | null;
+    /** The listed category itself. `cat_short_desc` is editor HTML, null when unset. */
+    category?: { id: number; name: string; slug: string; cat_short_desc?: string | null } | null;
     /** Present instead of `category` when the listing was fetched by ?tag=<slug>. */
     tag?: { id: number; name: string; slug: string } | null;
     /** Every storefront category, for the "Product categories" sidebar list. */
@@ -302,6 +307,9 @@ export interface HomeVideoProduct {
   product_selling_price: string;
   product_slug: string;
   product_video_cdn: string;
+  /** Wholesale rates — sent in place of the two above by /api/wholesale-page-data. */
+  product_wh_selling_price?: string | number | null;
+  product_wh_mrp_price?: string | number | null;
 }
 
 /** One `top_slider` banner from GET /api/home. `type` 2 links a category, 3 a tag. */

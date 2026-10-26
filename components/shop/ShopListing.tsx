@@ -32,6 +32,7 @@ export default function ShopListing({
   /** The live list from the API — every product (/shop), a category or a tag. */
   items: Product[];
   title?: string;
+  /** Line under the heading; empty or absent hides it. */
   lede?: string;
   /** A category page's live sidebar facets — every storefront category, its tags,
       the live price range and a few reduced-price picks. Absent on the plain /shop page. */
@@ -164,9 +165,7 @@ export default function ShopListing({
             <span>{f.state.q ? "Search" : title}</span>
           </nav>
           <h1>{title}</h1>
-          <p>
-            {lede ?? "Handicraft from six Jaipur lanes and the cotton it sits beside. Fabric is priced by the metre, handicraft by the piece."}
-          </p>
+          {lede && <p>{lede}</p>}
         </div>
       </div>
 

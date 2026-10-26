@@ -1,7 +1,7 @@
-import { apiProductToProduct, buildReels, toSlides } from "./home";
+import { apiProductToProduct, buildReels, toHandiCats, toSlides, type HandiCat } from "./home";
 import { categoryHref } from "./nav";
 import { site } from "./site";
-import type { BannerSlide, HomeApiSlide, Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeTagSection, HomeVideoProduct } from "./types";
+import type { BannerSlide, HomeApiSlide, Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeHandiCategory, HomeTagSection, HomeVideoProduct } from "./types";
 
 export interface HandicraftApiTestimonial {
   id: number;
@@ -29,6 +29,8 @@ export interface HandicraftApiResponse {
     handicraftCategory?: HandicraftApiFeatCategory[];
     /** Handicraft categories with their products — the page's product rails. */
     handicraft_show_home_page?: HomeCategorySection[];
+    /** Paper (type 1) and quilted (type 2) handicraft categories, for HandicraftRail — no images. */
+    handicraft_type_show_home_page?: HomeHandiCategory[];
     /** Small banners between the category rails — the same shape as /api/home's. */
     middle_slider?: HomeApiSlide[];
   };
@@ -94,10 +96,12 @@ export interface HandicraftData {
   reels: Reel[];
   /** `middle_slider` — small banners after the second category rail. */
   midSlides: BannerSlide[];
+  /** `handicraft_type_show_home_page` — paper and quilted categories, drawn by HandicraftRail. */
+  handiCats: HandiCat[];
 }
 
 const EMPTY: HandicraftData = {
-  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, tagRails: [], categoryRails: [], reels: [], midSlides: [],
+  columnImages: [], plates: [], swatches: [], faces: [], fabricSlides: [], bolts: [], video: null, voices: [], collections: 0, tagRails: [], categoryRails: [], reels: [], midSlides: [], handiCats: [],
 };
 
 const productHref = (slug: string) => `/product/${slug}`;
@@ -181,9 +185,15 @@ export async function getHandicraftData(): Promise<HandicraftData> {
       }).map((r) => ({ ...r, kind: "Handicraft" as const, unit: "piece" })),
       tagRails: (d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
         .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
-      categoryRails: (handRails.length ? handRails : stocked)
-        .map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
+      /* Handicraft rails are sold by the unit whatever style_type says. */
+      categoryRails: handRails.length
+        ? handRails.map((c) => ({ id: c.cat_slug, heading: c.cat_name,
+            items: c.products.map((p) => ({ ...apiProductToProduct(p), kind: "craft" as const, unit: "unit" })) }))
+        : stocked.map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
       midSlides: toSlides(d.middle_slider),
+      /* Pictures borrowed by id from handicraftCategory, which carries them. */
+      handiCats: toHandiCats(d.handicraft_type_show_home_page,
+        (d.handicraftCategory ?? []).map((c) => ({ id: c.id ?? c.cat_id, image: c.image ?? c.cat_cdn_url ?? c.image_cdn ?? c.cat_image }))),
     };
   } catch {
     return EMPTY;

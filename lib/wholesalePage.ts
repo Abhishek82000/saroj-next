@@ -1,4 +1,4 @@
-import { apiProductToProduct, getHomeData, toSlides } from "./home";
+import { apiProductToProduct, getHomeData, plain, toSlides } from "./home";
 import { site } from "./site";
 import { WHOLESALE_MIN_METRES, forMode, wholesaleCategoryHref } from "./wholesale";
 import { attachWholesale } from "./wholesalePrices";
@@ -27,19 +27,6 @@ export interface WholesalePage {
   reels: Reel[];
 }
 
-const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&quot;": '"', "&#39;": "'", "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&ndash;": "–", "&mdash;": "—" };
-
-/** Editor HTML → one line of plain text. */
-function plain(html: string, max?: number): string {
-  const text = html
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&[a-z#0-9]+;/gi, (e) => ENTITIES[e.toLowerCase()] ?? " ")
-    .replace(/\*\*|__/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  return max && text.length > max ? text.slice(0, max).trimEnd() + "…" : text;
-}
-
 const toCollection = (c: WholesaleApiCategory): WholesaleCollection => ({
   id: c.cat_id, name: c.cat_name, heading: c.cat_heading || c.cat_name, slug: c.cat_slug,
   blurb: plain(c.cat_short_desc ?? "", 150), image: c.cat_cdn_url, banner: c.cat_banner_cdn || c.cat_cdn_url,
@@ -60,10 +47,11 @@ function toProduct(p: WholesaleApiProduct): Product {
 function toReels(videos: HomeVideoProduct[], rails: WholesaleRail[]): Reel[] {
   const imageById = new Map<number, string>();
   for (const r of rails) for (const p of r.items) if (p.productId) imageById.set(p.productId, p.images[0]?.src ?? "");
-  /* A clip of a piece with no wholesale price isn't shown. */
-  return videos.filter((v) => v.product_video_cdn && Number(v.product_selling_price) > 0).map((v) => {
-    const price = Number(v.product_selling_price) || 0;
-    const mrp = Number(v.product_price) || 0;
+  /* Priced from product_wh_selling_price / product_wh_mrp_price; a clip of a piece with no wholesale price isn't shown. */
+  const whPrice = (v: HomeVideoProduct) => Number(v.product_wh_selling_price) || 0;
+  return videos.filter((v) => v.product_video_cdn && whPrice(v) > 0).map((v) => {
+    const price = whPrice(v);
+    const mrp = Number(v.product_wh_mrp_price) || 0;
     return {
       id: `reel-${v.product_id}`, video: v.product_video_cdn, kind: "Fabric", name: v.product_name,
       price, mrp: mrp > price ? mrp : 0, unit: "metre",
@@ -136,7 +124,7 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
       rails,
       tagRails: tags,
       midSlides: toSlides(d.middle_slider, wholesaleCategoryHref),
-      /* The feed sends wholesale rates under the usual price names; thumbnails come from the rails. */
+      /* Thumbnails come from the rails. */
       reels: toReels(d.video_products ?? [], [...rails, ...tags]),
     };
   } catch {
