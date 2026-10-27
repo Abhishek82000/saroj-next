@@ -17,6 +17,7 @@
  */
 import type { CartLine } from "./types";
 import { inr, site } from "./site";
+import { cartImage } from "./cart";
 
 /** ar_promo_tiers.tier_reward_type */
 export const REWARD = { percent: 0, flat: 1, coupon: 2, product: 3 } as const;
@@ -211,7 +212,7 @@ export function offerSlides(feed: OffersFeed): OfferSlide[] {
           : "Taken off in your cart automatically — no code needed.",
       terms: [`Cart over ${inr(t.min_amount)}`],
       code: null,
-      image: t.reward_type === REWARD.product ? t.product?.image ?? null : null,
+      image: t.reward_type === REWARD.product && t.product?.image ? cartImage(t.product.image) : null,
       cta: shop,
     });
   });

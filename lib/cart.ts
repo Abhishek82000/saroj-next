@@ -104,6 +104,19 @@ function findLines(root: unknown): ServerCartLine[] | undefined {
   return empty;
 }
 
+const OLD_UPLOADS = /^https?:\/\/(?:www\.)?sarojtextile\.com\/(?:public\/)?img\/uploads\//;
+
+/** The cart API builds its line images on the old storefront origin
+    (https://www.sarojtextile.com/public/img/uploads/…), which 404s now that
+    the API lives at site.api. Product photos are served from the CDN, as the
+    product cards already load them; any other upload moves to the API origin. */
+export function cartImage(src: string | null | undefined): string {
+  if (!src) return "";
+  const product = src.match(/\/img\/uploads\/products\/([^/?#]+)$/);
+  if (product) return `https://saroj-textile-store.b-cdn.net/products/${product[1]}`;
+  return src.replace(OLD_UPLOADS, `${site.api}/public/img/uploads/`);
+}
+
 /** A server line as the local cart holds it — same `id` scheme as the add buttons use. */
 export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): CartLine | null {
   if (!l.slug || !l.name || l.error) return null;
@@ -113,7 +126,7 @@ export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): Car
     name: l.name,
     price: l.price,
     unit: l.unit ?? "piece",
-    image: l.image ?? "",
+    image: cartImage(l.image),
     qty: l.qty,
     step: l.step || 1,
     href: type === "wholesale" ? wholesaleHref(href) : href,

@@ -5,6 +5,7 @@ import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { readOrderSnapshot, type OrderPaymentStatus, type ReceiptItem } from "@/lib/checkout";
 import { inrExact, site } from "@/lib/site";
+import { cartImage } from "@/lib/cart";
 
 /**
  * The thank-you page — shown by OrderStatusView once an order is paid (or,
@@ -155,12 +156,12 @@ export default function ThankYouView({ order }: { order: OrderPaymentStatus }) {
     if (r?.items.length) {
       return r.items.map((it, i) => {
         const match = snap.find((s) => s.name === it.name) ?? snap[i];
-        return { ...it, photo: match?.image || (it.image?.startsWith("http") ? it.image : null) };
+        return { ...it, photo: cartImage(match?.image) || (it.image?.startsWith("http") ? cartImage(it.image) : null) };
       });
     }
     return snap.map((s) => ({
       name: s.name, image: s.image, variant: null, qty: s.qty, mrp: s.price, price: s.price,
-      total: Math.round(s.price * s.qty * 100) / 100, photo: s.image,
+      total: Math.round(s.price * s.qty * 100) / 100, photo: cartImage(s.image) || null,
     }));
   }, [order.orderNumber, r]);
 

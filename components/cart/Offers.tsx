@@ -4,6 +4,7 @@ import Icon from "@/components/ui/Icon";
 import { useStore } from "@/components/shell/StoreProvider";
 import { applyCouponRemote, REWARD, type CartOffers, type Milestone, type OfferCard } from "@/lib/offers";
 import { inrExact, site } from "@/lib/site";
+import { cartImage } from "@/lib/cart";
 
 /**
  * The retail cart's offers — used by the cart drawer, the cart page and checkout.
@@ -103,7 +104,7 @@ function MilestoneBar({ m, compact }: { m: Milestone; compact: boolean }) {
       {giftTier?.product && (
         <p className="st-ms__gift">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={giftTier.product.image} alt="" />
+          <img src={cartImage(giftTier.product.image)} alt="" />
           <span><b>Free gift:</b> {giftTier.product.name} — packed with your order.</span>
         </p>
       )}
