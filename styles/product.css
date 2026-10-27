@@ -195,7 +195,7 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 /* ---------- tabs ---------- */
 .st-tabs{ display:flex; gap:.4rem; border-bottom:1px solid var(--line-2); overflow-x:auto; scrollbar-width:none; }
 .st-tabs::-webkit-scrollbar{ display:none; }
-.st-tab{ border:0; background:transparent; cursor:pointer; padding:.8rem; white-space:nowrap;
+.st-tab{ border:0; background:transparent; cursor:pointer; padding:.7rem; white-space:nowrap;
          font-size:.63rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700; color:var(--mute);
          border-bottom:2px solid transparent; margin-bottom:-1px; transition:.3s var(--ease); }
 .st-tab:hover{ color:var(--ink); }
