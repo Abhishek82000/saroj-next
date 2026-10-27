@@ -3,6 +3,7 @@ import { site } from "./site";
 import { WHOLESALE_MIN_METRES, forMode, wholesaleCategoryHref } from "./wholesale";
 import { attachWholesale } from "./wholesalePrices";
 import type { BannerSlide, HomeVideoProduct, Product, Reel, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse } from "./types";
+import { fixImages } from "./img";
 
 export type WholesaleSlide = BannerSlide;
 export interface WholesaleCollection { id: number; name: string; heading: string; slug: string; blurb: string; image: string; banner: string }
@@ -98,7 +99,7 @@ export async function getWholesalePage(): Promise<WholesalePage | null> {
   try {
     const res = await fetch(`${site.api}/api/wholesale-page-data`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
-    const { data: d }: WholesalePageApiResponse = await res.json();
+    const { data: d }: WholesalePageApiResponse = fixImages(await res.json());
     if (!d) return null;
     const [rails, tags] = await Promise.all([
       priceRails((d.category_show_home_page ?? [])

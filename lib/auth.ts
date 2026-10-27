@@ -1,5 +1,6 @@
 import { site } from "./site";
 import { fetchRetrying } from "./retry";
+import { fixImages } from "./img";
 
 /**
  * OTP login against the storefront's JSON API — mobile → 4-digit OTP → a name
@@ -113,7 +114,7 @@ async function call(
     const init: RequestInit = { method: opts.method ?? "POST", headers, body: opts.body ? JSON.stringify(opts.body) : undefined };
     const url = `${site.api}/api/auth/${path}${qs}`;
     const res = opts.retry ? await fetchRetrying(url, init) : await fetch(url, init);
-    const json: ApiBody = await res.json().catch(() => ({}));
+    const json: ApiBody = fixImages(await res.json().catch(() => ({})));
     if (res.status === 429) return { ok: false, message: "Too many attempts — wait a minute and try again." };
     if (!res.ok || failed(json)) {
       const first = json.errors ? Object.values(json.errors)[0]?.[0] : undefined;

@@ -2,6 +2,7 @@ import { site } from "./site";
 import type {
   BlogApiCategory, BlogApiPost, BlogApiRelatedProduct, BlogDetailApiResponse, BlogsListApiResponse, Product,
 } from "./types";
+import { fixImages } from "./img";
 
 const BLOG_IMG = (file: string | null) => (file ? `${site.api}/img/uploads/blogs/${file}` : "");
 
@@ -55,7 +56,7 @@ export async function getBlogList(page = 1, category?: string): Promise<BlogList
     const q = category ? `&category=${encodeURIComponent(category)}` : "";
     const res = await fetch(`${site.api}/api/blogs?page=${page}${q}`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY_LIST;
-    const json: BlogsListApiResponse = await res.json();
+    const json: BlogsListApiResponse = fixImages(await res.json());
     return {
       posts: (json.data?.blogs ?? []).map(toSummary),
       categories: json.data?.categories ?? [],
@@ -102,7 +103,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     const res = await fetch(`${site.api}/api/blogs/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
-    const json: BlogDetailApiResponse = await res.json();
+    const json: BlogDetailApiResponse = fixImages(await res.json());
     const b = json.data?.blog;
     if (!b) return null;
     return {

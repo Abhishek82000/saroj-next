@@ -34,6 +34,7 @@ import type { CartOffers, ShippingProgress } from "./offers";
 import { wholesaleHref } from "./wholesale";
 import { site } from "./site";
 import { fetchRetrying } from "./retry";
+import { fixImage, fixImages } from "./img";
 export interface CartAddPayload {
   type: "retail" | "wholesale";
   product_id: number;
@@ -65,7 +66,7 @@ async function call<T>(path: string, init: RequestInit, token?: string): Promise
     if (token) headers.Authorization = `Bearer ${token}`;
     const url = `${site.api}/api/cart${path.startsWith("?") ? path : `/${path}`}`;
     const res = await fetchRetrying(url, { ...init, headers });
-    const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string } & T;
+    const json = (fixImages(await res.json().catch(() => ({})))) as { status?: string; message?: string } & T;
     if (res.status === 429) return { ok: false, message: "Too many requests — wait a minute and try again." };
     if (!res.ok || json.status === "error") return { ok: false, message: json.message ?? "Couldn't update the cart." };
     return { ...json, ok: true };
@@ -104,18 +105,9 @@ function findLines(root: unknown): ServerCartLine[] | undefined {
   return empty;
 }
 
-const OLD_UPLOADS = /^https?:\/\/(?:www\.)?sarojtextile\.com\/(?:public\/)?img\/uploads\//;
-
-/** The cart API builds its line images on the old storefront origin
-    (https://www.sarojtextile.com/public/img/uploads/…), which 404s now that
-    the API lives at site.api. Product photos are served from the CDN, as the
-    product cards already load them; any other upload moves to the API origin. */
-export function cartImage(src: string | null | undefined): string {
-  if (!src) return "";
-  const product = src.match(/\/img\/uploads\/products\/([^/?#]+)$/);
-  if (product) return `https://saroj-textile-store.b-cdn.net/products/${product[1]}`;
-  return src.replace(OLD_UPLOADS, `${site.api}/public/img/uploads/`);
-}
+/** A cart, order or gift image as it can be shown — see fixImage. Responses are
+    already fixed as they're parsed; this covers lines saved in the browser earlier. */
+export const cartImage = fixImage;
 
 /** A server line as the local cart holds it — same `id` scheme as the add buttons use. */
 export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): CartLine | null {

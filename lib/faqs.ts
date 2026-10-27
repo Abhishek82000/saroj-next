@@ -1,5 +1,6 @@
 import { site } from "./site";
 import type { FaqsApiResponse } from "./types";
+import { fixImages } from "./img";
 
 export interface Faq {
   id: number;
@@ -20,7 +21,7 @@ export async function getFaqs(): Promise<Faq[]> {
   try {
     const res = await fetch(`${site.api}/api/faqs`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
-    const json: FaqsApiResponse = await res.json();
+    const json: FaqsApiResponse = fixImages(await res.json());
     return (json.data?.faqs ?? [])
       .filter((f) => f.faq_status === 1)
       .map((f) => ({ id: f.faq_id, question: f.faq_title, html: f.faq_description, text: stripHtml(f.faq_description) }));

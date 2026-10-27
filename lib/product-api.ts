@@ -4,6 +4,7 @@ import type {
 } from "./types";
 import { site } from "./site";
 import { WHOLESALE_MIN_METRES } from "./wholesale";
+import { fixImages } from "./img";
 
 /**
  * Talks to ProductApiDetailController.
@@ -203,7 +204,7 @@ async function get<T>(path: string, strict = false): Promise<T | null> {
   if (strict && !res.ok && res.status !== 404) throw new ApiUnavailableError(`${res.status}: ${path}`);
   try {
     if (!res.ok) return null;
-    const json = await res.json();
+    const json = fixImages(await res.json());
     return json?.success ? (json.data as T) : null;
   } catch {
     // A storefront that 500s because the API blinked is worse than one that
@@ -265,7 +266,7 @@ export async function fetchVariation(
       cache: "no-store",
     });
     if (!res.ok) return null;
-    const json = await res.json();
+    const json = fixImages(await res.json());
     return json?.success ? json.data : null;
   } catch {
     return null;

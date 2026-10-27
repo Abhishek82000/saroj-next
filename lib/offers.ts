@@ -18,6 +18,7 @@
 import type { CartLine } from "./types";
 import { inr, site } from "./site";
 import { cartImage } from "./cart";
+import { fixImages } from "./img";
 
 /** ar_promo_tiers.tier_reward_type */
 export const REWARD = { percent: 0, flat: 1, coupon: 2, product: 3 } as const;
@@ -112,7 +113,7 @@ async function send<T>(path: string, init: RequestInit, token?: string) {
     if (init.body) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(`${site.api}/api/offers${path}`, { ...init, headers });
-    const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string } & T;
+    const json = (fixImages(await res.json().catch(() => ({})))) as { status?: string; message?: string } & T;
     return { ok: res.ok && json.status !== "error", json };
   } catch {
     return { ok: false, json: { message: "Couldn't reach the server." } as { message?: string } & Partial<T> };
@@ -140,7 +141,7 @@ export async function getOffersFeed(): Promise<OffersFeed | null> {
   try {
     const res = await fetch(`${site.api}/api/offers`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
-    const json = await res.json() as Partial<OffersFeed> & { status?: string };
+    const json = fixImages(await res.json()) as Partial<OffersFeed> & { status?: string };
     if (json.status === "error") return null;
     return { offers: json.offers ?? [], milestone: json.milestone ?? null, shipping: json.shipping ?? null };
   } catch {

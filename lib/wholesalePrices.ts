@@ -1,6 +1,7 @@
 import { site } from "./site";
 import { WHOLESALE_MIN_METRES } from "./wholesale";
 import type { Product, WholesaleRate } from "./types";
+import { fixImages } from "./img";
 
 /**
  * Wholesale rates for listing cards. The listing APIs (/api/products and its
@@ -29,7 +30,7 @@ export async function wholesaleRates(ids: number[]): Promise<Map<number, Wholesa
         next: { revalidate: 300 },
       });
       if (!res.ok) return;
-      const json: { data?: RawCard[] } = await res.json();
+      const json: { data?: RawCard[] } = fixImages(await res.json());
       for (const c of json.data ?? []) {
         const price = Number(c.selling);
         const mrp = Number(c.mrp);

@@ -5,6 +5,7 @@ import type {
   Product, ProductDetailApiResponse, ProductsApiResponse, ProductsApiSaleProduct, ProductsApiTag,
   Reel, SaleProduct,
 } from "./types";
+import { fixImages } from "./img";
 
 export interface HomeData {
   /** `top_slider` — the banners across the top of the page. */
@@ -57,7 +58,7 @@ export async function getHomeData(): Promise<HomeData> {
   try {
     const res = await fetch(`${site.api}/api/home`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY_HOME_DATA;
-    const json: HomeApiResponse = await res.json();
+    const json: HomeApiResponse = fixImages(await res.json());
     return {
       slides: toSlides(json.data?.top_slider),
       midSlides: toSlides(json.data?.middle_slider),
@@ -159,7 +160,7 @@ async function fallbackFacets(sort: ProductsApiSort): Promise<SidebarFacets> {
     if (!anchor) return EMPTY_FACETS;
     const res = await fetchCategoryPage(anchor, 1, sort);
     if (!res.ok) return EMPTY_FACETS;
-    const json: ProductsApiResponse = await res.json();
+    const json: ProductsApiResponse = fixImages(await res.json());
     const pr = json.data?.price_range;
     return {
       categories: json.data?.categoryList ?? [],
@@ -185,7 +186,7 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
   try {
     const first = await fetchListingPage(by, 1, sort);
     if (!first.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
-    const firstJson: ProductsApiResponse = await first.json();
+    const firstJson: ProductsApiResponse = fixImages(await first.json());
     const products = [...(firstJson.data?.products ?? [])];
     const lastPage = firstJson.data?.pagination?.last_page ?? 1;
 
@@ -194,7 +195,7 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
         try {
           const res = await fetchListingPage(by, page, sort);
           if (!res.ok) return [];
-          const json: ProductsApiResponse = await res.json();
+          const json: ProductsApiResponse = fixImages(await res.json());
           return json.data?.products ?? [];
         } catch { return []; }
       });
@@ -240,7 +241,7 @@ export async function getProductsPage(sort: ProductsApiSort = "new_arrival", pag
   try {
     const res = await fetchListingPage({ all: true }, page, sort);
     if (!res.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)), page, lastPage: page, total: 0 };
-    const json: ProductsApiResponse = await res.json();
+    const json: ProductsApiResponse = fixImages(await res.json());
     const pr = json.data?.price_range;
     return {
       name: "Shop everything",
@@ -322,7 +323,7 @@ export async function getProductDetail(slug: string): Promise<ApiProductDetail |
   try {
     const res = await fetch(`${site.api}/api/products/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
-    const json: ProductDetailApiResponse = await res.json();
+    const json: ProductDetailApiResponse = fixImages(await res.json());
     const d = json.data?.product;
     if (!d) return null;
 

@@ -1,5 +1,6 @@
 import { site } from "./site";
 import type { PageDataApiResponse } from "./types";
+import { fixImages } from "./img";
 
 export interface StaticPage {
   name: string;
@@ -18,7 +19,7 @@ export async function getStaticPage(slug: string): Promise<StaticPage | null> {
   try {
     const res = await fetch(`${site.api}/api/page-data/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
-    const json: PageDataApiResponse = await res.json();
+    const json: PageDataApiResponse = fixImages(await res.json());
     // A page can 200 with a name but no body (e.g. Contact, which this app
     // renders with its own dedicated route instead) — nothing to show here.
     if (json.status !== "success" || !json.data || !json.data.page_content) return null;

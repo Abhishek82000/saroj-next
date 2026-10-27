@@ -10,6 +10,7 @@
  * straight to Laravel.
  */
 import { site } from "./site";
+import { fixImages } from "./img";
 
 export interface SearchHit { name: string; slug: string; image?: string }
 
@@ -18,7 +19,7 @@ export async function searchProducts(q: string, wholesale: boolean, signal?: Abo
   try {
     const res = await fetch(`${site.api}/api/search?${qs}`, { headers: { Accept: "application/json" }, signal });
     if (!res.ok) return [];
-    const json = (await res.json()) as { success?: boolean; data?: { name?: string; slug?: string; image?: string | null }[] };
+    const json = (fixImages(await res.json())) as { success?: boolean; data?: { name?: string; slug?: string; image?: string | null }[] };
     return (json.data ?? [])
       .filter((h) => h.name && h.slug)
       .map((h) => ({ name: h.name!, slug: h.slug!, image: h.image || undefined }));

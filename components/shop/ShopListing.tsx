@@ -16,6 +16,7 @@ import { inr, site } from "@/lib/site";
 import { apiProductToProduct } from "@/lib/home";
 import type { ProductsApiResponse } from "@/lib/types";
 import type { CommonCategoryRef, Product, ProductsApiTag, SaleProduct, WholesaleRate } from "@/lib/types";
+import { fixImages } from "@/lib/img";
 
 const sorts: [SortKey, string][] = [
   ["best_selling", "Best Selling"],
@@ -90,7 +91,7 @@ export default function ShopListing({
     try {
       const res = await fetch(`${site.api}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}`, { headers: { Accept: "application/json" } });
       if (res.ok) {
-        const json: ProductsApiResponse = await res.json();
+        const json: ProductsApiResponse = fixImages(await res.json());
         const next = (json.data?.products ?? []).map(apiProductToProduct);
         setAll((prev) => [...prev, ...next.filter((n) => !prev.some((p) => p.slug === n.slug))]);
         setPage((n) => n + 1);

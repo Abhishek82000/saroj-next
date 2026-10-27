@@ -2,6 +2,7 @@ import { apiProductToProduct, buildReels, toHandiCats, toSlides, type HandiCat }
 import { categoryHref } from "./nav";
 import { site } from "./site";
 import type { BannerSlide, HomeApiSlide, Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeHandiCategory, HomeTagSection, HomeVideoProduct } from "./types";
+import { fixImages } from "./img";
 
 export interface HandicraftApiTestimonial {
   id: number;
@@ -132,7 +133,7 @@ export async function getHandicraftData(): Promise<HandicraftData> {
   try {
     const res = await fetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY;
-    const json: HandicraftApiResponse = await res.json();
+    const json: HandicraftApiResponse = fixImages(await res.json());
     const d = json.data;
     if (!d) return EMPTY;
 

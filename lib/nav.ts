@@ -1,5 +1,6 @@
 import { site } from "./site";
 import type { CommonApiResponse, CommonFeaturedCategory, CommonMenuItem } from "./types";
+import { fixImages } from "./img";
 
 export interface NavLink {
   id: number;
@@ -60,7 +61,7 @@ export async function getFlatMenuTree(): Promise<NavLink[]> {
   try {
     const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
-    const json: CommonApiResponse = await res.json();
+    const json: CommonApiResponse = fixImages(await res.json());
     return (json.data?.menu ?? [])
       .map(buildLink)
       .filter((l) => !(l.href === "/" && l.children.length === 0));
@@ -81,7 +82,7 @@ export async function getMenuTree(): Promise<CommonMenuItem[]> {
   try {
     const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
-    const json: CommonApiResponse = await res.json();
+    const json: CommonApiResponse = fixImages(await res.json());
     const menu = json.data?.menu ?? [];
     // Match getMenuTree()'s behavior: drop the bare "Home" entry, the brand
     // mark already links there.
@@ -100,7 +101,7 @@ export async function getMarquee(): Promise<string | null> {
   try {
     const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
-    const json: CommonApiResponse = await res.json();
+    const json: CommonApiResponse = fixImages(await res.json());
     return json.data?.settings?.site_website_marque?.trim() || null;
   } catch {
     return null;
@@ -116,7 +117,7 @@ export async function getFeaturedCategories(): Promise<CommonFeaturedCategory[]>
   try {
     const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
-    const json: CommonApiResponse = await res.json();
+    const json: CommonApiResponse = fixImages(await res.json());
     return json.data?.featured_categories ?? [];
   } catch {
     return [];
