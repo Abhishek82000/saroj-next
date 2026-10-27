@@ -104,7 +104,7 @@ export function Totals({ subtotal: local, wholesale, server, offers, charges: qu
  * Retail is open to guests; the wholesale cart needs a login.
  */
 export default function CartView() {
-  const { cart, remove, subtotal, mode, href, user, hydrated, openLogin, otherCount, switchMode } = useStore();
+  const { cart, remove, subtotal, mode, href, user, hydrated, cartStatus, openLogin, otherCount, switchMode } = useStore();
   const wholesale = mode === "wholesale";
   const other = wholesale ? "retail" : "wholesale";
   const { totals, offers, errors, hasErrors } = useCartPrice(hydrated && !(wholesale && !user));
@@ -134,7 +134,8 @@ export default function CartView() {
           </button>
         )}
 
-        {!hydrated ? (
+        {/* Logged in, the cart is empty until the account's cart has been read back. */}
+        {!hydrated || (cartStatus === "loading" && cart.length === 0) ? (
           <div aria-busy="true"><CartBodySkeleton /></div>
         ) : wholesale && !user ? (
           <div className="st-co__empty">
@@ -142,6 +143,13 @@ export default function CartView() {
             <h2>Log in to see your wholesale cart</h2>
             <p>Wholesale orders are placed from your account.</p>
             <button type="button" className="st-btn st-btn--solid" onClick={() => openLogin("Log in to see your wholesale cart")}>Log in</button>
+          </div>
+        ) : cart.length === 0 && cartStatus === "failed" ? (
+          <div className="st-co__empty">
+            <Icon name="cart" size={32} strokeWidth={1.3} />
+            <h2>Couldn&apos;t load your cart</h2>
+            <p>Your items are still saved to your account — please try again.</p>
+            <button type="button" className="st-btn st-btn--solid" onClick={() => window.location.reload()}>Try again</button>
           </div>
         ) : cart.length === 0 ? (
           <div className="st-co__empty">

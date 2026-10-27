@@ -25,7 +25,6 @@ const PAYMENTS: Record<"retail" | "wholesale", { key: PaymentMethod; title: stri
   wholesale: [
     { key: "online", title: "UPI, All Cards, NetBanking",
       note: "After clicking “Pay Now”, you will be redirected to Cashfree to complete your payment securely." },
-    { key: "bank", title: "Bank Transfer (NEFT / RTGS)", note: "We'll send our bank details with the order confirmation; the order is processed once the payment lands." },
   ],
 };
 
@@ -41,7 +40,7 @@ type PinState = "idle" | "loading" | "ok" | "fail";
  * needs a login. Placing the order goes through `placeOrder` in lib/checkout.ts.
  */
 export default function CheckoutView() {
-  const { cart, subtotal, mode, href, user, hydrated, openLogin, say, coupon, updateUser } = useStore();
+  const { cart, subtotal, mode, href, user, hydrated, cartStatus, openLogin, say, coupon, updateUser } = useStore();
   const router = useRouter();
   const wholesale = mode === "wholesale";
   const payments = PAYMENTS[mode];
@@ -192,7 +191,11 @@ export default function CheckoutView() {
     </div>
   );
 
-  if (!hydrated) return <main id="main">{head}<div className="st-wrap st-co" aria-busy="true"><CheckoutBodySkeleton /></div></main>;
+  /* Logged in, the cart comes from the account — on a fresh load (back from Cashfree, say)
+     it's empty until that answers, which must not read as "Your cart is empty". */
+  if (!hydrated || (cartStatus === "loading" && cart.length === 0)) {
+    return <main id="main">{head}<div className="st-wrap st-co" aria-busy="true"><CheckoutBodySkeleton /></div></main>;
+  }
 
   if (wholesale && !user) {
     return (
@@ -202,6 +205,19 @@ export default function CheckoutView() {
           <h2>Log in to check out</h2>
           <p>Wholesale orders are placed from your account.</p>
           <button type="button" className="st-btn st-btn--solid" onClick={() => openLogin("Log in to place a wholesale order")}>Log in</button>
+        </div></div>
+      </main>
+    );
+  }
+
+  if (cart.length === 0 && cartStatus === "failed") {
+    return (
+      <main id="main">{head}
+        <div className="st-wrap st-co"><div className="st-co__empty">
+          <Icon name="cart" size={32} strokeWidth={1.3} />
+          <h2>Couldn&apos;t load your cart</h2>
+          <p>Your items are still saved to your account — please try again.</p>
+          <button type="button" className="st-btn st-btn--solid" onClick={() => window.location.reload()}>Try again</button>
         </div></div>
       </main>
     );

@@ -89,6 +89,10 @@ interface Store {
   logout: () => void;
   /** True once the saved cart, favourites and login have been read from this device. */
   hydrated: boolean;
+  /** The current mode's cart: "ready" to show; logged in, "loading" until the account's
+      cart (GET /api/cart) has been read back, or "failed" if it couldn't be — an empty
+      `cart` then means "not known yet", not "empty". */
+  cartStatus: "ready" | "loading" | "failed";
   /** Edit the signed-in user's name/email/address (kept on this device). */
   updateUser: (patch: Partial<Pick<User, "name" | "email" | "address">>) => void;
   loginOpen: boolean;
@@ -176,6 +180,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       rows GET /api/cart drops (a gone piece), so it can read one more than the
       drawer shows. */
   const [cartLoaded, setCartLoaded] = useState<Record<Mode, boolean>>({ retail: false, wholesale: false });
+  /** Modes whose account cart couldn't be read back, so pages say so rather than "empty". */
+  const [cartFailed, setCartFailed] = useState<Record<Mode, boolean>>({ retail: false, wholesale: false });
   const countsTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const refreshCounts = useCallback(() => {
     clearTimeout(countsTimer.current);
@@ -304,7 +310,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       const guest = cartsRef.current[kind].filter((l) => l.productId && !l.cartId);
       const synced = guest.length ? (await syncCartRemote(kind, guest, token)).ok : true;
       const server = await getCartRemote(kind, token);
-      if (!server) continue;
+      if (!server) { setCartFailed((p) => ({ ...p, [kind]: true })); continue; }
       /* The account's cart replaces the local one. If the sync failed, keep the
          guest lines rather than lose them. */
       const onServer = new Set(server.map((l) => l.id));
@@ -462,6 +468,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setWishlist(EMPTY_WISHLIST);
     setCounts(null);
     setCartLoaded({ retail: false, wholesale: false });
+    setCartFailed({ retail: false, wholesale: false });
     /* The pending action (a heart tapped while logged out) runs below, before re-render. */
     userRef.current = u;
     wishlistRef.current = EMPTY_WISHLIST;
@@ -486,6 +493,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     setWishlist(EMPTY_WISHLIST);
     setCounts(null);
     setCartLoaded({ retail: false, wholesale: false });
+    setCartFailed({ retail: false, wholesale: false });
     wishlistSyncedFor.current = null;
     cartSyncedFor.current = null;
     say("Logged out");
@@ -571,7 +579,8 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     shortOfFreeShipping: retail.length && retail.every((l) => l.shippingFree) ? 0 : Math.max(0, site.freeShippingOver - retailSubtotal),
     coupon, setCoupon,
     addProduct,
-    user, login, logout, hydrated, updateUser, loginOpen, loginReason, openLogin, closeLogin, withLogin,
+    user, login, logout, hydrated, updateUser,
+    cartStatus: !user?.token || cartLoaded[mode] ? "ready" : cartFailed[mode] ? "failed" : "loading", loginOpen, loginReason, openLogin, closeLogin, withLogin,
     mode, switchMode, href, navItem,
     favs: wishlist[mode], wishlist, toggleFav,
     /* count-data's wishlist count; until it answers, both lists' pieces as
