@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
+import { site } from "@/lib/site";
 import AccountMenu from "./AccountMenu";
 import { resolveHref, isMega, navAccent, splitMegaChildren, type CommonMenuItem } from "@/lib/nav";
 
@@ -66,7 +67,7 @@ export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
   return (
     <header className={`st-nav${stuck ? " stuck" : ""}`}>
       <Link className="st-brand" href={href("/")}>
-        <img width={80} src="https://www.sarojtextile.com/public/img/uploads/settings/1758459499.png" alt="Saroj Textile" />
+        <img width={80} src={site.logo} alt="Saroj Textile" />
       </Link>
 
       <nav aria-label="Primary">

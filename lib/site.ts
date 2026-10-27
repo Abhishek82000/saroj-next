@@ -10,6 +10,8 @@ export const site = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.sarojtextile.com",
   /** The Laravel API's origin — every `/api/...` call is this plus its path. Set NEXT_PUBLIC_API_URL to override. */
   api: (process.env.NEXT_PUBLIC_API_URL ?? "https://badmin.sarojtextile.com").replace(/\/$/, ""),
+  /** The shop's logo, uploaded in the Laravel admin's settings. */
+  get logo() { return `${this.api}/public/img/uploads/settings/1758459499.png`; },
   locale: "en_IN",
   currency: "INR",
   description:
