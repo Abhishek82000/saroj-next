@@ -197,7 +197,9 @@ export async function priceCartRemote(type: "retail" | "wholesale", lines: CartL
     "price", { method: "POST", body: JSON.stringify({ type, items: itemsOf(lines), ...(coupon ? { coupon } : {}) }) }, token);
   if (!r.ok) return null;
   const charges: CartCharges = { shipping: r.shipping ?? null, gst: r.gst ?? null, payable: r.payable ?? null };
-  return { items: r.items ?? [], totals: r.totals ?? null, hasErrors: !!r.has_errors, offers: r.offers ?? null, charges };
+  /* Its line images come on the old origin too (see cartImage); the cart copies them over its own on every re-price. */
+  const items = (r.items ?? []).map((l) => ({ ...l, image: cartImage(l.image) || null }));
+  return { items, totals: r.totals ?? null, hasErrors: !!r.has_errors, offers: r.offers ?? null, charges };
 }
 
 /** The local line a server line answers for — matched on product + variation. */

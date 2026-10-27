@@ -1,4 +1,5 @@
 import { authedGet } from "./auth";
+import { cartImage } from "./cart";
 
 /**
  * Saroj Textile order APIs, Bearer-authenticated (see `authedGet`):
@@ -117,7 +118,7 @@ function itemsFrom(order: Raw): OrderItem[] {
   const items = Array.isArray(order.items) ? (order.items as Raw[]) : [];
   return items.map((it) => ({
     name: str(it.td_item_title) ?? "Item",
-    image: str(it.td_item_image),
+    image: cartImage(str(it.td_item_image)) || undefined,
     variant: str(it.td_item_color),
     qty: qtyStr(it.td_item_qty),
     price: str(it.td_item_sellling_price) ?? str(it.td_item_net_price), // API's spelling
