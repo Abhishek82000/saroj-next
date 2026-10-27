@@ -55,6 +55,15 @@ export default function CheckoutView() {
   const savedAddress = useRef(user?.address);
   savedAddress.current = user?.address;
 
+  /* Pay hands the tab to Cashfree with the button still "Placing order…". Back from
+     there, the browser restores this page as it was left (back-forward cache), so
+     free the button for another go. */
+  useEffect(() => {
+    const restored = (e: PageTransitionEvent) => { if (e.persisted) setBusy(false); };
+    window.addEventListener("pageshow", restored);
+    return () => window.removeEventListener("pageshow", restored);
+  }, []);
+
   /* A logged-in visitor's details fill in whatever is still blank. The address
      is only there once the account has one — a new account (registered with
      just a name and email) leaves those fields empty to be typed in. City and
