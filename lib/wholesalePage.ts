@@ -36,9 +36,10 @@ const toCollection = (c: WholesaleApiCategory): WholesaleCollection => ({
 /** A wholesale-feed product as a card. The feed prices its products from the
     wholesale columns (WholesaleApiController::useWholesalePrices), so its
     price / selling_price are the trade rate; a product without one is left
-    for attachWholesale to look up. */
+    for attachWholesale to look up. The feed sends style_type as null; the
+    wholesale catalogue is fabric, so a missing one means by the metre (1). */
 function toProduct(p: WholesaleApiProduct): Product {
-  const item = apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 0 });
+  const item = apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 1 });
   const price = Number(p.selling_price ?? p.price);
   return price > 0 ? { ...item, wholesale: { price, mrp: Number(p.price) > price ? Number(p.price) : 0, minQty: p.moq || WHOLESALE_MIN_METRES } } : item;
 }
