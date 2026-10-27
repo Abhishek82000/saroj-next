@@ -32,7 +32,7 @@ export async function submitReview(
   if (input.video) form.append("review_video", input.video);
 
   try {
-    const res = await fetch(`${site.url}/api/process/${productId}/reviews`, {
+    const res = await fetch(`${site.api}/api/process/${productId}/reviews`, {
       method: "POST",
       headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
       body: form,

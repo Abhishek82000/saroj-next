@@ -18,7 +18,7 @@ function stripHtml(html: string): string {
     empty list on any failure so the page can show its own empty state. */
 export async function getFaqs(): Promise<Faq[]> {
   try {
-    const res = await fetch(`${site.url}/api/faqs`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/faqs`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const json: FaqsApiResponse = await res.json();
     return (json.data?.faqs ?? [])

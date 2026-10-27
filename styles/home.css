@@ -21,9 +21,13 @@
 .st-plates{ margin-top:clamp(34px,6vw,58px); perspective:1500px; display:grid; justify-items:center; }
 .st-plates__row{ display:grid; grid-template-columns:1fr 1.5fr 1fr; align-items:center;
                  gap:clamp(8px,2vw,26px); width:100%; max-width:820px; margin-inline:auto;
-                 transform-style:preserve-3d; will-change:transform; }
+                 transform-style:preserve-3d; will-change:transform;
+                 /* The side plates sit behind the row's own plane (translateZ(-90px)), so in 3D the row
+                    would take their clicks; let the row pass the pointer through to the plates. */
+                 pointer-events:none; }
 .st-plate{ display:block; border-radius:14px; box-shadow:var(--shadow); transform-style:preserve-3d;
-           transition:transform 1s var(--ease); will-change:transform; }
+           transition:transform 1s var(--ease); will-change:transform; pointer-events:auto; cursor:pointer; }
+.st-plate:hover .st-plate__cap,.st-plate:focus-visible .st-plate__cap{ background:var(--ink); color:#fff; }
 .st-plate--l{ aspect-ratio:3/4; transform:translateZ(-90px) rotateY(16deg) translateY(16px); }
 .st-plate--c{ aspect-ratio:4/5; transform:translateZ(40px); border-radius:16px; }
 .st-plate--r{ aspect-ratio:3/4; transform:translateZ(-90px) rotateY(-16deg) translateY(16px); }
@@ -458,7 +462,8 @@
 .st-vbanner{ position:relative; padding:clamp(30px,5vw,54px) 0; --p:0; }
 .st-vbanner__frame{
   position:relative; overflow:hidden; background:#0B1116;
-  height:clamp(430px,78vh,720px);
+  /* min-height, not height: the frame grows when the copy is expanded (Show more). */
+  display:flex; min-height:clamp(430px,78vh,720px);
   margin-inline:calc((1 - var(--p)) * var(--edge));
   border-radius:calc((1 - var(--p)) * 26px);
   box-shadow:0 40px 80px -40px rgba(16,24,32,.6);
@@ -470,8 +475,9 @@
   background:linear-gradient(to top, rgba(8,13,18,.9) 0%, rgba(8,13,18,.42) 42%, rgba(8,13,18,.18) 72%, rgba(8,13,18,.5) 100%);
 }
 .st-vbanner__in{
-  position:absolute; inset:0; z-index:3; display:flex; flex-direction:column;
+  position:relative; flex:1; z-index:3; display:flex; flex-direction:column;
   justify-content:flex-end; padding:clamp(22px,5vw,54px); color:#fff;
+  padding-top:clamp(76px,10vw,104px); /* clear of the caption and play/sound buttons when the copy is expanded */
 }
 .st-vbanner__eyebrow{ font-size:.6rem; letter-spacing:.3em; text-transform:uppercase;
                       font-weight:700; color:#8FC0F0; display:flex; align-items:center; gap:.6rem; }

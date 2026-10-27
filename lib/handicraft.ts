@@ -130,7 +130,7 @@ function toBolt(c: HomeCategorySection): HcBolt {
  */
 export async function getHandicraftData(): Promise<HandicraftData> {
   try {
-    const res = await fetch(`${site.url}/api/handicraft-data`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY;
     const json: HandicraftApiResponse = await res.json();
     const d = json.data;

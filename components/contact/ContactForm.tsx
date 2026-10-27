@@ -32,7 +32,7 @@ export default function ContactForm() {
 
     setSending(true);
     try {
-      const res = await fetch(`${site.url}/api/contact-process`, {
+      const res = await fetch(`${site.api}/api/contact-process`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         /* The API has no topic field, so the topic leads the message. */

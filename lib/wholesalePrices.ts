@@ -24,7 +24,7 @@ export async function wholesaleRates(ids: number[]): Promise<Map<number, Wholesa
 
   await Promise.all(batches.map(async (batch) => {
     try {
-      const res = await fetch(`${site.url}/api/products/cards?wholesale=1&ids=${batch.join(",")}`, {
+      const res = await fetch(`${site.api}/api/products/cards?wholesale=1&ids=${batch.join(",")}`, {
         headers: { Accept: "application/json" },
         next: { revalidate: 300 },
       });

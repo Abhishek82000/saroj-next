@@ -7,6 +7,7 @@ import SectionHead from "@/components/ui/SectionHead";
 import Rail from "@/components/product/Rail";
 import Reels from "@/components/home/Reels";
 import BannerSlider from "@/components/home/BannerSlider";
+import VideoBanner from "@/components/home/VideoBanner";
 import BoltTable from "@/components/wholesale/BoltTable";
 import SwatchBook from "@/components/wholesale/SwatchBook";
 import Voices from "@/components/home/Voices";
@@ -17,6 +18,7 @@ import { WHOLESALE_HOME, WHOLESALE_MIN_METRES, wholesaleCategoryHref } from "@/l
 import type { WholesalePage } from "@/lib/wholesalePage";
 
 const shop = wholesaleCategoryHref;
+const WHOLESALE_FILM = "https://saroj-textile-store.b-cdn.net/media/23161793064032.mp4";
 
 const TERMS: [string, string][] = [
   [`${WHOLESALE_MIN_METRES} m`, "Minimum order, any print"],
@@ -65,7 +67,11 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
           {n === Math.min(1, page.rails.length - 1) && <MidBanners slides={page.midSlides} />}
         </Fragment>
       ))}
-{page.collections.length > 0 && (
+
+      {/* The home page's video banner, with the wholesale film. */}
+      <VideoBanner src={WHOLESALE_FILM} />
+
+      {page.collections.length > 0 && (
         <section className="st-bolts" aria-labelledby="bolts-h">
           <div className="st-wrap st-bolts__wrap">
             <div className="st-bolts__head">

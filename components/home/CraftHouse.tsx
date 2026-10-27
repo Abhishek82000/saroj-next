@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ShowMore from "@/components/ui/ShowMore";
 import { categoryHref } from "@/lib/nav";
 import type { CommonFeaturedCategory } from "@/lib/types";
 
@@ -27,12 +28,14 @@ export default function CraftHouse({ categories }: { categories: CommonFeaturedC
       <div className="chs__in">
         <div className="chs__copy">
           <h2 className="chs__title" id="chs-title">Handmade Finds, <em>You’ll Love</em></h2>
-          <p className="chs__lede"> 
-            After establishing our name in the textile industry, we are now ready to take opportunities. We used our 30 years of knowledge, hard work, and love of textiles to make something special for you. Check out our brand-new handicrafts section.
-          </p>
-          <p className="chs__lede"> 
-            The product you use every day says a lot about you. Products that are meant to add a classic touch to your everyday life.
-          </p>
+          <ShowMore fraction={0.75}>
+            <p className="chs__lede">
+              After establishing our name in the textile industry, we are now ready to take opportunities. We used our 30 years of knowledge, hard work, and love of textiles to make something special for you. Check out our brand-new handicrafts section.
+            </p>
+            <p className="chs__lede">
+              The product you use every day says a lot about you. Products that are meant to add a classic touch to your everyday life.
+            </p>
+          </ShowMore>
           <div className="chs__cta">
             <Link href="/handicraft" className="chs__btn">Shop handicraft</Link>
             <span className="chs__count"><b>{categories.length}</b> {categories.length === 1 ? "craft" : "crafts"} on the shelf</span>

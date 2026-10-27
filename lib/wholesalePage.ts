@@ -96,7 +96,7 @@ async function tagRails(d: WholesalePageApiResponse["data"]): Promise<WholesaleR
  */
 export async function getWholesalePage(): Promise<WholesalePage | null> {
   try {
-    const res = await fetch(`${site.url}/api/wholesale-page-data`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/wholesale-page-data`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const { data: d }: WholesalePageApiResponse = await res.json();
     if (!d) return null;

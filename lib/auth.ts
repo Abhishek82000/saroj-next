@@ -111,7 +111,7 @@ async function call(
     if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
     if (opts.body) headers["Content-Type"] = "application/json";
     const init: RequestInit = { method: opts.method ?? "POST", headers, body: opts.body ? JSON.stringify(opts.body) : undefined };
-    const url = `${site.url}/api/auth/${path}${qs}`;
+    const url = `${site.api}/api/auth/${path}${qs}`;
     const res = opts.retry ? await fetchRetrying(url, init) : await fetch(url, init);
     const json: ApiBody = await res.json().catch(() => ({}));
     if (res.status === 429) return { ok: false, message: "Too many attempts — wait a minute and try again." };

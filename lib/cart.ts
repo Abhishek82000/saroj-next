@@ -63,7 +63,7 @@ async function call<T>(path: string, init: RequestInit, token?: string): Promise
     const headers: Record<string, string> = { Accept: "application/json" };
     if (init.body) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
-    const url = `${site.url}/api/cart${path.startsWith("?") ? path : `/${path}`}`;
+    const url = `${site.api}/api/cart${path.startsWith("?") ? path : `/${path}`}`;
     const res = await fetchRetrying(url, { ...init, headers });
     const json = (await res.json().catch(() => ({}))) as { status?: string; message?: string } & T;
     if (res.status === 429) return { ok: false, message: "Too many requests — wait a minute and try again." };

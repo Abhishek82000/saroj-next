@@ -58,7 +58,7 @@ function buildLink(item: CommonMenuItem): NavLink {
  */
 export async function getFlatMenuTree(): Promise<NavLink[]> {
   try {
-    const res = await fetch(`${site.url}/api/common`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const json: CommonApiResponse = await res.json();
     return (json.data?.menu ?? [])
@@ -79,7 +79,7 @@ export async function getFlatMenuTree(): Promise<NavLink[]> {
  */
 export async function getMenuTree(): Promise<CommonMenuItem[]> {
   try {
-    const res = await fetch(`${site.url}/api/common`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const json: CommonApiResponse = await res.json();
     const menu = json.data?.menu ?? [];
@@ -98,7 +98,7 @@ export async function getMenuTree(): Promise<CommonMenuItem[]> {
  */
 export async function getMarquee(): Promise<string | null> {
   try {
-    const res = await fetch(`${site.url}/api/common`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json: CommonApiResponse = await res.json();
     return json.data?.settings?.site_website_marque?.trim() || null;
@@ -114,7 +114,7 @@ export async function getMarquee(): Promise<string | null> {
  */
 export async function getFeaturedCategories(): Promise<CommonFeaturedCategory[]> {
   try {
-    const res = await fetch(`${site.url}/api/common`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/common`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const json: CommonApiResponse = await res.json();
     return json.data?.featured_categories ?? [];

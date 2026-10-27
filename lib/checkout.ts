@@ -116,7 +116,7 @@ export type PincodeResult = { ok: true; city: string; state: string } | { ok: fa
  */
 export async function lookupPincode(pin: string): Promise<PincodeResult> {
   try {
-    const res = await fetch(`${site.url}/api/get-state-city`, {
+    const res = await fetch(`${site.api}/api/get-state-city`, {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       body: JSON.stringify({ value: pin }),
@@ -251,7 +251,7 @@ export async function placeOrder(payload: PayNowPayload, token?: string): Promis
   try {
     const headers: Record<string, string> = { Accept: "application/json", "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
-    const res = await fetch(`${site.url}/api/cart/paynow`, { method: "POST", headers, body: JSON.stringify(payload) });
+    const res = await fetch(`${site.api}/api/cart/paynow`, { method: "POST", headers, body: JSON.stringify(payload) });
     const json = (await res.json().catch(() => ({}))) as PayNowResponse;
     if (res.status === 401 && payload.type === "wholesale") return { ok: false, message: "Log in again to place a wholesale order." };
     if (!res.ok || json.status === "error" || !json.order_number) {
@@ -351,7 +351,7 @@ const receiptFrom = (r: RawReceipt): OrderReceipt => ({
 export async function getPaymentStatus(orderNumber: string, receiptToken?: string): Promise<{ ok: true; order: OrderPaymentStatus } | { ok: false; notFound: boolean; message: string }> {
   try {
     const qs = receiptToken ? `?t=${encodeURIComponent(receiptToken)}` : "";
-    const res = await fetch(`${site.url}/api/cart/payment-status/${encodeURIComponent(orderNumber)}${qs}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+    const res = await fetch(`${site.api}/api/cart/payment-status/${encodeURIComponent(orderNumber)}${qs}`, { headers: { Accept: "application/json" }, cache: "no-store" });
     const json = (await res.json().catch(() => ({}))) as {
       message?: string;
       order?: { order_number: string; payment_status: PaymentState; amount: number; is_wholesale: boolean; receipt?: RawReceipt | null };

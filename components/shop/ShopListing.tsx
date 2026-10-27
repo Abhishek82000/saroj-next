@@ -88,7 +88,7 @@ export default function ShopListing({
     if (!hasMore || loadingMore) return;
     setLoadingMore(true);
     try {
-      const res = await fetch(`${site.url}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}`, { headers: { Accept: "application/json" } });
+      const res = await fetch(`${site.api}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}`, { headers: { Accept: "application/json" } });
       if (res.ok) {
         const json: ProductsApiResponse = await res.json();
         const next = (json.data?.products ?? []).map(apiProductToProduct);

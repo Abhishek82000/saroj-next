@@ -190,8 +190,8 @@
 .st-empty h3{ font-family:var(--d); font-weight:400; font-size:clamp(1.4rem,5vw,1.9rem); margin:0 0 .55rem; }
 .st-empty p{ color:var(--mute); font-size:.92rem; margin:0 auto 1.5rem; max-width:40ch; }
 
-.st-more{ display:grid; justify-items:center; gap:.75rem; margin-top:clamp(26px,4vw,42px); }
-.st-more p{ margin:0; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); }
+.st-more{ display:grid; gap:.75rem; margin-top:clamp(26px,4vw,42px); }
+.st-more p{ margin:0; color:var(--mute); }
 .st-more__bar{ width:min(100%,220px); height:2px; background:var(--paper-3); border-radius:99px; overflow:hidden; }
 .st-more__fill{ height:100%; background:var(--cobalt); transition:width .6s var(--ease); }
 

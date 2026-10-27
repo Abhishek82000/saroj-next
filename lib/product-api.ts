@@ -13,7 +13,7 @@ import { WHOLESALE_MIN_METRES } from "./wholesale";
  * whether a product came from the static catalogue or from Laravel.
  */
 
-const FALLBACK = "https://www.sarojtextile.com";
+const FALLBACK = site.api;
 
 /**
  * Server-side we call Laravel directly, so API_URL can be an internal address
@@ -23,7 +23,7 @@ const FALLBACK = "https://www.sarojtextile.com";
  */
 const SERVER_API = (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? FALLBACK).replace(/\/$/, "");
 
-const base = () => (typeof window === "undefined" ? SERVER_API : site.url);
+const base = () => (typeof window === "undefined" ? SERVER_API : site.api);
 
 /** Product data changes with stock and price, so don't cache it for long. */
 const REVALIDATE = 300;

@@ -55,7 +55,7 @@ const FABRIC_SLIDES: HcSlide[] = [
   ["Hakoba And Dobby", "hakoba-and-dobby", "17808342608853.webp"],
 ].map(([name, slug, file]) => ({ name, href: `/shop/${slug}`, img: CAT + file }));
 
-const VIDEO = { src: "https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4", name: "", href: "" };
+const VIDEO = { src: "https://saroj-textile-store.b-cdn.net/media/48791793063184.mp4", name: "", href: "" };
 
 const WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
 const countWord = (n: number) => WORDS[n] ?? String(n);
@@ -78,7 +78,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
   const faces = data.faces;
   const fabricSlides = data.fabricSlides.length >= 3 ? data.fabricSlides : FABRIC_SLIDES;
   const bolts = data.bolts.length >= 3 ? data.bolts : BOLTS;
-  const video = data.video ?? VIDEO;
+  /* The banner always plays our own film; the API's first handicraft clip only supplies the "Shop Handicraft" link. */
+  const video = { ...VIDEO, href: data.video?.href ?? VIDEO.href };
   const collections = data.collections || 21;
 
   useEffect(() => {

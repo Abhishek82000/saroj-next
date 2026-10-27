@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
+import ShowMore from "@/components/ui/ShowMore";
 
 const SRC = "https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4";
 const NOTE =
@@ -10,7 +11,7 @@ const NOTE =
  * The frame starts inset and squares off to full bleed as it crosses the
  * viewport. The whole effect is one CSS variable, --p, from 0 to 1.
  */
-export default function VideoBanner() {
+export default function VideoBanner({ src = SRC }: { src?: string }) {
   const section = useRef<HTMLElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -51,19 +52,19 @@ export default function VideoBanner() {
     const io = new IntersectionObserver(
       ([e]) => {
         if (!e.isIntersecting) { v.pause(); setPlaying(false); return; }
-        if (!v.src) v.src = SRC;
+        if (!v.src) v.src = src;
         v.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
       },
       { threshold: 0.3 },
     );
     io.observe(v);
     return () => io.disconnect();
-  }, []);
+  }, [src]);
 
   const toggle = () => {
     const v = video.current;
     if (!v) return;
-    if (v.paused) { if (!v.src) v.src = SRC; v.play().then(() => setPlaying(true)).catch(() => {}); }
+    if (v.paused) { if (!v.src) v.src = src; v.play().then(() => setPlaying(true)).catch(() => {}); }
     else { v.pause(); setPlaying(false); }
   };
 
@@ -108,9 +109,13 @@ export default function VideoBanner() {
 
         <div className="st-vbanner__in">
           <Reveal as="h2" delay={1} style={{fontSize: "clamp(2rem, 4.6vw, 3.2rem)"}}>A Little Inspiration for Your Next Creation</Reveal>
-          <Reveal as="p" delay={2} style={{maxWidth: "90ch"}}>
-            We understand every beautiful design comes from some inspiration. And finding the right fabric for your creation creates a big difference. At Saroj Textile, we help to provide life to your inspiration and imagination. Our diverse range of printed cotton fabrics, traditional fabrics, and designs, from Ajarkh to charming Jaipuri florals and paisley patterns, helps you find the perfect fabric for your imagination. Select fabric mixes and match prints, explore color combinations, and discover new possibilities with fabrics that suit your needs.</Reveal>
-            <Reveal as="p" delay={2} style={{maxWidth: "90ch"}}>We are working hard to build a textile haven for sewing enthusiasts and creative minds. We offer a huge range of designs of cotton fabrics that match different needs. The inconvenience of buying fabric according to the requirement is a deal with the heart. That creates more opportunities to experiment and express creativity.</Reveal>
+          <Reveal delay={2}>
+          <ShowMore fraction={0.75}>
+          <p style={{maxWidth: "90ch"}}>
+            We understand every beautiful design comes from some inspiration. And finding the right fabric for your creation creates a big difference. At Saroj Textile, we help to provide life to your inspiration and imagination. Our diverse range of printed cotton fabrics, traditional fabrics, and designs, from Ajarkh to charming Jaipuri florals and paisley patterns, helps you find the perfect fabric for your imagination. Select fabric mixes and match prints, explore color combinations, and discover new possibilities with fabrics that suit your needs.</p>
+            <p style={{maxWidth: "90ch"}}>We are working hard to build a textile haven for sewing enthusiasts and creative minds. We offer a huge range of designs of cotton fabrics that match different needs. The inconvenience of buying fabric according to the requirement is a deal with the heart. That creates more opportunities to experiment and express creativity.</p>
+          </ShowMore>
+          </Reveal>
         </div>
       </div>
     </section>

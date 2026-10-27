@@ -16,7 +16,7 @@ export interface SearchHit { name: string; slug: string; image?: string }
 export async function searchProducts(q: string, wholesale: boolean, signal?: AbortSignal): Promise<SearchHit[]> {
   const qs = new URLSearchParams({ searchstring: q, wholesale: wholesale ? "1" : "0" });
   try {
-    const res = await fetch(`${site.url}/api/search?${qs}`, { headers: { Accept: "application/json" }, signal });
+    const res = await fetch(`${site.api}/api/search?${qs}`, { headers: { Accept: "application/json" }, signal });
     if (!res.ok) return [];
     const json = (await res.json()) as { success?: boolean; data?: { name?: string; slug?: string; image?: string | null }[] };
     return (json.data ?? [])

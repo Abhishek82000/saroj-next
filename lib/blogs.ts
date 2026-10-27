@@ -3,7 +3,7 @@ import type {
   BlogApiCategory, BlogApiPost, BlogApiRelatedProduct, BlogDetailApiResponse, BlogsListApiResponse, Product,
 } from "./types";
 
-const BLOG_IMG = (file: string | null) => (file ? `${site.url}/img/uploads/blogs/${file}` : "");
+const BLOG_IMG = (file: string | null) => (file ? `${site.api}/img/uploads/blogs/${file}` : "");
 
 /** Strips HTML tags for a plain-text teaser under a card's title. */
 function excerptOf(html: string, max = 140): string {
@@ -53,7 +53,7 @@ const EMPTY_LIST: BlogList = { posts: [], categories: [], activeCategory: null, 
 export async function getBlogList(page = 1, category?: string): Promise<BlogList> {
   try {
     const q = category ? `&category=${encodeURIComponent(category)}` : "";
-    const res = await fetch(`${site.url}/api/blogs?page=${page}${q}`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/blogs?page=${page}${q}`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY_LIST;
     const json: BlogsListApiResponse = await res.json();
     return {
@@ -100,7 +100,7 @@ function relatedToProduct(p: BlogApiRelatedProduct): Product {
     on any failure or unknown slug so the route can 404 instead of breaking. */
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
-    const res = await fetch(`${site.url}/api/blogs/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/blogs/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json: BlogDetailApiResponse = await res.json();
     const b = json.data?.blog;

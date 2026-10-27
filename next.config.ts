@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 /** Where the Laravel storefront lives. */
-const API = (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "https://www.sarojtextile.com").replace(/\/$/, "");
+const API = (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "https://badmin.sarojtextile.com").replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "saroj-textile-store.b-cdn.net" },
       { protocol: "https", hostname: "www.sarojtextile.com" },
+      { protocol: "https", hostname: "badmin.sarojtextile.com" },
       { protocol: "https", hostname: "picsum.photos" },
     ],
     formats: ["image/avif", "image/webp"],

@@ -55,7 +55,7 @@ export const toSlides = (list: HomeApiSlide[] | undefined, catHref: (slug: strin
  */
 export async function getHomeData(): Promise<HomeData> {
   try {
-    const res = await fetch(`${site.url}/api/home`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/home`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY_HOME_DATA;
     const json: HomeApiResponse = await res.json();
     return {
@@ -117,7 +117,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const fetchListingPage = async (by: Listing, page: number, sort: ProductsApiSort) => {
   const filter = "category" in by ? `category=${encodeURIComponent(by.category)}&`
     : "tag" in by ? `tag=${encodeURIComponent(by.tag)}&` : "";
-  const url = `${site.url}/api/products?${filter}page=${page}&sort=${sort}`;
+  const url = `${site.api}/api/products?${filter}page=${page}&sort=${sort}`;
   for (let attempt = 0; ; attempt++) {
     const res = await fetch(url, { next: { revalidate: 300 } });
     if (res.status !== 429 || attempt >= 3) return res;
@@ -320,7 +320,7 @@ export interface ApiProductDetail {
  */
 export async function getProductDetail(slug: string): Promise<ApiProductDetail | null> {
   try {
-    const res = await fetch(`${site.url}/api/products/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/products/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json: ProductDetailApiResponse = await res.json();
     const d = json.data?.product;
