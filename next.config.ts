@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
   // console fills with "WebSocket connection failed". Run `npm run dev:lan`.
   allowedDevOrigins: ["192.168.1.*", "192.168.0.*", "10.0.0.*", "*.local"],
   images: {
+    // Serve images straight from the CDN. Vercel's optimizer answers 402
+    // (OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED) once the plan's quota is
+    // spent, which blanked every <Image>; the CDN files are already WebP.
+    unoptimized: true,
     // Product photography lives on BunnyCDN; the picsum seeds are stand-ins
     // for shots that haven't been taken yet.
     remotePatterns: [
