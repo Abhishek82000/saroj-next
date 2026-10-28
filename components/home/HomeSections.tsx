@@ -47,6 +47,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
 
   return (
     <main id="main">
+      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />} 
       <Hero />
       <CraftRoll />
       {tagSections.map((tag) => (
@@ -75,9 +76,8 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       ))}
       <VideoBanner />
       
-      
       {/* `top_slider` banners — their own section under the hero, retail only. */}
-      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />}    
+         
       {offers.length > 1 && <OffersSlider slides={offers} />}
       <Bulk />
       <Voices />  
