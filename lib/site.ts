@@ -36,7 +36,7 @@ export const site = {
   ],
   /** Shown in the ticker. */
   ticker: [
-    ["Use coupon DIWALI15 for ", "15% OFF"],
+    ["Use coupon DIWALI for ", "15% OFF"],
     ["Free shipping on orders above ", "₹500"],
   ] as [string, string][],
   delivery: { domestic: "5–7 working days", international: "10–15 working days" },
