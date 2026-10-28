@@ -31,8 +31,13 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
   const wholesale = detail?.mode === "wholesale";
   const mode = live?.cut.mode ?? (p.cut ? "length" : "quantity");
 
+  const [variant, setVariant] = useState<VariantState | null>(null);
+  /* product_stock (or the chosen variation's) caps every quantity on the page. */
+  const stockKnown = variant?.stock ?? live?.stock;
+  const stockLeft = stockKnown ?? 999;
+
   const minQty = live?.cut.min ?? p.cut?.min ?? 1;
-  const maxQty = live?.cut.max ?? p.cut?.max ?? 999;
+  const maxQty = Math.min(live?.cut.max ?? p.cut?.max ?? 999, stockLeft);
   const stepQty = live?.cut.step ?? p.cut?.step ?? 1;
 
   /* Wholesale opens at its minimum; retail fabric opens at a useful 3 m. */
@@ -42,7 +47,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
     return mode === "length" ? Math.max(minQty, 3) : minQty;
   });
 
-  const [variant, setVariant] = useState<VariantState | null>(null);
   const [guide, setGuide] = useState(false);
   const [ask, setAsk] = useState(false);
   const [stick, setStick] = useState(false);
@@ -54,7 +58,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
   const mrp = variant?.price?.mrp ?? live?.price.mrp ?? p.mrp;
   const off = variant?.price?.discount ?? live?.price.discount ?? discount(p);
   const image = variant?.image ?? p.images[0].src;
-  const stockLeft = variant?.stock ?? live?.stock ?? 999;
 
   const total = price * (qty || 1);
   const saved = !!wishlist[wholesale ? "wholesale" : "retail"][p.slug];
@@ -99,6 +102,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       productId: live?.id ?? p.productId,
       variationId: variant?.variationId ?? null,
       ...(wholesale ? { minQty } : {}),
+      ...(stockKnown != null ? { maxQty: stockKnown } : {}),
     };
     /* Wholesale pages fill the wholesale cart only, and only for a logged-in account. */
     if (wholesale) withLogin("Log in to add wholesale products to cart", () => add(line, "wholesale"));
@@ -341,7 +345,10 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
           <tbody>
             {makes.map((m) => (
               <tr key={m.name} style={{ cursor: "pointer" }}
-                onClick={() => { setQty(Math.max(minQty, m.hi)); setGuide(false); say(`Cut set to ${m.hi} m`); }}>
+                onClick={() => {
+                  const cut = Math.min(Math.max(minQty, m.hi), maxQty);
+                  setQty(cut); setGuide(false); say(cut < m.hi ? `Only ${maxQty} m in stock` : `Cut set to ${m.hi} m`);
+                }}>
                 <td>{m.name}</td>
                 <td>{m.lo === m.hi ? `${m.lo} m` : `${m.lo}–${m.hi} m`}</td>
               </tr>

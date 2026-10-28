@@ -263,11 +263,18 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const pendingAdds = useRef(new Map<string, Promise<void>>());
 
   const addTo = useCallback((kind: Mode, line: Omit<CartLine, "qty"> & { qty?: number }) => {
-    const qty = line.qty ?? 1;
+    const had = cartsRef.current[kind].find((l) => l.id === line.id)?.qty ?? 0;
+    /* Never more than the stock on hand, counting what the cart already holds. */
+    const max = line.maxQty ?? cartsRef.current[kind].find((l) => l.id === line.id)?.maxQty;
+    let qty = line.qty ?? 1;
+    if (max != null && had + qty > max) {
+      if (max - had <= 0) { say(max > 0 ? `Only ${max} in stock — all of it is in your cart` : "Out of stock just now"); return; }
+      qty = round(max - had);
+      say(`Only ${max} in stock — added ${qty}`);
+    }
     /* Fire-and-forget: mirror the add server-side (POST /api/cart/add, see
        lib/cart.ts). Only live pieces carry the product id it needs. */
     if (line.productId) {
-      const had = cartsRef.current[kind].find((l) => l.id === line.id)?.qty ?? 0;
       const pendingKey = `${kind}:${line.id}`;
       const request = addToCartRemote({
         type: kind,
@@ -289,12 +296,12 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     mutate(kind, (prev) => {
       const found = prev.find((l) => l.id === line.id);
       if (found) {
-        return prev.map((l) => (l.id === line.id ? { ...l, qty: round(l.qty + qty) } : l));
+        return prev.map((l) => (l.id === line.id ? { ...l, qty: round(l.qty + qty), ...(max != null ? { maxQty: max } : {}) } : l));
       }
       return [...prev, { ...line, qty }];
     });
     setPulse((n) => n + 1);
-    say("Added · " + line.name.slice(0, 32));
+    if (qty === (line.qty ?? 1)) say("Added · " + line.name.slice(0, 32));
     /* Show the cart with the new line in it. */
     setCartOpen(true);
   }, [mutate, say, refreshCounts]);
@@ -336,10 +343,11 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
           ...(s.image ? { image: s.image } : {}),
           ...(s.step ? { step: s.step } : {}),
           ...(s.min_qty ? { minQty: s.min_qty } : {}),
+          ...(s.max_qty != null ? { maxQty: s.max_qty } : {}),
           shippingFree: shipsFree(s),
         };
         if (upd.price !== l.price || upd.image !== l.image || upd.step !== l.step || upd.name !== l.name || upd.minQty !== l.minQty
-          || upd.shippingFree !== !!l.shippingFree) changed = true;
+          || upd.maxQty !== l.maxQty || upd.shippingFree !== !!l.shippingFree) changed = true;
         return upd;
       });
       return changed ? next : prev;
@@ -420,9 +428,14 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const setQty = useCallback((id: string, qty: number) => {
     if (qty <= 0) { remove(id); return; }
     const kind = mode;
-    const next = round(qty);
+    let next = round(qty);
     const line = cartsRef.current[kind].find((l) => l.id === id);
     if (!line) return;
+    if (line.maxQty != null && next > line.maxQty) {
+      say(`Only ${line.maxQty} in stock`);
+      if (line.qty >= line.maxQty) return;
+      next = line.maxQty;
+    }
     mutate(kind, (prev) => prev.map((l) => (l.id === id ? { ...l, qty: next } : l)));
     const token = userRef.current?.token;
     if (!token || !line.productId) return;
@@ -513,6 +526,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
         id: p.slug, name: p.name, price: p.price, unit: p.unit, image: p.images[0].src,
         step: p.cut?.step ?? 1, qty: qty ?? (p.cut ? 2.5 : 1), href: `/product/${p.slug}`,
         productId: p.productId ?? p.live?.id,
+        ...(p.live ? { maxQty: p.live.stock } : {}),
       });
       return;
     }
@@ -522,6 +536,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       id: p.slug, name: p.name, price: rate.price, unit: p.unit, image: p.images[0].src,
       step: p.cut?.step ?? (p.unit === "metre" ? 0.5 : 1), qty: Math.max(qty ?? 0, rate.minQty),
       href: wholesaleHref(`/product/${p.slug}`), minQty: rate.minQty, productId: p.productId ?? p.live?.id,
+      ...(p.live ? { maxQty: p.live.stock } : {}),
     };
     add(line, "wholesale");
   }, [mode, add, say]);

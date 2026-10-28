@@ -46,7 +46,7 @@ export interface CartAddPayload {
 export interface ServerCartLine {
   cart_id: number | null; key: string; product_id: number; variation_id: number | null; qty: number;
   name: string | null; slug: string | null; image: string | null; unit: string | null; step: number | null;
-  min_qty: number | null; mrp: number; price: number; line_total: number; error: string | null;
+  min_qty: number | null; max_qty: number | null; mrp: number; price: number; line_total: number; error: string | null;
   /** The product's product_shipping_free (1 / true = ships free), under either name.
       Checked live on 2026-10-24: /api/cart/price doesn't send it yet, so every line reads as not free. */
   shipping_free?: boolean | number | string | null;
@@ -123,6 +123,7 @@ export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): Car
     step: l.step || 1,
     href: type === "wholesale" ? wholesaleHref(href) : href,
     ...(l.min_qty ? { minQty: l.min_qty } : {}),
+    ...(l.max_qty != null ? { maxQty: l.max_qty } : {}),
     productId: l.product_id,
     variationId: l.variation_id,
     ...(l.cart_id ? { cartId: l.cart_id } : {}),

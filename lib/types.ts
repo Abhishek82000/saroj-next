@@ -57,6 +57,8 @@ export interface CartLine {
   href?: string;
   /** Set on wholesale lines: the smallest quantity the line may be cut down to. */
   minQty?: number;
+  /** Stock on hand (product_stock, or the variation's) — the most the line may hold. Absent when unknown. */
+  maxQty?: number;
   /** The live API's product id — what POST /api/cart/add needs. Absent on static-catalogue pieces. */
   productId?: number;
   /** The chosen variation, for a variable product. */
