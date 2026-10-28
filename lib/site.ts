@@ -36,10 +36,8 @@ export const site = {
   ],
   /** Shown in the ticker. */
   ticker: [
-    ["Free shipping over ", "₹2000"],
-    ["Cut to any length from ", "1 metre"],
-    ["Wholesale fabric from ", "₹80/m"],
-    ["Made in Jaipur · ", "Jhotwara"],
+    ["Use coupon DIWALI15 for ", "15% OFF"],
+    ["Free shipping on orders above ", "₹500"],
   ] as [string, string][],
   delivery: { domestic: "5–7 working days", international: "10–15 working days" },
 } as const;

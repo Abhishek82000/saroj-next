@@ -38,6 +38,9 @@ class OfferService
     /** Whether a coupon applies on top of the milestone reward. */
     public const STACK_COUPON_WITH_MILESTONE = true;
 
+    /** Coupons count the whole cart, whatever category the admin set on them (milestones still honour theirs). */
+    public const COUPON_IGNORES_CATEGORY = true;
+
     private ?Collection $live = null;
 
     /**
@@ -279,7 +282,7 @@ class OfferService
             $short = round($minimum - $amount, 2);
             return array_merge($out, [
                 'short_by' => $short,
-                'message'  => 'Add ₹' . $this->number($short) . ' more' . ($promo->promo_cat_id ? ' of eligible items' : '') . ' to use this coupon.',
+                'message'  => 'Add ₹' . $this->number($short) . ' more' . ($this->promoCategories($promo) ? ' of eligible items' : '') . ' to use this coupon.',
             ]);
         }
 
@@ -340,7 +343,7 @@ class OfferService
             'value'        => $amount,
             'max_amount'   => $cap > 0 ? $cap : null,
             'min_purchase' => (float) $p->promo_minimum_purchase ?: null,
-            'category_id'  => (int) $p->promo_cat_id ?: null,
+            'category_id'  => self::COUPON_IGNORES_CATEGORY ? null : ((int) $p->promo_cat_id ?: null),
             'first_order'  => (int) $p->promo_first_user === 1,
             'cashback'     => (int) $p->promo_discount_type === 0,
             'weekday'      => (int) $p->promo_type === 1 ? $p->promo_week_day : null,
@@ -366,7 +369,7 @@ class OfferService
     {
         static $cache = [];
         $id = (int) $p->promo_cat_id;
-        if (!$id) {
+        if (!$id || ((int) $p->promo_type !== 2 && self::COUPON_IGNORES_CATEGORY)) {
             return [];
         }
 

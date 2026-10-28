@@ -1,16 +1,13 @@
-import { getMarquee } from "@/lib/nav";
 import { site } from "@/lib/site";
 
-/** The marquee above the nav. Duplicated once so the loop is seamless. */
-export default async function Ticker() {
-  const marquee = await getMarquee();
+/** The marquee above the nav. Duplicated so the loop is seamless. */
+export default function Ticker() {
+  const lines = [...site.ticker, ...site.ticker, ...site.ticker, ...site.ticker];
 
   return (
     <div className="st-top" aria-hidden="true">
       <ul data-marquee>
-        {marquee
-          ? [marquee, marquee].map((text, i) => <li key={i}>{text}</li>)
-          : [...site.ticker, ...site.ticker].map(([lead, strong], i) => <li key={i}>{lead}<b>{strong}</b></li>)}
+        {lines.map(([lead, strong], i) => <li key={i}>{lead}<b>{strong}</b></li>)}
       </ul>
     </div>
   );
