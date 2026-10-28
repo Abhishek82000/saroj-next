@@ -20,7 +20,7 @@ const EVERY = 4200; // ms per step — the progress segment's fill time drives t
  * Tapping a coupon's code copies it and applies it to the cart.
  */
 export default function OffersSlider({ slides }: { slides: OfferSlide[] }) {
-  const { setCoupon, say } = useStore();
+  const { setCoupon, say, user, withLogin } = useStore();
   const rail = useRef<HTMLDivElement>(null);
   const reduce = useRef(false);
   const [stops, setStops] = useState<number[]>([0]);
@@ -84,9 +84,10 @@ export default function OffersSlider({ slides }: { slides: OfferSlide[] }) {
 
   const copy = async (code: string) => {
     try { await navigator.clipboard.writeText(code); } catch { /* still applied below */ }
-    setCoupon(code);
     setCopied(code);
-    say(`${code} copied — it's applied to your cart`);
+    /* Guests: copied, and applied once they log in. */
+    if (!user?.token) withLogin("Log in to apply coupons", () => { setCoupon(code); say(`${code} applied to your cart`); });
+    else { setCoupon(code); say(`${code} copied — it's applied to your cart`); }
     setTimeout(() => setCopied((c) => (c === code ? null : c)), 2200);
   };
 

@@ -41,6 +41,9 @@ class OfferService
     /** Coupons count the whole cart, whatever category the admin set on them (milestones still honour theirs). */
     public const COUPON_IGNORES_CATEGORY = true;
 
+    /** Categories (and their direct children) no coupon takes anything off — 37 Pre-Cut Fabrics. Milestones still count them. */
+    public const COUPON_EXCLUDED_CATEGORIES = [37];
+
     private ?Collection $live = null;
 
     /**
@@ -253,6 +256,11 @@ class OfferService
         }
         $out = array_merge($out, ['id' => (int) $promo->promo_id, 'code' => $promo->promo_coupon_code, 'name' => $promo->promo_name]);
 
+        // Guests see the coupons but can't use them.
+        if (!$user) {
+            return array_merge($out, ['message' => 'Log in to apply this coupon.']);
+        }
+
         if ($why = $this->whyNotLive($promo)) {
             return array_merge($out, ['message' => $why]);
         }
@@ -282,7 +290,7 @@ class OfferService
             $short = round($minimum - $amount, 2);
             return array_merge($out, [
                 'short_by' => $short,
-                'message'  => 'Add ₹' . $this->number($short) . ' more' . ($this->promoCategories($promo) ? ' of eligible items' : '') . ' to use this coupon.',
+                'message'  => 'Add ₹' . $this->number($short) . ' more' . ($this->promoCategories($promo) || $amount < array_sum(array_column($lines, 'line_total')) ? ' of eligible items' : '') . ' to use this coupon.',
             ]);
         }
 
@@ -351,17 +359,36 @@ class OfferService
         ];
     }
 
-    /** Subtotal of the lines the promo's category covers (all of them when it has none). */
+    /** Subtotal of the lines the promo's category covers (all of them when it has none).
+        Coupons leave out COUPON_EXCLUDED_CATEGORIES lines. */
     private function eligibleAmount(ArPromos $p, array $lines, array $categories): float
     {
         $allowed = $this->promoCategories($p);
+        $excluded = (int) $p->promo_type !== 2 ? $this->couponExcludedCategories() : [];
 
-        return round(array_sum(array_map(function (array $line) use ($allowed, $categories) {
-            if ($allowed && !array_intersect($allowed, $categories[$line['product_id']] ?? [])) {
+        return round(array_sum(array_map(function (array $line) use ($allowed, $excluded, $categories) {
+            $own = $categories[$line['product_id']] ?? [];
+            if ($allowed && !array_intersect($allowed, $own)) {
+                return 0;
+            }
+            if ($excluded && array_intersect($excluded, $own)) {
                 return 0;
             }
             return $line['line_total'];
         }, $lines)), 2);
+    }
+
+    /** COUPON_EXCLUDED_CATEGORIES and their direct children, as strings like productCategories(). */
+    private function couponExcludedCategories(): array
+    {
+        static $ids = null;
+        if (!self::COUPON_EXCLUDED_CATEGORIES) {
+            return [];
+        }
+
+        return $ids ??= collect(self::COUPON_EXCLUDED_CATEGORIES)
+            ->merge(ArCategory::whereIn('cat_parent', self::COUPON_EXCLUDED_CATEGORIES)->pluck('cat_id'))
+            ->map(fn ($c) => (string) $c)->unique()->values()->all();
     }
 
     /** The promo's category and its direct children, as the legacy coupon check did. Empty = all. */

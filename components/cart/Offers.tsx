@@ -130,14 +130,20 @@ function UnlockedCode({ code }: { code: string }) {
   );
 }
 
-/** Applies a code to the retail cart: checked by POST /api/offers/apply, then remembered. */
+/** Applies a code to the retail cart: checked by POST /api/offers/apply, then remembered.
+    Guests get the login popup; the code is applied once they're in (the cart re-prices it). */
 function useApplyCoupon() {
-  const { cart, user, setCoupon, say } = useStore();
+  const { cart, user, setCoupon, say, withLogin } = useStore();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const apply = async (code: string) => {
     if (!code.trim()) { setError("Enter a coupon code."); return false; }
+    if (!user?.token) {
+      const c = code.trim().toUpperCase();
+      withLogin("Log in to apply coupons", () => { setCoupon(c); say(`${c} added to your cart`); });
+      return false;
+    }
     setBusy(true);
     setError(null);
     const r = await applyCouponRemote(code, cart, user?.token);
