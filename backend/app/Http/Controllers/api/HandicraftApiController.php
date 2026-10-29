@@ -24,13 +24,21 @@ class HandicraftApiController extends Controller
 {
     public function index(): JsonResponse
     {
-        // Cache the whole assembled payload, not just the page meta row.
-        // 10 min is a reasonable revalidate window for a homepage; tune to taste.
+        // Cache the whole assembled payload, not just the page meta row, for 30 s.
         // The key must be this endpoint's own: it used to share 'api_home_payload'
         // with HomeApiController, so whichever endpoint filled the cache first
-        // served its payload from BOTH for ten minutes — the home page lost its
-        // handicraft sections, or this page lost its wheel.
-        $payload = Cache::remember('api_handicraft_payload', 600, function () {
+        // served its payload from BOTH — the home page lost its handicraft
+        // sections, or this page lost its wheel.
+        $payload = Cache::remember('api_handicraft_payload', 30, function () {
+
+            // Shuffle seeded by today's date, so the tag and category rails come out
+            // in a new order each day but hold the same order all day long. Sorting
+            // on a hash of date + product id avoids depending on shuffle()'s seed
+            // argument, which not every Laravel version keeps.
+            $day = date('Y-m-d');
+            $dailyShuffle = fn ($products) => $products
+                ->sortBy(fn ($p) => crc32($day . '-' . $p->product_id))
+                ->values();
 
             $handicraftCategory = ArCategory::where('cat_status', 1)
                 ->where('cat_type', 1)
@@ -92,7 +100,8 @@ class HandicraftApiController extends Controller
                         ->select($productColumns)
                         ->limit(30);
                 }])
-                ->get();
+                ->get()
+                ->each(fn ($tag) => $tag->setRelation('products', $dailyShuffle($tag->products)));
             $middleSlider = ArAppearanceSlider::where('slider_status', 1)
                 ->where('slider_position', 5)
                 ->with([
@@ -121,7 +130,8 @@ class HandicraftApiController extends Controller
                         ->select($productColumns)
                         ->limit(40);
                 }])
-                ->get();
+                ->get()
+                ->each(fn ($cat) => $cat->setRelation('catProducts', $dailyShuffle($cat->catProducts)));
 
             // The handicraft categories (cat_type 1) marked for the home page, each with
             // its products — the handicraft page's product rails. category_show_home_page
@@ -203,6 +213,6 @@ class HandicraftApiController extends Controller
                 'success' => true,
                 'data'    => $payload,
             ])
-            ->header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+            ->header('Cache-Control', 'public, max-age=30, stale-while-revalidate=30');
     }
 }

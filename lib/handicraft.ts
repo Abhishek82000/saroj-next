@@ -131,7 +131,7 @@ function toBolt(c: HomeCategorySection): HcBolt {
  */
 export async function getHandicraftData(): Promise<HandicraftData> {
   try {
-    const res = await fetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 300 } });
+    const res = await fetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 30 } });
     if (!res.ok) return EMPTY;
     const json: HandicraftApiResponse = fixImages(await res.json());
     const d = json.data;
