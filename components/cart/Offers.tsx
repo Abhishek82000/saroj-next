@@ -133,21 +133,28 @@ function UnlockedCode({ code }: { code: string }) {
 /** Applies a code to the retail cart: checked by POST /api/offers/apply, then remembered.
     Guests get the login popup; the code is applied once they're in (the cart re-prices it). */
 function useApplyCoupon() {
-  const { cart, user, setCoupon, say, withLogin } = useStore();
+  const { cart, user, setCoupon, say, withLogin, expireSession } = useStore();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const apply = async (code: string) => {
     if (!code.trim()) { setError("Enter a coupon code."); return false; }
+    const c = code.trim().toUpperCase();
+    const afterLogin = () => { setCoupon(c); say(`${c} added to your cart`); };
     if (!user?.token) {
-      const c = code.trim().toUpperCase();
-      withLogin("Log in to apply coupons", () => { setCoupon(c); say(`${c} added to your cart`); });
+      withLogin("Log in to apply coupons", afterLogin);
       return false;
     }
     setBusy(true);
     setError(null);
-    const r = await applyCouponRemote(code, cart, user?.token);
+    const r = await applyCouponRemote(code, cart, user.token);
     setBusy(false);
+    /* Shown as logged in, but the server no longer takes the login: log in afresh, then apply. */
+    if (r.expired) {
+      expireSession();
+      withLogin("Your session has expired — log in again to apply coupons", afterLogin);
+      return false;
+    }
     if (!r.ok) { setError(r.message); return false; }
     setCoupon(r.offers?.coupon?.code ?? code.trim().toUpperCase());
     say(r.message);

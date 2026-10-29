@@ -40,7 +40,7 @@ type PinState = "idle" | "loading" | "ok" | "fail";
  * needs a login. Placing the order goes through `placeOrder` in lib/checkout.ts.
  */
 export default function CheckoutView() {
-  const { cart, subtotal, mode, href, user, hydrated, cartStatus, openLogin, say, coupon, updateUser } = useStore();
+  const { cart, subtotal, mode, href, user, hydrated, cartStatus, openLogin, say, coupon, updateUser, expireSession } = useStore();
   const router = useRouter();
   const wholesale = mode === "wholesale";
   const payments = PAYMENTS[mode];
@@ -154,7 +154,13 @@ export default function CheckoutView() {
       gst: wholesale ? charges?.gst?.amount ?? 0 : 0,
       finalAmount: total,
     }), user?.token);
-    if (!r.ok) { setBusy(false); say(r.message); return; }
+    if (!r.ok) {
+      setBusy(false);
+      /* A dead login: drop it. Retail then re-prices and can pay as a guest; wholesale logs in again. */
+      if (r.expired) { expireSession(wholesale ? "Your session has expired — log in again to place a wholesale order" : undefined); }
+      say(r.message);
+      return;
+    }
     saveOrderSnapshot(r.orderId, cart);
     /* Online: Cashfree's page takes over and sends the buyer back to the status page.
        Bank transfer: the order is placed — straight to the status page. */

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { CartLine, Product } from "@/lib/types";
-import type { User } from "@/lib/auth";
+import { AUTH_IS_MOCK, getMe, type User } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate } from "@/lib/wholesale";
 import { getWishlist, setWishlistRemote, type Lists } from "@/lib/wishlist";
@@ -87,6 +87,9 @@ interface Store {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  /** The server refused the saved login (401): log out but keep the retail cart and
+      coupon, so checkout carries on as a guest. `reason` opens the login with it. */
+  expireSession: (reason?: string) => void;
   /** True once the saved cart, favourites and login have been read from this device. */
   hydrated: boolean;
   /** The current mode's cart: "ready" to show; logged in, "loading" until the account's
@@ -207,7 +210,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
 
   /* Read once on the client so the server render stays deterministic. */
   useEffect(() => {
-    const saved = safe.read<User | null>(USER_KEY, null);
+    /* A login saved without a session token (older builds) isn't one: every
+       logged-in call would refuse it, so start as a guest instead. */
+    const stored = safe.read<User | null>(USER_KEY, null);
+    const saved = stored?.token || AUTH_IS_MOCK ? stored : null;
     /* Logged in: the cart comes from the API only (syncCart) — nothing local.
        Logged out: the guest's own lines; any with a cartId were an account's. */
     /* Images saved before cartImage existed may still point at the old origin. */
@@ -512,6 +518,41 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     say("Logged out");
   }, [say, mode]);
 
+  /** The server refused the saved login (401: token revoked, or never a real
+      session) while this device still showed it as logged in — so shipping
+      never priced, coupons asked for a login and Pay failed. Drop it and carry
+      on as a guest: the retail lines on screen stay (as guest lines, handed
+      back to the account by syncCart on the next login), and so does the
+      coupon. `reason` opens the login with it. Safe to call more than once. */
+  const expireSession = useCallback((reason?: string) => {
+    if (!userRef.current?.token) return;
+    userRef.current = null;
+    setUser(null);
+    setRetail((prev) => prev.map((l) => ({ ...l, cartId: undefined })));
+    setWh({ owner: null, lines: [] });
+    if (mode === "wholesale") setCartOpen(false);
+    setWishlist(EMPTY_WISHLIST);
+    setCounts(null);
+    setCartLoaded({ retail: false, wholesale: false });
+    setCartFailed({ retail: false, wholesale: false });
+    wishlistSyncedFor.current = null;
+    cartSyncedFor.current = null;
+    if (reason) openLogin(reason);
+    else say("Your session has expired — please log in again");
+  }, [say, mode, openLogin]);
+
+  /* On load with a saved login, check it's still a session (GET /api/auth/me) —
+     once per token. Only a 401 logs out; a network blip leaves it be. */
+  const checkedToken = useRef<string | null>(null);
+  useEffect(() => {
+    const u = user;
+    if (!hydrated || !u?.token || AUTH_IS_MOCK || checkedToken.current === u.token) return;
+    checkedToken.current = u.token;
+    getMe(u.token, u.mobile).then((r) => {
+      if (!r.ok && r.status === 401 && userRef.current?.token === u.token) expireSession();
+    });
+  }, [hydrated, user, expireSession]);
+
   const switchMode = useCallback((m: Mode) => router.push(swapMode(pathname, m)), [router, pathname]);
   const href = useCallback((retail: string) => (mode === "wholesale" ? wholesaleHref(retail) : retail), [mode]);
   const navItem: Store["navItem"] = useCallback((link) => (
@@ -594,7 +635,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     shortOfFreeShipping: retail.length && retail.every((l) => l.shippingFree) ? 0 : Math.max(0, site.freeShippingOver - retailSubtotal),
     coupon, setCoupon,
     addProduct,
-    user, login, logout, hydrated, updateUser,
+    user, login, logout, expireSession, hydrated, updateUser,
     cartStatus: !user?.token || cartLoaded[mode] ? "ready" : cartFailed[mode] ? "failed" : "loading", loginOpen, loginReason, openLogin, closeLogin, withLogin,
     mode, switchMode, href, navItem,
     favs: wishlist[mode], wishlist, toggleFav,

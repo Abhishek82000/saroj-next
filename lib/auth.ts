@@ -58,7 +58,8 @@ export interface User {
   token?: string;
 }
 
-export type Failure = { ok: false; message: string };
+/** `status` is the HTTP status when the server answered — 401 means the session token is no good. */
+export type Failure = { ok: false; message: string; status?: number };
 /** `token` belongs to this OTP and goes back to verifyOtp. */
 export type SendOtpResult = { ok: true; token: string } | Failure;
 export type VerifyOtpResult =
@@ -118,7 +119,7 @@ async function call(
     if (res.status === 429) return { ok: false, message: "Too many attempts — wait a minute and try again." };
     if (!res.ok || failed(json)) {
       const first = json.errors ? Object.values(json.errors)[0]?.[0] : undefined;
-      return { ok: false, message: first ?? json.message ?? "Something went wrong — please try again." };
+      return { ok: false, message: first ?? json.message ?? "Something went wrong — please try again.", status: res.status };
     }
     return { ok: true, json };
   } catch {
@@ -225,13 +226,16 @@ export async function verifyOtp(mobile: string, otp: string, token: string): Pro
   const r = await call("verify-otp", { query: { otp, challenge_token: token } });
   if (!r.ok) return r;
   if (process.env.NODE_ENV !== "production") console.info("[auth] verify-otp response", r.json);
-  const next = tokenOf(r.json) ?? token;
   const flag = loginFlag(r.json);
-  /* No login_status at all? Fall back to the web flow's wording ("new_register"). */
-  const isNew = flag !== undefined ? flag === 0 : /new/i.test(r.json.message ?? "");
-  return isNew
-    ? { ok: true, state: "new", token: next }
-    : { ok: true, state: "existing", user: userFrom(r.json, mobile, undefined, next) };
+  /* No login_status at all? Fall back to the API's wording ("registration_required", or the web flow's "new_register"). */
+  const isNew = flag !== undefined ? flag === 0 : /new|registration/i.test(r.json.message ?? "");
+  if (isNew) return { ok: true, state: "new", token: tokenOf(r.json) ?? token };
+  /* Logged in only with the session token the server issues. The OTP's challenge
+     token isn't one — kept as the session, every logged-in call 401s with it. */
+  const session = tokenOf(r.json);
+  return session
+    ? { ok: true, state: "existing", user: userFrom(r.json, mobile, undefined, session) }
+    : { ok: false, message: "Couldn't log you in — please try again." };
 }
 
 export async function registerUser(mobile: string, name: string, email: string, token: string): Promise<RegisterResult> {
@@ -244,7 +248,11 @@ export async function registerUser(mobile: string, name: string, email: string, 
     return { ok: true, user };
   }
   const r = await call("register", { query: { name: name.trim(), email: email.trim(), registration_token: token } });
-  return r.ok ? { ok: true, user: userFrom(r.json, mobile, { name: name.trim(), email: email.trim() }, token) } : r;
+  if (!r.ok) return r;
+  /* As with verify-otp: the registration token isn't a session, only the server's own token is. */
+  return tokenOf(r.json)
+    ? { ok: true, user: userFrom(r.json, mobile, { name: name.trim(), email: email.trim() }) }
+    : { ok: false, message: "Couldn't finish signing you up — please log in again." };
 }
 
 /**

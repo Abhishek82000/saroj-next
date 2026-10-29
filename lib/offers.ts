@@ -114,18 +114,21 @@ async function send<T>(path: string, init: RequestInit, token?: string) {
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(`${site.api}/api/offers${path}`, { ...init, headers });
     const json = (fixImages(await res.json().catch(() => ({})))) as { status?: string; message?: string } & T;
-    return { ok: res.ok && json.status !== "error", json };
+    return { ok: res.ok && json.status !== "error", status: res.status, json };
   } catch {
-    return { ok: false, json: { message: "Couldn't reach the server." } as { message?: string } & Partial<T> };
+    return { ok: false, status: 0, json: { message: "Couldn't reach the server." } as { message?: string } & Partial<T> };
   }
 }
 
-/** Checks `code` against the retail cart. On success the caller stores the code. */
+/** Checks `code` against the retail cart. On success the caller stores the code.
+    `expired`: a token went along but the server didn't take it as a login — a 401,
+    or (older servers) the guest answer "Log in to apply this coupon." */
 export async function applyCouponRemote(code: string, lines: CartLine[], token?: string) {
-  const { ok, json } = await send<{ offers?: CartOffers }>("/apply", {
+  const { ok, status, json } = await send<{ offers?: CartOffers }>("/apply", {
     method: "POST", body: JSON.stringify({ code: code.trim(), items: itemsOf(lines) }),
   }, token);
-  return { ok, message: json.message ?? (ok ? "Coupon applied." : "This coupon code is not valid."), offers: json.offers ?? null };
+  const expired = !ok && !!token && (status === 401 || /^log in/i.test(json.message ?? ""));
+  return { ok, expired, message: json.message ?? (ok ? "Coupon applied." : "This coupon code is not valid."), offers: json.offers ?? null };
 }
 
 /** Featured coupons, the milestone offer and free shipping, without a cart. */

@@ -52,9 +52,16 @@ class OfferApiController extends Controller
             'items.*.qty'          => 'required|numeric|gt:0',
         ]);
 
+        // A Bearer token that's no longer a session is a 401 (as /api/cart/price answers),
+        // not the guest's "Log in to apply this coupon." — so the browser knows to log in again.
+        $user = $request->user('sanctum');
+        if (!$user && $request->bearerToken()) {
+            return response()->json(['status' => 'error', 'message' => 'Your session has expired. Please log in again.'], 401);
+        }
+
         $payload = $this->cart->forGuest($data['items'], CartService::RETAIL);
         $payload['offers'] = $this->offers->summary(
-            $payload['items'], $payload['totals']['subtotal'], $data['code'], $request->user('sanctum'),
+            $payload['items'], $payload['totals']['subtotal'], $data['code'], $user,
         );
         $coupon = $payload['offers']['coupon'];
 

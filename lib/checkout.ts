@@ -235,7 +235,8 @@ export type PlaceOrderResult =
       /** Online: open Cashfree with this. Null for a bank transfer — the order is placed already. */
       payment: { sessionId: string; mode: "sandbox" | "production" } | null;
     }
-  | { ok: false; message: string; fieldErrors?: Record<string, string[]> };
+  /** `expired`: the login sent along was refused (401) — log out, then retail can go again as a guest. */
+  | { ok: false; message: string; fieldErrors?: Record<string, string[]>; expired?: boolean };
 
 interface PayNowResponse {
   status?: string;
@@ -253,6 +254,14 @@ export async function placeOrder(payload: PayNowPayload, token?: string): Promis
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(`${site.api}/api/cart/paynow`, { method: "POST", headers, body: JSON.stringify(payload) });
     const json = (await res.json().catch(() => ({}))) as PayNowResponse;
+    if (res.status === 401 && token) {
+      return {
+        ok: false, expired: true,
+        message: payload.type === "wholesale"
+          ? "Your session has expired — log in again to place a wholesale order."
+          : "Your session has expired — log in again, or tap Pay again to check out as a guest.",
+      };
+    }
     if (res.status === 401 && payload.type === "wholesale") return { ok: false, message: "Log in again to place a wholesale order." };
     if (!res.ok || json.status === "error" || !json.order_number) {
       const first = json.errors ? Object.values(json.errors)[0]?.[0] : undefined;

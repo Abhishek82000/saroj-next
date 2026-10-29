@@ -57,7 +57,8 @@ export interface ServerCartLine {
 export const shipsFree = (l: Pick<ServerCartLine, "shipping_free" | "product_shipping_free">) =>
   Number(l.shipping_free ?? l.product_shipping_free) === 1;
 
-type Fail = { ok: false; message: string };
+/** `status` 401: the Bearer token sent is no longer a session. */
+type Fail = { ok: false; message: string; status?: number };
 
 async function call<T>(path: string, init: RequestInit, token?: string): Promise<({ ok: true } & T) | Fail> {
   try {
@@ -68,7 +69,7 @@ async function call<T>(path: string, init: RequestInit, token?: string): Promise
     const res = await fetchRetrying(url, { ...init, headers });
     const json = (fixImages(await res.json().catch(() => ({})))) as { status?: string; message?: string } & T;
     if (res.status === 429) return { ok: false, message: "Too many requests — wait a minute and try again." };
-    if (!res.ok || json.status === "error") return { ok: false, message: json.message ?? "Couldn't update the cart." };
+    if (!res.ok || json.status === "error") return { ok: false, message: json.message ?? "Couldn't update the cart.", status: res.status };
     return { ...json, ok: true };
   } catch {
     return { ok: false, message: "Couldn't reach the server." };
@@ -181,18 +182,19 @@ const itemsOf = (lines: CartLine[]) => lines
   .map((l) => ({ product_id: l.productId, variation_id: l.variationId ?? null, qty: l.qty }));
 
 /** Today's prices for these lines, straight from the server — with the retail
-    cart's offers (milestone, free shipping, `coupon` re-checked; see lib/offers.ts). */
+    cart's offers (milestone, free shipping, `coupon` re-checked; see lib/offers.ts).
+    `expired` on a failure: the token sent was refused (401) — the caller logs out and asks again as a guest. */
 export async function priceCartRemote(type: "retail" | "wholesale", lines: CartLine[], token?: string, coupon?: string | null) {
   const r = await call<{
     items?: ServerCartLine[]; totals?: CartTotals; has_errors?: boolean; offers?: CartOffers | null;
     shipping?: CartCharges["shipping"]; gst?: CartCharges["gst"]; payable?: number | null;
   }>(
     "price", { method: "POST", body: JSON.stringify({ type, items: itemsOf(lines), ...(coupon ? { coupon } : {}) }) }, token);
-  if (!r.ok) return null;
+  if (!r.ok) return { ok: false as const, expired: !!token && r.status === 401 };
   const charges: CartCharges = { shipping: r.shipping ?? null, gst: r.gst ?? null, payable: r.payable ?? null };
   /* Its line images come on the old origin too (see cartImage); the cart copies them over its own on every re-price. */
   const items = (r.items ?? []).map((l) => ({ ...l, image: cartImage(l.image) || null }));
-  return { items, totals: r.totals ?? null, hasErrors: !!r.has_errors, offers: r.offers ?? null, charges };
+  return { ok: true as const, items, totals: r.totals ?? null, hasErrors: !!r.has_errors, offers: r.offers ?? null, charges };
 }
 
 /** The local line a server line answers for — matched on product + variation. */
