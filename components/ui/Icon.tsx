@@ -28,8 +28,8 @@ const paths: Record<string, React.ReactNode> = {
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   home: <><path d="M3.5 11 12 4l8.5 7" /><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5" /></>,
   grid: <><rect x="4" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" /></>,
-  /* A clay pot — handicraft. */
-  craft: <><path d="M9 3h6M10 3v3C7 7.5 5 10 5 13.5 5 17.6 8.1 21 12 21s7-3.4 7-7.5C19 10 17 7.5 14 6V3" /><path d="M5.6 12h12.8M6.4 16.5h11.2" /></>,
+  /* A woven cloth on a rod, with a motif and fringe — textile handicraft. */
+  textile: <><path d="M3 4h18M5 4v13h14V4" /><path d="m12 7.5 2.5 2.5-2.5 2.5-2.5-2.5Z" /><path d="M7 17v3M10 17v3M14 17v3M17 17v3" /></>,
 };
 
 export default function Icon({ name, size = 17, fill = "none", strokeWidth = 1.5, className }: {

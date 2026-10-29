@@ -187,7 +187,7 @@ class CartService
             'name'       => $product->product_name,
             'slug'       => $product->product_slug,
             'image'      => $this->image($variation?->pv_image ?: $product->product_image),
-            'unit'       => (int) $product->product_style_type === 1 ? 'metre' : 'piece',
+            'unit'       => (int) $product->product_style_type === 1 ? 'meter' : 'piece',
             'step'       => $step,
             'min_qty'    => $type === self::WHOLESALE && (float) $product->product_moq > 0 ? (float) $product->product_moq : null,
             'max_qty'    => $this->stockCap($product, $variation),

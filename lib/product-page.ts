@@ -30,7 +30,7 @@ export async function productMeta(slug: string, wholesale: boolean): Promise<Met
   const price = live?.price.selling ?? p.price;
 
   const composed = p.cut
-    ? `${p.name}. ${inr(price)} a metre${off ? `, down from ${inr(live?.price.mrp ?? p.mrp)}` : ""} — cut to any length from ${p.cut.min} m. Posted from Jhotwara, Jaipur.`
+    ? `${p.name}. ${inr(price)} a meter${off ? `, down from ${inr(live?.price.mrp ?? p.mrp)}` : ""} — cut to any length from ${p.cut.min} m. Posted from Jhotwara, Jaipur.`
     : `${p.name}. ${inr(price)} ${unitLabel(p.unit)}${off ? `, down from ${inr(live?.price.mrp ?? p.mrp)}` : ""}. ${craft.name} made in ${craft.lane}, Jaipur.`;
 
   return pageMeta({

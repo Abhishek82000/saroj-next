@@ -281,7 +281,7 @@ function apiSaleProductToSaleProduct(p: ProductsApiSaleProduct): SaleProduct {
 export const shipsFree = (v: HomeApiProduct["shipping"]) => Number(v) === 1;
 
 /** Turns an /api/home product into the shape Rail and the product cards expect.
-    style_type 1 is fabric by the metre; anything else is handicraft, sold by the unit. */
+    style_type 1 is fabric by the meter; anything else is handicraft, sold by the unit. */
 export function apiProductToProduct(p: HomeApiProduct): Product {
   const price = Number(p.selling_price);
   const mrp = Number(p.price);
@@ -295,7 +295,7 @@ export function apiProductToProduct(p: HomeApiProduct): Product {
     material: "",
     price,
     mrp: mrp > price ? mrp : 0,
-    unit: fabric ? "metre" : "unit",
+    unit: fabric ? "meter" : "unit",
     ...(shipsFree(p.shipping) ? { shippingFree: true } : {}),
     stock: p.stock <= 0 ? "out" : p.stock < 10 ? "low" : "in",
     images: [{ src: p.image, note: p.image_alt ?? "" }],
@@ -342,7 +342,7 @@ export async function getProductDetail(slug: string): Promise<ApiProductDetail |
       kind: "fabric",
       craft: "",
       material: "",
-      unit: "metre",
+      unit: "meter",
       price: priced ? Number(priced.selling_price) : 0,
       mrp: priced && Number(priced.price) > Number(priced.selling_price) ? Number(priced.price) : 0,
       // Unpriced means "we don't actually know" — treated as out of stock so
@@ -380,7 +380,7 @@ export function buildReels({ tagSections, categorySections, videoProducts }: Pic
       name: v.product_name,
       price,
       mrp: mrp > price ? mrp : 0,
-      unit: "metre",
+      unit: "meter",
       image: imageById.get(v.product_id) ?? "",
       slug: v.product_slug,
       productId: v.product_id,

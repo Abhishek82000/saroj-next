@@ -23,7 +23,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
   return pageMeta({
     title: "Shop everything",
     description:
-      "Every piece on the Saroj Textile counter — hand block printed cotton by the metre and handicraft from Jaipur. Filter by category, price and availability.",
+      "Every piece on the Saroj Textile counter — hand block printed cotton by the meter and handicraft from Jaipur. Filter by category, price and availability.",
     path: "/shop",
   });
 }
@@ -53,7 +53,7 @@ export async function ShopView({ searchParams, wholesale }: { searchParams: Sear
       <ShopListing
         q={q}
         items={products}
-        lede="Hand block printed cotton by the metre and handicraft from Jaipur — everything on the counter."
+        lede="Hand block printed cotton by the meter and handicraft from Jaipur — everything on the counter."
         categories={categories}
         sort={sort}
         tags={tags}

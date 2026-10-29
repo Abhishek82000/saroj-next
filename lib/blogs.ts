@@ -88,7 +88,7 @@ function relatedToProduct(p: BlogApiRelatedProduct): Product {
     material: "",
     price,
     mrp: mrp > price ? mrp : 0,
-    unit: "metre",
+    unit: "meter",
     stock: p.product_stock <= 0 ? "out" : p.product_stock < 10 ? "low" : "in",
     images: [{ src: p.product_image_cdn, note: p.product_name }],
     fresh: p.product_id,

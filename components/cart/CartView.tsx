@@ -20,7 +20,7 @@ export function LineQty({ l }: { l: CartLine }) {
         if (l.minQty && next < l.minQty) return say(`Wholesale minimum is ${l.minQty} m`);
         setQty(l.id, next);
       }}>−</button>
-      <span>{l.qty}{l.unit === "metre" ? " m" : ""}</span>
+      <span>{l.qty}{l.unit === "meter" ? " m" : ""}</span>
       <button type="button" onClick={() => setQty(l.id, l.qty + l.step)} aria-label="More">+</button>
     </span>
   );
@@ -158,7 +158,7 @@ export default function CartView() {
             <p>
               {wholesale
                 ? "Wholesale fabric starts at 10 metres — pick a category and add your lengths."
-                : "Fabric is cut to any length from one metre, so start wherever you like."}
+                : "Fabric is cut to any length from one meter, so start wherever you like."}
             </p>
             <Link href={href("/shop")} className="st-btn st-btn--solid">Browse the counter</Link>
           </div>

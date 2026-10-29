@@ -252,7 +252,7 @@ export default function CheckoutView() {
           <span className="st-co__mph">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={l.image} alt="" />
-            <i>{l.qty}{l.unit === "metre" ? "m" : ""}</i>
+            <i>{l.qty}{l.unit === "meter" ? "m" : ""}</i>
           </span>
           <span className="st-co__mn">
             {l.name}

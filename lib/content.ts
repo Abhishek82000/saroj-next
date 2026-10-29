@@ -1,6 +1,6 @@
 /**
  * Copy that isn't a product: wash care, the questions people ask,
- * the metre guide and the running offers. Kept out of the components so
+ * the meter guide and the running offers. Kept out of the components so
  * a merchandiser can edit it without touching JSX.
  */
 

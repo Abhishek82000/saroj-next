@@ -211,12 +211,12 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       {live && mode !== "enquiry" && (
         wholesale ? (
           <p className="st-crosslink">
-            Ordering less than {minQty}{live.cut.unit === "metre" ? "m" : " pcs"}?{" "}
+            Ordering less than {minQty}{live.cut.unit === "meter" ? "m" : " pcs"}?{" "}
             <Link href={productHref(p.slug, false)}>Buy at retail instead</Link>
           </p>
         ) : live.wholesale.available && live.wholesale.sellingPrice > 0 ? (
           <p className="st-crosslink">
-            Taking {live.wholesale.minQty || site.wholesaleFrom}{live.cut.unit === "metre" ? "m" : " pcs"} or more?{" "}
+            Taking {live.wholesale.minQty || site.wholesaleFrom}{live.cut.unit === "meter" ? "m" : " pcs"} or more?{" "}
             <Link href={productHref(p.slug, true)}>
               Wholesale is {inr(live.wholesale.sellingPrice)} {unitLabel(live.cut.unit)}
             </Link>
@@ -250,8 +250,8 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
         <div className="st-whole">
           <p>
             {qty >= site.wholesaleFrom
-              ? <>At this length the wholesale rate is <b>{inr(live.wholesale.sellingPrice)} a metre</b> — {inr(live.wholesale.sellingPrice * qty)} instead of {inr(total)}.</>
-              : <>Taking <b>{site.wholesaleFrom} m</b> or more? The wholesale rate is {inr(live.wholesale.sellingPrice)} a metre.</>}
+              ? <>At this length the wholesale rate is <b>{inr(live.wholesale.sellingPrice)} a meter</b> — {inr(live.wholesale.sellingPrice * qty)} instead of {inr(total)}.</>
+              : <>Taking <b>{site.wholesaleFrom} m</b> or more? The wholesale rate is {inr(live.wholesale.sellingPrice)} a meter.</>}
           </p>
           <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale →</a>
         </div>
@@ -259,7 +259,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
 
       {live?.wholesale.lFoldNote && (
         <p className="st-cart__note" style={{ marginTop: ".8rem" }}>
-          Cut in an L fold, so a metre measures 95–98 cm on the bolt.
+          Cut in an L fold, so a meter measures 95–98 cm on the bolt.
         </p>
       )}
 
@@ -334,7 +334,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
         </Portal>
       )}
 
-      {/* ---------- metre guide ---------- */}
+      {/* ---------- meter guide ---------- */}
       <Modal open={guide} onClose={() => setGuide(false)} title="How much do I need?" wide>
         <p className="st-lede" style={{ marginTop: 0 }}>
           At 42 inches wide, these are the lengths our customers usually ask for.

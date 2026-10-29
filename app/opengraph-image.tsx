@@ -21,7 +21,7 @@ export default async function OpengraphImage() {
           <div style={{ fontSize: 96, lineHeight: 1.02, letterSpacing: -2 }}>Woven, then</div>
           <div style={{ fontSize: 96, lineHeight: 1.02, letterSpacing: -2, color: "#1B5FA8" }}>fired &amp; cast.</div>
           <div style={{ fontSize: 30, color: "#6C7A82", marginTop: 28, maxWidth: 860 }}>
-            Hand block printed cotton by the metre, and handicraft from six Jaipur lanes.
+            Hand block printed cotton by the meter, and handicraft from six Jaipur lanes.
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, color: "#3A4750" }}>

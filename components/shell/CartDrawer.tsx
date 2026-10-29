@@ -53,7 +53,7 @@ export default function CartDrawer() {
             <p>
               {wholesale
                 ? "Wholesale fabric starts at 10 metres — pick a category and add your lengths."
-                : "Fabric is cut to any length from one metre, so start wherever you like."}
+                : "Fabric is cut to any length from one meter, so start wherever you like."}
             </p>
             {wholesale && !user && (
               <button type="button" className="st-btn" style={{ marginBottom: ".6rem" }}
@@ -87,7 +87,7 @@ export default function CartDrawer() {
                         if (l.minQty && next < l.minQty) return say(`Wholesale minimum is ${l.minQty} m`);
                         setQty(l.id, next);
                       }}>−</button>
-                      <span>{l.qty}{l.unit === "metre" ? " m" : ""}</span>
+                      <span>{l.qty}{l.unit === "meter" ? " m" : ""}</span>
                       <button type="button" onClick={() => setQty(l.id, l.qty + l.step)} aria-label="More">+</button>
                     </span>
                     <span className="st-line__p">{inrExact(l.price * l.qty)}</span>

@@ -67,7 +67,7 @@ Two things I kept for parity but would move:
 | `components/product/CutPicker.tsx` | wholesale nudge gated |
 | `styles/product.css` | additions |
 
-The UI is unchanged — same gallery, same metre picker with its slider and
+The UI is unchanged — same gallery, same meter picker with its slider and
 garment chips, same tabs, same sticky bar. Only the data behind it moved.
 
 ### Environment

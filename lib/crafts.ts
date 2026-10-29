@@ -11,7 +11,7 @@ export const crafts: Craft[] = [
   { key: "brass",   name: "Lac & Brass",  hindi: "लाख और पीतल",  lane: "Tripolia Bazaar", image: PIC + "saroj-craft-brass/200/200" },
   { key: "marble",  name: "Marble Jali",  hindi: "संगमरमर जाली", lane: "Kishanpole", image: PIC + "saroj-craft-marble/200/200" },
   { key: "puppet",  name: "Kathputli",    hindi: "कठपुतली",      lane: "Shilpgram", image: PIC + "saroj-craft-puppet/200/200" },
-  { key: "fabric",  name: "Fabric",       hindi: "कपड़ा",         lane: "By the metre", image: CDN + "48621785565568.webp" },
+  { key: "fabric",  name: "Fabric",       hindi: "कपड़ा",         lane: "By the meter", image: CDN + "48621785565568.webp" },
 ];
 
 export const craftBy = Object.fromEntries(crafts.map((c) => [c.key, c])) as Record<string, Craft>;

@@ -88,7 +88,7 @@ export default function Footer({ handicraftCats = [] }: { handicraftCats?: Foote
           <Link className="st-foot__logo" href="/" aria-label="Saroj Textile home">
             <img width={46} height={46} src={site.logo} alt="Saroj Textile" />
           </Link>
-          <p className="st-foot__say">Printed by hand,<br /><em>cut to the metre.</em></p>
+          <p className="st-foot__say">Printed by hand,<br /><em>cut to the meter.</em></p>
           <address>{site.address.street}, {site.address.city} {site.address.postalCode}</address>
         </div>
 

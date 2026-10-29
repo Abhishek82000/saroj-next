@@ -534,7 +534,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     if (!rate) { say("This piece isn't sold wholesale"); return; }
     const line = {
       id: p.slug, name: p.name, price: rate.price, unit: p.unit, image: p.images[0].src,
-      step: p.cut?.step ?? (p.unit === "metre" ? 0.5 : 1), qty: Math.max(qty ?? 0, rate.minQty),
+      step: p.cut?.step ?? (p.unit === "meter" ? 0.5 : 1), qty: Math.max(qty ?? 0, rate.minQty),
       href: wholesaleHref(`/product/${p.slug}`), minQty: rate.minQty, productId: p.productId ?? p.live?.id,
       ...(p.live ? { maxQty: p.live.stock } : {}),
     };

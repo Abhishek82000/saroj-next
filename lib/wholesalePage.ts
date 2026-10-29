@@ -37,7 +37,7 @@ const toCollection = (c: WholesaleApiCategory): WholesaleCollection => ({
     wholesale columns (WholesaleApiController::useWholesalePrices), so its
     price / selling_price are the trade rate; a product without one is left
     for attachWholesale to look up. The feed sends style_type as null; the
-    wholesale catalogue is fabric, so a missing one means by the metre (1). */
+    wholesale catalogue is fabric, so a missing one means by the meter (1). */
 function toProduct(p: WholesaleApiProduct): Product {
   const item = apiProductToProduct({ ...p, price: p.price ?? "0", selling_price: p.selling_price ?? "0", style_type: p.style_type ?? 1 });
   const price = Number(p.selling_price ?? p.price);
@@ -56,7 +56,7 @@ function toReels(videos: HomeVideoProduct[], rails: WholesaleRail[]): Reel[] {
     const mrp = Number(v.product_wh_mrp_price) || 0;
     return {
       id: `reel-${v.product_id}`, video: v.product_video_cdn, kind: "Fabric", name: v.product_name,
-      price, mrp: mrp > price ? mrp : 0, unit: "metre",
+      price, mrp: mrp > price ? mrp : 0, unit: "meter",
       image: imageById.get(v.product_id) ?? "", slug: v.product_slug, productId: v.product_id,
     };
   });

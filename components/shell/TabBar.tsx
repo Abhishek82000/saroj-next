@@ -31,7 +31,7 @@ export default function TabBar() {
         <Icon name="home" size={21} /><span>Home</span>
       </Link>
       <Link href="/handicraft" className={on(path.startsWith("/handicraft"))}>
-        <Icon name="craft" size={21} /><span>Handicraft</span>
+        <Icon name="textile" size={21} /><span>Handicraft</span>
       </Link>
       <Link href={swap.href} className="st-tab">
         <Icon name="grid" size={21} /><span>{swap.label}</span>

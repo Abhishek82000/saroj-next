@@ -112,7 +112,7 @@ const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
 function toBolt(c: HomeCategorySection): HcBolt {
   const first = c.products[0];
   const from = Math.min(...c.products.map((p) => Number(p.selling_price)).filter((n) => n > 0));
-  // style_type 2 is a top-and-bottom suit set, sold whole rather than by the metre.
+  // style_type 2 is a top-and-bottom suit set, sold whole rather than by the meter.
   const unit = first.style_type === 2 ? "set" : "m";
   return {
     name: c.cat_name,

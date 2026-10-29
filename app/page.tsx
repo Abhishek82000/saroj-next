@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = pageMeta({
   title: `${site.name} — ${site.tagline}`,
   description:
-    "Hand block printed Jaipuri cotton, Ajrakh and Kalamkari by the metre, alongside blue pottery, meenakari, brass and marble from the lanes that print our cloth. Cut to any length from one metre.",
+    "Hand block printed Jaipuri cotton, Ajrakh and Kalamkari by the meter, alongside blue pottery, meenakari, brass and marble from the lanes that print our cloth. Cut to any length from one meter.",
   path: "/",
 });
 

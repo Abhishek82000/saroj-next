@@ -42,8 +42,8 @@ export default function ProdCard({
         {known && (
           <div className="st-prod__price">
             <b>{inr(view.price)}</b>
-            {/* Fabric is priced by the metre; handicraft by the piece. */}
-            <small>/ {p.unit === "metre" ? "metre" : "piece"}</small>
+            {/* Fabric is priced by the meter; handicraft by the piece. */}
+            <small>/ {p.unit === "meter" ? "meter" : "piece"}</small>
             {view.mrp > view.price && <s>{inr(view.mrp)}</s>}
           </div>
         )}

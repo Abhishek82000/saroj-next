@@ -87,7 +87,7 @@ const stockLevel = (n: number): Stock => (n <= 0 ? "out" : n < 10 ? "low" : "in"
 const plain = (html: string | null) =>
   (html ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 
-/** Fabric sold by the metre reads as fabric; everything else is a piece. */
+/** Fabric sold by the meter reads as fabric; everything else is a piece. */
 const kindOf = (styleType: number) => (styleType === 1 ? "fabric" : "craft");
 
 function mapLive(raw: RawProduct): LiveProduct {
@@ -133,15 +133,15 @@ function mapProduct(raw: RawProduct): Product {
     kind: kindOf(raw.style_type),
     // Live products carry no craft key; the page falls back to the fabric craft.
     craft: kindOf(raw.style_type) === "fabric" ? "fabric" : "bagru",
-    material: raw.cut.unit === "metre" ? "Cotton" : "—",
+    material: raw.cut.unit === "meter" ? "Cotton" : "—",
     price: raw.price.selling,
     mrp: raw.price.mrp,
-    unit: raw.cut.unit === "metre" ? "metre" : "unit",
+    unit: raw.cut.unit === "meter" ? "meter" : "unit",
     stock: stockLevel(raw.stock),
     images,
     fresh: 0,
     sold: raw.review_count,
-    // Only a by-the-metre product gets the length picker.
+    // Only a by-the-meter product gets the length picker.
     cut: raw.cut.mode === "length"
       ? { min: raw.cut.min, max: raw.cut.max, step: raw.cut.step, wholesale: raw.wholesale.selling_price }
       : undefined,
@@ -170,7 +170,7 @@ function mapCard(raw: RawCard, wholesale = false): Product {
     material: raw.style_type === 1 ? "Cotton" : "—",
     price: raw.selling,
     mrp: raw.mrp,
-    unit: raw.style_type === 1 ? "metre" : "unit",
+    unit: raw.style_type === 1 ? "meter" : "unit",
     ...(Number(raw.shipping) === 1 ? { shippingFree: true } : {}),
     stock: stockLevel(raw.stock),
     images: [{ src: raw.image, note: raw.image_alt || raw.name }],

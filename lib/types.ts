@@ -142,7 +142,7 @@ export interface LiveProduct {
   inCarts: number;
   /** 0 simple, 1 variable. */
   type: number;
-  /** 1 by the metre, 3 variant picker, 4 enquiry only. */
+  /** 1 by the meter, 3 variant picker, 4 enquiry only. */
   styleType: number;
   stock: number;
   rating: number;

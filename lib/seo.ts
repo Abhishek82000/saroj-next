@@ -107,7 +107,7 @@ export const productLd = (p: Product) => {
     sku: p.slug,
     material: p.material,
     brand: { "@type": "Brand", name: site.name },
-    category: p.kind === "fabric" ? "Fabric by the metre" : "Handicraft",
+    category: p.kind === "fabric" ? "Fabric by the meter" : "Handicraft",
     ...(off ? { award: `${off}% off` } : {}),
     offers: {
       "@type": "Offer",
@@ -123,7 +123,7 @@ export const productLd = (p: Product) => {
             ? "https://schema.org/LimitedAvailability"
             : "https://schema.org/InStock",
       seller: { "@id": abs("/#organization") },
-      ...(p.unit === "metre" ? { eligibleQuantity: { "@type": "QuantitativeValue", unitCode: "MTR", minValue: p.cut?.min ?? 1 } } : {}),
+      ...(p.unit === "meter" ? { eligibleQuantity: { "@type": "QuantitativeValue", unitCode: "MTR", minValue: p.cut?.min ?? 1 } } : {}),
       shippingDetails: {
         "@type": "OfferShippingDetails",
         shippingRate: { "@type": "MonetaryAmount", value: 0, currency: site.currency },

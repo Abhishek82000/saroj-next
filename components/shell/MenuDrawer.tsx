@@ -40,7 +40,7 @@ export default function MenuDrawer({ navMenu = [] }: { navMenu?: CommonMenuItem[
             <Link href={switchLink.href} onClick={close} className="sm-switch__opt">Wholesale</Link>
           )}
         </div>
-        {!isWholesale && <p className="sm-switch__note">Wholesale fabric from ₹80 per metre</p>}
+        {!isWholesale && <p className="sm-switch__note">Wholesale fabric from ₹80 per meter</p>}
 
         {/* Dynamic menu */}
         <nav className="sm-list" aria-label="Shop by category">

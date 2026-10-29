@@ -15,7 +15,7 @@ export const site = {
   locale: "en_IN",
   currency: "INR",
   description:
-    "Jaipuri cotton, Ajrakh, Kalamkari and Sanganeri block prints by the metre, alongside blue pottery, meenakari, brass and marble from the lanes that print our cloth.",
+    "Jaipuri cotton, Ajrakh, Kalamkari and Sanganeri block prints by the meter, alongside blue pottery, meenakari, brass and marble from the lanes that print our cloth.",
   freeShippingOver: 2000,
   wholesaleFrom: 50,
   phone: "+91 95879 86226",
@@ -54,5 +54,5 @@ export const inrExact = (n: number) => {
   return "₹" + v.toLocaleString("en-IN", { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
 };
 
-/** "metre" reads better with a preposition; "set of 6" does not. */
-export const unitLabel = (u: string) => (u === "metre" ? "per metre" : u);
+/** "meter" reads better with a preposition; "set of 6" does not. */
+export const unitLabel = (u: string) => (u === "meter" ? "per meter" : u);

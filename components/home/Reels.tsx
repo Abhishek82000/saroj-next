@@ -120,8 +120,8 @@ function ReelCard({ reel }: { reel: Reel }) {
               price: reel.price,
               unit: reel.unit,
               image: reel.image,
-              step: reel.unit === "metre" ? 0.5 : 1,
-              qty: reel.unit === "metre" ? 2.5 : 1,
+              step: reel.unit === "meter" ? 0.5 : 1,
+              qty: reel.unit === "meter" ? 2.5 : 1,
               href: reel.slug ? link : undefined,
               productId: reel.productId,
             })}>
