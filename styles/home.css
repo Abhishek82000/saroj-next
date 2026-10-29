@@ -834,7 +834,7 @@
 
 /* the ticket: two notches where the stub tears off, a dashed tear line */
 .st-ofr{ --stub:112px; --fg:#fff; --soft:rgba(255,255,255,.72); --acc:#fff;
-         position:relative; flex:1; display:flex; flex-direction:column; min-height:clamp(330px,88vw,380px);
+         position:relative; flex:1; display:flex; flex-direction:column;
          border-radius:20px; overflow:hidden; color:var(--fg); isolation:isolate;
          -webkit-mask:radial-gradient(circle 12px at 0 calc(100% - var(--stub)),#0000 97%,#000) left/51% 100% no-repeat,
                       radial-gradient(circle 12px at 100% calc(100% - var(--stub)),#0000 97%,#000) right/51% 100% no-repeat;

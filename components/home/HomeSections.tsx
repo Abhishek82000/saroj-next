@@ -62,11 +62,9 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
       {/* The handicraft categories, then the handicraft rails — retail only. */}
       {!isWholesale && <CraftHouse categories={homeData.handCategories} />}
       {/* Paper and quilted handicraft categories, one screen tall; each opens its category page. */}
-      <HandicraftRail cats={homeData.handicraftCats} />
+      
       <Reels items={apiReels} />
       <Shelf categories={featuredCategories} />
-      
-      
       {categoryRails.map((cat, n) => (
         <Fragment key={cat.id}>
           <Rail id={cat.slug} eyebrow="Off the kiln and off the loom" heading={cat.name} items={cat.items} />
@@ -74,6 +72,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
           {n === Math.min(1, categoryRails.length - 1) && <MidBanners slides={homeData.midSlides} />}
         </Fragment>
       ))}
+      <HandicraftRail cats={homeData.handicraftCats} />
       <VideoBanner />
       
       {/* `top_slider` banners — their own section under the hero, retail only. */}
