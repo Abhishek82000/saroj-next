@@ -104,7 +104,7 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
         </section>
       )}
 
-      <Voices />
+      <Voices items={page.testimonials.map((t) => ({ name: t.name, content: t.quote, rating: t.rating }))} />
 
       <section className="st-sec st-whcta">
         <div className="st-wrap st-whcta__box">

@@ -19,9 +19,11 @@ export interface HomeData {
   /** `handcategories` — the handicraft categories, drawn by CraftHouse. */
   handCategories: CommonFeaturedCategory[];
   videoProducts: HomeVideoProduct[];
+  /** `testimonials` — the Voices review wall, as plain text. */
+  voices: { name: string; content: string | null; rating: number }[];
 }
 
-const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftCats: [], handCategories: [], videoProducts: [] };
+const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftCats: [], handCategories: [], videoProducts: [], voices: [] };
 
 /** A handicraft category for HandicraftRail: 1 = paper handicraft, 2 = quilted handicraft. */
 export interface HandiCat { id: number; name: string; slug: string; type: 1 | 2; image: string }
@@ -68,6 +70,7 @@ export async function getHomeData(): Promise<HomeData> {
       handicraftCats: toHandiCats(json.data?.handicraft_show_home_page, json.data?.handcategories),
       handCategories: (json.data?.handcategories ?? []).filter((c) => c.image && c.slug),
       videoProducts: json.data?.video_products ?? [],
+      voices: (json.data?.testimonials ?? []).map((t) => ({ name: t.name, content: t.content ? plain(t.content) : null, rating: t.rating })),
     };
   } catch {
     return EMPTY_HOME_DATA;

@@ -79,7 +79,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
          
       {offers.length > 1 && <OffersSlider slides={offers} />}
       <Bulk />
-      <Voices />  
+      <Voices items={homeData.voices} />
       {/* Wholesale + handicraft, each with its way in — retail only, wholesale is already inside. */}
       {!isWholesale && <WaysToBuy />}
       

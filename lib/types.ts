@@ -341,6 +341,8 @@ export interface HomeApiResponse {
     /** Handicraft categories (id, name, slug, image) for the home page's craft house. */
     handcategories?: CommonFeaturedCategory[];
     video_products: HomeVideoProduct[];
+    /** Customer reviews for the Voices wall; `content` is editor HTML. */
+    testimonials?: { id: number; name: string; content: string | null; image: string | null; rating: number }[];
   };
 }
 

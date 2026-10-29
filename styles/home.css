@@ -884,11 +884,11 @@
 .st-ofr__terms{ margin:0; font-size:.6rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--soft);
                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-.st-ofr__code,.st-ofr__cta{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; width:100%; min-height:44px;
+.st-ofr__code,.st-ofr__cta{ display:flex; align-items:center; justify-content:space-between; gap:.3rem; width:100%; min-height:44px;
                             padding:.35rem .4rem .35rem .9rem; border-radius:12px; font-family:var(--b); cursor:pointer;
                             transition:background .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease); }
 .st-ofr__code{ border:1.5px dashed rgba(255,255,255,.65); background:rgba(255,255,255,.08); color:var(--fg); }
-.st-ofr__code code{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:clamp(.8rem,3.4vw,.92rem); font-weight:700;
+.st-ofr__code code{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:clamp(.8rem,3.4vw,.8rem); font-weight:700;
                     letter-spacing:.12em; color:var(--acc); overflow:hidden; text-overflow:ellipsis; }
 .st-ofr__code span,.st-ofr__cta svg{ flex:none; }
 .st-ofr__code span{ display:inline-flex; align-items:center; gap:.25rem; padding:.45em .75em; border-radius:9px;
