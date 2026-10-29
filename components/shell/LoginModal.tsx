@@ -11,7 +11,7 @@ import type { User } from "@/lib/auth";
 type Step = "mobile" | "otp" | "register";
 const OTP_LEN = 4;
 const RESEND_AFTER = 30;
-const BANNER = "https://saroj-textile-store.b-cdn.net/media/90941782542541.webp";
+const BANNER = "https://saroj-textile-store.b-cdn.net/media/22551793273587.webp";
 
 /**
  * Login / Register in one modal, the way the storefront does it: mobile →

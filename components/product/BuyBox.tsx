@@ -161,12 +161,25 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
         {soldOut && <span><i /> Out of stock</span>}
       </div>
 
+      {/* Nothing to nudge toward when you're already on the wholesale page,
+          or when this product has no trade rate. */}
+      {mode === "length" && !wholesale && live && live.wholesale.sellingPrice > 0 && live.wholesale.sellingPrice < price && (
+        <div className="st-whole">
+          <p>
+            {qty >= site.wholesaleFrom
+              ? <>At this length the wholesale rate is <b>{inr(live.wholesale.sellingPrice)} a meter</b> — {inr(live.wholesale.sellingPrice * qty)} instead of {inr(total)}.</>
+              : <>Taking <b>10 m</b> or more? The wholesale rate is {inr(live.wholesale.sellingPrice)} a meter.</>}
+          </p>
+          <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale →</a>
+        </div>
+      )}
+
       {detail?.promo && (
         <Countdown seconds={detail.promo.seconds_remaining} code={detail.promo.code}
           description={detail.promo.description} />
       )}
 
-      <hr className="st-rule" />
+      {/* <hr className="st-rule" /> */}
 
       {/* ---------- variations ---------- */}
       {detail && live && detail.variants.length > 0 && (
@@ -241,19 +254,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
             aria-label="Save to wishlist" onClick={() => toggleFav(p, wholesale ? "wholesale" : "retail")}>
             <Icon name="heart" size={19} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
           </button>
-        </div>
-      )}
-
-      {/* Nothing to nudge toward when you're already on the wholesale page,
-          or when this product has no trade rate. */}
-      {mode === "length" && !wholesale && live && live.wholesale.sellingPrice > 0 && live.wholesale.sellingPrice < price && (
-        <div className="st-whole">
-          <p>
-            {qty >= site.wholesaleFrom
-              ? <>At this length the wholesale rate is <b>{inr(live.wholesale.sellingPrice)} a meter</b> — {inr(live.wholesale.sellingPrice * qty)} instead of {inr(total)}.</>
-              : <>Taking <b>{site.wholesaleFrom} m</b> or more? The wholesale rate is {inr(live.wholesale.sellingPrice)} a meter.</>}
-          </p>
-          <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale →</a>
         </div>
       )}
 

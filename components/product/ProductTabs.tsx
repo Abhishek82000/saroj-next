@@ -4,17 +4,17 @@ import Modal from "@/components/ui/Modal";
 import { useStore } from "@/components/shell/StoreProvider";
 import { ReviewForm } from "./BuyBox";
 import Tabs from "./Tabs";
-import type { Faq, Product, ReviewSummary } from "@/lib/types";
+import type { Product, ReviewSummary } from "@/lib/types";
 
-/** Description / Wash care / Reviews / Questions, full width under the photo and buy box
+/** Description / Wash care / Reviews / How to do COD, full width under the photo and buy box
     — with the "Write a review" popup the Reviews tab opens. */
-export default function ProductTabs({ p, reviews, faqs }: { p: Product; reviews?: ReviewSummary; faqs?: Faq[] }) {
+export default function ProductTabs({ p, reviews }: { p: Product; reviews?: ReviewSummary }) {
   const { say, withLogin } = useStore();
   const [review, setReview] = useState(false);
 
   return (
     <section className="st-pdtabs">
-      <Tabs p={p} reviews={reviews} faqs={faqs}
+      <Tabs p={p} reviews={reviews}
         onWriteReview={() => withLogin("Log in to write a review", () => setReview(true))} />
       <Modal open={review} onClose={() => setReview(false)} title="Write a review">
         <ReviewForm productId={p.productId} say={say}

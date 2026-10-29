@@ -1,20 +1,21 @@
 "use client";
 import { useMemo, useState } from "react";
 import Reviews from "./Reviews";
-import { faq as staticFaq, photoNotes, washCare } from "@/lib/content";
-import type { Faq, Product, ReviewSummary } from "@/lib/types";
+import Icon from "@/components/ui/Icon";
+import { photoNotes, washCare } from "@/lib/content";
+import { site } from "@/lib/site";
+import type { Product, ReviewSummary } from "@/lib/types";
 
 /**
- * Description / Wash care / Reviews / Questions, plus any extra tabs the
+ * Description / Wash care / Reviews / How to do COD, plus any extra tabs the
  * merchandiser added in the admin (product_tabs). The wash-care copy is the
  * same block the Blade hard-codes, kept in lib/content.ts.
  */
 export default function Tabs({
-  p, reviews, faqs, onWriteReview,
+  p, reviews, onWriteReview,
 }: {
   p: Product;
   reviews?: ReviewSummary;
-  faqs?: Faq[];
   onWriteReview: () => void;
 }) {
   const live = p.live;
@@ -22,16 +23,14 @@ export default function Tabs({
   const tabs = useMemo(() => {
     const base: [string, string][] = [];
     if (live?.descriptionHtml || p.description) base.push(["desc", "Description"]);
-    base.push(["care", "Wash care"], ["rev", "Reviews"], ["faq", "Questions"]);
+    base.push(["care", "Wash care"], ["rev", "Reviews"], ["cod", "How to do COD"]);
     (live?.tabs ?? []).forEach((t, i) => base.push([`extra-${i}`, t.name]));
     return base;
   }, [live, p.description]);
 
   const [on, setOn] = useState(tabs[0][0]);
 
-  const questions: Faq[] = faqs?.length
-    ? faqs
-    : staticFaq.map(([title, body]) => ({ title, html: `<p>${body}</p>` }));
+  const codHref = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(`Hi, I'd like to place a COD order for ${p.name}`)}`;
 
   const summary: ReviewSummary = reviews ?? {
     average: 0, total: 0, buckets: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }, items: [],
@@ -69,9 +68,9 @@ export default function Tabs({
       )}
 
       <div className={`st-panel${on === "care" ? " on" : ""}`} id="panel-care" role="tabpanel" aria-labelledby="tab-care">
-        <p className="st-lede" style={{ marginBottom: "1.4rem" }}>
+        {/* <p className="st-lede" style={{ marginBottom: "1.4rem" }}>
           Hand wash or a gentle machine cycle. Eight things worth doing if you want the colour to stay put.
-        </p>
+        </p> */}
         <div className="st-care">
           {washCare.map(([title, body]) => <div key={title}><b>{title}</b><p>{body}</p></div>)}
         </div>
@@ -81,14 +80,18 @@ export default function Tabs({
         <Reviews reviews={summary} onWrite={onWriteReview} />
       </div>
 
-      <div className={`st-panel${on === "faq" ? " on" : ""}`} id="panel-faq" role="tabpanel" aria-labelledby="tab-faq">
-        <div className="st-faq">
-          {questions.map((q) => (
-            <details key={q.title}>
-              <summary>{q.title}</summary>
-              <div className="st-faq__body" dangerouslySetInnerHTML={{ __html: q.html }} />
-            </details>
-          ))}
+      <div className={`st-panel${on === "cod" ? " on" : ""}`} id="panel-cod" role="tabpanel" aria-labelledby="tab-cod">
+        <div className="st-prose">
+          <p>We accept COD order but partial.</p>
+          <p>Due to past bad experiences, we don&rsquo;t do full COD.</p>
+          <p>
+            To place COD order, you have to pay <strong>20% of total amount</strong> by any online payment mode
+            and <strong>80% amount</strong> will be paid to the courier guy at the time of receipt of courier.
+          </p>
+          <p>You can send your requirement and images on WhatsApp and we will process the order.</p>
+          <a className="st-btn st-btn--solid" href={codHref} target="_blank" rel="noopener noreferrer">
+            <Icon name="whatsapp" size={16} fill="currentColor" strokeWidth={0} /> Order COD on WhatsApp
+          </a>
         </div>
       </div>
 

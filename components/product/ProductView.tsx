@@ -1,4 +1,3 @@
-import Link from "@/components/ui/SiteLink";
 import Gallery from "./Gallery";
 import BuyBox from "./BuyBox";
 import Rail from "./Rail";
@@ -7,7 +6,6 @@ import RecentlyViewed from "./RecentlyViewed";
 import HandicraftHouse from "./HandicraftHouse";
 import JsonLd from "@/components/seo/JsonLd";
 import { productHref, WHOLESALE_BASE } from "@/lib/product-api";
-import { categoryHref } from "@/lib/nav";
 import { breadcrumbLd, faqLd, graph, productLd } from "@/lib/seo";
 import type { Product, ProductDetail } from "@/lib/types";
 
@@ -21,32 +19,15 @@ export default function ProductView({
 }: { p: Product; detail?: ProductDetail; related?: Product[] }) {
   const wholesale = detail?.mode === "wholesale";
   const rails = detail?.categoryRails ?? [];
-  /* The API's first category rail is the piece's own category. */
-  const cat = rails[0] ? { name: rails[0].name, href: categoryHref(rails[0].slug) } : null;
-  const kindLabel = p.kind === "fabric" ? "Fabric" : "Handicraft";
   const also = detail?.related ?? related ?? [];
 
   return (
     <main id="main">
-      <nav className="st-crumb" aria-label="Breadcrumb">
-        <Link href="/">Home</Link><span aria-hidden="true">/</span>
-        {wholesale
-          ? <><Link href={WHOLESALE_BASE}>Wholesale</Link><span aria-hidden="true">/</span></>
-          : <><Link href="/shop">Shop</Link><span aria-hidden="true">/</span></>}
-        {cat && <><Link href={cat.href}>{cat.name}</Link><span aria-hidden="true">/</span></>}
-        <b>{p.short}</b>
-      </nav>
-
       {/* Full width: .st-pd pads itself to the page edge, like every other section. */}
       <section>
         <div className="st-pd">
           <Gallery p={p} />
           <div>
-            <p className="st-pd__kind">
-              {cat ? <Link href={cat.href}>{cat.name}</Link> : kindLabel}
-              {p.kind === "fabric" ? " · Hand block printed" : " · Jaipur"}
-              {wholesale && " · Wholesale"}
-            </p>
             <h1 className="st-pd__name">{p.name}</h1>
             {p.hindi && <p className="st-pd__hi st-dv">{p.hindi}</p>}
             {detail && detail.reviews.total > 0 && (
@@ -60,7 +41,7 @@ export default function ProductView({
         </div>  
       </section>
 
-      <ProductTabs p={p} reviews={detail?.reviews} faqs={detail?.faqs} />
+      <ProductTabs p={p} reviews={detail?.reviews} />
 
       {p.specs && (
         <section className="st-spec">
@@ -95,7 +76,6 @@ export default function ProductView({
         breadcrumbLd([
           { name: "Home", path: "/" },
           { name: wholesale ? "Wholesale" : "Shop", path: wholesale ? WHOLESALE_BASE : "/shop" },
-          ...(cat ? [{ name: cat.name, path: wholesale ? `/wholesale/${rails[0].slug}` : cat.href }] : []),
           { name: p.short, path: productHref(p.slug, wholesale) },
         ]),
         faqLd(),

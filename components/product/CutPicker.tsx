@@ -30,7 +30,7 @@ export default function CutPicker({
 
   return (
     <>
-      <div className="st-cut__lbl">
+      <div className="st-cut__lbl mt-3">
         <h2>How much shall we cut?</h2>
         <button type="button" onClick={onOpenGuide}>How much do I need?</button>
       </div>
@@ -48,7 +48,7 @@ export default function CutPicker({
           <span className="st-cut__unit">metres</span>
           <span className="st-cut__sum">
             <b>{inr(total)}</b>
-            <small>{p.price} × {value} m</small>
+            {/* <small>{p.price} × {value} m</small> */}
           </span>
         </div>
 
@@ -73,13 +73,13 @@ export default function CutPicker({
         </div>
       </div>
 
-      <div className="st-makes" role="group" aria-label="Cut for a garment">
+      {/* <div className="st-makes" role="group" aria-label="Cut for a garment">
         {makes.filter((m) => quickMakes.includes(m.name)).map((m) => (
           <button type="button" key={m.name} className={value === m.hi ? "on" : ""} onClick={() => set(m.hi)}>
             {m.name}<small>{m.hi} m</small>
           </button>
         ))}
-      </div>
+      </div> */}
     </>
   );
 }

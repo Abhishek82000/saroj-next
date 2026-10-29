@@ -5,7 +5,7 @@ import Reveal from "@/components/ui/Reveal";
 import ShowMore from "@/components/ui/ShowMore";
 import { WHOLESALE_HOME } from "@/lib/wholesale";
 
-const CDN = "https://saroj-textile-store.b-cdn.net/products/";
+const CDN = "https://saroj-textile-store.b-cdn.net/media/";
 /* Stand-ins until craft photography is on the CDN.
    SWAP: a blue pottery piece (tall shot) and a meenakari close-up (square). */
 const PIC = "https://picsum.photos/seed/";
@@ -34,8 +34,8 @@ const WAYS: Way[] = [
     badge: "Since 1998",
     cta: "Explore wholesale",
     href: WHOLESALE_HOME,
-    main: { src: CDN + "63141785559833.webp", alt: "Bolts of red Ajrakh hand block printed cotton" },
-    inset: { src: CDN + "2201780380811.webp", alt: "Indigo Ajrakh print, close up" },
+    main: { src: CDN + "49111793255085.webp", alt: "Bolts of red Ajrakh hand block printed cotton" },
+    inset: { src: CDN + "88821793273602.webp", alt: "Indigo Ajrakh print, close up" },
   },
   {
     id: "handicraft",
@@ -47,8 +47,8 @@ const WAYS: Way[] = [
     badge: "Made in Jaipur",
     cta: "Explore handicraft",
     href: "/handicraft",
-    main: { src: PIC + "saroj-craft-pottery/800/1000", alt: "Blue pottery from Kot Jewar" },
-    inset: { src: PIC + "saroj-craft-meena/400/400", alt: "Meenakari enamel work, close up" },
+    main: { src: CDN + "48761793254796.webp", alt: "Blue pottery from Kot Jewar" },
+    inset: { src: CDN + "38021793274042.webp", alt: "Meenakari enamel work, close up" },
   },
 ];
 

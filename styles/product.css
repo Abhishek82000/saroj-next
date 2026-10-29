@@ -437,7 +437,7 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 /* Wholesale minimums run to three digits, so let the row wrap rather than
    squeeze the stepper. */
 .st-cut__row{ flex-wrap:wrap; }
-.st-qty-step input{ width:clamp(52px,7ch,86px); }
+.st-qty-step input{ width:clamp(45px, 5ch, 64px); }
 .st-pdtabs{ padding:0 var(--edge) clamp(40px,6vw,72px); }
 
 /* The rails' add-to-cart: a full-width button at the foot of the card, always visible. */
