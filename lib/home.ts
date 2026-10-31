@@ -8,6 +8,8 @@ import type {
 import { fixImages } from "./img";
 
 export interface HomeData {
+  /** `categories` — the fabric categories, drawn by Hero. */
+  categories: CommonFeaturedCategory[];
   /** `top_slider` — the banners across the top of the page. */
   slides: BannerSlide[];
   /** `middle_slider` — the small banners between the category rails. */
@@ -23,7 +25,7 @@ export interface HomeData {
   voices: { name: string; content: string | null; rating: number }[];
 }
 
-const EMPTY_HOME_DATA: HomeData = { slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftCats: [], handCategories: [], videoProducts: [], voices: [] };
+const EMPTY_HOME_DATA: HomeData = { categories: [], slides: [], midSlides: [], tagSections: [], categorySections: [], handicraftCats: [], handCategories: [], videoProducts: [], voices: [] };
 
 /** A handicraft category for HandicraftRail: 1 = paper handicraft, 2 = quilted handicraft. */
 export interface HandiCat { id: number; name: string; slug: string; type: 1 | 2; image: string }
@@ -62,6 +64,7 @@ export async function getHomeData(): Promise<HomeData> {
     if (!res.ok) return EMPTY_HOME_DATA;
     const json: HomeApiResponse = fixImages(await res.json());
     return {
+      categories: (json.data?.categories ?? []).filter((c) => c.image && c.slug).map((c) => ({ ...c, name: c.name.replace(/\s+/g, " ").trim() })),
       slides: toSlides(json.data?.top_slider),
       midSlides: toSlides(json.data?.middle_slider),
       tagSections: json.data?.tag_show_home_page ?? [],

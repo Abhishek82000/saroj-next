@@ -48,7 +48,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
   return (
     <main id="main">
       {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />} 
-      <Hero />
+      <Hero categories={homeData.categories} />
       <CraftRoll />
       {tagSections.map((tag) => (
         <Rail

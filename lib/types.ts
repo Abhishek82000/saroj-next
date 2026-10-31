@@ -331,6 +331,8 @@ export interface BannerSlide { id: number; alt: string; image: string; mobileIma
 export interface HomeApiResponse {
   success: boolean;
   data: {
+    /** The fabric categories (id, name, slug, image) for the home page's hero. */
+    categories?: CommonFeaturedCategory[];
     top_slider?: HomeApiSlide[];
     /** Small banners shown between the category rails. Same shape as top_slider. */
     middle_slider?: HomeApiSlide[];

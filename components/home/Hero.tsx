@@ -3,8 +3,15 @@ import Link from "@/components/ui/SiteLink";
 import { useEffect, useRef, useState } from "react";
 import Photo from "@/components/ui/Photo";
 import { categoryHref } from "@/lib/nav";
+import type { CommonFeaturedCategory } from "@/lib/types";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
+
+const PLATE_CLS = ["st-plate--l", "st-plate--c", "st-plate--r"];
+/* Three plates and enough swatches to keep the marquee wider than the screen. */
+const MIN_CATEGORIES = 9;
+
+/* Below is the hero's own copy, used wherever /api/home comes back short. */
 
 /** The 3 featured categories — real category names, each linked to its /shop/<slug> listing. */
 export const plates = [
@@ -23,9 +30,18 @@ export const swatches = [
   ["34411788077677", "Stripes and Checks", "strips-and-checks"],
 ];
 
-export default function Hero() {
+export default function Hero({ categories }: { categories: CommonFeaturedCategory[] }) {
   const [lit, setLit] = useState(false);
   const row = useRef<HTMLDivElement>(null);
+
+  /* The API's categories in its own order: the first three on the plates, the rest in the marquee. */
+  const live = categories.length >= MIN_CATEGORIES;
+  const heroPlates = live
+    ? categories.slice(0, 3).map((c, i) => ({ cls: PLATE_CLS[i], src: c.image, cap: c.name, alt: c.name, note: c.name, slug: c.slug }))
+    : plates;
+  const heroSwatches = live
+    ? categories.slice(3).map((c) => ({ src: c.image, title: c.name, slug: c.slug }))
+    : swatches.map(([file, title, slug]) => ({ src: CDN + file + ".webp", title, slug }));
 
   /* One orchestrated entrance on load, then the page stays still. */
   useEffect(() => {
@@ -66,7 +82,7 @@ export default function Hero() {
 
         <div className="st-plates fade f4">
           <div className="st-plates__row" ref={row}>
-            {plates.map((p) => (
+            {heroPlates.map((p) => (
               <Link key={p.cls} href={categoryHref(p.slug)} className={`st-plate ${p.cls} ph`}>
                 <Photo src={p.src} alt={p.alt} note={p.note} priority sizes="(max-width:900px) 40vw, 300px" />
                 <span className="st-plate__cap">{p.cap}</span>
@@ -77,13 +93,13 @@ export default function Hero() {
 
         <div className="st-hero__strip fade f4">
           {/* Two copies so the marquee loops seamlessly; the second is hidden from screen readers and tabbing. */}
-          <div className="st-hero__track" data-marquee>
+          <div className="st-hero__track" data-marquee style={{ "--n": heroSwatches.length } as React.CSSProperties}>
             {[0, 1].map((copy) =>
-              swatches.map(([file, title, slug]) => (
-                <Link key={`${copy}-${file}`} href={categoryHref(slug)} className="st-swatch-item" title={title}
+              heroSwatches.map(({ src, title, slug }) => (
+                <Link key={`${copy}-${slug}`} href={categoryHref(slug)} className="st-swatch-item" title={title}
                   aria-hidden={copy === 1 || undefined} tabIndex={copy === 1 ? -1 : undefined}>
                   <span className="st-hero-swatch ph">
-                    <Photo src={CDN + file + ".webp"} alt={copy === 1 ? "" : title} sizes="155px" />
+                    <Photo src={src} alt={copy === 1 ? "" : title} sizes="155px" />
                   </span>
                   <span className="st-swatch__label">{title}</span>
                 </Link>
