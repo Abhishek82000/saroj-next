@@ -9,7 +9,7 @@ import { breadcrumbLd, graph, pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
   title: "Contact Us",
-  description: `Get in touch with ${site.name} — the Jhotwara counter in Jaipur. Call, WhatsApp, email, or drop by.`,
+  description: `Get in touch with ${site.name} — the Saroj Textile in Jaipur. Call, WhatsApp, email, or drop by.`,
   path: "/contact",
 });
 
@@ -48,7 +48,7 @@ export default function ContactPage() {
           <h1 className="ct-hero__title">Let’s talk <em>cloth.</em></h1>
           <p className="ct-hero__sub">
             Prints, lengths, wholesale rates or a handicraft piece you spotted — someone at the
-            Jhotwara counter reads every message.
+            Saroj Textile reads every message.
           </p>
           <div className="ct-hero__quick">
             <a href={wa} target="_blank" rel="noopener noreferrer" className="ct-pill ct-pill--wa">

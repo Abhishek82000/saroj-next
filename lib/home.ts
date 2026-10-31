@@ -40,6 +40,10 @@ export const toHandiCats = (list: HomeHandiCategory[] | undefined, images: { id?
     .map((c) => ({ id: c.cat_id, name: c.cat_name, slug: c.cat_slug, type: c.cat_handi_type as 1 | 2, image: imageById.get(c.cat_id) ?? "" }));
 };
 
+/** The API's `categories`, ready to draw: one without a picture or a link is dropped. */
+const toCategories = (list: CommonFeaturedCategory[] | undefined): CommonFeaturedCategory[] =>
+  (list ?? []).filter((c) => c.image && c.slug).map((c) => ({ ...c, name: c.name.replace(/\s+/g, " ").trim() }));
+
 /** API banners (`top_slider`, `middle_slider`) into BannerSlide; one without an image is dropped.
     `catHref` lets the wholesale page point category banners at its own listings. */
 export const toSlides = (list: HomeApiSlide[] | undefined, catHref: (slug: string) => string = categoryHref): BannerSlide[] =>
@@ -64,7 +68,7 @@ export async function getHomeData(): Promise<HomeData> {
     if (!res.ok) return EMPTY_HOME_DATA;
     const json: HomeApiResponse = fixImages(await res.json());
     return {
-      categories: (json.data?.categories ?? []).filter((c) => c.image && c.slug).map((c) => ({ ...c, name: c.name.replace(/\s+/g, " ").trim() })),
+      categories: toCategories(json.data?.categories),
       slides: toSlides(json.data?.top_slider),
       midSlides: toSlides(json.data?.middle_slider),
       tagSections: json.data?.tag_show_home_page ?? [],
@@ -89,6 +93,8 @@ export interface CategoryProducts {
   priceRange: { min: number; max: number } | null;
   /** A handful of reduced-price picks for the sidebar's "Recommended" rail. */
   saleProducts: SaleProduct[];
+  /** `categories` — the fabric categories, for the fabric house under the list. */
+  fabricCategories: CommonFeaturedCategory[];
   /** The category's `cat_short_desc` as plain text; empty for tags or when unset. */
   shortDesc?: string;
 }
@@ -107,7 +113,7 @@ export function plain(html: string, max?: number): string {
 }
 
 const EMPTY_CATEGORY: CategoryProducts = {
-  name: "", products: [], categories: [], tags: [], priceRange: null, saleProducts: [],
+  name: "", products: [], categories: [], tags: [], priceRange: null, saleProducts: [], fabricCategories: [],
 };
 
 /** The four sort orders the storefront API understands for GET /api/products. */
@@ -146,8 +152,8 @@ async function pooled<T, R>(items: T[], limit: number, fn: (x: T) => Promise<R>)
 const fetchCategoryPage = (slug: string, page: number, sort: ProductsApiSort) =>
   fetchListingPage({ category: slug }, page, sort);
 
-type SidebarFacets = Pick<CategoryProducts, "categories" | "tags" | "priceRange" | "saleProducts">;
-const EMPTY_FACETS: SidebarFacets = { categories: [], tags: [], priceRange: null, saleProducts: [] };
+type SidebarFacets = Pick<CategoryProducts, "categories" | "tags" | "priceRange" | "saleProducts" | "fabricCategories">;
+const EMPTY_FACETS: SidebarFacets = { categories: [], tags: [], priceRange: null, saleProducts: [], fabricCategories: [] };
 
 /**
  * A handful of storefront categories are listed in the nav/menu but 404 when
@@ -173,6 +179,7 @@ async function fallbackFacets(sort: ProductsApiSort): Promise<SidebarFacets> {
       tags: json.data?.tagsList ?? [],
       priceRange: pr ? { min: Number(pr.min), max: Number(pr.max) } : null,
       saleProducts: (json.data?.saleProducts ?? []).map(apiSaleProductToSaleProduct),
+      fabricCategories: toCategories(json.data?.categories),
     };
   } catch {
     return EMPTY_FACETS;
@@ -225,6 +232,7 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
       tags: fallback?.tags ?? tags,
       priceRange: fallback?.priceRange ?? (pr ? { min: Number(pr.min), max: Number(pr.max) } : null),
       saleProducts: fallback?.saleProducts ?? saleProducts,
+      fabricCategories: fallback?.fabricCategories ?? toCategories(firstJson.data?.categories),
     };
   } catch {
     return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
@@ -256,6 +264,7 @@ export async function getProductsPage(sort: ProductsApiSort = "new_arrival", pag
       tags: json.data?.tagsList ?? [],
       priceRange: pr ? { min: Number(pr.min), max: Number(pr.max) } : null,
       saleProducts: (json.data?.saleProducts ?? []).map(apiSaleProductToSaleProduct),
+      fabricCategories: toCategories(json.data?.categories),
       page,
       lastPage: json.data?.pagination?.last_page ?? page,
       total: json.data?.pagination?.total ?? 0,

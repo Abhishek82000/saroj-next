@@ -3,7 +3,7 @@
 import Link from "@/components/ui/SiteLink";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/components/shell/StoreProvider";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Icon from "@/components/ui/Icon";
 import { SkCards } from "@/components/ui/Skeleton";
 import { wholesaleRates, withRates } from "@/lib/wholesalePrices";
@@ -27,7 +27,7 @@ const sorts: [SortKey, string][] = [
 
 export default function ShopListing({
   q = "", items, title: titleProp, lede,
-  categories, currentSlug, currentTag, sort: liveSort, tags, priceRange, saleProducts, paging,
+  categories, currentSlug, currentTag, sort: liveSort, tags, priceRange, saleProducts, paging, after,
 }: {
   q?: string;
   /** The live list from the API — every product (/shop), a category or a tag. */
@@ -49,6 +49,8 @@ export default function ShopListing({
   saleProducts?: SaleProduct[];
   /** /shop only: `items` is page 1 of every product; the rest load on scroll. */
   paging?: { lastPage: number; total: number };
+  /** Full-width sections for under the list, held back until its last product is showing. */
+  after?: ReactNode;
 }) {
   const router = useRouter();
   const { href, mode } = useStore();
@@ -114,6 +116,8 @@ export default function ShopListing({
   /* With no filters on, /shop's count is the whole counter, not just what's loaded so far. */
   const shownTotal = paging && f.activeCount === 0 ? Math.max(paging.total, list.length) : list.length;
   const slice = list.slice(0, f.shown);
+  /* Every product is on screen, with no page left to fetch. */
+  const finished = f.shown >= list.length && !hasMore;
   /** True when the source list itself (a category's live products) is empty —
       as opposed to filters narrowing a non-empty list down to nothing — so the
       empty state doesn't tell someone to "clear filters" they never set. */
@@ -242,7 +246,7 @@ export default function ShopListing({
                   {loadingMore && <SkCards count={Number(cols)} />}
                 </div>
                 <div className="st-more">
-                  {f.shown >= list.length && !hasMore ? (
+                  {finished ? (
                     <p>That’s all {list.length}</p>
                   ) : (
                     <>
@@ -259,6 +263,8 @@ export default function ShopListing({
           </div>
         </div>
       </div>
+
+      {finished && after}
 
       <Drawer open={drawer} onClose={() => setDrawer(false)} side="left" label="Filters" className="st-fltdrawer">
         <div className="drawer__head">

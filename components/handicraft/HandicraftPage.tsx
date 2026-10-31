@@ -5,7 +5,7 @@ import { Fragment, useEffect, useRef } from "react";
 import MidBanners from "@/components/home/MidBanners";
 import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
 import type { HandicraftData, HcBolt, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
-import FabricStrip from "./FabricStrip";
+import FabricHouse from "./FabricHouse";
 import FabricTrade from "./FabricTrade";
 import HandicraftSeo from "./HandicraftSeo";
 import Rail from "@/components/product/Rail";
@@ -639,24 +639,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
         </div>
       </section>
       {/* ================= FABRIC HOUSE ================= */}
-      <section className="hc-sec hc-cloth mb-5" id="cloth">
-        <span className="hc-cloth__mark hc-dv" aria-hidden="true">कपड़ा</span>
-        <div className="hc-wrap hc-cloth__head">
-          <div>
-            <h2 className="hc-h2 rv" data-d="1">Prints That Never Go <em>Out of Style.</em></h2>
-          </div>
-          <div className="hc-cloth__side">
-            <p className="hc-lede rv" data-d="2">Do not forget to explore our established textile category with a huge range of printed cotton fabric. We bring fabric that has ruled the industry over the last 30 years.</p>
-            <div className="hc-cloth__cta rv" data-d="3">
-              <Link href="/shop" className="hc-btn hc-btn--solid">Shop all fabrics</Link>
-              <span className="hc-cloth__count"><b>{fabricSlides.length}</b> collections on the line</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Every fabric collection, drifting past under the fan. */}
-        <FabricStrip slides={fabricSlides} />
-      </section>
+      <FabricHouse slides={fabricSlides} />
 
       {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}
       {data.reels.length > 0 && <Reels items={data.reels} />}

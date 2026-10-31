@@ -89,7 +89,7 @@ export default function VideoBanner({ src = SRC }: { src?: string }) {
             aria-label="Fabric moving on the bolt" onError={() => setFailed(true)} />
         )}
 
-        <span className="st-vbanner__cap">Jhotwara · 06:40</span>
+        <span className="st-vbanner__cap">Saroj Textile· 06:40</span>
 
         <div className="st-vbanner__ctrl">
           <button className={`st-vctrl${playing ? " is-playing" : ""}`} onClick={toggle}

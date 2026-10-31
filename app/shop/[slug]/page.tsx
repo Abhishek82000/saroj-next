@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
+import ListingSections from "@/components/shop/ListingSections";
 import JsonLd from "@/components/seo/JsonLd";
 import { attachWholesale } from "@/lib/wholesalePrices";
-import { getCategoryProducts, getTagProducts, type ProductsApiSort } from "@/lib/home";
+import { getCategoryProducts, getHomeData, getTagProducts, type ProductsApiSort } from "@/lib/home";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
 type Params = Promise<{ slug: string }>;
@@ -48,9 +49,11 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
   const { slug } = await params;
   const sort = toSort((await searchParams).sort);
   const listing = await resolveListing(slug, sort);
-  const { name, categories, tags, priceRange, saleProducts } = listing;
+  const { name, categories, tags, priceRange, saleProducts, fabricCategories } = listing;
   /* Wholesale pages carry each piece's wholesale rate (product_wh_* columns, via the cards API). */
   const products = wholesale ? await attachWholesale(listing.products) : listing.products;
+  /* /api/products' `handcategories` has no cat_handi_type, which the rail's lanes need. */
+  const { handicraftCats } = await getHomeData();
   const title = name || titleFromSlug(slug);
 
   return (
@@ -66,6 +69,7 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
         tags={tags}
         priceRange={priceRange}
         saleProducts={saleProducts}
+        after={<ListingSections fabricCategories={fabricCategories} handicraftCats={handicraftCats} />}
       />
 
       <JsonLd data={graph([

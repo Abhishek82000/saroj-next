@@ -278,6 +278,8 @@ export interface ProductsApiResponse {
     products: HomeApiProduct[];
     /** A handful of reduced-price picks for the "Recommended" sidebar rail. */
     saleProducts?: ProductsApiSaleProduct[];
+    /** The fabric categories (id, name, slug, image), for the fabric house under the list. */
+    categories?: CommonFeaturedCategory[];
     pagination: { current_page: number; last_page: number; total: number };
   };
 }

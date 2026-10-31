@@ -25,7 +25,7 @@ export default function CartDrawer() {
       <CartRecent open={cartOpen} onPick={close} />
       <div className="st-cart__head">
         <div>
-          <span className="st-eyebrow">{wholesale ? "Wholesale" : "Jhotwara counter"}</span>
+          <span className="st-eyebrow">{wholesale ? "Wholesale Counter" : "Retail Counter"}</span>
           <h2 style={{ fontFamily: "var(--d)", fontWeight: 400, fontSize: "1.5rem", margin: ".25rem 0 0", lineHeight: 1 }}>
             {wholesale ? "Wholesale cart" : "Your cart"}
           </h2>

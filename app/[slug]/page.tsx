@@ -54,7 +54,7 @@ export default async function StaticPage({ params }: { params: Params }) {
           <aside className="st-static__help">
             <Icon name="help" size={22} strokeWidth={1.6} />
             <h2>Still have a question?</h2>
-            <p>Someone at the Jhotwara counter reads every message — usually answered the same day.</p>
+            <p>Someone at the Saroj Textile reads every message — usually answered the same day.</p>
             <a className="st-btn st-btn--solid" href={`https://wa.me/${site.whatsapp}`}>
               <Icon name="whatsapp" size={15} fill="currentColor" />WhatsApp us
             </a>

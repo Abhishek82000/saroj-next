@@ -370,7 +370,7 @@ function AskForm({ onSent, say }: { onSent: () => void; say: (m: string) => void
   return (
     <>
       <p className="st-lede" style={{ marginTop: 0 }}>
-        Colour, shrinkage, how it takes a dye — ask and someone at the Jhotwara counter answers, usually the same day.
+        Colour, shrinkage, how it takes a dye — ask and someone at the Saroj Textilecounter answers, usually the same day.
       </p>
       <label className="st-field"><span>Phone or email</span>
         <input type="text" value={contact} onChange={(e) => setContact(e.target.value)} placeholder="95879 86226" /></label>

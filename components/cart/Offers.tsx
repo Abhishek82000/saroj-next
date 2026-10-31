@@ -37,7 +37,7 @@ function ShippingBar({ offers, compact }: { offers: CartOffers | null; compact: 
   const text = prepaidOnly
     ? <><b>Free shipping</b> on every prepaid order.</>
     : reached
-      ? compact ? <><b>Shipping is on us.</b> Cut and posted from Jhotwara in two working days.</> : <><b>Shipping is on us</b> on this order.</>
+      ? compact ? <><b>Shipping is on us.</b> Cut and posted from Saroj Textilein two working days.</> : <><b>Shipping is on us</b> on this order.</>
       : <><b>{inrExact(short)}</b> more and the shipping is on us.</>;
 
   if (!compact) {

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
+import ListingSections from "@/components/shop/ListingSections";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProductsPage, type ProductsApiSort } from "@/lib/home";
+import { getHomeData, getProductsPage, type ProductsApiSort } from "@/lib/home";
 import { attachWholesale } from "@/lib/wholesalePrices";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
@@ -45,8 +46,10 @@ export async function ShopView({ searchParams, wholesale }: { searchParams: Sear
   const { q = "", sort: rawSort } = await searchParams;
   const sort = toSort(rawSort);
   const page = await getProductsPage(sort);
-  const { categories, tags, priceRange, saleProducts, lastPage, total } = page;
+  const { categories, tags, priceRange, saleProducts, fabricCategories, lastPage, total } = page;
   const products = wholesale ? await attachWholesale(page.products) : page.products;
+  /* /api/products' `handcategories` has no cat_handi_type, which the rail's lanes need. */
+  const { handicraftCats } = await getHomeData();
 
   return (
     <main id="main">
@@ -60,6 +63,7 @@ export async function ShopView({ searchParams, wholesale }: { searchParams: Sear
         priceRange={priceRange}
         saleProducts={saleProducts}
         paging={{ lastPage, total }}
+        after={<ListingSections fabricCategories={fabricCategories} handicraftCats={handicraftCats} />}
       />
       <JsonLd data={graph([
         breadcrumbLd([{ name: "Home", path: "/" }, { name: "Shop", path: "/shop" }]),
