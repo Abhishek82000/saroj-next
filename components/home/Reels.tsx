@@ -112,7 +112,7 @@ function ReelCard({ reel }: { reel: Reel }) {
             <b>{inr(reel.price)}</b>{reel.mrp > 0 && <s>{inr(reel.mrp)}</s>}
           </span>
           {wholesale ? (
-            <Link className="st-reel__buy" href={link}>View piece</Link>
+            <Link className="st-reel__buy" href={link}>View Fabric</Link>
           ) : <button className="st-reel__buy"
             onClick={() => add({
               id: reel.slug ?? reel.id,

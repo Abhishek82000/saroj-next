@@ -40,12 +40,12 @@ export default function CutPicker({
           <span className="st-qty-step">
             <button type="button" onClick={() => set(value - cut.step)} disabled={value <= cut.min} aria-label="Half a meter less">−</button>
             <input type="number" inputMode="decimal" min={cut.min} max={cut.max} step={cut.step}
-              value={live} aria-label="Length in metres"
+              value={live} aria-label="Length in meters"
               onChange={(e) => setLive(parseFloat(e.target.value))}
               onBlur={(e) => set(parseFloat(e.target.value) || cut.min)} />
             <button type="button" onClick={() => set(value + cut.step)} disabled={value >= cut.max} aria-label="Half a meter more">+</button>
           </span>
-          <span className="st-cut__unit">metres</span>
+          <span className="st-cut__unit">meters</span>
           <span className="st-cut__sum">
             <b>{inr(total)}</b>
             {/* <small>{p.price} × {value} m</small> */}

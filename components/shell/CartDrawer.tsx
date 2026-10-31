@@ -52,7 +52,7 @@ export default function CartDrawer() {
             </h3>
             <p>
               {wholesale
-                ? "Wholesale fabric starts at 10 metres — pick a category and add your lengths."
+                ? "Wholesale fabric starts at 10 meters — pick a category and add your lengths."
                 : "Fabric is cut to any length from one meter, so start wherever you like."}
             </p>
             {wholesale && !user && (

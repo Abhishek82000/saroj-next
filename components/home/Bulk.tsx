@@ -9,7 +9,7 @@ const PHOTO = { src: "https://picsum.photos/seed/saroj-bulk-craft/900/1200", alt
 
 /* The three ways to order in quantity: what it is, and the minimum. */
 const options = [
-  { n: "01", title: "Wholesale fabric", min: "50", unit: "metres",
+  { n: "01", title: "Wholesale fabric", min: "50", unit: "meters",
     copy: "From ₹80 a meter on any print in the book, cut to the lengths you need. Mix prints within one order, and every invoice carries GST for your books." },
   { n: "02", title: "Corporate & export", min: "10", unit: "Peice",
     copy: "Repeatable runs for brands and buyers abroad. You sign off a sample before anything goes into production, and we handle the export documentation and freight." },

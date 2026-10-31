@@ -30,7 +30,7 @@ use Illuminate\Support\Str;
  */
 class ProductApiDetailController extends Controller
 {
-    private const LENGTH_STYLE  = 1;   // sold by the metre
+    private const LENGTH_STYLE  = 1;   // sold by the meter
     private const VARIANT_STYLE = 3;   // has an attribute picker
     private const ENQUIRY_STYLE = 4;   // WhatsApp enquiry, no cart
     private const DEFAULT_LGAP  = 0.5;
@@ -279,11 +279,11 @@ class ProductApiDetailController extends Controller
 
         if ($style === self::LENGTH_STYLE) {
             // The Blade raises the floor to one full gap when the gap is
-            // coarser than a metre, so the first option is never unbuyable.
+            // coarser than a meter, so the first option is never unbuyable.
             if ($lgap > 1) {
                 $min = max($min, $lgap);
             }
-            return ['mode' => 'length', 'min' => $min, 'max' => $max, 'step' => $lgap, 'unit' => 'metre', 'lgap' => $lgap];
+            return ['mode' => 'length', 'min' => $min, 'max' => $max, 'step' => $lgap, 'unit' => 'meter', 'lgap' => $lgap];
         }
 
         return ['mode' => 'quantity', 'min' => $min, 'max' => $max, 'step' => 1, 'unit' => 'each', 'lgap' => $lgap];

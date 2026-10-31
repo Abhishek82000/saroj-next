@@ -110,7 +110,7 @@ export default function WholesaleHome({ page }: { page: WholesalePage }) {
         <div className="st-wrap st-whcta__box">
           <div>
             <h2 className="st-h2">Planning a larger order?</h2>
-            <p>Tell us the prints and metres and we&rsquo;ll send trade rates the same day.</p>
+            <p>Tell us the prints and meters and we&rsquo;ll send trade rates the same day.</p>
           </div>
           <div className="st-whcta__btns">
             <a href={`https://wa.me/${site.whatsapp}`} className="st-btn st-btn--light">WhatsApp the counter</a>

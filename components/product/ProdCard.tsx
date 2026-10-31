@@ -28,7 +28,7 @@ export default function ProdCard({
     <div className="st-prod" aria-hidden={clone || undefined} inert={clone}>
       <Link href={href(`/product/${p.slug}`)} className="st-prod__ph ph" aria-label={p.name}>
         <Photo src={p.images[0].src} alt={p.name} note={p.images[0].note} priority={priority} sizes={sizes} />
-        <span className="st-prod__peek" aria-hidden>View piece <Icon name="right" size={12} strokeWidth={2} /></span>
+        <span className="st-prod__peek" aria-hidden>View Fabric <Icon name="right" size={12} strokeWidth={2} /></span>
       </Link>
       {p.label && <span className="st-prod__label">{p.label}</span>}
       {off > 0 && <span className="st-prod__off">{off}% off</span>}

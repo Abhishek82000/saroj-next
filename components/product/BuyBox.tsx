@@ -185,7 +185,22 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       {detail && live && detail.variants.length > 0 && (
         <VariantPicker productId={live.id} groups={detail.variants} wholesale={wholesale} onChange={onVariant} />
       )}
-
+      {/* ---------- the other side of the counter ---------- */}
+      {live && mode !== "enquiry" && (
+        wholesale ? (
+          <p className="st-crosslink">
+            Ordering less than {minQty}{live.cut.unit === "meter" ? "m" : " pcs"}?{" "}
+            <Link href={productHref(p.slug, false)}>Buy at retail instead</Link>
+          </p>
+        ) : live.wholesale.available && live.wholesale.sellingPrice > 0 ? (
+          <p className="st-crosslink">
+            Taking {live.wholesale.minQty || site.wholesaleFrom}{live.cut.unit === "meter" ? "m" : " meter"} or more?{" "}
+            <Link href={productHref(p.slug, true)}>
+              Wholesale is {inr(live.wholesale.sellingPrice)} {unitLabel(live.cut.unit)}
+            </Link>
+          </p>
+        ) : null
+      )}
       {/* ---------- how much ---------- */}
       {mode === "enquiry" ? (
         <div className="st-enquire">
@@ -218,23 +233,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
             <span className="st-cut__sum"><b>{inr(total)}</b><small>{price} × {qty}</small></span>
           </div>
         </div>
-      )}
-
-      {/* ---------- the other side of the counter ---------- */}
-      {live && mode !== "enquiry" && (
-        wholesale ? (
-          <p className="st-crosslink">
-            Ordering less than {minQty}{live.cut.unit === "meter" ? "m" : " pcs"}?{" "}
-            <Link href={productHref(p.slug, false)}>Buy at retail instead</Link>
-          </p>
-        ) : live.wholesale.available && live.wholesale.sellingPrice > 0 ? (
-          <p className="st-crosslink">
-            Taking {live.wholesale.minQty || site.wholesaleFrom}{live.cut.unit === "meter" ? "m" : " meter"} or more?{" "}
-            <Link href={productHref(p.slug, true)}>
-              Wholesale is {inr(live.wholesale.sellingPrice)} {unitLabel(live.cut.unit)}
-            </Link>
-          </p>
-        ) : null
       )}
 
       {/* ---------- buy ---------- */}
@@ -311,7 +309,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
 
       <div className="st-quiet">
         <button type="button" onClick={() => setAsk(true)}><Icon name="help" size={14} strokeWidth={1.6} /> Ask about this</button>
-        {mode === "length" && <button type="button" onClick={() => setGuide(true)}><Icon name="ruler" size={14} strokeWidth={1.6} /> Metre guide</button>}
+        {mode === "length" && <button type="button" onClick={() => setGuide(true)}><Icon name="ruler" size={14} strokeWidth={1.6} /> Meter guide</button>}
         <button type="button" onClick={share}><Icon name="share" size={14} strokeWidth={1.6} /> Share</button>
       </div>
 
@@ -440,7 +438,7 @@ export function ReviewForm({ productId, onSent, say }: { productId?: number; onS
       </label>
       <label className="st-field"><span>What did you make with it?</span>
         <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)}
-          placeholder="Three metres came out as a kurta with fabric to spare…" /></label>
+          placeholder="Three Meters came out as a kurta with fabric to spare…" /></label>
       <label className="st-field"><span>Photo (optional)</span>
         <input type="file" accept="image/*" onChange={pick(setImage1, MAX_IMAGE_MB)} /></label>
       <label className="st-field"><span>Another photo (optional)</span>

@@ -657,5 +657,5 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   );
 }
 
-/** Lengths come in half metres, so keep one decimal and no float dust. */
+/** Lengths come in half meters, so keep one decimal and no float dust. */
 const round = (n: number) => Math.round(n * 10) / 10;

@@ -1,7 +1,7 @@
 import SectionHead from "@/components/ui/SectionHead";
 
 const reviews: [string, string, number][] = [
-  ["Ordered three metres of the maroon paisley for a kurta. Colour is exactly the photo.", "Santosh Selam", 5],
+  ["Ordered three meters of the maroon paisley for a kurta. Colour is exactly the photo.", "Santosh Selam", 5],
   ["The brass diyas have a weight to them you can feel through the parcel.", "Tarun P.", 5],
   ["Cut to 4.5 m without any fuss and posted the same day.", "Suhana", 5],
   ["Second order. The Ajrakh washed beautifully, no bleeding at all.", "Sonam", 5],
