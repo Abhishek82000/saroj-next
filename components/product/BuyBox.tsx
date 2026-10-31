@@ -229,7 +229,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
           </p>
         ) : live.wholesale.available && live.wholesale.sellingPrice > 0 ? (
           <p className="st-crosslink">
-            Taking {live.wholesale.minQty || site.wholesaleFrom}{live.cut.unit === "meter" ? "m" : " pcs"} or more?{" "}
+            Taking {live.wholesale.minQty || site.wholesaleFrom}{live.cut.unit === "meter" ? "m" : " meter"} or more?{" "}
             <Link href={productHref(p.slug, true)}>
               Wholesale is {inr(live.wholesale.sellingPrice)} {unitLabel(live.cut.unit)}
             </Link>
