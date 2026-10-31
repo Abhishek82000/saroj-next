@@ -30,14 +30,14 @@ const EMPTY_HOME_DATA: HomeData = { categories: [], slides: [], midSlides: [], t
 /** A handicraft category for HandicraftRail: 1 = paper handicraft, 2 = quilted handicraft. */
 export interface HandiCat { id: number; name: string; slug: string; type: 1 | 2; image: string }
 
-/** `handicraft_show_home_page` (and /api/handicraft-data's `handicraft_type_show_home_page`) carries
-    no image, so each category borrows its picture by id from another category list (empty when it
-    has none). Types other than 1 and 2 aren't shown. */
+/** `handicraft_show_home_page` carries no image, so each category borrows its picture by id from
+    another category list; /api/handicraft-data's `handicraft_type_show_home_page` sends its own
+    (empty when it has neither). Types other than 1 and 2 aren't shown. */
 export const toHandiCats = (list: HomeHandiCategory[] | undefined, images: { id?: number; image?: string | null }[] | undefined): HandiCat[] => {
   const imageById = new Map((images ?? []).map((c) => [c.id, c.image ?? ""]));
   return (list ?? [])
     .filter((c) => (c.cat_handi_type === 1 || c.cat_handi_type === 2) && c.cat_slug)
-    .map((c) => ({ id: c.cat_id, name: c.cat_name, slug: c.cat_slug, type: c.cat_handi_type as 1 | 2, image: imageById.get(c.cat_id) ?? "" }));
+    .map((c) => ({ id: c.cat_id, name: c.cat_name, slug: c.cat_slug, type: c.cat_handi_type as 1 | 2, image: c.image || imageById.get(c.cat_id) || "" }));
 };
 
 /** The API's `categories`, ready to draw: one without a picture or a link is dropped. */

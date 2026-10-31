@@ -1,5 +1,7 @@
+import { cache } from "react";
 import { apiProductToProduct, buildReels, toHandiCats, toSlides, type HandiCat } from "./home";
 import { categoryHref } from "./nav";
+import { ApiUnavailableError } from "./product-api";
 import { site } from "./site";
 import type { BannerSlide, HomeApiSlide, Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeHandiCategory, HomeTagSection, HomeVideoProduct } from "./types";
 import { fixImages } from "./img";
@@ -77,7 +79,7 @@ export interface HcBolt { name: string; desc: string; price: string; img: string
 export interface HcSlide { name: string; href?: string; img: string; count?: string }
 export interface HcVideo { src: string; name: string; href: string }
 
-/** Everything /handicraft can take from the storefront. Empty lists mean "use the page's own copy". */
+/** Everything /handicraft can take from the storefront. Empty lists mean the section is left out. */
 export interface HandicraftData {
   columnImages: string[];
   plates: HcPlate[];
@@ -123,80 +125,98 @@ function toBolt(c: HomeCategorySection): HcBolt {
   };
 }
 
-/**
- * GET /api/handicraft-data — the storefront's picks for the handicraft
- * landing page. Same product shape as /api/home. Cached for a few minutes;
- * returns empty lists on any failure so each section falls back to the
- * page's built-in content instead of breaking.
- */
-export async function getHandicraftData(): Promise<HandicraftData> {
-  try {
-    const res = await fetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 30 } });
-    if (!res.ok) return EMPTY;
-    const json: HandicraftApiResponse = fixImages(await res.json());
-    const d = json.data;
-    if (!d) return EMPTY;
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-    // Some categories aren't stocked yet, so the API lists them with no products.
-    const stocked = (d.category_show_home_page ?? []).filter((c) => c.products.length > 0);
-    const categories = (d.categories ?? []).filter((c) => c.image);
-    /* This endpoint sends its handicraft categories as handicraftCategory (CategoryResource shape). */
-    const handCats = (d.handicraftCategory ?? []).map(toFace).filter((f): f is HcFace => f !== null);
-    /* The product rails: handicraft categories with products; until the API sends those, the general ones. */
-    const handRails = (d.handicraft_show_home_page ?? []).filter((c) => (c.products ?? []).length > 0);
-
-    const everyProduct: HomeApiProduct[] = [
-      ...(d.tag_show_home_page ?? []).flatMap((t) => t.products),
-      ...stocked.flatMap((c) => c.products),
-    ];
-    const columnImages = [...new Set(everyProduct.map((p) => p.image).filter(Boolean))];
-
-    const plates = stocked.slice(0, 3).map((c) => {
-      const p = c.products[0];
-      return { href: productHref(p.slug), src: p.image, cap: c.cat_name, alt: p.image_alt || p.name };
-    });
-
-    /* The wheel shows every handicraft category (handicraftCategory) — the strip below reuses the same list. */
-    const faces = handCats;
-    const fabricSlides = (d.fabricCategory?.length ? d.fabricCategory : categories)
-      .map(toFace).filter((f): f is HcFace => f !== null)
-      .map((f) => ({ name: f.name, href: f.href, img: f.img, count: f.count }));
-    const swatches = handCats.length
-      ? handCats.slice(0, 6).map((c) => ({ href: c.href ?? "/handicraft", src: c.img, title: c.name }))
-      : categories.slice(0, 6).map((c) => ({ href: categoryHref(c.slug), src: c.image, title: c.name }));
-
-    /* This endpoint sends its clips as video_handicraft_products. */
-    const v = d.video_handicraft_products?.[0] ?? d.video_products?.[0];
-
-    return {
-      columnImages,
-      plates,
-      swatches,
-      faces,
-      fabricSlides,
-      bolts: stocked.slice(0, 5).map(toBolt),
-      video: v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
-      voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content, rating: t.rating })),
-      collections: handCats.length || (d.categories?.length ?? 0),
-      // Thumbnails are borrowed from the rails by product id, same as on the home page.
-      reels: buildReels({
-        tagSections: d.tag_show_home_page ?? [],
-        categorySections: stocked,
-        videoProducts: d.video_handicraft_products ?? [],
-      }).map((r) => ({ ...r, kind: "Handicraft" as const, unit: "piece" })),
-      tagRails: (d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
-        .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
-      /* Handicraft rails are sold by the unit whatever style_type says. */
-      categoryRails: handRails.length
-        ? handRails.map((c) => ({ id: c.cat_slug, heading: c.cat_name,
-            items: c.products.map((p) => ({ ...apiProductToProduct(p), kind: "craft" as const, unit: "unit" })) }))
-        : stocked.map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
-      midSlides: toSlides(d.middle_slider),
-      /* Pictures borrowed by id from handicraftCategory, which carries them. */
-      handiCats: toHandiCats(d.handicraft_type_show_home_page,
-        (d.handicraftCategory ?? []).map((c) => ({ id: c.id ?? c.cat_id, image: c.image ?? c.cat_cdn_url ?? c.image_cdn ?? c.cat_image }))),
-    };
-  } catch {
-    return EMPTY;
+/** The API rate-limits bursts (429) and every visitor shares the server's IP, so a
+    failed call is tried again after a short, growing pause before giving up. The
+    signal also opts out of React's per-render fetch memo, which would otherwise hand
+    a retry the same failed response. */
+async function fetchHandicraftJson(): Promise<HandicraftApiResponse> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await fetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 30 }, signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new ApiUnavailableError(`${res.status}: /api/handicraft-data`);
+      return await res.json();
+    } catch (e) {
+      if (attempt >= 2) throw e;
+      await wait(1000 * (attempt + 1));
+    }
   }
 }
+
+/**
+ * GET /api/handicraft-data — the storefront's picks for the handicraft
+ * landing page. Same product shape as /api/home. Cached for a few minutes.
+ * Throws when the API can't answer, so /handicraft keeps its last good copy
+ * rather than being cached without its handicraft (see app/error.tsx).
+ */
+export const loadHandicraftData = cache(async (): Promise<HandicraftData> => {
+  const json = fixImages(await fetchHandicraftJson());
+  const d = json.data;
+  /* The shop always has handicraft categories, so an answer without any is a broken one. */
+  if (!d?.handicraftCategory?.length) throw new ApiUnavailableError("no categories: /api/handicraft-data");
+
+  // Some categories aren't stocked yet, so the API lists them with no products.
+  const stocked = (d.category_show_home_page ?? []).filter((c) => c.products.length > 0);
+  const categories = (d.categories ?? []).filter((c) => c.image);
+  /* This endpoint sends its handicraft categories as handicraftCategory (CategoryResource shape). */
+  const handCats = (d.handicraftCategory ?? []).map(toFace).filter((f): f is HcFace => f !== null);
+  /* The product rails: handicraft categories with products; until the API sends those, the general ones. */
+  const handRails = (d.handicraft_show_home_page ?? []).filter((c) => (c.products ?? []).length > 0);
+
+  const everyProduct: HomeApiProduct[] = [
+    ...(d.tag_show_home_page ?? []).flatMap((t) => t.products),
+    ...stocked.flatMap((c) => c.products),
+  ];
+  const columnImages = [...new Set(everyProduct.map((p) => p.image).filter(Boolean))];
+
+  /* One piece per stocked category, topped up from the tag rails when fewer than three are stocked. */
+  const plates = [
+    ...stocked.map((c) => ({ cap: c.cat_name, p: c.products[0] })),
+    ...(d.tag_show_home_page ?? []).flatMap((t) => t.products.map((p) => ({ cap: t.name, p }))),
+  ].slice(0, 3).map(({ cap, p }) => ({ href: productHref(p.slug), src: p.image, cap, alt: p.image_alt || p.name }));
+
+  /* The wheel shows every handicraft category (handicraftCategory) — the strip below reuses the same list. */
+  const faces = handCats;
+  const fabricSlides = (d.fabricCategory?.length ? d.fabricCategory : categories)
+    .map(toFace).filter((f): f is HcFace => f !== null)
+    .map((f) => ({ name: f.name, href: f.href, img: f.img, count: f.count }));
+  const swatches = handCats.length
+    ? handCats.slice(0, 6).map((c) => ({ href: c.href ?? "/handicraft", src: c.img, title: c.name }))
+    : categories.slice(0, 6).map((c) => ({ href: categoryHref(c.slug), src: c.image, title: c.name }));
+
+  /* This endpoint sends its clips as video_handicraft_products. */
+  const v = d.video_handicraft_products?.[0] ?? d.video_products?.[0];
+
+  return {
+    columnImages,
+    plates,
+    swatches,
+    faces,
+    fabricSlides,
+    bolts: stocked.slice(0, 5).map(toBolt),
+    video: v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
+    voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content, rating: t.rating })),
+    collections: handCats.length || (d.categories?.length ?? 0),
+    // Thumbnails are borrowed from the rails by product id, same as on the home page.
+    reels: buildReels({
+      tagSections: d.tag_show_home_page ?? [],
+      categorySections: stocked,
+      videoProducts: d.video_handicraft_products ?? [],
+    }).map((r) => ({ ...r, kind: "Handicraft" as const, unit: "piece" })),
+    tagRails: (d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
+      .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
+    /* Handicraft rails are sold by the unit whatever style_type says. */
+    categoryRails: handRails.length
+      ? handRails.map((c) => ({ id: c.cat_slug, heading: c.cat_name,
+          items: c.products.map((p) => ({ ...apiProductToProduct(p), kind: "craft" as const, unit: "unit" })) }))
+      : stocked.map((c) => ({ id: c.cat_slug, heading: c.cat_name, items: c.products.map(apiProductToProduct) })),
+    midSlides: toSlides(d.middle_slider),
+    /* Pictures borrowed by id from handicraftCategory, which carries them. */
+    handiCats: toHandiCats(d.handicraft_type_show_home_page,
+      (d.handicraftCategory ?? []).map((c) => ({ id: c.id ?? c.cat_id, image: c.image ?? c.cat_cdn_url ?? c.image_cdn ?? c.cat_image }))),
+  };
+});
+
+/** For the site shell, which every page renders: empty lists on any failure, never an error. */
+export const getHandicraftData = () => loadHandicraftData().catch(() => EMPTY);

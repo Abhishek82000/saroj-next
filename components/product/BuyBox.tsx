@@ -215,6 +215,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
           value={qty}
           onChange={setQty}
           onOpenGuide={() => setGuide(true)}
+          wholesale={wholesale}
         />
       ) : (
         <div className="st-cut">

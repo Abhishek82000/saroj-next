@@ -152,6 +152,7 @@ class HandicraftApiController extends Controller
                 ->get();
 
             $videoProducts = ArProduct::where('product_status', 1)
+                ->where('product_is_handicraft', 1)
                 ->where('product_video_cdn', '!=', '')
                 ->where('product_stock', '>', 0)
                 ->orderBy('product_recommended', 'DESC')
@@ -199,6 +200,7 @@ class HandicraftApiController extends Controller
                         'cat_id'   => $cat->cat_id,
                         'cat_name' => $cat->cat_name,
                         'cat_slug' => $cat->cat_slug,
+                        'image'    => $cat->cat_cdn_url ?: $cat->cat_image,
                         'cat_handi_type' => $cat->cat_handi_type,
                     ];
                 }),

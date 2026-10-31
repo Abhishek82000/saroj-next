@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { Fragment, useEffect, useRef } from "react";
 import MidBanners from "@/components/home/MidBanners";
-import { plates as homePlates, swatches as homeSwatches } from "@/components/home/Hero";
-import type { HandicraftData, HcBolt, HcPlate, HcSlide, HcSwatch } from "@/lib/handicraft";
+import type { HandicraftData, HcBolt, HcSlide } from "@/lib/handicraft";
 import FabricHouse from "./FabricHouse";
 import FabricTrade from "./FabricTrade";
 import HandicraftSeo from "./HandicraftSeo";
@@ -15,19 +14,9 @@ import Voices from "@/components/home/Voices";
 
 const CDN = "https://saroj-textile-store.b-cdn.net/products/";
 
-/* Everything below is the page's own copy, used wherever /api/handicraft-data comes back short. */
+/* The page's own copy of its fabric sections, used wherever /api/handicraft-data comes back short.
+   The handicraft sections have none: all of it would be fabric, so they are left out instead. */
 
-/* Five drifting columns behind the opening hero; each is listed twice so the loop is seamless. */
-const COLUMN_IMAGES = [
-  "48621785565568", "711785564464", "97721785569096",
-  "42621785568665", "13001785568370", "67951785568205",
-  "12091782565773", "47691780986642", "94351785567420",
-  "47191782732714", "71911780379169", "8731780988074",
-  "62201785562941", "2201780380811", "16601783765066",
-].map((id) => CDN + id + ".webp");
-
-const PLATES: HcPlate[] = homePlates.map((p) => ({ href: `/shop/${p.slug}`, src: p.src, cap: p.cap, alt: p.alt }));
-const SWATCHES: HcSwatch[] = homeSwatches.map(([file, title, slug]) => ({ href: `/shop/${slug}`, src: CDN + file + ".webp", title }));
 /* The jharokha windows: an ogee arch (viewBox 0 0 100 150) — also the mask in styles/handicraft.css (.hj-arch__win). */
 const ARCH = "M0 150V58C0 40 10 30 22 24C30 20 38 16 44 9C47 5 49 2 50 0C51 2 53 5 56 9C62 16 70 20 78 24C90 30 100 40 100 58V150Z";
 /* The frame is the same arch left open at the sill. */
@@ -69,11 +58,13 @@ const countWord = (n: number) => WORDS[n] ?? String(n);
 export default function HandicraftPage({ data }: { data: HandicraftData }) {
   const root = useRef<HTMLElement>(null);
 
-  /* Each section takes the API's picks only when there are enough to fill its layout. */
-  const images = data.columnImages.length >= 15 ? data.columnImages : COLUMN_IMAGES;
-  const columns = Array.from({ length: 5 }, (_, c) => images.slice(c * 3, c * 3 + 3));
-  const plates = data.plates.length === 3 ? data.plates : PLATES;
-  const swatches = data.swatches.length >= 3 ? data.swatches : SWATCHES;
+  /* Five drifting columns behind the opening hero, three pictures each; a short list repeats to fill them. */
+  const images = data.columnImages;
+  const columns = images.length
+    ? Array.from({ length: 5 }, (_, c) => [0, 1, 2].map((i) => images[(c * 3 + i) % images.length]))
+    : [];
+  const plates = data.plates;
+  const swatches = data.swatches;
   /* The wheel shows the API's handicraft categories only; with none, the section is left out. */
   const faces = data.faces;
   const fabricSlides = data.fabricSlides.length >= 3 ? data.fabricSlides : FABRIC_SLIDES;
@@ -526,6 +517,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       {/* ================= TAG RAILS — New Arrivals, Best Seller, … ================= */}
       {data.tagRails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
       {/* ================= THE SECOND HOUSE — a jharokha facade under a toran ================= */}
+      {plates.length === 3 && (
       <section className="hj mb-5" id="hero" aria-labelledby="hj-title">
         <span className="hj__jali" aria-hidden="true" />
 
@@ -591,6 +583,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ================= CRAFT BAZAAR — paper and quilted handicraft categories ================= */}
       <HandicraftRail cats={data.handiCats} id="bazaar" />

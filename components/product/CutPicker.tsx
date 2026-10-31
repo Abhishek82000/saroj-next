@@ -10,8 +10,8 @@ import type { Product } from "@/lib/types";
  * says in plain words what the chosen length will actually make.
  */
 export default function CutPicker({
-  p, value, onChange, onOpenGuide,
-}: { p: Product; value: number; onChange: (v: number) => void; onOpenGuide: () => void }) {
+  p, value, onChange, onOpenGuide, wholesale = false,
+}: { p: Product; value: number; onChange: (v: number) => void; onOpenGuide: () => void; wholesale?: boolean }) {
   const cut = p.cut!;
   const [live, setLive] = useState(value);
 
@@ -58,19 +58,22 @@ export default function CutPicker({
           <div className="st-slider__ends"><span>{cut.min} m</span><span>{cut.max} m on the bolt</span></div>
         </div>
 
-        <div className="st-cut__makes">
-          <p>
-            {fits.length
-              ? <>At {value} m you can cut a {fits.slice(0, 3).map((name, n, arr) => (
-                    <span key={name}><b>{name}</b>{n < arr.length - 1 ? ", a " : "."}</span>
-                  ))}</>
-              : <span className="none">
-                  {value} m — enough for {value > 5.5
-                    ? "a saree with plenty over, or two garments."
-                    : "a start; nudge it up for a full garment."}
-                </span>}
-          </p>
-        </div>
+        {/* Trade buyers order by the bolt, not by the garment. */}
+        {!wholesale && (
+          <div className="st-cut__makes">
+            <p>
+              {fits.length
+                ? <>At {value} m you can cut a {fits.slice(0, 3).map((name, n, arr) => (
+                      <span key={name}><b>{name}</b>{n < arr.length - 1 ? ", a " : "."}</span>
+                    ))}</>
+                : <span className="none">
+                    {value} m — enough for {value > 5.5
+                      ? "a saree with plenty over, or two garments."
+                      : "a start; nudge it up for a full garment."}
+                  </span>}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* <div className="st-makes" role="group" aria-label="Cut for a garment">

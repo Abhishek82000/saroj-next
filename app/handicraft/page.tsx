@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import HandicraftPage from "@/components/handicraft/HandicraftPage";
-import { getHandicraftData } from "@/lib/handicraft";
+import { getHandicraftData, loadHandicraftData } from "@/lib/handicraft";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
@@ -11,6 +11,11 @@ export const metadata: Metadata = pageMeta({
 });
 
 export default async function Handicraft() {
-  const data = await getHandicraftData();
+  /* A failed API call throws: Next then keeps serving the last good page instead of
+     caching this one without its handicraft. Only a build, with no good page yet and a
+     deploy to protect, carries on without the data; the first visit after it refills the page. */
+  const data = process.env.NEXT_PHASE === "phase-production-build"
+    ? await getHandicraftData()
+    : await loadHandicraftData();
   return <HandicraftPage data={data} />;
 }

@@ -240,6 +240,8 @@ export interface HomeHandiCategory {
   cat_name: string;
   cat_slug: string;
   cat_handi_type: number;
+  /** Sent by /api/handicraft-data, sub-categories included; /api/home leaves it out. */
+  image?: string | null;
 }
 
 export interface HomeCategorySection {
