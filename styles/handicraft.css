@@ -239,8 +239,9 @@
 .hc .hc-trade__media{ position:relative; height:clamp(300px,min(78svh,62vw),720px); }
 .hc .hc-trade__media figure{ margin:0; }
 .hc .hc-trade__main{ position:absolute; inset:0 14% 8% 0; border-radius:220px 220px 18px 18px; box-shadow:0 40px 70px -34px rgba(16,24,32,.55); }
+.hc .hc-trade__main img{object-fit:fill;}
 .hc .hc-trade--dark .hc-trade__main{ inset:0 0 8% 14%; }
-.hc .hc-trade__inset{ position:absolute; right:0; bottom:0; width:42%; aspect-ratio:4/5; border-radius:14px; border:7px solid var(--paper);
+.hc .hc-trade__inset{ position:absolute; right:0; bottom:0; width:28%; aspect-ratio:4/5; border-radius:14px; border:7px solid var(--paper);
   box-shadow:0 30px 50px -24px rgba(16,24,32,.55); rotate:4deg; transition:rotate .6s var(--ease); }
 .hc .hc-trade--dark .hc-trade__inset{ right:auto; left:0; rotate:-4deg; border-color:#fff; }
 .hc .hc-trade__media:hover .hc-trade__inset{ rotate:0deg; }

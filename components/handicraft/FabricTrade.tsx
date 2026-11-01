@@ -1,6 +1,6 @@
 import ShowMore from "@/components/ui/ShowMore";
 
-const CDN ="https://saroj-textile-store.b-cdn.net/products/";
+const CDN ="https://saroj-textile-store.b-cdn.net/media/";
 
 type Trade = {
   id: string;
@@ -31,8 +31,8 @@ const TRADES: Trade[] = [
     ],
     signoff: "Bring home a little creativity. Add a little joy. Make every day special.",
     stamp: "Retail · Saroj Textile · Jaipur · ",
-    main: { src: CDN + "47691780986642.webp", alt: "Pink base jaal printed Jaipuri cotton" },
-    inset: { src: CDN + "94351785567420.webp", alt: "Red multicolour paisley Kalamkari print" },
+    main: { src: CDN + "78851793509813.webp", alt: "Pink base jaal printed Jaipuri cotton" },
+    inset: { src: CDN + "60021793511737.webp", alt: "Red multicolour paisley Kalamkari print" },
   },
   {
     id: "wholesale",
@@ -47,8 +47,8 @@ const TRADES: Trade[] = [
     ],
     signoff: "Connect with us to discuss bulk requirements and request wholesale pricing.",
     stamp: "Wholesale · Thaan · Trade · ",
-    main: { src: CDN + "63141785559833.webp", alt: "Red over-dye Ajrakh block printed cotton" },
-    inset: { src: CDN + "2201780380811.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
+    main: { src: CDN + "30381793509824.webp", alt: "Red over-dye Ajrakh block printed cotton" },
+    inset: { src: CDN + "88821793273602.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
   },
 ];
 
