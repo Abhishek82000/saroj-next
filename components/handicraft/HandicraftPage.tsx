@@ -518,7 +518,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       {data.tagRails.map((r) => <Rail key={r.id} id={r.id} eyebrow="Off the kiln and off the loom" heading={r.heading} items={r.items} />)}
       {/* ================= THE SECOND HOUSE — a jharokha facade under a toran ================= */}
       {plates.length === 3 && (
-      <section className="hj mb-5" id="hero" aria-labelledby="hj-title">
+      <section className="hj" id="hero" aria-labelledby="hj-title">
         <span className="hj__jali" aria-hidden="true" />
 
         {/* the toran: the prints strung across the doorway, as over every Jaipur door on a festival morning */}

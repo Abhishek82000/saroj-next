@@ -190,6 +190,7 @@ class HomeApiController extends Controller
         $request->validate([
             'q'         => 'nullable|string|max:100',
             'wholesale' => 'nullable|boolean',
+            'handicraft' => 'nullable|boolean',
         ]);
         $term = trim((string) $request->query('q', $request->query('searchstring', '')));
 
@@ -200,6 +201,10 @@ class HomeApiController extends Controller
         $isWholesale = $request->query('wholesale');
         $statusFilter = $isWholesale ? 'wh_status' : 'status';
         $results = CommonSearch::where('name', 'LIKE', '%' . $term . '%')->where($statusFilter, 1)
+            ->when($request->boolean('handicraft'), function ($query) {
+                // common_search has no handicraft flag, so match its product rows by slug.
+                $query->where('type', 0)->whereIn('slug', ArProduct::where('product_is_handicraft', 1)->select('product_slug'));
+            })
             ->limit(20)
             ->get()
             ->map(function ($row) use ($isWholesale) {

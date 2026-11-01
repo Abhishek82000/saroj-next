@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Drawer, { DrawerClose } from "@/components/ui/Drawer";
+import Icon from "@/components/ui/Icon";
 import { useStore } from "./StoreProvider";
 import { site } from "@/lib/site";
 import { navAccent, resolveHref, type CommonMenuItem } from "@/lib/nav";
@@ -17,6 +19,13 @@ export default function MenuDrawer({ navMenu = [] }: { navMenu?: CommonMenuItem[
 
   const switchLink = navItem({ label: "Wholesale", href: "/wholesale-fabric" });
   const isWholesale = mode === "wholesale";
+  const pathname = usePathname();
+  const current = isWholesale ? "wholesale" : pathname === "/handicraft" ? "handicraft" : "retail";
+  const modes = [
+    { key: "retail", label: "Retail", note: "By the meter", icon: "cart", href: isWholesale ? switchLink.href : "/" },
+    { key: "handicraft", label: "Handicraft", note: "Handmade", icon: "textile", href: "/handicraft" },
+    { key: "wholesale", label: "Wholesale", note: "From ₹80/m", icon: "truck", href: switchLink.href },
+  ];
   const initial = user?.name?.trim().charAt(0).toUpperCase();
 
   return (
@@ -27,20 +36,26 @@ export default function MenuDrawer({ navMenu = [] }: { navMenu?: CommonMenuItem[
       </div>
 
       <div className="sm-body" data-ready={menuOpen}>
-        {/* Retail / Wholesale switch */}
-        <div className="sm-switch" role="group" aria-label="Pricing mode">
-          {isWholesale ? (
-            <Link href={switchLink.href} onClick={close} className="sm-switch__opt">Retail</Link>
-          ) : (
-            <span className="sm-switch__opt" aria-current="true" data-on="true">Retail</span>
-          )}
-          {isWholesale ? (
-            <span className="sm-switch__opt" aria-current="true" data-on="true">Wholesale</span>
-          ) : (
-            <Link href={switchLink.href} onClick={close} className="sm-switch__opt">Wholesale</Link>
-          )}
-        </div>
-        {!isWholesale && <p className="sm-switch__note">Wholesale fabric from ₹80 per meter</p>}
+        {/* Retail / Handicraft / Wholesale switch */}
+        <nav className="sm-switch" aria-labelledby="sm-switch-title">
+          <p className="sm-switch__title" id="sm-switch-title">Switch to</p>
+          <div className="sm-switch__opts">
+            {modes.map((m) => {
+              const inner = (
+                <>
+                  <Icon name={m.icon} size={20} />
+                  <span className="sm-switch__label">{m.label}</span>
+                  <small className="sm-switch__note">{m.note}</small>
+                </>
+              );
+              return m.key === current ? (
+                <span key={m.key} className={`sm-switch__opt sm-switch__opt--${m.key}`} aria-current="page" data-on="true">{inner}</span>
+              ) : (
+                <Link key={m.key} href={m.href} onClick={close} className={`sm-switch__opt sm-switch__opt--${m.key}`}>{inner}</Link>
+              );
+            })}
+          </div>
+        </nav>
 
         {/* Dynamic menu */}
         <nav className="sm-list" aria-label="Shop by category">

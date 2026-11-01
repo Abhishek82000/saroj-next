@@ -1,10 +1,11 @@
 /**
  * The storefront's product search, as the header's search sheet uses it:
  *
- *   GET /api/search?searchstring=<q>&wholesale=<0|1>
+ *   GET /api/search?searchstring=<q>&wholesale=<0|1>[&handicraft=1]
  *     → { success, data: [{ name, slug, image, type, url }] }   (at most 20)
  *
- * `wholesale=1` searches the wholesale counter. Name, slug and image are used —
+ * `wholesale=1` searches the wholesale counter; `handicraft=1` keeps only
+ * handicraft products. Name, slug and image are used —
  * the link is built from the slug so it stays inside this site and its mode
  * (the API's `url` points at the old storefront). Called from the browser,
  * straight to Laravel.
@@ -14,8 +15,9 @@ import { fixImages } from "./img";
 
 export interface SearchHit { name: string; slug: string; image?: string }
 
-export async function searchProducts(q: string, wholesale: boolean, signal?: AbortSignal): Promise<SearchHit[]> {
+export async function searchProducts(q: string, wholesale: boolean, signal?: AbortSignal, handicraft = false): Promise<SearchHit[]> {
   const qs = new URLSearchParams({ searchstring: q, wholesale: wholesale ? "1" : "0" });
+  if (handicraft) qs.set("handicraft", "1");
   try {
     const res = await fetch(`${site.api}/api/search?${qs}`, { headers: { Accept: "application/json" }, signal });
     if (!res.ok) return [];

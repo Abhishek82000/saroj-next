@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Portal from "@/components/ui/Portal";
 import Icon from "@/components/ui/Icon";
 import { useLockedBody } from "@/components/ui/useLockedBody";
@@ -17,9 +17,11 @@ function highlight(text: string, q: string) {
 }
 
 /** The header's search: live results from GET /api/search, in the mode the
-    visitor is browsing (retail or wholesale), each one opening its product. */
-export default function SearchSheet({ navMenu = [] }: { navMenu?: CommonMenuItem[] }) {
+    visitor is browsing (retail or wholesale), each one opening its product.
+    On /handicraft both the results and the collections are handicraft only. */
+export default function SearchSheet({ navMenu = [], handicraftCats = [] }: { navMenu?: CommonMenuItem[]; handicraftCats?: { name: string; href: string }[] }) {
   const { searchOpen, setSearchOpen, href, mode } = useStore();
+  const craft = usePathname() === "/handicraft";
   const { render, shown } = useTransition(searchOpen);
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
@@ -43,20 +45,23 @@ export default function SearchSheet({ navMenu = [] }: { navMenu?: CommonMenuItem
     const ctl = new AbortController();
     setLoading(true);
     const t = setTimeout(() => {
-      searchProducts(term, mode === "wholesale", ctl.signal).then((r) => {
+      searchProducts(term, mode === "wholesale", ctl.signal, craft).then((r) => {
         if (ctl.signal.aborted) return;
         setHits(r); setCursor(-1); setLoading(false);
       });
     }, 250);
     return () => { clearTimeout(t); ctl.abort(); };
-  }, [term, mode]);
+  }, [term, mode, craft]);
 
   /* The live menu's collections (its sub-categories, or the top level when
      an entry has none) — a shortcut beside the search box. */
-  const collections = navMenu
-    .flatMap((m) => (m.children?.length ? m.children : [m]))
-    .filter((c) => c.name)
-    .slice(0, 12);
+  const collections = (craft && handicraftCats.length
+    ? handicraftCats
+    : navMenu
+      .flatMap((m) => (m.children?.length ? m.children : [m]))
+      .filter((c) => c.name)
+      .map((c) => ({ name: c.name, href: resolveHref(c) }))
+  ).slice(0, 12);
 
   const close = () => setSearchOpen(false);
   /* Through the store's `href`, so a search from wholesale stays in wholesale. */
@@ -86,7 +91,7 @@ export default function SearchSheet({ navMenu = [] }: { navMenu?: CommonMenuItem
             <Icon name="search" size={21} />
             <input ref={input} type="search" value={q} autoComplete="off" spellCheck={false}
               onChange={(e) => setQ(e.target.value)} onKeyDown={onKey}
-              placeholder="Ajrakh, Kalamkari, cotton, a colour…" aria-label="Search products" />
+              placeholder={craft ? "Gift hamper, tote bag, notebook…" : "Ajrakh, Kalamkari, cotton, a colour…"} aria-label="Search products" />
             <button type="button" className="st-search__x" onClick={close}>Close</button>
           </div>
 
@@ -97,7 +102,7 @@ export default function SearchSheet({ navMenu = [] }: { navMenu?: CommonMenuItem
                   <p className="st-search__lbl">Browse a collection</p>
                   <div className="st-sugg">
                     {collections.map((c) => (
-                      <button type="button" key={c.id} onClick={() => go(resolveHref(c))}>{c.name}</button>
+                      <button type="button" key={`${c.name}|${c.href}`} onClick={() => go(c.href)}>{c.name}</button>
                     ))}
                   </div>
                 </>
@@ -106,7 +111,7 @@ export default function SearchSheet({ navMenu = [] }: { navMenu?: CommonMenuItem
 
             <div className="st-res" aria-live="polite" aria-busy={loading}>
               {!term ? (
-                <p className="st-search__lbl">Type a name, craft or colour to search</p>
+                <p className="st-search__lbl">{craft ? "Type a name or craft to search handicraft" : "Type a name, craft or colour to search"}</p>
               ) : loading && hits.length === 0 ? (
                 <p className="st-search__lbl">Searching…</p>
               ) : hits.length === 0 ? (
@@ -114,8 +119,8 @@ export default function SearchSheet({ navMenu = [] }: { navMenu?: CommonMenuItem
                   <h3 style={{ fontFamily: "var(--d)", fontWeight: 400, fontSize: "1.35rem", margin: "0 0 .4rem" }}>
                     No match for “{term}”
                   </h3>
-                  <p>Try a craft name, a colour, or a material — cotton, Ajrakh, Kalamkari.</p>
-                  <button type="button" className="st-btn" onClick={() => go("/shop")}>Browse everything</button>
+                  <p>{craft ? "Try a piece or a material — gift hamper, tote bag, notebook." : "Try a craft name, a colour, or a material — cotton, Ajrakh, Kalamkari."}</p>
+                  <button type="button" className="st-btn" onClick={() => go(craft ? "/handicraft" : "/shop")}>{craft ? "Browse all handicraft" : "Browse everything"}</button>
                 </div>
               ) : (
                 hits.map((h, i) => (

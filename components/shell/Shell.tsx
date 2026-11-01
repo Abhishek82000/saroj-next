@@ -16,7 +16,7 @@ import { getHandicraftData } from "@/lib/handicraft";
 /** Everything that wraps every page. Mounted once, in the root layout. */
 export default async function Shell({ children }: { children: React.ReactNode }) {
   const [navMenu, { faces }] = await Promise.all([getMenuTree(), getHandicraftData()]);
-  /* The /handicraft footer lists the handicraft categories in place of the fabric ones. */
+  /* The /handicraft footer and search list the handicraft categories in place of the fabric ones. */
   const handicraftCats = faces.filter((f) => f.href).map((f) => ({ name: f.name, href: f.href!, image: f.img }));
 
   return (
@@ -29,7 +29,7 @@ export default async function Shell({ children }: { children: React.ReactNode })
       <TabBar />
       <MenuDrawer navMenu={navMenu} />
       <CartDrawer />
-      <SearchSheet navMenu={navMenu} />
+      <SearchSheet navMenu={navMenu} handicraftCats={handicraftCats} />
       <LoginModal />
       <Toast />
       <MarqueeDrag />

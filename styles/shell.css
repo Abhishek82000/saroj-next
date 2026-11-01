@@ -67,10 +67,9 @@
 .st-dropdown__panel a:hover{ background:none; color:var(--cobalt); }
 @media(max-width:900px){ .st-dropdown__panel{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
 .st-tools{ display:flex; align-items:center; gap:.4rem; }
-.st-icn{ width:40px; height:40px; display:grid; place-items:center; border-radius:50%;
-         border:1px solid var(--line-2); background:transparent; color:var(--ink); transition:.3s var(--ease); }
+.st-icn{ width:40px; height:40px; display:grid; place-items:center; border:none; background:transparent; color:var(--ink); transition:.3s var(--ease); }
 .st-icn:hover{ border-color:var(--cobalt); color:var(--cobalt); transform:translateY(-2px); }
-.st-icn svg{ width:17px; height:17px; }
+.st-icn svg{ width:27px; height:25px; }
 .st-burger{ display:grid; }
 @media(min-width:1120px){ .st-links{ display:flex; } .st-burger{ display:none; } }
 
@@ -533,35 +532,77 @@
 .sm-body::-webkit-scrollbar { width: 6px; }
 .sm-body::-webkit-scrollbar-thumb { background: var(--sm-line); border-radius: 6px; }
 
-/* ---------- retail / wholesale switch ---------- */
-.sm-switch {
-  display: grid;
+/* ---------- retail / handicraft / wholesale switch ---------- */
+/* Three swatches stitched into one strip: the seams between them are dashed
+   like running thread, and the mode you're in is filled with its own colour
+   (the same colours as the menu's highlighted rows). */
+.sm-switch__title {
+  display: flex;
   align-items: center;
-  grid-template-columns: 1fr 1fr;
-  padding: 4px;
+  gap: 0.75rem;
+  margin: 0 0 0.7rem;
+  font-family: var(--sm-display);
+  font-size: 1.0625rem;
+  white-space: nowrap;
+}
+.sm-switch__title::before,
+.sm-switch__title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sm-line);
+}
+.sm-switch__opts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--sm-line);
+  border-radius: 14px;
   background: var(--sm-soft);
-  border-radius: 999px;
 }
-.sm-switch__opt {
-  display: block;
-  padding: 0.65rem 0;
-  border-radius: 999px;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--sm-muted);
-  transition: color 0.2s, background 0.2s;
-}
-a.sm-switch__opt:hover { color: var(--sm-ink); }
-.sm-switch__opt[data-on="true"] {
-  background: var(--sm-ink);
-  color: var(--sm-bg);
-}
-.sm-switch__note {
-  margin: 0.7rem 0 0;
-  text-align: center;
+/* .sm-drawer is in the selector to outrank the drawer's link reset above. */
+.sm-drawer .sm-switch__opt {
+  --tone: #1E3A5F;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.7rem 0.15rem 0.6rem;
   font-size: 0.8125rem;
-  color: var(--sm-muted);
+  text-align: center;
+  color: var(--sm-ink);
+  transition: background 0.2s, color 0.2s;
+}
+.sm-drawer .sm-switch__opt--handicraft { --tone: #891226; }
+.sm-drawer .sm-switch__opt--wholesale { --tone: #8a5e14; }
+.sm-switch__opt + .sm-switch__opt { border-left: 1px dashed #bdb5a7; }
+.sm-switch__opt:first-child { border-radius: 13px 0 0 13px; }
+.sm-switch__opt:last-child { border-radius: 0 13px 13px 0; }
+.sm-switch__opt svg { color: var(--tone); }
+.sm-switch__label { font-weight: 600; }
+.sm-switch__note {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  color: #5f5a52;
+}
+a.sm-switch__opt:hover { background: color-mix(in srgb, var(--tone) 9%, transparent); }
+.sm-drawer .sm-switch__opt[data-on="true"] {
+  position: relative;
+  border-left-color: transparent;
+  background: var(--tone);
+  color: #fff;
+}
+.sm-switch__opt[data-on="true"] + .sm-switch__opt { border-left-color: transparent; }
+.sm-switch__opt[data-on="true"] svg,
+.sm-switch__opt[data-on="true"] .sm-switch__note { color: #fff; }
+/* a thread stitched inside the chosen swatch */
+.sm-switch__opt[data-on="true"]::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  pointer-events: none;
 }
 
 /* ---------- list rows ---------- */
