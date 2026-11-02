@@ -31,7 +31,6 @@ export default function CutPicker({
   return (
     <>
       <div className="st-cut__lbl mt-3">
-        <h2>How much shall we cut?</h2>
         <button type="button" onClick={onOpenGuide}>How much do I need?</button>
       </div>
 

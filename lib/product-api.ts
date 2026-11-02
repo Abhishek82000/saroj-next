@@ -2,7 +2,7 @@ import type {
   CategoryRail, Coupon, Faq, LiveProduct, Product, ProductDetail,
   ReviewSummary, Stock, VariantGroup,
 } from "./types";
-import { site } from "./site";
+import { fixUnit, site } from "./site";
 import { WHOLESALE_MIN_METRES } from "./wholesale";
 import { fixImages } from "./img";
 
@@ -102,7 +102,7 @@ function mapLive(raw: RawProduct): LiveProduct {
     rating: raw.rating,
     reviewCount: raw.review_count,
     price: raw.price,
-    cut: raw.cut,
+    cut: { ...raw.cut, unit: fixUnit(raw.cut.unit) },
     descriptionHtml: raw.description_html,
     shortDescription: raw.short_description,
     tabs: raw.tabs ?? [],
@@ -133,10 +133,10 @@ function mapProduct(raw: RawProduct): Product {
     kind: kindOf(raw.style_type),
     // Live products carry no craft key; the page falls back to the fabric craft.
     craft: kindOf(raw.style_type) === "fabric" ? "fabric" : "bagru",
-    material: raw.cut.unit === "meter" ? "Cotton" : "—",
+    material: live.cut.unit === "meter" ? "Cotton" : "—",
     price: raw.price.selling,
     mrp: raw.price.mrp,
-    unit: raw.cut.unit === "meter" ? "meter" : "unit",
+    unit: live.cut.unit === "meter" ? "meter" : "unit",
     stock: stockLevel(raw.stock),
     images,
     fresh: 0,

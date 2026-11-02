@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { CartLine, Product } from "@/lib/types";
 import { AUTH_IS_MOCK, getMe, type User } from "@/lib/auth";
-import { site } from "@/lib/site";
+import { fixUnit, site } from "@/lib/site";
 import { WHOLESALE_HOME, isWholesalePath, swapMode, wholesaleHref, wholesaleRate } from "@/lib/wholesale";
 import { getWishlist, setWishlistRemote, type Lists } from "@/lib/wishlist";
 import { getCounts, type Counts } from "@/lib/counts";
@@ -216,9 +216,10 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     const saved = stored?.token || AUTH_IS_MOCK ? stored : null;
     /* Logged in: the cart comes from the API only (syncCart) — nothing local.
        Logged out: the guest's own lines; any with a cartId were an account's. */
-    /* Images saved before cartImage existed may still point at the old origin. */
+    /* Images saved before cartImage existed may still point at the old origin,
+       and lines saved earlier may still carry the API's "metre". */
     setRetail(saved ? [] : safe.read<CartLine[]>(RETAIL_CART_KEY, []).filter((l) => !l.cartId)
-      .map((l) => ({ ...l, image: cartImage(l.image) })));
+      .map((l) => ({ ...l, image: cartImage(l.image), unit: fixUnit(l.unit) })));
     setCoupon(safe.read<string | null>(COUPON_KEY, null));
     setUser(saved);
     if (saved) {

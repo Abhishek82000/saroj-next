@@ -15,6 +15,7 @@ import { makes } from "@/lib/content";
 import { discount } from "@/lib/price";
 import { submitReview } from "@/lib/reviews";
 import { inr, site, unitLabel } from "@/lib/site";
+import { WHOLESALE_MIN_METRES } from "@/lib/wholesale";
 import type { Product, ProductDetail } from "@/lib/types";
 
 /**
@@ -68,6 +69,12 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
 
   /* Coupons are a retail offer only — wholesale has none. From the API, never made up. */
   const coupons = wholesale ? [] : detail?.coupons ?? [];
+
+  /* For the box that points across to this product's other page. */
+  const isMeter = live?.cut.unit === "meter";
+  const unitShort = isMeter ? " m" : " pcs";
+  const unitEach = isMeter ? "a meter" : "a piece";
+  const tradeMin = live?.wholesale.minQty || WHOLESALE_MIN_METRES;
 
   useEffect(() => {
     const el = addRef.current;
@@ -161,17 +168,25 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
         {soldOut && <span><i /> Out of stock</span>}
       </div>
 
-      {/* Nothing to nudge toward when you're already on the wholesale page,
-          or when this product has no trade rate. */}
-      {mode === "length" && !wholesale && live && live.wholesale.sellingPrice > 0 && live.wholesale.sellingPrice < price && (
-        <div className="st-whole">
-          <p>
-            {qty >= site.wholesaleFrom
-              ? <>At this length the wholesale rate is <b>{inr(live.wholesale.sellingPrice)} a meter</b> — {inr(live.wholesale.sellingPrice * qty)} instead of {inr(total)}.</>
-              : <>Taking <b>10 m</b> or more? The wholesale rate is {inr(live.wholesale.sellingPrice)} a meter.</>}
-          </p>
-          <a href="https://www.sarojtextile.com/wholesale-fabric">Wholesale →</a>
-        </div>
+      {/* ---------- the other side of the counter ----------
+          Each page points at this product's other page. Retail only points at
+          wholesale when this product has a trade rate that actually saves. */}
+      {live && mode !== "enquiry" && (
+        wholesale ? (
+          <div className="st-whole">
+            <p>Ordering less than <b>{minQty}{unitShort}</b>? Buy this at the retail rate instead.</p>
+            <Link href={productHref(p.slug, false)}>Retail →</Link>
+          </div>
+        ) : live.wholesale.available && live.wholesale.sellingPrice > 0 && live.wholesale.sellingPrice < price ? (
+          <div className="st-whole">
+            <p>
+              {qty >= tradeMin
+                ? <>At this {isMeter ? "length" : "quantity"} the wholesale rate is <b>{inr(live.wholesale.sellingPrice)} {unitEach}</b> — {inr(live.wholesale.sellingPrice * qty)} instead of {inr(total)}.</>
+                : <>Taking <b>{tradeMin}{unitShort}</b> or more? The wholesale rate is {inr(live.wholesale.sellingPrice)} {unitEach}.</>}
+            </p>
+            <Link href={productHref(p.slug, true)}>Wholesale →</Link>
+          </div>
+        ) : null
       )}
 
       {detail?.promo && (
@@ -184,22 +199,6 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
       {/* ---------- variations ---------- */}
       {detail && live && detail.variants.length > 0 && (
         <VariantPicker productId={live.id} groups={detail.variants} wholesale={wholesale} onChange={onVariant} />
-      )}
-      {/* ---------- the other side of the counter ---------- */}
-      {live && mode !== "enquiry" && (
-        wholesale ? (
-          <p className="st-crosslink">
-            Ordering less than {minQty}{live.cut.unit === "meter" ? "m" : " pcs"}?{" "}
-            <Link href={productHref(p.slug, false)}>Buy at retail instead</Link>
-          </p>
-        ) : live.wholesale.available && live.wholesale.sellingPrice > 0 ? (
-          <p className="st-crosslink">
-            Taking {live.wholesale.minQty || site.wholesaleFrom}{live.cut.unit === "meter" ? "m" : " meter"} or more?{" "}
-            <Link href={productHref(p.slug, true)}>
-              Wholesale is {inr(live.wholesale.sellingPrice)} {unitLabel(live.cut.unit)}
-            </Link>
-          </p>
-        ) : null
       )}
       {/* ---------- how much ---------- */}
       {mode === "enquiry" ? (

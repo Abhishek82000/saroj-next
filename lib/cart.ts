@@ -32,7 +32,7 @@
 import type { CartLine } from "./types";
 import type { CartOffers, ShippingProgress } from "./offers";
 import { wholesaleHref } from "./wholesale";
-import { site } from "./site";
+import { fixUnit, site } from "./site";
 import { fetchRetrying } from "./retry";
 import { fixImage, fixImages } from "./img";
 export interface CartAddPayload {
@@ -118,7 +118,7 @@ export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): Car
     id: l.variation_id ? `${l.slug}#${l.variation_id}` : l.slug,
     name: l.name,
     price: l.price,
-    unit: l.unit ?? "piece",
+    unit: fixUnit(l.unit ?? "piece"),
     image: cartImage(l.image),
     qty: l.qty,
     step: l.step || 1,

@@ -406,11 +406,6 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
 .st-variant__warn{ color:var(--lac); }
 
 /* --- retail ⇄ wholesale --- */
-.st-crosslink{ margin:1rem 0 0; font-size:.78rem; color:var(--ink-2); }
-.st-crosslink a{ color:var(--lac); border-bottom:2px solid currentColor; font-weight:700; padding:0 .1rem;
-                 background:color-mix(in srgb, var(--lac) 10%, transparent); transition:.3s var(--ease); }
-.st-crosslink a:hover{ background:color-mix(in srgb, var(--lac) 18%, transparent); }
-
 /* --- enquiry-only products --- */
 .st-enquire{ border:1px dashed var(--line); border-radius:16px; background:var(--paper-2);
              padding:1.1rem 1.2rem; }

@@ -54,5 +54,8 @@ export const inrExact = (n: number) => {
   return "₹" + v.toLocaleString("en-IN", { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
 };
 
+/** The API spells it "metre"; everything here compares and prints "meter". */
+export const fixUnit = (u: string) => (u === "metre" ? "meter" : u);
+
 /** "meter" reads better with a preposition; "set of 6" does not. */
 export const unitLabel = (u: string) => (u === "meter" ? "per meter" : u);
