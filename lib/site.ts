@@ -37,7 +37,7 @@ export const site = {
   /** Shown in the ticker. */
   ticker: [
     ["Use coupon ABOVE4K for ", "10% OFF"],
-    ["Free shipping on orders above ", "₹20000"],
+    ["Free shipping on orders above ", "₹2000"],
   ] as [string, string][],
   delivery: { domestic: "5–7 working days", international: "10–15 working days" },
 } as const;
@@ -53,6 +53,9 @@ export const inrExact = (n: number) => {
   const whole = Number.isInteger(v);
   return "₹" + v.toLocaleString("en-IN", { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
 };
+
+/** The API spells it "metre"; everything here compares and prints "meter". */
+export const fixUnit = (u: string) => (u === "metre" ? "meter" : u);
 
 /** "meter" reads better with a preposition; "set of 6" does not. */
 export const unitLabel = (u: string) => (u === "meter" ? "per meter" : u);
