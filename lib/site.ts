@@ -37,7 +37,7 @@ export const site = {
   /** Shown in the ticker. */
   ticker: [
     ["Use coupon ABOVE4K for ", "10% OFF"],
-    ["Free shipping on orders above ", "₹2000"],
+    ["Free shipping on orders above ", "₹20000"],
   ] as [string, string][],
   delivery: { domestic: "5–7 working days", international: "10–15 working days" },
 } as const;
