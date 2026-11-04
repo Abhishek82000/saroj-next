@@ -47,8 +47,8 @@ const TRADES: Trade[] = [
     ],
     signoff: "Connect with us to discuss bulk requirements and request wholesale pricing.",
     stamp: "Wholesale · Thaan · Trade · ",
-    main: { src: CDN + "30381793509824.webp", alt: "Red over-dye Ajrakh block printed cotton" },
-    inset: { src: CDN + "88821793273602.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
+    main: { src: CDN + "86661793761623.webp", alt: "Red over-dye Ajrakh block printed cotton" },
+    inset: { src: CDN + "35031793768439.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
   },
 ];
 
