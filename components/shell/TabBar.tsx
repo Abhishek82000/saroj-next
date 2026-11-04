@@ -20,7 +20,7 @@ export default function TabBar() {
 
   const home = href("/");
   const swap = navItem({ label: "Wholesale", href: WHOLESALE_HOME });
-  const on = (yes: boolean) => (yes ? "st-tab on" : "st-tab");
+  const on = (yes: boolean) => (yes ? "st-tabbar__tab on" : "st-tabbar__tab");
   const openCart = () => (mode === "wholesale"
     ? withLogin("Log in to see your wholesale cart", () => setCartOpen(true))
     : setCartOpen(true));
@@ -33,12 +33,12 @@ export default function TabBar() {
       <Link href="/handicraft" className={on(path.startsWith("/handicraft"))}>
         <Icon name="textile" size={21} /><span>Handicraft</span>
       </Link>
-      <Link href={swap.href} className="st-tab">
+      <Link href={swap.href} className="st-tabbar__tab">
         <Icon name="grid" size={21} /><span>{swap.label}</span>
       </Link>
       <button type="button" className={on(cartOpen || /\/cart$/.test(path))} onClick={openCart}
         aria-label={`${mode === "wholesale" ? "Wholesale cart" : "Cart"}, ${count} ${count === 1 ? "item" : "items"}`}>
-        <span className="st-tab__ic">
+        <span className="st-tabbar__ic">
           <Icon name="cart" size={21} />
           <span className={`st-count${count ? " on" : ""}`} aria-hidden="true">{count > 99 ? "99+" : count}</span>
         </span>

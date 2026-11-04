@@ -48,7 +48,7 @@ export default function ShopListing({
   priceRange?: { min: number; max: number } | null;
   saleProducts?: SaleProduct[];
   /** /shop only: `items` is page 1 of every product; the rest load on scroll. */
-  paging?: { lastPage: number; total: number };
+  paging?: { lastPage: number; total: number; seed?: number };
   /** Full-width sections for under the list, held back until its last product is showing. */
   after?: ReactNode;
 }) {
@@ -91,7 +91,7 @@ export default function ShopListing({
     if (!hasMore || loadingMore) return;
     setLoadingMore(true);
     try {
-      const res = await fetch(`${site.api}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}`, { headers: { Accept: "application/json" } });
+      const res = await fetch(`${site.api}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}${paging?.seed ? `&seed=${paging.seed}` : ""}`, { cache: "no-store", headers: { Accept: "application/json" } });
       if (res.ok) {
         const json: ProductsApiResponse = fixImages(await res.json());
         const next = (json.data?.products ?? []).map(apiProductToProduct);

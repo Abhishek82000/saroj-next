@@ -72,6 +72,26 @@
 .st-icn svg{ width:27px; height:25px; }
 .st-burger{ display:grid; }
 @media(min-width:1120px){ .st-links{ display:flex; } .st-burger{ display:none; } }
+/* Below desktop the link bar is hidden, so its empty <nav> mustn't take a gap;
+   burger + logo sit left, the tools right. */
+@media(max-width:1119px){
+  .st-nav{ gap:.5rem; }
+  .st-nav > nav{ display:none; }
+  .st-brand{ margin-right:auto; }
+  .st-brand img{ height:auto; }
+}
+/* Small phones (iPhone SE, Galaxy S2x at 360px): smaller icons and logo so the row fits. */
+@media(max-width:420px){
+  .st-nav{ gap:.25rem; padding-inline:12px; }
+  .st-tools{ gap:0; }
+  .st-icn{ width:36px; height:36px; }
+  .st-icn svg{ width:22px; height:22px; }
+  .st-brand img{ width:64px; }
+}
+@media(max-width:340px){
+  .st-icn{ width:33px; height:33px; }
+  .st-brand img{ width:56px; }
+}
 
 .st-drawer{ background:var(--paper); color:var(--ink); width:min(88vw,380px); border-left:1px solid var(--line-2); }
 .st-drawer .drawer__head{ border-bottom:1px solid var(--line-2); }
@@ -389,7 +409,7 @@
 .st-account__nav button:hover,.st-account__nav button.on{ background:var(--paper-2); color:var(--cobalt); }
 .st-account__main{ border:1px solid var(--line-2); border-radius:14px; background:#fff; padding:clamp(18px,3vw,30px); min-height:340px; }
 .st-account__main h1{ margin:0 0 1.4rem; padding-bottom:1rem; border-bottom:1px solid var(--line-2); font-family:var(--d); font-weight:400; font-size:1.5rem; }
-.st-account__cards{ display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); }
+.st-account__cards{ display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr)); }
 .st-account__card{ display:grid; justify-items:center; gap:.4rem; text-align:center; padding:1.6rem 1rem; border:1px solid var(--line-2); border-radius:12px;
                    background:var(--paper-2); cursor:pointer; font:inherit; color:inherit; transition:.25s var(--ease); }
 .st-account__card:hover{ transform:translateY(-3px); box-shadow:var(--shadow); }
@@ -836,11 +856,15 @@ a.sm-switch__opt:hover { background: color-mix(in srgb, var(--tone) 9%, transpar
   body:has(.st-tabbar) .st-toast{ bottom:calc(20px + var(--tabbar)); }
   body:has(.st-tabbar) .st-stick{ bottom:var(--tabbar); }
 }
-.st-tab{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.2rem; min-width:0;
-         border:0; background:none; padding:0; color:var(--ink-2); text-decoration:none;
-         font-size:.62rem; font-weight:600; letter-spacing:.04em; -webkit-tap-highlight-color:transparent; }
-.st-tab > span:last-child{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.st-tab.on{ color:var(--ink); font-weight:800; }
-.st-tab.on svg{ stroke-width:2; }
-.st-tab__ic{ position:relative; display:grid; place-items:center; }
-.st-tab__ic .st-count{ top:-6px; right:-9px; }
+/* Own class, not .st-tab: that one is the product/account page tabs (product.css),
+   and sharing it squashed those tabs together and truncated these labels. */
+.st-tabbar__tab{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.2rem; min-width:0;
+         border:0; background:none; padding:0 2px; color:var(--ink-2); text-decoration:none; font:inherit;
+         font-size:.62rem; font-weight:600; letter-spacing:.02em; text-transform:none; cursor:pointer;
+         -webkit-tap-highlight-color:transparent; }
+.st-tabbar__tab > span:last-child{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.st-tabbar__tab.on{ color:var(--ink); font-weight:800; }
+.st-tabbar__tab.on svg{ stroke-width:2; }
+.st-tabbar__ic{ position:relative; display:grid; place-items:center; }
+.st-tabbar__ic .st-count{ top:-6px; right:-9px; }
+@media(max-width:360px){ .st-tabbar__tab{ font-size:.58rem; letter-spacing:0; } }

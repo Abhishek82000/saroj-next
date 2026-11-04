@@ -66,6 +66,10 @@ export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
 
   return (
     <header className={`st-nav${stuck ? " stuck" : ""}`}>
+      {/* Mobile only (hidden from 1120px up): sits at the left, before the logo. */}
+      <button className="st-icn st-burger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+        <Icon name="menu" />
+      </button>
       <Link className="st-brand" href={href("/")}>
         <img width={80} src={site.logo} alt="Saroj Textile" />
       </Link>
@@ -104,9 +108,6 @@ export default function Nav({ navMenu }: { navMenu: CommonMenuItem[] }) {
           <span ref={badge} className={`st-count${count ? " on" : ""}`} aria-hidden="true">
             {count > 99 ? "99+" : count}
           </span>
-        </button>
-        <button className="st-icn st-burger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-          <Icon name="menu" />
         </button>
       </div>
     </header>

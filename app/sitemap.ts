@@ -15,7 +15,9 @@ const at = (path: string) => site.url.replace(/\/$/, "") + path;
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const { products, categories } = await getAllProducts();
+  /* Order doesn't matter here; low_high keeps the 40-odd page fetches cached
+     (the default new_arrival is shuffled and never cached). */
+  const { products, categories } = await getAllProducts("low_high");
   const page = (path: string, priority: number, changeFrequency: "daily" | "weekly" | "monthly" = "weekly") =>
     ({ url: at(path), lastModified: now, changeFrequency, priority });
 

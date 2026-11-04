@@ -173,6 +173,7 @@
                font-weight:700; transition:.32s var(--ease); }
 .st-card__add:hover{ background:var(--cobalt); }
 .st-card__add:disabled{ background:var(--paper-3); color:var(--mute); cursor:not-allowed; }
+@media (max-width:420px){ .st-card__add{ white-space:nowrap; padding-inline:.6em; font-size:.6rem; letter-spacing:.08em; } }
 .st-card__body{ padding:.75rem; display:flex; flex-direction:column; flex:1; }
 .st-card__craft{ font-size:.53rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700; color:var(--cobalt); }
 .st-card__n{ font-size:.9rem; line-height:1.38; color:var(--ink-2); margin:0;

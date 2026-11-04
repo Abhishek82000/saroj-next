@@ -46,7 +46,7 @@ export async function ShopView({ searchParams, wholesale }: { searchParams: Sear
   const { q = "", sort: rawSort } = await searchParams;
   const sort = toSort(rawSort);
   const page = await getProductsPage(sort);
-  const { categories, tags, priceRange, saleProducts, fabricCategories, lastPage, total } = page;
+  const { categories, tags, priceRange, saleProducts, fabricCategories, lastPage, total, seed } = page;
   const products = wholesale ? await attachWholesale(page.products) : page.products;
   /* /api/products' `handcategories` has no cat_handi_type, which the rail's lanes need. */
   const { handicraftCats } = await getHomeData();
@@ -62,7 +62,7 @@ export async function ShopView({ searchParams, wholesale }: { searchParams: Sear
         tags={tags}
         priceRange={priceRange}
         saleProducts={saleProducts}
-        paging={{ lastPage, total }}
+        paging={{ lastPage, total, seed }}
         after={<ListingSections fabricCategories={fabricCategories} handicraftCats={handicraftCats} />}
       />
       <JsonLd data={graph([

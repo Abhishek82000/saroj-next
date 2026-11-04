@@ -127,12 +127,15 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** One listing page. The API rate-limits bursts (429) and has no page-size
     option (always 24), so a 429 is retried after a short, growing pause. */
-const fetchListingPage = async (by: Listing, page: number, sort: ProductsApiSort) => {
+const fetchListingPage = async (by: Listing, page: number, sort: ProductsApiSort, seed?: number) => {
   const filter = "category" in by ? `category=${encodeURIComponent(by.category)}&`
     : "tag" in by ? `tag=${encodeURIComponent(by.tag)}&` : "";
-  const url = `${site.api}/api/products?${filter}page=${page}&sort=${sort}`;
+  const url = `${site.api}/api/products?${filter}page=${page}&sort=${sort}${seed ? `&seed=${seed}` : ""}`;
+  /* new_arrival comes back shuffled from the API on every call; caching it
+     would replay the same order on every refresh for five minutes. */
+  const init: RequestInit = sort === "new_arrival" ? { cache: "no-store" } : { next: { revalidate: 300 } };
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url, init);
     if (res.status !== 429 || attempt >= 3) return res;
     await wait(1500 * (attempt + 1));
   }
@@ -148,6 +151,10 @@ async function pooled<T, R>(items: T[], limit: number, fn: (x: T) => Promise<R>)
   }));
   return out;
 }
+/** One shuffle per listing: every page of it is asked for with the same seed,
+    so the API's random order doesn't repeat or drop products between pages. */
+export const newShuffleSeed = () => Math.floor(Math.random() * 2147483646) + 1;
+
 /** Kept for the fallback fetch below, which only ever anchors on a category. */
 const fetchCategoryPage = (slug: string, page: number, sort: ProductsApiSort) =>
   fetchListingPage({ category: slug }, page, sort);
@@ -197,7 +204,8 @@ async function fallbackFacets(sort: ProductsApiSort): Promise<SidebarFacets> {
  */
 async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: ProductsApiResponse) => string): Promise<CategoryProducts> {
   try {
-    const first = await fetchListingPage(by, 1, sort);
+    const seed = newShuffleSeed();
+    const first = await fetchListingPage(by, 1, sort, seed);
     if (!first.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
     const firstJson: ProductsApiResponse = fixImages(await first.json());
     const products = [...(firstJson.data?.products ?? [])];
@@ -206,7 +214,7 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
     if (lastPage > 1) {
       const rest = await pooled(Array.from({ length: lastPage - 1 }, (_, i) => i + 2), 2, async (page) => {
         try {
-          const res = await fetchListingPage(by, page, sort);
+          const res = await fetchListingPage(by, page, sort, seed);
           if (!res.ok) return [];
           const json: ProductsApiResponse = fixImages(await res.json());
           return json.data?.products ?? [];
@@ -251,10 +259,11 @@ export function getAllProducts(sort: ProductsApiSort = "new_arrival"): Promise<C
 /** One page of every product plus the sidebar facets — /shop's first screen;
     the listing loads the following pages as the visitor scrolls. */
 export async function getProductsPage(sort: ProductsApiSort = "new_arrival", page = 1):
-  Promise<CategoryProducts & { page: number; lastPage: number; total: number }> {
+  Promise<CategoryProducts & { page: number; lastPage: number; total: number; seed: number }> {
+  const seed = newShuffleSeed();
   try {
-    const res = await fetchListingPage({ all: true }, page, sort);
-    if (!res.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)), page, lastPage: page, total: 0 };
+    const res = await fetchListingPage({ all: true }, page, sort, seed);
+    if (!res.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)), page, lastPage: page, total: 0, seed };
     const json: ProductsApiResponse = fixImages(await res.json());
     const pr = json.data?.price_range;
     return {
@@ -268,9 +277,10 @@ export async function getProductsPage(sort: ProductsApiSort = "new_arrival", pag
       page,
       lastPage: json.data?.pagination?.last_page ?? page,
       total: json.data?.pagination?.total ?? 0,
+      seed,
     };
   } catch {
-    return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)), page, lastPage: page, total: 0 };
+    return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)), page, lastPage: page, total: 0, seed };
   }
 }
 
