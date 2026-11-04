@@ -2,14 +2,13 @@
 import { useMemo, useState } from "react";
 import Reviews from "./Reviews";
 import Icon from "@/components/ui/Icon";
-import { photoNotes, washCare } from "@/lib/content";
+import { photoNotes } from "@/lib/content";
 import { site } from "@/lib/site";
 import type { Product, ReviewSummary } from "@/lib/types";
 
 /**
- * Description / Wash care / Reviews / How to do COD, plus any extra tabs the
- * merchandiser added in the admin (product_tabs). The wash-care copy is the
- * same block the Blade hard-codes, kept in lib/content.ts.
+ * Description / Reviews / How to do COD, plus any extra tabs the
+ * merchandiser added in the admin (product_tabs).
  */
 export default function Tabs({
   p, reviews, onWriteReview,
@@ -23,7 +22,7 @@ export default function Tabs({
   const tabs = useMemo(() => {
     const base: [string, string][] = [];
     if (live?.descriptionHtml || p.description) base.push(["desc", "Description"]);
-    base.push(["care", "Wash care"], ["rev", "Reviews"], ["cod", "How to do COD"]);
+    base.push(["rev", "Reviews"], ["cod", "How to do COD"]);
     (live?.tabs ?? []).forEach((t, i) => base.push([`extra-${i}`, t.name]));
     return base;
   }, [live, p.description]);
@@ -66,15 +65,6 @@ export default function Tabs({
           </div>
         </div>
       )}
-
-      <div className={`st-panel${on === "care" ? " on" : ""}`} id="panel-care" role="tabpanel" aria-labelledby="tab-care">
-        {/* <p className="st-lede" style={{ marginBottom: "1.4rem" }}>
-          Hand wash or a gentle machine cycle. Eight things worth doing if you want the colour to stay put.
-        </p> */}
-        <div className="st-care">
-          {washCare.map(([title, body]) => <div key={title}><b>{title}</b><p>{body}</p></div>)}
-        </div>
-      </div>
 
       <div className={`st-panel${on === "rev" ? " on" : ""}`} id="panel-rev" role="tabpanel" aria-labelledby="tab-rev">
         <Reviews reviews={summary} onWrite={onWriteReview} />

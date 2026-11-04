@@ -424,30 +424,80 @@ export function ReviewForm({ productId, onSent, say }: { productId?: number; onS
     onSent();
   };
 
+  const shown = hover || score;
+
   return (
-    <>
-      <label className="st-field"><span>Your rating</span>
-        <span style={{ fontSize: "1.6rem", letterSpacing: ".25em", cursor: "pointer" }} onMouseLeave={() => setHover(0)}>
+    <div className="st-review">
+      <div className="st-review__rate">
+        <span className="st-review__label">Your rating</span>
+        <div className="st-review__stars" role="radiogroup" aria-label="Your rating" onMouseLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((i) => (
-            <span key={i} role="button" tabIndex={0} aria-label={`${i} stars`}
-              onMouseEnter={() => setHover(i)} onClick={() => setScore(i)}
-              onKeyDown={(e) => { if (e.key === "Enter") setScore(i); }}
-              style={{ color: i <= (hover || score) ? "var(--ochre)" : "var(--paper-3)" }}>★</span>
+            <button key={i} type="button" role="radio" aria-checked={score === i} aria-label={`${i} star${i > 1 ? "s" : ""}`}
+              className={i <= shown ? "on" : undefined}
+              onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)} onBlur={() => setHover(0)}
+              onClick={() => setScore(i)}>★</button>
           ))}
-        </span>
-      </label>
+        </div>
+        <span className="st-review__word">{shown ? RATING_WORDS[shown] : "Tap a star"}</span>
+      </div>
+
       <label className="st-field"><span>What did you make with it?</span>
         <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)}
-          placeholder="Three Meters came out as a kurta with fabric to spare…" /></label>
-      <label className="st-field"><span>Photo (optional)</span>
-        <input type="file" accept="image/*" onChange={pick(setImage1, MAX_IMAGE_MB)} /></label>
-      <label className="st-field"><span>Another photo (optional)</span>
-        <input type="file" accept="image/*" onChange={pick(setImage2, MAX_IMAGE_MB)} /></label>
-      <label className="st-field"><span>Video (optional)</span>
-        <input type="file" accept="video/*" onChange={pick(setVideo, MAX_VIDEO_MB)} /></label>
+          placeholder="Three metres came out as a kurta with fabric to spare…" /></label>
+
+      <div className="st-review__media">
+        <span className="st-review__label">Photos or a video <em>optional</em></span>
+        <div className="st-review__drops">
+          <MediaPick label="Photo" hint={`Up to ${MAX_IMAGE_MB} MB`} accept="image/*" file={image1}
+            onPick={pick(setImage1, MAX_IMAGE_MB)} onClear={() => setImage1(null)} />
+          <MediaPick label="Photo" hint={`Up to ${MAX_IMAGE_MB} MB`} accept="image/*" file={image2}
+            onPick={pick(setImage2, MAX_IMAGE_MB)} onClear={() => setImage2(null)} />
+          <MediaPick label="Video" hint={`Up to ${MAX_VIDEO_MB} MB`} accept="video/*" file={video}
+            onPick={pick(setVideo, MAX_VIDEO_MB)} onClear={() => setVideo(null)} />
+        </div>
+      </div>
+
       <button type="button" className="st-btn st-btn--solid w-full" disabled={busy} onClick={post}>
         {busy ? "Posting…" : "Post review"}
       </button>
-    </>
+    </div>
+  );
+}
+
+const RATING_WORDS = ["", "Not for me", "Could be better", "It's okay", "Liked it", "Loved it"];
+
+/** One upload tile: a dashed box that opens the file picker, then shows a preview of the pick with a remove button. */
+function MediaPick({ label, hint, accept, file, onPick, onClear }: {
+  label: string; hint: string; accept: string; file: File | null;
+  onPick: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
+}) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file) return setUrl(null);
+    const u = URL.createObjectURL(file);
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [file]);
+
+  if (file && url) {
+    return (
+      <div className="st-review__drop has">
+        {file.type.startsWith("video/")
+          ? <video src={url} muted playsInline />
+          : <img src={url} alt="" />}
+        <button type="button" className="st-review__clear" onClick={onClear} aria-label={`Remove ${label.toLowerCase()}`}>
+          <Icon name="close" size={12} strokeWidth={2} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <label className="st-review__drop">
+      <input type="file" accept={accept} onChange={onPick} />
+      <Icon name="plus" size={18} strokeWidth={1.6} />
+      <b>{label}</b>
+      <small>{hint}</small>
+    </label>
   );
 }

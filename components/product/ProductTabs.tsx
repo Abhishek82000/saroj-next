@@ -6,7 +6,7 @@ import { ReviewForm } from "./BuyBox";
 import Tabs from "./Tabs";
 import type { Product, ReviewSummary } from "@/lib/types";
 
-/** Description / Wash care / Reviews / How to do COD, full width under the photo and buy box
+/** Description / Reviews / How to do COD, full width under the photo and buy box
     — with the "Write a review" popup the Reviews tab opens. */
 export default function ProductTabs({ p, reviews }: { p: Product; reviews?: ReviewSummary }) {
   const { say, withLogin } = useStore();

@@ -64,7 +64,8 @@ const Svg = ({ d }: { d: string }) => (
 export default function Footer({ handicraftCats = [] }: { handicraftCats?: FooterCat[] }) {
   const [fb, ig] = site.social;
   /* On the handicraft home, the swatch strip and the first column show handicraft categories instead of fabric. */
-  const craft = usePathname() === "/handicraft" && handicraftCats.length > 0;
+  const onHandicraft = usePathname() === "/handicraft";
+  const craft = onHandicraft && handicraftCats.length > 0;
   const strip = craft
     ? handicraftCats.slice(0, 8).map((c) => ({ name: c.name, href: c.href, src: c.image }))
     : swatches.map(([name, slug, file]) => ({ name, href: `/shop/${slug}`, src: CAT + file }));
@@ -88,7 +89,9 @@ export default function Footer({ handicraftCats = [] }: { handicraftCats?: Foote
           <Link className="st-foot__logo" href="/" aria-label="Saroj Textile home">
             <img width={46} height={46} src={site.logo} alt="Saroj Textile" />
           </Link>
-          <p className="st-foot__say">Printed by hand,<br /><em>cut to the meter.</em></p>
+          {onHandicraft
+            ? <p className="st-foot__say">Made by hand,<br /><em>gifted with love.</em></p>
+            : <p className="st-foot__say">Printed by hand,<br /><em>cut to the meter.</em></p>}
           <address>{site.address.street}, {site.address.city} {site.address.postalCode}</address>
         </div>
 

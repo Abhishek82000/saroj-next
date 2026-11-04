@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import ShowMore from "@/components/ui/ShowMore";
 
-const SRC = "https://saroj-textile-store.b-cdn.net/products/99751775717907.mp4";
+const SRC = "https://saroj-textile-store.b-cdn.net/media/23161793064032.mp4";
 const NOTE =
   "PLACEHOLDER — workshop footage: the wheel turning, brush on a pot, kiln door opening. 12–20s, no cuts, ambient sound.";
 

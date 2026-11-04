@@ -1,4 +1,6 @@
 import ShowMore from "@/components/ui/ShowMore";
+import Icon from "@/components/ui/Icon";
+import { site } from "@/lib/site";
 
 const CDN ="https://saroj-textile-store.b-cdn.net/media/";
 
@@ -12,6 +14,8 @@ type Trade = {
   body: string[];
   /** The closing line, set apart from the paragraphs. */
   signoff: string;
+  /** Prefilled WhatsApp message; when set, a WhatsApp button sits under the signoff. */
+  whatsapp?: string;
   stamp: string;
   main: { src: string; alt: string };
   inset: { src: string; alt: string };
@@ -31,8 +35,8 @@ const TRADES: Trade[] = [
     ],
     signoff: "Bring home a little creativity. Add a little joy. Make every day special.",
     stamp: "Retail · Saroj Textile · Jaipur · ",
-    main: { src: CDN + "78851793509813.webp", alt: "Pink base jaal printed Jaipuri cotton" },
-    inset: { src: CDN + "60021793511737.webp", alt: "Red multicolour paisley Kalamkari print" },
+    main: { src: CDN + "30051793791085.webp", alt: "Pink base jaal printed Jaipuri cotton" },
+    inset: { src: CDN + "88181793794066.webp", alt: "Red multicolour paisley Kalamkari print" },
   },
   {
     id: "wholesale",
@@ -46,6 +50,7 @@ const TRADES: Trade[] = [
       "Our goal is to build lasting business relationships by bringing together product variety, thoughtful designs, and a commitment to quality.",
     ],
     signoff: "Connect with us to discuss bulk requirements and request wholesale pricing.",
+    whatsapp: "Hi, I would like to discuss bulk requirements and wholesale pricing.",
     stamp: "Wholesale · Thaan · Trade · ",
     main: { src: CDN + "86661793761623.webp", alt: "Red over-dye Ajrakh block printed cotton" },
     inset: { src: CDN + "35031793768439.webp", alt: "Indigo blue base bindu and stripes Ajrakh print" },
@@ -84,6 +89,15 @@ export default function FabricTrade() {
                 </ShowMore>
               </div>
               <p className="hc-trade__signoff rv" data-d="4">{t.signoff}</p>
+              {t.whatsapp && (
+                <div className="hc-trade__cta rv" data-d="4">
+                  <a href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(t.whatsapp)}`} target="_blank" rel="noopener noreferrer"
+                    className={`hc-btn ${t.tone === "dark" ? "hc-btn--light" : "hc-btn--solid"}`}>
+                    <Icon name="whatsapp" size={18} fill="currentColor" strokeWidth={0} />
+                    WhatsApp us
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </section>
