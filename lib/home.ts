@@ -97,6 +97,9 @@ export interface CategoryProducts {
   fabricCategories: CommonFeaturedCategory[];
   /** The category's `cat_short_desc` as plain text; empty for tags or when unset. */
   shortDesc?: string;
+  /** Child categories (e.g. Tote Bags → 18x18, 16*16 …). When there are any,
+      the category page shows these instead of a product list. */
+  subcategories?: CommonFeaturedCategory[];
 }
 
 const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&quot;": '"', "&#39;": "'", "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&ndash;": "–", "&mdash;": "—" };
@@ -131,11 +134,11 @@ const fetchListingPage = async (by: Listing, page: number, sort: ProductsApiSort
   const filter = "category" in by ? `category=${encodeURIComponent(by.category)}&`
     : "tag" in by ? `tag=${encodeURIComponent(by.tag)}&` : "";
   const url = `${site.api}/api/products?${filter}page=${page}&sort=${sort}${seed ? `&seed=${seed}` : ""}`;
-  /* new_arrival comes back shuffled from the API on every call; caching it
-     would replay the same order on every refresh for five minutes. */
-  const init: RequestInit = sort === "new_arrival" ? { cache: "no-store" } : { next: { revalidate: 300 } };
+  /* Always cached: uncached listings cost the API several ORDER BY RAND()
+     calls per visit. The per-refresh shuffle happens in the browser instead
+     (ShopListing). */
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, init);
+    const res = await fetch(url, { next: { revalidate: 300 } });
     if (res.status !== 429 || attempt >= 3) return res;
     await wait(1500 * (attempt + 1));
   }
@@ -151,9 +154,24 @@ async function pooled<T, R>(items: T[], limit: number, fn: (x: T) => Promise<R>)
   }));
   return out;
 }
-/** One shuffle per listing: every page of it is asked for with the same seed,
-    so the API's random order doesn't repeat or drop products between pages. */
-export const newShuffleSeed = () => Math.floor(Math.random() * 2147483646) + 1;
+/** The API's shuffle seed, fixed for each 5-minute window: every page of a
+    listing shares it (so pages don't repeat or drop products) and the URL stays
+    the same for the whole window, so the cache above actually gets hits. */
+export const newShuffleSeed = () => Math.floor(Date.now() / 300_000);
+
+/** Fisher–Yates on a copy; `on: false` returns the list as it came. The shop
+    views run it on the server for each request, over the cached API data, so
+    every refresh arrives in a new order with no extra API calls and no
+    client-side reshuffle flashing in after hydration. */
+export function shuffled<T>(list: T[], on = true): T[] {
+  if (!on) return list;
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 /** Kept for the fallback fetch below, which only ever anchors on a category. */
 const fetchCategoryPage = (slug: string, page: number, sort: ProductsApiSort) =>
@@ -208,8 +226,13 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
     const first = await fetchListingPage(by, 1, sort, seed);
     if (!first.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
     const firstJson: ProductsApiResponse = fixImages(await first.json());
+    /* Kept even without an image (the tile falls back to a plain swatch). */
+    const subcategories = (firstJson.data?.subcategories ?? [])
+      .filter((c) => c.slug)
+      .map((c) => ({ ...c, name: c.name.replace(/\s+/g, " ").trim() }));
     const products = [...(firstJson.data?.products ?? [])];
-    const lastPage = firstJson.data?.pagination?.last_page ?? 1;
+    /* A parent category shows its subcategories, not products: skip the other pages. */
+    const lastPage = subcategories.length > 0 ? 1 : firstJson.data?.pagination?.last_page ?? 1;
 
     if (lastPage > 1) {
       const rest = await pooled(Array.from({ length: lastPage - 1 }, (_, i) => i + 2), 2, async (page) => {
@@ -235,6 +258,7 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
     return {
       name: name(firstJson),
       shortDesc: plain(firstJson.data?.category?.cat_short_desc ?? ""),
+      subcategories,
       products: products.map(apiProductToProduct),
       categories: fallback?.categories ?? categories,
       tags: fallback?.tags ?? tags,

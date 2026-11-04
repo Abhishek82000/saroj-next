@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import ListingSections from "@/components/shop/ListingSections";
+import SubcategoryGrid from "@/components/shop/SubcategoryGrid";
 import JsonLd from "@/components/seo/JsonLd";
 import { attachWholesale } from "@/lib/wholesalePrices";
-import { getCategoryProducts, getHomeData, getTagProducts, type ProductsApiSort } from "@/lib/home";
+import { WHOLESALE_SECTION } from "@/lib/wholesale";
+import { getCategoryProducts, getHomeData, getTagProducts, shuffled, type ProductsApiSort } from "@/lib/home";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
 type Params = Promise<{ slug: string }>;
@@ -50,8 +52,24 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
   const sort = toSort((await searchParams).sort);
   const listing = await resolveListing(slug, sort);
   const { name, categories, tags, priceRange, saleProducts, fabricCategories } = listing;
+  const subcategories = listing.subcategories ?? [];
+  /* A parent category (e.g. Tote Bags) opens on its subcategories, not a product list. */
+  if (!listing.tag && subcategories.length > 0) {
+    const title = name || titleFromSlug(slug);
+    const base = wholesale ? WHOLESALE_SECTION : "/shop";
+    return (
+      <main id="main">
+        <SubcategoryGrid title={title} lede={listing.shortDesc} subcategories={subcategories} wholesale={wholesale} />
+        <JsonLd data={graph([
+          breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path: `${base}/${slug}` }]),
+        ])} />
+      </main>
+    );
+  }
   /* Wholesale pages carry each piece's wholesale rate (product_wh_* columns, via the cards API). */
-  const products = wholesale ? await attachWholesale(listing.products) : listing.products;
+  /* Shuffled here, per request, for the default order: the HTML arrives in its final order. */
+  const listed = shuffled(listing.products, sort === "new_arrival");
+  const products = wholesale ? await attachWholesale(listed) : listed;
   /* /api/products' `handcategories` has no cat_handi_type, which the rail's lanes need. */
   const { handicraftCats } = await getHomeData();
   const title = name || titleFromSlug(slug);

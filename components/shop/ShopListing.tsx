@@ -13,7 +13,7 @@ import ProdCard from "@/components/product/ProdCard";
 import Filters from "./Filters";
 import { emptyFilters, useShopFilters, type SortKey } from "./useShopFilters";
 import { inr, site } from "@/lib/site";
-import { apiProductToProduct } from "@/lib/home";
+import { apiProductToProduct, shuffled } from "@/lib/home";
 import type { ProductsApiResponse } from "@/lib/types";
 import type { CommonCategoryRef, Product, ProductsApiTag, SaleProduct, WholesaleRate } from "@/lib/types";
 import { fixImages } from "@/lib/img";
@@ -67,6 +67,9 @@ export default function ShopListing({
   /* Wholesale rates already fetched, kept so a fresh list from the server is re-priced at once. */
   const rates = useRef(new Map<number, WholesaleRate>());
   useEffect(() => { setAll(withRates(items, rates.current)); setPage(1); }, [items]);
+  /* `items` arrives already shuffled by the server (no flash of the old order);
+     pages loaded on scroll get the same treatment as they're appended. */
+  const shuffle = liveSort == null || liveSort === "new_arrival";
   const hasMore = !!paging && page < paging.lastPage;
 
   /* Wholesale: the listing APIs price at retail, so any piece still without a
@@ -91,10 +94,10 @@ export default function ShopListing({
     if (!hasMore || loadingMore) return;
     setLoadingMore(true);
     try {
-      const res = await fetch(`${site.api}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}${paging?.seed ? `&seed=${paging.seed}` : ""}`, { cache: "no-store", headers: { Accept: "application/json" } });
+      const res = await fetch(`${site.api}/api/products?page=${page + 1}&sort=${liveSort ?? "new_arrival"}${paging?.seed ? `&seed=${paging.seed}` : ""}`, { headers: { Accept: "application/json" } });
       if (res.ok) {
         const json: ProductsApiResponse = fixImages(await res.json());
-        const next = (json.data?.products ?? []).map(apiProductToProduct);
+        const next = shuffled((json.data?.products ?? []).map(apiProductToProduct), shuffle);
         setAll((prev) => [...prev, ...next.filter((n) => !prev.some((p) => p.slug === n.slug))]);
         setPage((n) => n + 1);
       }

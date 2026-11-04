@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import ListingSections from "@/components/shop/ListingSections";
 import JsonLd from "@/components/seo/JsonLd";
-import { getHomeData, getProductsPage, type ProductsApiSort } from "@/lib/home";
+import { getHomeData, getProductsPage, shuffled, type ProductsApiSort } from "@/lib/home";
 import { attachWholesale } from "@/lib/wholesalePrices";
 import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
 
@@ -47,7 +47,9 @@ export async function ShopView({ searchParams, wholesale }: { searchParams: Sear
   const sort = toSort(rawSort);
   const page = await getProductsPage(sort);
   const { categories, tags, priceRange, saleProducts, fabricCategories, lastPage, total, seed } = page;
-  const products = wholesale ? await attachWholesale(page.products) : page.products;
+  /* Shuffled here, per request, for the default order: the HTML arrives in its final order. */
+  const listed = shuffled(page.products, sort === "new_arrival");
+  const products = wholesale ? await attachWholesale(listed) : listed;
   /* /api/products' `handcategories` has no cat_handi_type, which the rail's lanes need. */
   const { handicraftCats } = await getHomeData();
 

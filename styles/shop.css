@@ -208,3 +208,96 @@
 }
 .st-card__n a{ color:inherit; text-decoration:none; transition:color .2s var(--ease); }
 .st-card__n a:hover{ color:var(--cobalt); text-decoration:underline; text-underline-offset:.15em; }
+
+/* ---------- parent category page (components/shop/SubcategoryGrid.tsx) ---------- */
+/* Banded header: block-print dot field, a slowly turning rosette, the title's
+   last word in italic madder over a brass brush stroke. */
+.sc-hero{ position:relative; overflow:hidden; isolation:isolate; background:var(--paper-2);
+          padding:clamp(22px,4vw,40px) var(--edge) clamp(40px,6vw,72px);
+          border-bottom:1px solid color-mix(in srgb, var(--brass) 35%, transparent); }
+.sc-hero::before{ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+                  background:radial-gradient(circle, color-mix(in srgb, var(--lac) 22%, transparent) 1px, transparent 1.6px) 0 0/18px 18px;
+                  -webkit-mask-image:linear-gradient(105deg, transparent 30%, #000 85%); mask-image:linear-gradient(105deg, transparent 30%, #000 85%); }
+.sc-hero__rosette{ position:absolute; z-index:-1; right:clamp(-90px,-6vw,-40px); top:50%; width:clamp(200px,34vw,420px);
+                   translate:0 -50%; fill:none; stroke:color-mix(in srgb, var(--lac) 30%, transparent); stroke-width:.8;
+                   animation:scSpin 70s linear infinite; }
+@keyframes scSpin{ to{ rotate:360deg; } }
+.sc-hero__in{ position:relative; max-width:640px; }
+.sc-hero__kick{ display:inline-flex; align-items:center; gap:.6em; margin:clamp(14px,2.4vw,22px) 0 0;
+                font-size:.62rem; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:var(--lac); }
+.sc-hero__kick i{ font-style:normal; font-size:.5em; color:var(--brass); }
+.sc-hero__kick::before{ content:""; width:28px; height:1px; background:currentColor; opacity:.6; }
+.sc-hero__title{ font-family:var(--d); font-weight:400; line-height:1.02; letter-spacing:-.018em; margin:.45rem 0 0;
+                 font-size:clamp(2.4rem,7.5vw,4.6rem); color:var(--ink); }
+.sc-hero__title em{ position:relative; display:inline-block; font-style:italic; color:var(--lac); padding-right:.06em; }
+.sc-hero__title svg{ position:absolute; left:-3%; bottom:-.12em; width:106%; height:.28em; overflow:visible; }
+.sc-hero__title path{ fill:none; stroke:var(--ochre); stroke-width:3.2; stroke-linecap:round; vector-effect:non-scaling-stroke;
+                      stroke-dasharray:260; stroke-dashoffset:260; animation:scDraw 1.4s .35s var(--ease) forwards; }
+@keyframes scDraw{ to{ stroke-dashoffset:0; } }
+.sc-hero__lede{ margin:1.1rem 0 0; max-width:46ch; color:var(--ink-2); font-weight:300; font-size:clamp(.92rem,2.4vw,1.02rem); line-height:1.6; }
+
+/* The tiles: arched like a Jaipur jharokha, a stitched inner edge, a brass
+   numeral, and an "Explore" pill that fills madder on hover. */
+.sc-wrap{ padding:clamp(28px,5vw,64px) var(--edge) clamp(44px,7vw,90px); }
+.sc-grid{ list-style:none; margin:0 auto; padding:0; display:grid; gap:clamp(18px,3vw,36px) clamp(14px,2.4vw,30px);
+          grid-template-columns:repeat(auto-fit, minmax(min(100%,210px), 270px)); justify-content:center; }
+.sc-cell{ min-width:0; }
+.sc-card{ display:flex; flex-direction:column; gap:.9rem; color:inherit; text-decoration:none; -webkit-tap-highlight-color:transparent; }
+.sc-card__arch{ position:relative; display:block; aspect-ratio:3/4; overflow:hidden; isolation:isolate;
+                border-radius:999px 999px 18px 18px; background:var(--paper-3);
+                box-shadow:0 22px 40px -24px rgba(28,38,48,.45), 0 0 0 1px color-mix(in srgb, var(--brass) 30%, transparent);
+                transition:transform .6s var(--ease), box-shadow .6s var(--ease); }
+.sc-card__arch img{ transition:transform 1.1s var(--ease); }
+/* The stitched edge, inset from the arch. */
+.sc-card__arch::after{ content:""; position:absolute; inset:9px; z-index:2; pointer-events:none;
+                       border:1.5px dashed rgba(255,255,255,.7); border-radius:999px 999px 12px 12px;
+                       transition:inset .6s var(--ease), border-color .6s var(--ease); }
+/* A soft ink wash at the foot, so the numeral reads on any photo. */
+.sc-card__arch::before{ content:""; position:absolute; inset:auto 0 0; height:45%; z-index:1; pointer-events:none;
+                        background:linear-gradient(to top, rgba(16,24,32,.5), transparent); }
+.sc-card__no{ position:absolute; left:50%; bottom:16px; translate:-50% 0; z-index:3;
+              font-family:var(--d); font-size:clamp(1.05rem,3vw,1.35rem); letter-spacing:.06em; color:#fff;
+              text-shadow:0 2px 10px rgba(0,0,0,.35); white-space:nowrap; }
+.sc-card__no::before,.sc-card__no::after{ content:""; display:inline-block; vertical-align:middle; width:14px; height:1px;
+                                          background:var(--brass); margin:0 .5em; }
+.sc-card__blank{ display:grid; place-items:center; width:100%; height:100%; font-family:var(--d); font-size:3rem; color:var(--mute); }
+.sc-card__foot{ display:flex; flex-direction:column; align-items:center; gap:.55rem; text-align:center; }
+.sc-card__name{ font-family:var(--d); font-size:clamp(1.02rem,2.8vw,1.28rem); line-height:1.2; color:var(--ink); }
+.sc-card__cta{ display:inline-flex; align-items:center; gap:.4em; padding:.5em 1.05em; border-radius:99px;
+               border:1px solid var(--line); color:var(--ink-2); font-size:.6rem; font-weight:700; letter-spacing:.18em;
+               text-transform:uppercase; transition:background .4s var(--ease), color .4s var(--ease), border-color .4s var(--ease); }
+.sc-card__cta svg{ transition:transform .4s var(--ease); }
+@media (hover:hover){
+  .sc-card:hover .sc-card__arch{ transform:translateY(-8px);
+    box-shadow:0 34px 50px -26px rgba(28,38,48,.55), 0 0 0 1px var(--brass); }
+  .sc-card:hover .sc-card__arch img{ transform:scale(1.07); }
+  .sc-card:hover .sc-card__arch::after{ inset:13px; border-color:#fff; }
+  .sc-card:hover .sc-card__cta{ background:var(--lac); border-color:var(--lac); color:#fff; }
+  .sc-card:hover .sc-card__cta svg{ transform:translateX(3px); }
+}
+.sc-card:focus-visible{ outline:none; }
+.sc-card:focus-visible .sc-card__arch{ box-shadow:0 0 0 3px var(--paper), 0 0 0 5px var(--cobalt); }
+.sc-card:active .sc-card__arch{ transform:scale(.98); }
+
+/* Phones: two up; an odd last tile centres under the pair. */
+@media (max-width:559px){
+  .sc-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .sc-cell:last-child:nth-child(odd){ grid-column:1 / -1; justify-self:center; width:calc(50% - clamp(14px,2.4vw,30px) / 2); }
+  .sc-card{ gap:.7rem; }
+  .sc-hero__rosette{ top:auto; bottom:-70px; right:-80px; translate:none; width:220px; opacity:.55; }
+  .sc-card__no{ bottom:12px; }
+  .sc-card__no::before,.sc-card__no::after{ width:9px; margin:0 .35em; }
+  .sc-card__arch::after{ inset:6px; }
+  .sc-card__cta{ padding:.42em .85em; font-size:.56rem; letter-spacing:.14em; }
+}
+
+/* A carved diamond on a brass hairline, closing the gallery. */
+.sc-rule{ display:flex; align-items:center; gap:14px; max-width:420px; margin:clamp(36px,6vw,64px) auto 0; }
+.sc-rule::before,.sc-rule::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--brass)); }
+.sc-rule::after{ background:linear-gradient(90deg, var(--brass), transparent); }
+.sc-rule span{ width:9px; height:9px; rotate:45deg; border:1px solid var(--brass); }
+
+@media (prefers-reduced-motion: reduce){
+  .sc-hero__rosette{ animation:none; }
+  .sc-hero__title path{ animation:none; stroke-dashoffset:0; }
+}

@@ -273,6 +273,8 @@ export interface ProductsApiResponse {
     category?: { id: number; name: string; slug: string; cat_short_desc?: string | null } | null;
     /** Present instead of `category` when the listing was fetched by ?tag=<slug>. */
     tag?: { id: number; name: string; slug: string } | null;
+    /** The listed category's active child categories (cat_parent = its id); empty when it has none. */
+    subcategories?: CommonFeaturedCategory[];
     /** Every storefront category, for the "Product categories" sidebar list. */
     categoryList?: CommonCategoryRef[];
     tagsList?: ProductsApiTag[];
