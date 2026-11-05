@@ -6,6 +6,8 @@ import type {
   Reel, SaleProduct,
 } from "./types";
 import { fixImages } from "./img";
+import { ApiUnavailableError } from "./product-api";
+import { cache } from "react";
 
 export interface HomeData {
   /** `categories` — the fabric categories, drawn by Hero. */
@@ -55,33 +57,73 @@ export const toSlides = (list: HomeApiSlide[] | undefined, catHref: (slug: strin
     href: s.url || (s.category ? catHref(s.category.slug) : s.tag ? `/shop/${s.tag.slug}` : null),
   }));
 
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** The last good answer this server got, handed out while the API is down. */
+let lastHomeData: HomeData | null = null;
+
+/** GET /api/home, tried again after a short, growing pause when it fails (the API
+    rate-limits bursts, and every visitor shares the server's IP). The signal also
+    opts out of React's per-render fetch memo, which would hand a retry the same
+    failed response. */
+async function fetchHomeJson(): Promise<HomeApiResponse> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await fetch(`${site.api}/api/home`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new ApiUnavailableError(`${res.status}: /api/home`);
+      return await res.json();
+    } catch (e) {
+      if (attempt >= 2) throw e;
+      await wait(1000 * (attempt + 1));
+    }
+  }
+}
+
 /**
  * Everything the homepage pulls live from the storefront: the tag rails
  * ("New Arrivals", "Best Seller", ...), the category rails ("Ajrakh
- * Collection", "Jaipur Cotton", ...) and the shoppable-reel clips. Fetched
- * once per render and cached for a few minutes; returns empty lists on any
- * failure so the page can fall back to its static content instead of breaking.
+ * Collection", "Jaipur Cotton", ...) and the shoppable-reel clips. Cached for
+ * a few minutes. Throws when the API can't answer (after retries, and with no
+ * earlier answer to fall back on), so the home page keeps its last good copy
+ * rather than being cached with every live section missing (see app/error.tsx).
  */
+export const loadHomeData = cache(async (): Promise<HomeData> => {
+  try {
+    const json = fixImages(await fetchHomeJson());
+    const data = toHomeData(json);
+    /* The shop always has product rails, so an answer without any is a broken one. */
+    if (data.tagSections.length === 0 && data.categorySections.length === 0) throw new ApiUnavailableError("no rails: /api/home");
+    lastHomeData = data;
+    return data;
+  } catch (e) {
+    if (lastHomeData) return lastHomeData;
+    throw e;
+  }
+});
+
+/** loadHomeData for pages that only borrow from the home feed (shop sidebars,
+    product prices): empty lists instead of an error when it can't be had. */
 export async function getHomeData(): Promise<HomeData> {
   try {
-    const res = await fetch(`${site.api}/api/home`, { next: { revalidate: 300 } });
-    if (!res.ok) return EMPTY_HOME_DATA;
-    const json: HomeApiResponse = fixImages(await res.json());
-    return {
-      categories: toCategories(json.data?.categories),
-      slides: toSlides(json.data?.top_slider),
-      midSlides: toSlides(json.data?.middle_slider),
-      tagSections: json.data?.tag_show_home_page ?? [],
-      // Some categories aren't stocked yet, so the API lists them with no products.
-      categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),
-      handicraftCats: toHandiCats(json.data?.handicraft_show_home_page, json.data?.handcategories),
-      handCategories: (json.data?.handcategories ?? []).filter((c) => c.image && c.slug),
-      videoProducts: json.data?.video_products ?? [],
-      voices: (json.data?.testimonials ?? []).map((t) => ({ name: t.name, content: t.content ? plain(t.content) : null, rating: t.rating })),
-    };
+    return await loadHomeData();
   } catch {
     return EMPTY_HOME_DATA;
   }
+}
+
+function toHomeData(json: HomeApiResponse): HomeData {
+  return {
+    categories: toCategories(json.data?.categories),
+    slides: toSlides(json.data?.top_slider),
+    midSlides: toSlides(json.data?.middle_slider),
+    tagSections: json.data?.tag_show_home_page ?? [],
+    // Some categories aren't stocked yet, so the API lists them with no products.
+    categorySections: (json.data?.category_show_home_page ?? []).filter((c) => c.products.length > 0),
+    handicraftCats: toHandiCats(json.data?.handicraft_show_home_page, json.data?.handcategories),
+    handCategories: (json.data?.handcategories ?? []).filter((c) => c.image && c.slug),
+    videoProducts: json.data?.video_products ?? [],
+    voices: (json.data?.testimonials ?? []).map((t) => ({ name: t.name, content: t.content ? plain(t.content) : null, rating: t.rating })),
+  };
 }
 
 export interface CategoryProducts {
@@ -125,8 +167,6 @@ export type ProductsApiSort = "best_selling" | "new_arrival" | "high_low" | "low
 /** GET /api/products takes either ?category=<slug> or ?tag=<slug> — never both —
     or neither, for every product on the counter. */
 type Listing = { category: string } | { tag: string } | { all: true };
-
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** One listing page. The API rate-limits bursts (429) and has no page-size
     option (always 24), so a 429 is retried after a short, growing pause. */

@@ -17,7 +17,7 @@ import HandicraftRail from "@/components/product/HandicraftRail";
 import BannerSlider from "@/components/home/BannerSlider";
 import JsonLd from "@/components/seo/JsonLd";
 import { getBlogList } from "@/lib/blogs";
-import { apiProductToProduct, buildReels, getHomeData } from "@/lib/home";
+import { apiProductToProduct, buildReels, loadHomeData } from "@/lib/home";
 import { getFeaturedCategories } from "@/lib/nav";
 import { breadcrumbLd, graph, itemListLd } from "@/lib/seo";
 import { WHOLESALE_HOME } from "@/lib/wholesale";
@@ -30,7 +30,7 @@ import type { WholesalePage } from "@/lib/wholesalePage";
  * because it is in wholesale mode its cards carry no add-to-cart.
  */
 export default async function HomeSections({ wholesale }: { wholesale?: WholesalePage | null }) {
-  const homeData = await getHomeData();
+  const homeData = await loadHomeData();
   const tagSections = homeData.tagSections;
   const apiReels = buildReels(homeData);
   const featuredCategories = await getFeaturedCategories();
