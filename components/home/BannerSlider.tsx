@@ -29,7 +29,7 @@ export default function BannerSlider({ slides, label = "Offers" }: { slides: Ban
             <picture>
               <source media="(max-width:640px)" srcSet={s.mobileImage} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={s.image} alt={s.alt} loading={k === 0 ? "eager" : "lazy"} />
+              <img src={s.image} alt={s.alt} loading={k === 0 ? "eager" : "lazy"} fetchPriority={k === 0 ? "high" : "low"} />
             </picture>
           );
           return (

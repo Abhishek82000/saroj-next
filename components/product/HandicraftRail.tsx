@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
-import { useStore } from "@/components/shell/StoreProvider";
+import { useModeHref } from "@/components/shell/StoreProvider";
 import { categoryHref } from "@/lib/nav";
 import type { HandiCat } from "@/lib/home";
 
@@ -97,7 +97,7 @@ function Lane({ title, cats, index }: { title: string; cats: HandiCat[]; index: 
 }
 
 function Tag({ c, copy, style }: { c: HandiCat; copy: boolean; style: CSSProperties }) {
-  const { href } = useStore();
+  const href = useModeHref();
 
   return (
     <li className="hcs__slot" style={style} aria-hidden={copy || undefined}>

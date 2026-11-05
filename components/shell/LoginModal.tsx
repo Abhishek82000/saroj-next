@@ -121,7 +121,7 @@ export default function LoginModal() {
       /* The storefront's own login banner, which leads to the wholesale page. */
       // eslint-disable-next-line @next/next/no-img-element
       <Link href="/wholesale-fabric" onClick={closeLogin}>
-        <img src={BANNER} alt="Our exclusive wholesale fabrics — minimum 10 m, starting @80" />
+        <img src={BANNER} width={1774} height={887} alt="Our exclusive wholesale fabrics — minimum 10 m, starting @80" />
       </Link>}>
       <div className="st-login">
         <h3 className="st-login__h">{heading}</h3>

@@ -36,6 +36,7 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
   const featuredCategories = await getFeaturedCategories();
   const { posts: journalPosts } = await getBlogList();
   const isWholesale = wholesale !== undefined;
+  const hasBanner = !isWholesale && homeData.slides.length > 0;
   /* Live coupons, cart-milestone steps and free shipping (GET /api/offers) — a retail offer. */
   const feed = isWholesale ? null : await getOffersFeed();
   const offers = feed ? offerSlides(feed) : [];
@@ -47,8 +48,10 @@ export default async function HomeSections({ wholesale }: { wholesale?: Wholesal
 
   return (
     <main id="main">
-      {!isWholesale && homeData.slides.length > 0 && <BannerSlider slides={homeData.slides} />} 
-      <Hero categories={homeData.categories} />
+      {hasBanner && <BannerSlider slides={homeData.slides} />}
+      {/* Under a banner the plates are off the first screen on a phone: preloading them
+          at high priority only slows the banner, which is the page's largest paint. */}
+      <Hero categories={homeData.categories} priority={!hasBanner} />
       <CraftRoll />
       {tagSections.map((tag) => (
         <Rail

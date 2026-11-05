@@ -138,6 +138,14 @@ interface Store {
 
 const Ctx = createContext<Store | null>(null);
 
+/** The store's `href` without subscribing to the store: it depends only on the
+    URL, so a link using this re-renders on navigation, not on every cart,
+    wishlist or login change — with hundreds of links on a page that matters. */
+export function useModeHref() {
+  const wholesale = isWholesalePath(usePathname());
+  return useCallback((retail: string) => (wholesale ? wholesaleHref(retail) : retail), [wholesale]);
+}
+
 export function useStore() {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useStore must be used inside <StoreProvider>");

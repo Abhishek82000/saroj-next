@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
+import { memo, useCallback, useRef } from "react";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
-import { useStore } from "@/components/shell/StoreProvider";
+import { useModeHref, useStore, type Mode } from "@/components/shell/StoreProvider";
 import { discount } from "@/lib/price";
 import { inr } from "@/lib/site";
 import { priced } from "@/lib/wholesale";
@@ -13,15 +14,30 @@ import type { Product } from "@/lib/types";
  * `clone` marks the rail loop's second pass: decoration, hidden from screen
  * readers and tabbing.
  */
-export default function ProdCard({
-  p, clone, priority, sizes = "262px",
-}: { p: Product; clone?: boolean; priority?: boolean; sizes?: string }) {
-  const { addProduct, mode, href, wishlist, toggleFav } = useStore();
+export default function ProdCard(props: { p: Product; clone?: boolean; priority?: boolean; sizes?: string }) {
+  const { addProduct, mode, wishlist, toggleFav } = useStore();
+  /* The store's value changes on every cart, login, toast or badge update, and a
+     home page carries a few hundred cards. Hand the card only what it shows,
+     with click handlers that never change, so it re-renders when its own heart
+     or the mode does — not on each of those updates. */
+  const latest = useRef({ addProduct, toggleFav, mode });
+  latest.current = { addProduct, toggleFav, mode };
+  const onAdd = useCallback((p: Product) => latest.current.addProduct(p), []);
+  const onFav = useCallback((p: Product) => latest.current.toggleFav(p, latest.current.mode), []);
+  return <Card {...props} mode={mode} saved={!!wishlist[mode][props.p.slug]} onAdd={onAdd} onFav={onFav} />;
+}
+
+const Card = memo(function Card({
+  p, clone, priority, sizes = "262px", mode, saved, onAdd, onFav,
+}: {
+  p: Product; clone?: boolean; priority?: boolean; sizes?: string;
+  mode: Mode; saved: boolean; onAdd: (p: Product) => void; onFav: (p: Product) => void;
+}) {
+  const href = useModeHref();
   const view = priced(p, mode === "wholesale");
   /* A piece the API sent without a price shows no price — never a made-up ₹0. */
   const known = view.price > 0;
   const off = known ? discount(view.wholesale ? { ...p, price: view.price, mrp: view.mrp } : p) : 0;
-  const saved = !!wishlist[mode][p.slug];
   const out = p.stock === "out";
 
   return (
@@ -34,7 +50,7 @@ export default function ProdCard({
       {off > 0 && <span className="st-prod__off">{off}% off</span>}
       {/* Login-gated, saved to this mode's wishlist. */}
       <button type="button" className={`st-card__fav${saved ? " on" : ""}`}
-        aria-pressed={saved} aria-label={`Save ${p.name}`} onClick={() => toggleFav(p, mode)}>
+        aria-pressed={saved} aria-label={`Save ${p.name}`} onClick={() => onFav(p)}>
         <Icon name="heart" size={14} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
       </button>
       <div className="st-prod__body">
@@ -56,10 +72,10 @@ export default function ProdCard({
       </div>
       {known && mode !== "wholesale" && (
         <button type="button" className="st-prod__add" aria-label={`Add ${p.name} to cart`} disabled={out}
-          onClick={() => addProduct(p)}>
+          onClick={() => onAdd(p)}>
           <Icon name="cart" size={14} strokeWidth={1.8} /><span>{out ? "Sold out" : "Add to cart"}</span>
         </button>
       )}
     </div>
   );
-}
+});

@@ -30,7 +30,7 @@ export const swatches = [
   ["34411788077677", "Stripes and Checks", "strips-and-checks"],
 ];
 
-export default function Hero({ categories }: { categories: CommonFeaturedCategory[] }) {
+export default function Hero({ categories, priority = true }: { categories: CommonFeaturedCategory[]; priority?: boolean }) {
   const [lit, setLit] = useState(false);
   const row = useRef<HTMLDivElement>(null);
 
@@ -84,7 +84,7 @@ export default function Hero({ categories }: { categories: CommonFeaturedCategor
           <div className="st-plates__row" ref={row}>
             {heroPlates.map((p) => (
               <Link key={p.cls} href={categoryHref(p.slug)} className={`st-plate ${p.cls} ph`}>
-                <Photo src={p.src} alt={p.alt} note={p.note} priority sizes="(max-width:900px) 40vw, 300px" />
+                <Photo src={p.src} alt={p.alt} note={p.note} priority={priority} sizes="(max-width:900px) 40vw, 300px" />
                 <span className="st-plate__cap">{p.cap}</span>
               </Link>
             ))}

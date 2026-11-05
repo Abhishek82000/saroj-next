@@ -17,6 +17,19 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
   /** Folds the running drift into scrollLeft; set by the drift effect. */
   const foldRef = useRef(() => {});
   const [loop, setLoop] = useState(false);
+  /* Whether the rail has come near the screen yet. The second copy of the cards
+     only matters once the rail can be seen drifting, and a home page has a dozen
+     rails: building every copy on load doubled the page's cards in one burst of
+     main-thread work right as it became interactive. */
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = rail.current;
+    if (!el || near) return;
+    if (typeof IntersectionObserver === "undefined") return setNear(true);
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) setNear(true); }, { rootMargin: "300px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [near]);
 
   /** Width of one copy of the cards: where the second copy starts. */
   const period = () => {
@@ -34,6 +47,7 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
   useEffect(() => {
     const el = rail.current;
     if (!el || count < 2) return setLoop(false);
+    if (!near) return;
     const oneCopy = () => {
       if (loop) return period();
       const row = track.current;
@@ -52,7 +66,7 @@ export function useLoopRail(count: number, speed = 32 /* px per second */) {
     ro.observe(el);
     return () => ro.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, loop]);
+  }, [count, loop, near]);
 
   /* Snap points would tug against the drift, so they're off while looping. */
   useEffect(() => {

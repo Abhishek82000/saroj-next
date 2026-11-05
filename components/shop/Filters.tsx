@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
-import { useStore } from "@/components/shell/StoreProvider";
+import { useModeHref } from "@/components/shell/StoreProvider";
 import { crafts, materials } from "@/lib/crafts";
 import { inr } from "@/lib/site";
 import type { CommonCategoryRef, ProductsApiTag, SaleProduct } from "@/lib/types";
@@ -84,7 +84,7 @@ export default function Filters({
   state, counts, onToggle, onPrice, showCraft = true, showMaterial = true,
   categories, currentSlug, tags, currentTag, priceRange, saleProducts,
 }: FilterProps) {
-  const { href } = useStore();
+  const href = useModeHref();
   return (
     <>
       {categories && categories.length > 0 && (
