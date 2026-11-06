@@ -15,7 +15,7 @@ const Card = ({ text, who, rating }: { text: string; who: string; rating: number
     <blockquote style={{ margin: 0 }}><p>{text}</p></blockquote>
     <figcaption className="st-voice__who">
       <span className="st-voice__ini">{who.slice(0, 1)}</span>
-      <span><b>{who}</b><br /><small>Verified buyer</small></span>
+      <span className="st-voice__span"><b>{who}</b><small>Verified buyer</small></span>
     </figcaption>
   </figure>
 );

@@ -127,7 +127,7 @@ export default function Footer({ handicraftCats = [] }: { handicraftCats?: Foote
       <div className="st-foot__tape">
         <div className="st-wrap">
           <span>© {new Date().getFullYear()} {site.name} · {site.address.city}</span>
-          <span className="st-foot__made">Measured, cut &amp; posted from Jhotwara</span>
+          <span className="st-foot__made">Measured, cut &amp; posted from Jaipur</span>
           <a className="st-foot__up" href="#">Back to top <span aria-hidden="true">↑</span></a>
         </div>
       </div>

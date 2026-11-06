@@ -248,13 +248,13 @@ export default function ShopListing({
                   {/* Placeholder cards where the next page of products will land. */}
                   {loadingMore && <SkCards count={Number(cols)} />}
                 </div>
-                <div className="st-more">
+                <div className="st-loadmore">
                   {finished ? (
                     <p>That’s all {list.length}</p>
                   ) : (
                     <>
-                      <div className="st-more__bar">
-                        <span className="st-more__fill" style={{ width: `${(Math.min(f.shown, list.length) / shownTotal) * 100}%` }} />
+                      <div className="st-loadmore__bar">
+                        <span className="st-loadmore__fill" style={{ width: `${(Math.min(f.shown, list.length) / shownTotal) * 100}%` }} />
                       </div>
                       <p>{Math.min(f.shown, list.length)} of {shownTotal} · {loadingMore ? "loading more…" : "more on scroll"}</p>
                       <div ref={sentinel} aria-hidden="true" style={{ height: 1 }} />

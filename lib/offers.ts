@@ -228,7 +228,7 @@ export function offerSlides(feed: OffersFeed): OfferSlide[] {
       kicker: "Delivery",
       big: "Free", bigSub: "shipping",
       title: s.threshold ? `Free shipping over ${inr(s.threshold)}` : "Free shipping on prepaid orders",
-      text: "Cut, folded in our own Ajrakh offcuts and posted from Jhotwara.",
+      text: "Cut, folded in our own Ajrakh offcuts and posted from Jaipur.",
       terms: [s.prepaid_free ? "Prepaid orders" : "All over India"],
       code: null, image: null, cta: shop,
     });

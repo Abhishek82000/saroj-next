@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { apiProductToProduct, buildReels, toHandiCats, toSlides, type HandiCat } from "./home";
+import { apiProductToProduct, buildReels, plain, toHandiCats, toSlides, type HandiCat } from "./home";
 import { categoryHref } from "./nav";
 import { ApiUnavailableError } from "./product-api";
 import { site } from "./site";
@@ -196,7 +196,7 @@ export const loadHandicraftData = cache(async (): Promise<HandicraftData> => {
     fabricSlides,
     bolts: stocked.slice(0, 5).map(toBolt),
     video: v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
-    voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content, rating: t.rating })),
+    voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content ? plain(t.content) : null, rating: t.rating })),
     collections: handCats.length || (d.categories?.length ?? 0),
     // Thumbnails are borrowed from the rails by product id, same as on the home page.
     reels: buildReels({

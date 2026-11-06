@@ -310,6 +310,7 @@
 .st-voice__who{ display:flex; align-items:center; gap:.55rem; margin-top:.85rem; }
 .st-voice__ini{ width:28px; height:28px; border-radius:50%; background:var(--paper-2); color:var(--cobalt);
                 display:grid; place-items:center; font-size:.66rem; font-weight:700; flex:none; }
+.st-voice__span{display: flex;flex-direction: column;}
 .st-voice__who b{ font-size:.72rem; font-weight:600; }
 .st-voice__who small{ font-size:.58rem; color:var(--mute); letter-spacing:.1em; text-transform:uppercase; }
 
@@ -736,27 +737,37 @@
 
 .wb-actions { margin-top: clamp(0.25rem, 1vh, 0.75rem); }
 
+/* A filled button, so it reads as the section's one action: ink on paper, brass on ink. */
+.wb-part--paper { --wb-cta-bg: var(--wb-ink); --wb-cta-ink: var(--wb-bg); --wb-cta-hover: var(--wb-accent); }
+.wb-part--ink   { --wb-cta-bg: var(--wb-accent); --wb-cta-ink: var(--wb-bg); --wb-cta-hover: var(--wb-ink); }
+
 .wb-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.7rem 1.35rem;
-  border: 1px solid var(--wb-line);
+  gap: 0.7rem;
+  padding: 0.95rem 1.9rem;
+  border: 1px solid var(--wb-cta-bg);
   border-radius: 999px;
-  color: var(--wb-ink);
-  font-size: 0.9375rem;
+  background: var(--wb-cta-bg);
+  color: var(--wb-cta-ink);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-decoration: none;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 14px 28px -14px color-mix(in srgb, var(--wb-cta-bg) 75%, transparent);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 .wb-cta svg { transition: transform 0.3s ease; }
 
 @media (hover: hover) {
   .wb-cta:hover {
-    background: var(--wb-btn-hover-bg);
-    color: var(--wb-btn-hover-ink);
-    border-color: var(--wb-btn-hover-bg);
+    background: var(--wb-cta-hover);
+    border-color: var(--wb-cta-hover);
+    color: var(--wb-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 32px -14px color-mix(in srgb, var(--wb-cta-hover) 80%, transparent);
   }
-  .wb-cta:hover svg { transform: translateX(3px); }
+  .wb-cta:hover svg { transform: translateX(4px); }
 }
 .wb-cta:focus-visible { outline: 2px solid var(--wb-ink); outline-offset: 3px; }
 
@@ -807,7 +818,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .wb-cta, .wb-cta svg { transition: none; }
-  .wb-cta:hover svg { transform: none; }
+  .wb-cta:hover, .wb-cta:hover svg { transform: none; }
 }
 /* ============================================================
    OFFERS SLIDER — coupon tickets (components/home/OffersSlider)
