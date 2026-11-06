@@ -26,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     page("/shop", 0.9, "daily"),
     page("/handicraft", 0.8),
     page("/blog", 0.6),
+    page("/about", 0.5, "monthly"),
     page("/contact", 0.4, "monthly"),
     page("/faq", 0.4, "monthly"),
     ...categories.map((c) => page(categoryHref(c.cat_slug), 0.7, "daily")),

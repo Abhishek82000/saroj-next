@@ -29,7 +29,7 @@ const columns = [
   {
     title: "The house",
     links: [
-      ["https://www.sarojtextile.com/about", "Our story"],
+      ["/about", "Our story"],
       ["/faq", "FAQs"],
       ["/blog", "Blog"],
       ["/wholesale-fabric", "Wholesale @ ₹80"],
