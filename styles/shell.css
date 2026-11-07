@@ -352,7 +352,7 @@
 @media(hover:none){ .st-quick{ opacity:1; transform:none; } }
 
 /* ---------- pricing mode, account, login ---------- */
-.st-icn--on{ font-size:.82rem; font-weight:700; background:var(--ink); color:var(--paper); border-color:var(--ink); }
+.st-icn--on{ font-size:.82rem; font-weight:700; background:var(--ink); color:var(--paper); border-color:var(--ink);border-radius: 100px; }
 .st-icn--on:hover{ background:var(--cobalt); border-color:var(--cobalt); color:#fff; }
 .st-acct{ position:relative; }
 .st-acct__menu{ position:absolute; right:0; top:calc(100% + 10px); min-width:236px; z-index:95;

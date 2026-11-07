@@ -131,7 +131,7 @@
 
 /* ================= QUOTE ================= */
 .ab-quote{ position:relative; isolation:isolate; background:var(--ab-lac); color:var(--ab-cream);
-           padding-block:clamp(90px,13vw,60px); overflow:hidden; }
+           padding-block:clamp(50px,10vw,60px); overflow:hidden; }
 .ab-quote__bg{ position:absolute; inset:-10%; z-index:-1; display:grid; grid-template-columns:repeat(6,1fr); gap:10px;
                transform:rotate(-8deg); opacity:.16; mix-blend-mode:luminosity; }
 .ab-quote__bg div{ background-size:cover; background-position:center; border-radius:10px; }
@@ -145,7 +145,7 @@
 .ab-quote__by{ margin:0; font-size:.75rem; font-weight:700; letter-spacing:.32em; text-transform:uppercase; color:rgba(244,234,219,.75); }
 
 /* ================= TIMELINE ================= */
-.ab-time{ padding-block:clamp(80px,12vw,50px); background:linear-gradient(180deg, var(--paper), var(--paper-2)); }
+.ab-time{ padding-block:clamp(50px,12vw,50px); background:linear-gradient(180deg, var(--paper), var(--paper-2)); }
 .ab-time .ab-head{ text-align:center; }
 .ab-time .ab-kicker{ justify-content:center; }
 .ab-time .ab-kicker::after{ content:""; width:34px; height:1px; background:currentColor; }
