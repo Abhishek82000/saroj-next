@@ -142,6 +142,8 @@ export interface CategoryProducts {
   /** Child categories (e.g. Tote Bags → 18x18, 16*16 …). When there are any,
       the category page shows these instead of a product list. */
   subcategories?: CommonFeaturedCategory[];
+  /** The category's admin SEO fields (cat_meta_*) and image; empty strings when unset or for tags. */
+  meta?: { title: string; description: string; keywords: string; image: string };
 }
 
 const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&quot;": '"', "&#39;": "'", "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&ndash;": "–", "&mdash;": "—" };
@@ -295,9 +297,21 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
     const needsFallback = categories.length === 0 && tags.length === 0 && saleProducts.length === 0;
     const fallback = needsFallback ? await fallbackFacets(sort) : null;
 
+    const cat = firstJson.data?.category;
+    /* Image: the API's own, else the same category's tile from the category lists. */
+    const tile = cat
+      ? [...(firstJson.data?.categories ?? []), ...(firstJson.data?.handcategories ?? [])].find((c) => c.slug === cat.slug)
+      : undefined;
+
     return {
       name: name(firstJson),
-      shortDesc: plain(firstJson.data?.category?.cat_short_desc ?? ""),
+      shortDesc: plain(cat?.cat_short_desc ?? ""),
+      meta: {
+        title: plain(cat?.cat_meta_title ?? ""),
+        description: plain(cat?.cat_meta_desc ?? ""),
+        keywords: plain(cat?.cat_meta_keyword ?? ""),
+        image: cat?.image || tile?.image || "",
+      },
       subcategories,
       products: products.map(apiProductToProduct),
       categories: fallback?.categories ?? categories,

@@ -19,12 +19,15 @@ export function pageMeta(opts: {
   imageAlt?: string;
   noIndex?: boolean;
   type?: "website" | "article";
+  /** Comma-separated, e.g. from the admin's meta keyword field. */
+  keywords?: string;
 }): Metadata {
   const url = abs(opts.path);
   const image = opts.image ?? abs("/opengraph-image");
   return {
     title: opts.title,
     description: opts.description,
+    ...(opts.keywords ? { keywords: opts.keywords } : {}),
     alternates: { canonical: url },
     robots: opts.noIndex
       ? { index: false, follow: false }

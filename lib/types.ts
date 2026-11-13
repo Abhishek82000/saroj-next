@@ -270,7 +270,15 @@ export interface ProductsApiResponse {
   success: boolean;
   data: {
     /** The listed category itself. `cat_short_desc` is editor HTML, null when unset. */
-    category?: { id: number; name: string; slug: string; cat_short_desc?: string | null } | null;
+    category?: {
+      id: number; name: string; slug: string; cat_short_desc?: string | null;
+      /** SEO fields set in the admin; null/empty when unset. */
+      cat_meta_title?: string | null;
+      cat_meta_keyword?: string | null;
+      cat_meta_desc?: string | null;
+      /** The category's image (CDN URL), for og:image. */
+      image?: string | null;
+    } | null;
     /** Present instead of `category` when the listing was fetched by ?tag=<slug>. */
     tag?: { id: number; name: string; slug: string } | null;
     /** The listed category's active child categories (cat_parent = its id); empty when it has none. */
@@ -284,6 +292,8 @@ export interface ProductsApiResponse {
     saleProducts?: ProductsApiSaleProduct[];
     /** The fabric categories (id, name, slug, image), for the fabric house under the list. */
     categories?: CommonFeaturedCategory[];
+    /** The handicraft categories (id, name, slug, image). */
+    handcategories?: CommonFeaturedCategory[];
     pagination: { current_page: number; last_page: number; total: number };
   };
 }

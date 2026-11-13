@@ -30,12 +30,17 @@ async function resolveListing(slug: string, sort?: ProductsApiSort) {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const { name } = await resolveListing(slug);
+  const { name, meta } = await resolveListing(slug);
   const title = name || titleFromSlug(slug);
 
+  /* The admin's cat_meta_* fields when set; the composed defaults otherwise. */
   return pageMeta({
-    title,
-    description: `${title} at the Saroj Textile counter in Jaipur — hand block printed cotton and handicraft from six Jaipur lanes.`,
+    title: meta?.title || title,
+    description: meta?.description
+      || `${title} at the Saroj Textile counter in Jaipur — hand block printed cotton and handicraft from six Jaipur lanes.`,
+    keywords: meta?.keywords || undefined,
+    image: meta?.image || undefined,
+    imageAlt: title,
     path: `/shop/${slug}`,
   });
 }
