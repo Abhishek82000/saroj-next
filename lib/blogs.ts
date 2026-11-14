@@ -3,6 +3,7 @@ import type {
   BlogApiCategory, BlogApiPost, BlogApiRelatedProduct, BlogDetailApiResponse, BlogsListApiResponse, Product,
 } from "./types";
 import { fixImages } from "./img";
+import { adminMeta, type AdminMeta } from "./page-meta";
 
 const BLOG_IMG = (file: string | null) => (file ? `${site.api}/img/uploads/blogs/${file}` : "");
 
@@ -72,6 +73,8 @@ export async function getBlogList(page = 1, category?: string): Promise<BlogList
 export interface BlogPost extends BlogSummary {
   html: string;
   related: Product[];
+  /** blog_meta_title / blog_meta_desc / blog_meta_keyword from the admin. */
+  meta: AdminMeta;
 }
 
 /** The related-products list has its own field names, distinct from the
@@ -110,6 +113,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
       ...toSummary(b),
       html: b.blog_desc,
       related: (json.data?.related_products ?? []).map(relatedToProduct),
+      meta: adminMeta(b.blog_meta_title, b.blog_meta_desc, b.blog_meta_keyword),
     };
   } catch {
     return null;

@@ -21,11 +21,14 @@ export function pageMeta(opts: {
   type?: "website" | "article";
   /** Comma-separated, e.g. from the admin's meta keyword field. */
   keywords?: string;
+  /** Use the title exactly as given, without the " · Saroj Textile" suffix
+      (for titles typed in the admin, which usually carry the brand already). */
+  absoluteTitle?: boolean;
 }): Metadata {
   const url = abs(opts.path);
   const image = opts.image ?? abs("/opengraph-image");
   return {
-    title: opts.title,
+    title: opts.absoluteTitle ? { absolute: opts.title } : opts.title,
     description: opts.description,
     ...(opts.keywords ? { keywords: opts.keywords } : {}),
     alternates: { canonical: url },

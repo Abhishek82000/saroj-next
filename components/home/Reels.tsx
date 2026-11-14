@@ -12,7 +12,7 @@ import type { Reel } from "@/lib/types";
  * Drape and glaze don't survive a still, so these are short clips shot on the
  * counter. Each one is buyable without leaving the rail.
  */
-export default function Reels({ items }: { items?: Reel[] }) {
+export default function Reels({ items, title = "Shoppable reels." }: { items?: Reel[]; title?: string }) {
   const rail = useRef<HTMLDivElement>(null);
   const data = items ?? [];
 
@@ -28,7 +28,7 @@ export default function Reels({ items }: { items?: Reel[] }) {
   return (
     <section className="st-sec" id="reels" style={{ paddingBlock: "clamp(30px,5vw,54px)" }}>
       <div className="st-wrap st-railhead">
-        <SectionHead title="Shoppable reels." />
+        <SectionHead title={title} />
       </div>
 
       <div className="st-wrap">
@@ -73,7 +73,9 @@ function ReelCard({ reel }: { reel: Reel }) {
     else { v.pause(); setPlaying(false); }
   };
 
-  const link = reel.slug ? href(`/product/${reel.slug}`) : reel.href!;
+  const link = reel.category ? reel.href! : reel.slug ? href(`/product/${reel.slug}`) : reel.href!;
+  /* Site-internal paths go through the client router. */
+  const internal = !!reel.slug || link.startsWith("/");
 
   return (
     <article className={`st-reel${playing ? "" : " paused"}`}>
@@ -87,6 +89,7 @@ function ReelCard({ reel }: { reel: Reel }) {
         }}>PLACEHOLDER — {reel.name}</p>
       ) : (
         <video ref={video} muted loop playsInline preload="none" aria-label={reel.name}
+          poster={reel.category && reel.image ? reel.image : undefined}
           onError={() => setFailed(true)} />
       )}
 
@@ -104,10 +107,14 @@ function ReelCard({ reel }: { reel: Reel }) {
       </button>
 
       <div className="st-reel__info">
-        {reel.slug
+        {internal
           ? <Link className="st-reel__name" href={link}>{reel.name}</Link>
           : <a className="st-reel__name" href={link}>{reel.name}</a>}
-        <div className="st-reel__foot">
+        {reel.category ? (
+          <div className="st-reel__foot">
+            <Link className="st-reel__buy" href={link}>Shop the collection</Link>
+          </div>
+        ) : <div className="st-reel__foot">
           <span className="st-reel__price">
             <b>{inr(reel.price)}</b>{reel.mrp > 0 && <s>{inr(reel.mrp)}</s>}
           </span>
@@ -127,7 +134,7 @@ function ReelCard({ reel }: { reel: Reel }) {
             })}>
             Add to Cart
           </button>}
-        </div>
+        </div>}
       </div>
     </article>
   );

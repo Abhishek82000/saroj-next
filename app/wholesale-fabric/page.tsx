@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
+import { getAdminPageMeta, withAdminMeta } from "@/lib/page-meta";
 import HomeSections from "@/components/home/HomeSections";
 import WholesaleHome from "@/components/wholesale/WholesaleHome";
 import { getWholesalePage } from "@/lib/wholesalePage";
 import { WHOLESALE_HOME, WHOLESALE_MIN_METRES } from "@/lib/wholesale";
 import { site } from "@/lib/site";
-import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = pageMeta({
-  title: "Wholesale fabric",
-  description: `Wholesale fabric from ${site.name}, Jaipur — cut to your lengths from ${WHOLESALE_MIN_METRES} m, at trade rates.`,
-  path: WHOLESALE_HOME,
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return withAdminMeta({
+    title: "Wholesale fabric",
+    description: `Wholesale fabric from ${site.name}, Jaipur — cut to your lengths from ${WHOLESALE_MIN_METRES} m, at trade rates.`,
+    path: WHOLESALE_HOME,
+  }, await getAdminPageMeta("wholesale-fabric"));
+}
 
 /**
  * /wholesale-fabric — its own page, built from GET /api/wholesale-page-data;

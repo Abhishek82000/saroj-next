@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getAdminPageMeta, withAdminMeta } from "@/lib/page-meta";
 import ShopListing from "@/components/shop/ShopListing";
 import ListingSections from "@/components/shop/ListingSections";
 import JsonLd from "@/components/seo/JsonLd";
@@ -21,12 +22,12 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
       noIndex: true,
     });
   }
-  return pageMeta({
+  return withAdminMeta({
     title: "Shop everything",
     description:
       "Every piece on the Saroj Textile counter — hand block printed cotton by the meter and handicraft from Jaipur. Filter by category, price and availability.",
     path: "/shop",
-  });
+  }, await getAdminPageMeta("shop"));
 }
 
 /**

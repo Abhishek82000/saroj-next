@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import { getAdminPageMeta, withAdminMeta } from "@/lib/page-meta";
 import HandicraftPage from "@/components/handicraft/HandicraftPage";
 import { getHandicraftData, loadHandicraftData } from "@/lib/handicraft";
-import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = pageMeta({
-  title: "Handicraft",
-  description:
-    "The hand behind our cloth now works in clay, brass and enamel. Jaipur handicraft alongside the fabric house Saroj Textile has always been.",
-  path: "/handicraft",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return withAdminMeta({
+    title: "Handicraft",
+    description:
+      "The hand behind our cloth now works in clay, brass and enamel. Jaipur handicraft alongside the fabric house Saroj Textile has always been.",
+    path: "/handicraft",
+  }, await getAdminPageMeta("handicraft"));
+}
 
 export default async function Handicraft() {
   /* A failed API call throws: Next then keeps serving the last good page instead of

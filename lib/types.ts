@@ -382,6 +382,8 @@ export interface Reel {
   /** The live API's product id — what the cart API needs. */
   productId?: number;
   href?: string;
+  /** A category's film rather than a product's: links to `href`, no price or cart button. */
+  category?: boolean;
 }
 
 export interface CommonCategoryRef {
@@ -435,7 +437,13 @@ export interface PageDataApiResponse {
     page_url: string;
     /** null on pages this app renders with its own dedicated route instead (Contact). */
     page_content: string | null;
+    page_meta_title?: string | null;
+    page_meta_desc?: string | null;
+    page_meta_keyword?: string | null;
+    page_header_image?: string | null;
   } | null;
+  /** Base URL for page_header_image file names. */
+  imgUrl?: string | null;
 }
 
 export interface BlogApiCategory {
@@ -452,6 +460,8 @@ export interface BlogApiPost {
   blog_short_description: string | null;
   blog_desc: string;
   blog_meta_desc: string | null;
+  blog_meta_title?: string | null;
+  blog_meta_keyword?: string | null;
   blog_image: string | null;
   blog_date: string;
   blog_featured: number;

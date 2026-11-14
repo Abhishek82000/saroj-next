@@ -5,7 +5,8 @@ import Icon from "@/components/ui/Icon";
 import JsonLd from "@/components/seo/JsonLd";
 import { getStaticPage } from "@/lib/pages";
 import { site } from "@/lib/site";
-import { breadcrumbLd, graph, pageMeta } from "@/lib/seo";
+import { breadcrumbLd, graph } from "@/lib/seo";
+import { withAdminMeta } from "@/lib/page-meta";
 
 type Params = Promise<{ slug: string }>;
 
@@ -14,11 +15,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const page = await getStaticPage(slug);
   if (!page) return {};
 
-  return pageMeta({
+  return withAdminMeta({
     title: page.name,
     description: `${page.name} — ${site.name}, ${site.address.city}.`,
     path: `/${slug}`,
-  });
+  }, page.meta);
 }
 
 /**

@@ -1,11 +1,14 @@
 import { site } from "./site";
 import type { PageDataApiResponse } from "./types";
 import { fixImages } from "./img";
+import { adminMeta, type AdminMeta } from "./page-meta";
 
 export interface StaticPage {
   name: string;
   /** Raw HTML from the storefront's own editor — rendered as-is in the middle of the page. */
   html: string;
+  /** page_meta_title / page_meta_desc / page_meta_keyword / page_header_image from the admin. */
+  meta: AdminMeta;
 }
 
 /**
@@ -23,7 +26,16 @@ export async function getStaticPage(slug: string): Promise<StaticPage | null> {
     // A page can 200 with a name but no body (e.g. Contact, which this app
     // renders with its own dedicated route instead) — nothing to show here.
     if (json.status !== "success" || !json.data || !json.data.page_content) return null;
-    return { name: json.data.page_name, html: json.data.page_content };
+    const d = json.data;
+    const img = d.page_header_image?.trim();
+    const image = !img ? null
+      : /^https?:\/\//.test(img) ? img
+      : json.imgUrl ? `${json.imgUrl.replace(/\/$/, "")}/${img.replace(/^\//, "")}` : null;
+    return {
+      name: d.page_name,
+      html: d.page_content!,
+      meta: adminMeta(d.page_meta_title, d.page_meta_desc, d.page_meta_keyword, image),
+    };
   } catch {
     return null;
   }

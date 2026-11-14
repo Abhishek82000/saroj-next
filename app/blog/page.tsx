@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getAdminPageMeta, withAdminMeta } from "@/lib/page-meta";
 import Link from "next/link";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
@@ -14,12 +15,14 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
   const { activeCategory } = category ? await getBlogList(1, category) : { activeCategory: null };
   const title = activeCategory ? `${activeCategory} — The Journal` : "The Journal";
 
-  return pageMeta({
+  const defaults = {
     title,
     description: `Notes on fabric, print and craft from the ${site.name} counter in Jaipur.`,
     path: category ? `/blog?category=${encodeURIComponent(category)}` : "/blog",
     noIndex: !!category,
-  });
+  };
+  /* The admin's meta applies to the main listing, not its category filters. */
+  return category ? pageMeta(defaults) : withAdminMeta(defaults, await getAdminPageMeta("blog"));
 }
 
 /**

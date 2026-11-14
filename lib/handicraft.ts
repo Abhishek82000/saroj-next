@@ -1,10 +1,20 @@
 import { cache } from "react";
-import { apiProductToProduct, buildReels, plain, toHandiCats, toSlides, type HandiCat } from "./home";
+import { apiProductToProduct, plain, toHandiCats, toSlides, type HandiCat } from "./home";
 import { categoryHref } from "./nav";
 import { ApiUnavailableError } from "./product-api";
 import { site } from "./site";
 import type { BannerSlide, HomeApiSlide, Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeHandiCategory, HomeTagSection, HomeVideoProduct } from "./types";
 import { fixImages } from "./img";
+
+/** One `video_handicraft_products` row: a handicraft category and its clip. */
+export interface HandicraftApiVideoCategory {
+  cat_id: number;
+  cat_name: string;
+  cat_slug: string;
+  cat_image: string | null;
+  cat_cdn_url: string | null;
+  cat_video_cdn: string | null;
+}
 
 export interface HandicraftApiTestimonial {
   id: number;
@@ -21,8 +31,9 @@ export interface HandicraftApiResponse {
     tag_show_home_page: HomeTagSection[];
     category_show_home_page: HomeCategorySection[];
     video_products: HomeVideoProduct[];
-    /** Handicraft pieces on film, for the shoppable reels (same shape as video_products). */
-    video_handicraft_products?: HomeVideoProduct[];
+    /** Handicraft categories (cat_type 1) and their film, for the category reels.
+        Only rows with a cat_video_cdn are shown. */
+    video_handicraft_products?: HandicraftApiVideoCategory[];
     testimonials: HandicraftApiTestimonial[];
     /** The handicraft categories picked for the Kaarigar Wheel. */
     handicraftFeatCategory?: HandicraftApiFeatCategory[];
@@ -95,7 +106,7 @@ export interface HandicraftData {
   tagRails: HcRail[];
   /** Product rails, one per stocked category. */
   categoryRails: HcRail[];
-  /** Shoppable reels of handicraft pieces, drawn like the home page's. */
+  /** Handicraft categories on film, drawn like the home page's reels but linking to each category. */
   reels: Reel[];
   /** `middle_slider` — small banners after the second category rail. */
   midSlides: BannerSlide[];
@@ -185,8 +196,10 @@ export const loadHandicraftData = cache(async (): Promise<HandicraftData> => {
     ? handCats.slice(0, 6).map((c) => ({ href: c.href ?? "/handicraft", src: c.img, title: c.name }))
     : categories.slice(0, 6).map((c) => ({ href: categoryHref(c.slug), src: c.image, title: c.name }));
 
-  /* This endpoint sends its clips as video_handicraft_products. */
-  const v = d.video_handicraft_products?.[0] ?? d.video_products?.[0];
+  /* Handicraft categories that have a clip. */
+  const filmed = (d.video_handicraft_products ?? []).filter((c) => c.cat_slug && c.cat_video_cdn?.trim());
+  const firstFilm = filmed[0];
+  const v = d.video_products?.[0];
 
   return {
     columnImages,
@@ -195,15 +208,24 @@ export const loadHandicraftData = cache(async (): Promise<HandicraftData> => {
     faces,
     fabricSlides,
     bolts: stocked.slice(0, 5).map(toBolt),
-    video: v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
+    video: firstFilm
+      ? { src: firstFilm.cat_video_cdn!, name: firstFilm.cat_name, href: categoryHref(firstFilm.cat_slug) }
+      : v ? { src: v.product_video_cdn, name: v.product_name, href: productHref(v.product_slug) } : null,
     voices: (d.testimonials ?? []).map((t) => ({ name: t.name, content: t.content ? plain(t.content) : null, rating: t.rating })),
     collections: handCats.length || (d.categories?.length ?? 0),
-    // Thumbnails are borrowed from the rails by product id, same as on the home page.
-    reels: buildReels({
-      tagSections: d.tag_show_home_page ?? [],
-      categorySections: stocked,
-      videoProducts: d.video_handicraft_products ?? [],
-    }).map((r) => ({ ...r, kind: "Handicraft" as const, unit: "piece" })),
+    /* One reel per handicraft category with a clip; it links to the category, not a product. */
+    reels: filmed.map((c): Reel => ({
+      id: `cat-reel-${c.cat_id}`,
+      video: c.cat_video_cdn!.trim(),
+      kind: "Handicraft",
+      name: c.cat_name.replace(/\s+/g, " ").trim(),
+      price: 0,
+      mrp: 0,
+      unit: "piece",
+      image: c.cat_cdn_url ?? "",
+      href: categoryHref(c.cat_slug),
+      category: true,
+    })),
     tagRails: (d.tag_show_home_page ?? []).filter((t) => t.products.length > 0)
       .map((t) => ({ id: t.slug, heading: t.name, items: t.products.map(apiProductToProduct) })),
     /* Handicraft rails are sold by the unit whatever style_type says. */

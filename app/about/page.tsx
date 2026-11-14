@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getAdminPageMeta, withAdminMeta } from "@/lib/page-meta";
 import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
@@ -6,13 +7,15 @@ import Reveal from "@/components/ui/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
 import { CountUp, Thread } from "@/components/about/AboutMotion";
 import { site } from "@/lib/site";
-import { breadcrumbLd, graph, pageMeta } from "@/lib/seo";
+import { breadcrumbLd, graph } from "@/lib/seo";
 
-export const metadata: Metadata = pageMeta({
-  title: "Our Story",
-  description: `${site.name} began in 1995 as one small shop in Jaipur, run by Saroj herself. Thirty years of quality cotton, 30,000+ orders delivered, and a family promise that hasn't changed.`,
-  path: "/about",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return withAdminMeta({
+    title: "Our Story",
+    description: `${site.name} began in 1995 as one small shop in Jaipur, run by Saroj herself. Thirty years of quality cotton, 30,000+ orders delivered, and a family promise that hasn't changed.`,
+    path: "/about",
+  }, await getAdminPageMeta("about"));
+}
 
 const CDN = "https://saroj-textile-store.b-cdn.net/";
 /** Fabric photographs from the storefront's own categories (3:4 portraits). */

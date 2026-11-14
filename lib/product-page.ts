@@ -33,14 +33,23 @@ export async function productMeta(slug: string, wholesale: boolean): Promise<Met
     ? `${p.name}. ${inr(price)} a meter${off ? `, down from ${inr(live?.price.mrp ?? p.mrp)}` : ""} — cut to any length from ${p.cut.min} m. Posted from Jaipur.`
     : `${p.name}. ${inr(price)} ${unitLabel(p.unit)}${off ? `, down from ${inr(live?.price.mrp ?? p.mrp)}` : ""}. ${craft.name} made in ${craft.lane}, Jaipur.`;
 
+  /* product_meta_title / product_meta_desc / product_meta_keyword. The API falls
+     back to the product name for an empty meta title, so only a title that
+     differs from the name counts as typed in the admin (shown as-is). */
+  const adminTitle = live?.meta.title?.trim() && live.meta.title.trim() !== p.name.trim() ? live.meta.title.trim() : "";
+  const baseTitle = adminTitle || p.name;
+
   return pageMeta({
-    title: wholesale ? `${p.name} — wholesale` : (live?.meta.title || p.name),
-    description: live?.meta.description || composed,
+    /* The wholesale page keeps a suffix so it never shares the retail page's title. */
+    title: wholesale ? `${baseTitle} — wholesale` : baseTitle,
+    absoluteTitle: !!adminTitle,
+    description: live?.meta.description?.trim() || composed,
+    keywords: live?.meta.keywords?.trim() || undefined,
     path: productHref(p.slug, wholesale),
     image: p.images[0].src,
     imageAlt: p.name,
     type: "article",
-    // Trade pricing shouldn't compete with the retail page in search results.
-    noIndex: wholesale,
+    // Wholesale pages are indexed too (they're listed in /sitemap.xml); each
+    // page's canonical points at itself, retail or wholesale.
   });
 }

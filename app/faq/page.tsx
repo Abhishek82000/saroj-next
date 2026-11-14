@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
+import { getAdminPageMeta, withAdminMeta } from "@/lib/page-meta";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import JsonLd from "@/components/seo/JsonLd";
 import { getFaqs } from "@/lib/faqs";
 import { site } from "@/lib/site";
-import { breadcrumbLd, faqLd, graph, pageMeta } from "@/lib/seo";
+import { breadcrumbLd, faqLd, graph } from "@/lib/seo";
 
-export const metadata: Metadata = pageMeta({
-  title: "FAQs",
-  description: `Shipping, orders, returns and payments at ${site.name} — answered.`,
-  path: "/faq",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return withAdminMeta({
+    title: "FAQs",
+    description: `Shipping, orders, returns and payments at ${site.name} — answered.`,
+    path: "/faq",
+  }, await getAdminPageMeta("faq"));
+}
 
 /**
  * /faq — the footer's "FAQs" link. Questions come live from GET /api/faqs;

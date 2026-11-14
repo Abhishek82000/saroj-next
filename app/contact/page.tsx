@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
+import { getAdminPageMeta, withAdminMeta } from "@/lib/page-meta";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import ContactForm from "@/components/contact/ContactForm";
 import JsonLd from "@/components/seo/JsonLd";
 import { site } from "@/lib/site";
 import { WHOLESALE_HOME } from "@/lib/wholesale";
-import { breadcrumbLd, graph, pageMeta } from "@/lib/seo";
+import { breadcrumbLd, graph } from "@/lib/seo";
 
-export const metadata: Metadata = pageMeta({
-  title: "Contact Us",
-  description: `Get in touch with ${site.name} — the Saroj Textile in Jaipur. Call, WhatsApp, email, or drop by.`,
-  path: "/contact",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return withAdminMeta({
+    title: "Contact Us",
+    description: `Get in touch with ${site.name} — the Saroj Textile in Jaipur. Call, WhatsApp, email, or drop by.`,
+    path: "/contact",
+  }, await getAdminPageMeta("contact"));
+}
 
 /**
  * /contact — unlike the other footer pages, GET /api/page-data/contact

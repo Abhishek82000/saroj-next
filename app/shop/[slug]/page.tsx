@@ -7,7 +7,8 @@ import JsonLd from "@/components/seo/JsonLd";
 import { attachWholesale } from "@/lib/wholesalePrices";
 import { WHOLESALE_SECTION } from "@/lib/wholesale";
 import { getCategoryProducts, getHomeData, getTagProducts, shuffled, type ProductsApiSort } from "@/lib/home";
-import { breadcrumbLd, graph, itemListLd, pageMeta } from "@/lib/seo";
+import { breadcrumbLd, graph, itemListLd } from "@/lib/seo";
+import { adminMeta, withAdminMeta } from "@/lib/page-meta";
 
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ sort?: string }>;
@@ -34,16 +35,14 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { name, meta } = await resolveListing(slug);
   const title = name || titleFromSlug(slug);
 
-  /* The admin's cat_meta_* fields when set; the composed defaults otherwise. */
-  return pageMeta({
-    title: meta?.title || title,
-    description: meta?.description
-      || `${title} at the Saroj Textile counter in Jaipur — hand block printed cotton and handicraft from six Jaipur lanes.`,
-    keywords: meta?.keywords || undefined,
-    image: meta?.image || undefined,
+  /* The admin's cat_meta_title / cat_meta_desc / cat_meta_keyword and the
+     category image when set; the composed defaults otherwise. */
+  return withAdminMeta({
+    title,
+    description: `${title} at the Saroj Textile counter in Jaipur — hand block printed cotton and handicraft from six Jaipur lanes.`,
     imageAlt: title,
     path: `/shop/${slug}`,
-  });
+  }, meta ? adminMeta(meta.title, meta.description, meta.keywords, meta.image) : null);
 }
 
 /**

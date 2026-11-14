@@ -5,7 +5,8 @@ import Photo from "@/components/ui/Photo";
 import Rail from "@/components/product/Rail";
 import JsonLd from "@/components/seo/JsonLd";
 import { getBlogPost } from "@/lib/blogs";
-import { breadcrumbLd, graph, pageMeta } from "@/lib/seo";
+import { breadcrumbLd, graph } from "@/lib/seo";
+import { withAdminMeta } from "@/lib/page-meta";
 
 type Params = Promise<{ slug: string }>;
 
@@ -14,13 +15,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const post = await getBlogPost(slug);
   if (!post) return {};
 
-  return pageMeta({
+  return withAdminMeta({
     title: post.name,
     description: post.excerpt,
     path: `/blog/${slug}`,
     image: post.image || undefined,
     type: "article",
-  });
+  }, post.meta);
 }
 
 const fmt = (d: string) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });

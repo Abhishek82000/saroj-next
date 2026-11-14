@@ -634,8 +634,8 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
       {/* ================= FABRIC HOUSE ================= */}
       <FabricHouse slides={fabricSlides} />
 
-      {/* Hidden rather than falling back: the home page's built-in reels are all fabric. */}
-      {data.reels.length > 0 && <Reels items={data.reels} />}
+      {/* Handicraft categories on film (cat_video_cdn); hidden when none has a clip. */}
+      {data.reels.length > 0 && <Reels items={data.reels} title="Handicraft categories on film." />}
       <FabricTrade />
       {/* ================= VOICES — the home page's review wall, fed by the API's testimonials ================= */}
       <Voices items={data.voices} />
