@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import Link from "@/components/ui/SiteLink";
 import { site } from "@/lib/site";
+import { useHandicraftFooter } from "./footerMode";
 
 /** A handicraft category for the /handicraft footer. */
 export interface FooterCat { name: string; href: string; image: string }
@@ -63,8 +64,10 @@ const Svg = ({ d }: { d: string }) => (
 
 export default function Footer({ handicraftCats = [] }: { handicraftCats?: FooterCat[] }) {
   const [fb, ig] = site.social;
-  /* On the handicraft home, the swatch strip and the first column show handicraft categories instead of fabric. */
-  const onHandicraft = usePathname() === "/handicraft";
+  /* On the handicraft home and handicraft product pages, the swatch strip and
+     the first column show handicraft categories instead of fabric. */
+  const craftPage = useHandicraftFooter();
+  const onHandicraft = usePathname() === "/handicraft" || craftPage;
   const craft = onHandicraft && handicraftCats.length > 0;
   const strip = craft
     ? handicraftCats.slice(0, 8).map((c) => ({ name: c.name, href: c.href, src: c.image }))

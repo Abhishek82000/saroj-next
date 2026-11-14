@@ -40,6 +40,8 @@ interface RawProduct {
   gallery: { id: number; src: string; alt: string }[];
   short_description: string | null; description_html: string | null;
   type: number; style_type: number; stock: number; in_carts: number;
+  /** product_is_handicraft: 1 for a handicraft piece. */
+  is_handicraft?: number;
   rating: number; review_count: number;
   price: RawPrice; cut: RawCut;
   default_variation_id: number | null;
@@ -98,6 +100,7 @@ function mapLive(raw: RawProduct): LiveProduct {
     inCarts: raw.in_carts,
     type: raw.type,
     styleType: raw.style_type,
+    isHandicraft: Number(raw.is_handicraft) === 1,
     stock: raw.stock,
     rating: raw.rating,
     reviewCount: raw.review_count,

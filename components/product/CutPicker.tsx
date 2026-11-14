@@ -54,7 +54,7 @@ export default function CutPicker({
         <div className="st-slider">
           <input type="range" min={cut.min} max={cut.max} step={cut.step} value={value}
             aria-label="Slide to set length" onChange={(e) => set(parseFloat(e.target.value))} />
-          <div className="st-slider__ends"><span>{cut.min} m</span><span>{cut.max} m on the bolt</span></div>
+          <div className="st-slider__ends"><span>{cut.min} m</span><span>{cut.max} m on the stock</span></div>
         </div>
 
         {/* Trade buyers order by the bolt, not by the garment. */}

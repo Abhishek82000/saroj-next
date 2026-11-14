@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ShopListing from "@/components/shop/ShopListing";
 import ListingSections from "@/components/shop/ListingSections";
 import SubcategoryGrid from "@/components/shop/SubcategoryGrid";
+import CategoryAbout from "@/components/shop/CategoryAbout";
 import JsonLd from "@/components/seo/JsonLd";
 import { attachWholesale } from "@/lib/wholesalePrices";
 import { WHOLESALE_SECTION } from "@/lib/wholesale";
@@ -65,6 +66,7 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
     return (
       <main id="main">
         <SubcategoryGrid title={title} lede={listing.shortDesc} subcategories={subcategories} wholesale={wholesale} />
+        <CategoryAbout title={title} html={listing.description} />
         <JsonLd data={graph([
           breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path: `${base}/${slug}` }]),
         ])} />
@@ -94,6 +96,8 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
         saleProducts={saleProducts}
         after={<ListingSections fabricCategories={fabricCategories} handicraftCats={handicraftCats} />}
       />
+
+      {!listing.tag && <CategoryAbout title={title} html={listing.description} />}
 
       <JsonLd data={graph([
         breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path: `/shop/${slug}` }]),

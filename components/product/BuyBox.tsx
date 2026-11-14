@@ -142,7 +142,8 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
 
   /* Handicraft in bulk (BULK_MOQ+ pieces) is quoted on WhatsApp — the message
      carries the piece, its SKU, the chosen variation, price and link. */
-  const handicraft = p.kind === "craft";
+  /* Only pieces marked product_is_handicraft = 1 in the admin. */
+  const handicraft = !!live?.isHandicraft;
   const bulkHref = useMemo(() => {
     if (!handicraft) return "";
     const url = typeof window !== "undefined" ? window.location.href : site.url + productHref(p.slug, wholesale);
@@ -288,7 +289,7 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
 
       {live?.wholesale.lFoldNote && (
         <p className="st-cart__note" style={{ marginTop: ".8rem" }}>
-          Cut in an L fold, so a meter measures 95–98 cm on the bolt.
+          Cut in an L fold, so a meter measures 95–98 cm.
         </p>
       )}
 

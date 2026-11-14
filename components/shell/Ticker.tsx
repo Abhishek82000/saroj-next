@@ -1,8 +1,14 @@
-import { site } from "@/lib/site";
+"use client";
 
-/** The marquee above the nav. Duplicated so the loop is seamless. */
+import { usePathname } from "next/navigation";
+import { site } from "@/lib/site";
+import { isWholesalePath } from "@/lib/wholesale";
+
+/** The marquee above the nav — trade messages on the wholesale pages, retail
+    offers everywhere else. Duplicated so the loop is seamless. */
 export default function Ticker() {
-  const lines = [...site.ticker, ...site.ticker, ...site.ticker, ...site.ticker];
+  const set = isWholesalePath(usePathname()) ? site.wholesaleTicker : site.ticker;
+  const lines = [...set, ...set, ...set, ...set];
 
   return (
     <div className="st-top" aria-hidden="true">

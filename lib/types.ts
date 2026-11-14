@@ -144,6 +144,8 @@ export interface LiveProduct {
   type: number;
   /** 1 by the meter, 3 variant picker, 4 enquiry only. */
   styleType: number;
+  /** product_is_handicraft = 1. */
+  isHandicraft?: boolean;
   stock: number;
   rating: number;
   reviewCount: number;
@@ -272,6 +274,8 @@ export interface ProductsApiResponse {
     /** The listed category itself. `cat_short_desc` is editor HTML, null when unset. */
     category?: {
       id: number; name: string; slug: string; cat_short_desc?: string | null;
+      /** The category's long description (editor HTML), shown at the foot of its listing. */
+      cat_desc?: string | null;
       /** SEO fields set in the admin; null/empty when unset. */
       cat_meta_title?: string | null;
       cat_meta_keyword?: string | null;

@@ -301,3 +301,10 @@
   .sc-hero__rosette{ animation:none; }
   .sc-hero__title path{ animation:none; stroke-dashoffset:0; }
 }
+
+/* ---------- category long description (cat_desc), above the footer ---------- */
+.st-catabout{ border-top:1px solid var(--line); }
+.st-catabout .st-wrap{ max-width:900px; }
+.st-catabout__h{ font-family:var(--d); font-weight:400; font-size:clamp(1.5rem, 3vw, 2.1rem);
+                 line-height:1.1; margin:.6rem 0 1.2rem; }
+.st-catabout .st-richtext img{ max-width:100%; height:auto; }

@@ -39,6 +39,12 @@ export const site = {
     ["Use coupon ABOVE4K for ", "10% OFF"],
     ["Free shipping on orders above ", "₹2000"],
   ] as [string, string][],
+  /** Shown in the ticker on the wholesale pages (/wholesale-fabric, /wholesale/…) instead. */
+  wholesaleTicker: [
+    ["Wholesale fabric starts from ", "₹80/m"],
+    ["Trade prices from ", "10 m per design"],
+    ["Bulk orders & custom prints — WhatsApp ", "+91 95879 86226"],
+  ] as [string, string][],
   delivery: { domestic: "5–7 working days", international: "10–15 working days" },
 } as const;
 

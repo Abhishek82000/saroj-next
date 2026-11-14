@@ -605,7 +605,7 @@ export default function HandicraftPage({ data }: { data: HandicraftData }) {
             id="vBanner"
             data-src={video.src}
             muted loop playsInline preload="none"
-            aria-label="Fabric moving on the bolt"
+            aria-label="Fabric moving on the stock"
           />
 
           <div className="hc-vbanner__ctrl">

@@ -139,6 +139,8 @@ export interface CategoryProducts {
   fabricCategories: CommonFeaturedCategory[];
   /** The category's `cat_short_desc` as plain text; empty for tags or when unset. */
   shortDesc?: string;
+  /** The category's `cat_desc` as editor HTML; empty for tags or when unset. */
+  description?: string;
   /** Child categories (e.g. Tote Bags → 18x18, 16*16 …). When there are any,
       the category page shows these instead of a product list. */
   subcategories?: CommonFeaturedCategory[];
@@ -306,6 +308,8 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
     return {
       name: name(firstJson),
       shortDesc: plain(cat?.cat_short_desc ?? ""),
+      /* Kept as HTML; an editor that left only empty tags/&nbsp; counts as unset. */
+      description: plain(cat?.cat_desc ?? "") ? (cat?.cat_desc ?? "").trim() : "",
       meta: {
         title: plain(cat?.cat_meta_title ?? ""),
         description: plain(cat?.cat_meta_desc ?? ""),

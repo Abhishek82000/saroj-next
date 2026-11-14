@@ -5,6 +5,7 @@ import ProductTabs from "./ProductTabs";
 import RecentlyViewed from "./RecentlyViewed";
 import HandicraftHouse from "./HandicraftHouse";
 import JsonLd from "@/components/seo/JsonLd";
+import { HandicraftFooter } from "@/components/shell/footerMode";
 import { productHref, WHOLESALE_BASE } from "@/lib/product-api";
 import { breadcrumbLd, faqLd, graph, productLd } from "@/lib/seo";
 import type { Product, ProductDetail } from "@/lib/types";
@@ -23,6 +24,8 @@ export default function ProductView({
 
   return (
     <main id="main">
+      {/* Handicraft pieces get the handicraft footer. */}
+      {p.kind === "craft" && <HandicraftFooter />}
       {/* Full width: .st-pd pads itself to the page edge, like every other section. */}
       <section>
         <div className="st-pd">

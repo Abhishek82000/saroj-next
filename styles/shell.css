@@ -530,6 +530,29 @@
   padding: 1.1rem 1.5rem;
   border-bottom: 1px solid var(--sm-line);
 }
+/* The menu's close button: a filled, larger target so it reads at a glance on a phone. */
+.sm-head .x {
+  width: 42px;
+  height: 42px;
+  background: var(--sm-ink);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(28, 26, 24, 0.22);
+}
+.sm-head .x svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+.sm-head .x:hover,
+.sm-head .x:active {
+  background: var(--sm-accent) !important;
+  color: #fff;
+}
+.sm-head .x:focus-visible {
+  outline: 2px solid var(--sm-accent);
+  outline-offset: 3px;
+}
 .sm-brand {
   font-family: var(--sm-display);
   font-size: 1.25rem;

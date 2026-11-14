@@ -86,7 +86,7 @@ export default function VideoBanner({ src = SRC }: { src?: string }) {
           }}>{NOTE}</p>
         ) : (
           <video ref={video} className="st-vbanner__vid" muted loop playsInline preload="none"
-            aria-label="Fabric moving on the bolt" onError={() => setFailed(true)} />
+            aria-label="Fabric moving on the stock" onError={() => setFailed(true)} />
         )}
 
         <span className="st-vbanner__cap">Saroj Textile· 06:40</span>
