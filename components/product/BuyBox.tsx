@@ -18,6 +18,9 @@ import { inr, site, unitLabel } from "@/lib/site";
 import { WHOLESALE_MIN_METRES } from "@/lib/wholesale";
 import type { Product, ProductDetail } from "@/lib/types";
 
+/** Handicraft orders of this many pieces or more are quoted on WhatsApp. */
+const BULK_MOQ = 20;
+
 /**
  * Everything interactive on a product page.
  *
@@ -137,6 +140,24 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
     return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(`Hi, I'd like to ask about ${p.name} — ${url}`)}`;
   }, [p.name]);
 
+  /* Handicraft in bulk (BULK_MOQ+ pieces) is quoted on WhatsApp — the message
+     carries the piece, its SKU, the chosen variation, price and link. */
+  const handicraft = p.kind === "craft";
+  const bulkHref = useMemo(() => {
+    if (!handicraft) return "";
+    const url = typeof window !== "undefined" ? window.location.href : site.url + productHref(p.slug, wholesale);
+    const lines = [
+      `Hi Saroj Textile, I'd like a bulk quote (${BULK_MOQ}+ pieces) for this handicraft:`,
+      `Product: ${p.name}`,
+      live?.sku ? `SKU: ${live.sku}` : "",
+      variant?.combination ? `Variation: ${variant.combination}` : "",
+      `Listed price: ${inr(price)} ${unitLabel(live?.cut.unit ?? p.unit)}`,
+      `Quantity needed: ${Math.max(qty, BULK_MOQ)} pieces`,
+      `Link: ${url}`,
+    ].filter(Boolean);
+    return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`;
+  }, [handicraft, p.name, p.slug, p.unit, live?.sku, live?.cut.unit, variant?.combination, price, qty, wholesale]);
+
   return (
     <>
       {/* ---------- badges ---------- */}
@@ -252,6 +273,16 @@ export default function BuyBox({ p, detail }: { p: Product; detail?: ProductDeta
             aria-label="Save to wishlist" onClick={() => toggleFav(p, wholesale ? "wholesale" : "retail")}>
             <Icon name="heart" size={19} fill={saved ? "currentColor" : "none"} strokeWidth={1.6} />
           </button>
+        </div>
+      )}
+
+      {/* ---------- handicraft in bulk ---------- */}
+      {handicraft && mode !== "enquiry" && (
+        <div className="st-whole st-whole--wa">
+          <p>Need <b>{BULK_MOQ}+ pieces</b>? WhatsApp us for a bulk price on this piece.</p>
+          <a href={bulkHref} target="_blank" rel="noopener noreferrer">
+            <Icon name="whatsapp" size={14} fill="currentColor" strokeWidth={0} /> WhatsApp us
+          </a>
         </div>
       )}
 

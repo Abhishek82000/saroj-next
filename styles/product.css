@@ -123,6 +123,9 @@ h1.st-pd__name{ font-family:var(--d); font-weight:400; line-height:1.08; letter-
              font-weight:700; color:var(--paper); background:var(--cobalt); padding:.55rem .95rem; border-radius:99px;
              white-space:nowrap; transition:.3s var(--ease); }
 .st-whole a:hover{ background:var(--lac); }
+/* Handicraft bulk enquiry — the same strip, with a WhatsApp-green button. */
+.st-whole--wa a{ display:inline-flex; align-items:center; gap:.4rem; background:#1f9d55; }
+.st-whole--wa a:hover{ background:#17803f; }
 
 .st-buy{ display:flex; gap:.5rem; margin-top:1.4rem; }
 .st-buy .st-btn--solid{ flex:1; }
