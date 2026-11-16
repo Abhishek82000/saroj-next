@@ -26,11 +26,7 @@ export const metadata: Metadata = {
   authors: [{ name: site.name, url: site.url }],
   creator: site.name,
   publisher: site.name,
-  keywords: [
-    "Jaipuri cotton", "hand block print", "Ajrakh", "Kalamkari", "Sanganeri print",
-    "fabric by the meter", "blue pottery", "meenakari", "Jaipur handicraft",
-    "wholesale fabric Jaipur", "Saroj Textile",
-  ],
+  keywords: [],
   category: "shopping",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
