@@ -222,7 +222,7 @@
                    translate:0 -50%; fill:none; stroke:color-mix(in srgb, var(--lac) 30%, transparent); stroke-width:.8;
                    animation:scSpin 70s linear infinite; }
 @keyframes scSpin{ to{ rotate:360deg; } }
-.sc-hero__in{ position:relative; max-width:640px; }
+.sc-hero__in{ position:relative; max-width:100%; }
 .sc-hero__kick{ display:inline-flex; align-items:center; gap:.6em; margin:clamp(14px,2.4vw,22px) 0 0;
                 font-size:.62rem; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:var(--lac); }
 .sc-hero__kick i{ font-style:normal; font-size:.5em; color:var(--brass); }
@@ -234,7 +234,7 @@
 .sc-hero__title path{ fill:none; stroke:var(--ochre); stroke-width:3.2; stroke-linecap:round; vector-effect:non-scaling-stroke;
                       stroke-dasharray:260; stroke-dashoffset:260; animation:scDraw 1.4s .35s var(--ease) forwards; }
 @keyframes scDraw{ to{ stroke-dashoffset:0; } }
-.sc-hero__lede{ margin:1.1rem 0 0; max-width:46ch; color:var(--ink-2); font-weight:300; font-size:clamp(.92rem,2.4vw,1.02rem); line-height:1.6; }
+.sc-hero__lede{ margin:1.1rem 0 0; max-width:100%; color:var(--ink-2); font-weight:300; font-size:clamp(.92rem,2.4vw,1.02rem); line-height:1.6; }
 
 /* The tiles: arched like a Jaipur jharokha, a stitched inner edge, a brass
    numeral, and an "Explore" pill that fills madder on hover. */
