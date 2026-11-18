@@ -15,7 +15,7 @@ export const site = {
   locale: "en_IN",
   currency: "INR",
   description:
-    "Jaipuri cotton, Ajrakh, Kalamkari and Sanganeri block prints by the meter, alongside blue pottery, meenakari, brass and marble from the lanes that print our cloth.",
+    "",
   freeShippingOver: 2000,
   wholesaleFrom: 50,
   phone: "+91 95879 86226",
