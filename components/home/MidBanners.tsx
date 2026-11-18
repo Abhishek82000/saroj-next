@@ -1,6 +1,7 @@
 "use client";
 import Link from "@/components/ui/SiteLink";
 import { useEffect, useRef } from "react";
+import Icon from "@/components/ui/Icon";
 import type { BannerSlide } from "@/lib/types";
 
 /**
@@ -13,16 +14,25 @@ export default function MidBanners({ slides }: { slides: BannerSlide[] }) {
   const rail = useRef<HTMLDivElement>(null);
   const held = useRef(false);
 
+  /** One banner along, wrapping at either end. */
+  const nudge = (dir: 1 | -1) => {
+    const el = rail.current;
+    const card = el?.firstElementChild as HTMLElement | null;
+    if (!el || !card) return;
+    const step = card.offsetWidth + parseFloat(getComputedStyle(el).columnGap || "0");
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    const atStart = el.scrollLeft <= 4;
+    if (dir === 1 && atEnd) return el.scrollTo({ left: 0, behavior: "smooth" });
+    if (dir === -1 && atStart) return el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  };
+
   useEffect(() => {
     const el = rail.current;
     if (!el || slides.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(() => {
       if (held.current || el.scrollWidth <= el.clientWidth + 2) return;
-      const card = el.firstElementChild as HTMLElement | null;
-      if (!card) return;
-      const step = card.offsetWidth + parseFloat(getComputedStyle(el).columnGap || "0");
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-      el.scrollTo({ left: atEnd ? 0 : el.scrollLeft + step, behavior: "smooth" });
+      nudge(1);
     }, 3500);
     return () => clearInterval(t);
   }, [slides.length]);
@@ -32,7 +42,11 @@ export default function MidBanners({ slides }: { slides: BannerSlide[] }) {
 
   return (
     <section className="st-midb" aria-label="Offers">
-      <div className="st-wrap">
+      <div className="st-wrap st-railwrap">
+        {slides.length > 1 && <>
+          <button type="button" className="st-arrow st-arrow--side st-arrow--prev" onClick={() => nudge(-1)} aria-label="Previous banner"><Icon name="left" size={16} strokeWidth={1.8} /></button>
+          <button type="button" className="st-arrow st-arrow--side st-arrow--next" onClick={() => nudge(1)} aria-label="Next banner"><Icon name="right" size={16} strokeWidth={1.8} /></button>
+        </>}
         <div className="st-midb__rail" ref={rail}
           onMouseEnter={hold(true)} onMouseLeave={hold(false)}
           onTouchStart={hold(true)} onTouchEnd={hold(false)}

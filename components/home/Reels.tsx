@@ -32,8 +32,12 @@ export default function Reels({ items, title = "Shoppable reels." }: { items?: R
       </div>
 
       <div className="st-wrap">
-        <div className="st-reels" ref={rail}>
-          {data.map((r) => <ReelCard key={r.id} reel={r} />)}
+        <div className="st-railwrap">
+          <button type="button" className="st-arrow st-arrow--side st-arrow--prev" onClick={() => nudge(-1)} aria-label="Scroll left"><Icon name="left" size={16} strokeWidth={1.8} /></button>
+          <button type="button" className="st-arrow st-arrow--side st-arrow--next" onClick={() => nudge(1)} aria-label="Scroll right"><Icon name="right" size={16} strokeWidth={1.8} /></button>
+          <div className="st-reels" ref={rail}>
+            {data.map((r) => <ReelCard key={r.id} reel={r} />)}
+          </div>
         </div>
       </div>
     </section>

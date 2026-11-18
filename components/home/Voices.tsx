@@ -1,4 +1,5 @@
 import SectionHead from "@/components/ui/SectionHead";
+import MarqueeArrows from "@/components/ui/MarqueeArrows";
 
 const reviews: [string, string, number][] = [
   ["Ordered three meters of the maroon paisley for a kurta. Colour is exactly the photo.", "Santosh Selam", 5],
@@ -47,6 +48,7 @@ export default function Voices({ items }: { items?: VoiceItem[] }) {
     <section className="st-voices" style={{paddingBlock:"clamp(28px,5vw,54px)"}}>
       <div className="st-voices__head st-wrap">
         <SectionHead title="Voices." />
+        <MarqueeArrows scope=".st-voices" className="st-mqnav--end" label="reviews" />
       </div>
       <div className="st-vrow st-vrow--a" data-marquee>
         {[...a, ...a].map((r, i) => <Card key={`a${i}`} text={r[0]} who={r[1]} rating={r[2]} />)}

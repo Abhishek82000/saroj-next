@@ -958,3 +958,12 @@
   .st-midb__card{ flex-basis:calc((100% - var(--gap)) / 1.2); border-radius:12px; }
 }
 @media (prefers-reduced-motion: reduce){ .st-midb__rail{ scroll-behavior:auto; } }
+
+/* Prev / next for the CSS marquees (components/ui/MarqueeArrows): together beside a heading, or at the strip's ends. */
+.st-mqnav{ display:inline-flex; gap:.5rem; flex:none; }
+.st-mqnav--side{ display:contents; }
+.st-mqnav--end{ margin-left:auto; align-self:flex-end; }
+.st-mqnav--light .st-arrow{ color:var(--chs-cream,#fff); border-color:rgba(255,255,255,.4); }
+.st-mqnav--light .st-arrow:hover{ background:#fff; color:#3d0912; }
+.hcs__lanehead .st-mqnav .st-arrow{ width:38px; height:38px; }
+@media (max-width:640px){ .st-mqnav .st-arrow{ width:36px; height:36px; } }

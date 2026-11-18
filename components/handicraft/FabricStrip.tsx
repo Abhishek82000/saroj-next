@@ -1,4 +1,5 @@
 import Link from "@/components/ui/SiteLink";
+import MarqueeArrows from "@/components/ui/MarqueeArrows";
 import type { HcSlide } from "@/lib/handicraft";
 
 /**
@@ -36,6 +37,7 @@ export default function FabricStrip({ slides }: { slides: HcSlide[] }) {
           })}
         </ul>
       </div>
+      <MarqueeArrows scope=".hc-fstrip" side label="collections" />
     </div>
   );
 }

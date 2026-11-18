@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ShowMore from "@/components/ui/ShowMore";
+import MarqueeArrows from "@/components/ui/MarqueeArrows";
 import { categoryHref } from "@/lib/nav";
 import type { CommonFeaturedCategory } from "@/lib/types";
 
@@ -39,6 +40,7 @@ export default function CraftHouse({ categories }: { categories: CommonFeaturedC
           <div className="chs__cta">
             <Link href="/handicraft" className="chs__btn">Shop handicraft</Link>
             <span className="chs__count"><b>{categories.length}</b> {categories.length === 1 ? "craft" : "crafts"} on the shelf</span>
+            <MarqueeArrows scope=".chs" className="st-mqnav--light" label="crafts" />
           </div>
         </div>
 

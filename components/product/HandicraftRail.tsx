@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import Photo from "@/components/ui/Photo";
 import Icon from "@/components/ui/Icon";
+import MarqueeArrows from "@/components/ui/MarqueeArrows";
 import { useModeHref } from "@/components/shell/StoreProvider";
 import { categoryHref } from "@/lib/nav";
 import type { HandiCat } from "@/lib/home";
@@ -82,6 +83,7 @@ function Lane({ title, cats, index }: { title: string; cats: HandiCat[]; index: 
           <h3 className="hcs__cat" id={titleId}>{title}</h3>
           <span className="hcs__qty">{n} {n === 1 ? "category" : "categories"}</span>
         </div>
+        <MarqueeArrows scope=".hcs__lane" label={`${title} categories`} />
       </div>
       <div className="hcs__rope" ref={rope} data-run={seen || undefined}>
         <ul className="hcs__track" style={style} data-marquee>
