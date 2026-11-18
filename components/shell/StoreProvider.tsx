@@ -575,7 +575,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       add({
         id: p.slug, name: p.name, price: p.price, unit: p.unit, image: p.images[0].src,
         step: p.cut?.step ?? 1, qty: qty ?? (p.cut ? 2.5 : 1), href: `/product/${p.slug}`,
-        productId: p.productId ?? p.live?.id,
+        minQty: p.cut?.min ?? 1, productId: p.productId ?? p.live?.id,
         ...(p.live ? { maxQty: p.live.stock } : {}),
       });
       return;

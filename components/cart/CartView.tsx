@@ -5,20 +5,20 @@ import { CartBodySkeleton } from "@/components/ui/Skeleton";
 import { useStore } from "@/components/shell/StoreProvider";
 import { inrExact, unitLabel } from "@/lib/site";
 import type { CartLine } from "@/lib/types";
-import type { CartCharges, CartTotals } from "@/lib/cart";
+import { lessQty, type CartCharges, type CartTotals } from "@/lib/cart";
 import { REWARD, type CartOffers } from "@/lib/offers";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import { CartProgress, CouponBox } from "@/components/cart/Offers";
 
-/** One line's − qty + control, holding wholesale lines at their minimum. */
+/** One line's − qty + control, holding the line at its minimum. */
 export function LineQty({ l }: { l: CartLine }) {
-  const { setQty, say } = useStore();
+  const { setQty, say, mode } = useStore();
   return (
     <span className="st-qty">
       <button type="button" aria-label="Less" onClick={() => {
-        const next = l.qty - l.step;
-        if (l.minQty && next < l.minQty) return say(`Wholesale minimum is ${l.minQty} m`);
-        setQty(l.id, next);
+        const r = lessQty(l, mode === "wholesale");
+        if ("error" in r) return say(r.error);
+        setQty(l.id, r.qty);
       }}>−</button>
       <span>{l.qty}{l.unit === "meter" ? " m" : ""}</span>
       <button type="button" onClick={() => setQty(l.id, l.qty + l.step)} aria-label="More">+</button>

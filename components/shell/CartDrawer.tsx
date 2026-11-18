@@ -7,6 +7,7 @@ import { inrExact, unitLabel } from "@/lib/site";
 import { useCartPrice } from "@/components/cart/useCartPrice";
 import { CartProgress, CouponBox } from "@/components/cart/Offers";
 import CartRecent from "./CartRecent";
+import { lessQty } from "@/lib/cart";
 
 export default function CartDrawer() {
   const {
@@ -83,9 +84,9 @@ export default function CartDrawer() {
                   <div className="st-line__foot">
                     <span className="st-qty">
                       <button type="button" aria-label="Less" onClick={() => {
-                        const next = l.qty - l.step;
-                        if (l.minQty && next < l.minQty) return say(`Wholesale minimum is ${l.minQty} m`);
-                        setQty(l.id, next);
+                        const r = lessQty(l, wholesale);
+                        if ("error" in r) return say(r.error);
+                        setQty(l.id, r.qty);
                       }}>−</button>
                       <span>{l.qty}{l.unit === "meter" ? " m" : ""}</span>
                       <button type="button" onClick={() => setQty(l.id, l.qty + l.step)} aria-label="More">+</button>

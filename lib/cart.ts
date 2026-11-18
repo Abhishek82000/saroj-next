@@ -110,6 +110,15 @@ function findLines(root: unknown): ServerCartLine[] | undefined {
     already fixed as they're parsed; this covers lines saved in the browser earlier. */
 export const cartImage = fixImage;
 
+/** The cart − button's next quantity, or a message when it would go under the
+    line's minimum (1 when the line doesn't say — lines saved before minQty was stored). */
+export function lessQty(l: CartLine, wholesale: boolean): { qty: number } | { error: string } {
+  const min = l.minQty ?? 1;
+  const next = Math.round((l.qty - l.step) * 100) / 100;
+  if (next < min) return { error: `${wholesale ? "Wholesale minimum" : "Minimum"} is ${min}${l.unit === "meter" ? " m" : ""} — use Remove to take it out` };
+  return { qty: next };
+}
+
 /** A server line as the local cart holds it — same `id` scheme as the add buttons use. */
 export function toCartLine(l: ServerCartLine, type: "retail" | "wholesale"): CartLine | null {
   if (!l.slug || !l.name || l.error) return null;

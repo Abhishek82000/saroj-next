@@ -55,7 +55,7 @@ export interface CartLine {
   qty: number;
   step: number;
   href?: string;
-  /** Set on wholesale lines: the smallest quantity the line may be cut down to. */
+  /** The smallest quantity the line may be cut down to (1 when absent). */
   minQty?: number;
   /** Stock on hand (product_stock, or the variation's) — the most the line may hold. Absent when unknown. */
   maxQty?: number;
