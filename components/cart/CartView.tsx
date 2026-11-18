@@ -160,7 +160,7 @@ export default function CartView() {
                 ? "Wholesale fabric starts at 10 meters — pick a category and add your lengths."
                 : "Fabric is cut to any length from one meter, so start wherever you like."}
             </p>
-            <Link href={href("/shop")} className="st-btn st-btn--solid">Browse the counter</Link>
+            <Link href={href("/")} className="st-btn st-btn--solid">Browse the counter</Link>
           </div>
         ) : (
           <div className="st-co__grid">

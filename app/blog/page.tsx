@@ -65,7 +65,7 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
             <p>{category ? "Nothing in this category yet — try another, or see everything." : "Check back soon, or browse the counter instead."}</p>
             {category
               ? <Link href="/blog" className="st-btn st-btn--solid">See all posts</Link>
-              : <Link href="/shop" className="st-btn st-btn--solid">Browse the counter</Link>}
+              : <Link href="/" className="st-btn st-btn--solid">Browse the counter</Link>}
           </div>
         ) : (
           <div className="st-blog__layout">

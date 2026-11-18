@@ -62,7 +62,7 @@ export default function CartDrawer() {
                 Log in to order
               </button>
             )}
-            <Link href={href("/shop")} className="st-btn st-btn--solid" onClick={close}>Browse the counter</Link>
+            <Link href={href("/")} className="st-btn st-btn--solid" onClick={close}>Browse the counter</Link>
           </div>
         ) : (
           <div className="st-lines">

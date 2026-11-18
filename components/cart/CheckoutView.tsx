@@ -245,7 +245,7 @@ export default function CheckoutView() {
           <Icon name="cart" size={32} strokeWidth={1.3} />
           <h2>Your cart is empty</h2>
           <p>Add something first, then come back here to check out.</p>
-          <Link href={href("/shop")} className="st-btn st-btn--solid">Browse the counter</Link>
+          <Link href={href("/")} className="st-btn st-btn--solid">Browse the counter</Link>
         </div></div>
       </main>
     );
