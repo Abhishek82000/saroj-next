@@ -18,15 +18,15 @@ export default async function OpengraphImage() {
           Jhotwara, Jaipur
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: 96, lineHeight: 1.02, letterSpacing: -2 }}>Woven, then</div>
-          <div style={{ fontSize: 96, lineHeight: 1.02, letterSpacing: -2, color: "#1B5FA8" }}>fired &amp; cast.</div>
-          <div style={{ fontSize: 30, color: "#6C7A82", marginTop: 28, maxWidth: 860 }}>
-            Hand block printed cotton by the meter, and handicraft from six Jaipur lanes.
+          <div style={{ fontSize: 96, lineHeight: 1.02, letterSpacing: -2 }}>Hand block printed</div>
+          <div style={{ fontSize: 96, lineHeight: 1.02, letterSpacing: -2, color: "#1B5FA8" }}>cotton &amp; handicraft.</div>
+          <div style={{ fontSize: 30, color: "#6C7A82", marginTop: 28, maxWidth: 900 }}>
+            Jaipuri prints cut to your length — retail by the meter, wholesale from {site.wholesaleFrom} m.
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, color: "#3A4750" }}>
-          <span>{site.name}</span>
-          <span>Free shipping over ₹2000</span>
+          <span>{site.name} · {site.url.replace(/^https?:\/\//, "")}</span>
+          <span>Free shipping over ₹{site.freeShippingOver}</span>
         </div>
       </div>
     ),
