@@ -4,9 +4,6 @@ import { discount } from "./price";
 import { faq } from "./content";
 import type { Product } from "./types";
 
-/** Version of the generated share card (app/opengraph-image.tsx) — bump it with every change to the card. */
-const OG_VERSION = 2;
-
 export const abs = (path: string) =>
   path.startsWith("http") ? path : site.url.replace(/\/$/, "") + path;
 
@@ -29,9 +26,8 @@ export function pageMeta(opts: {
   absoluteTitle?: boolean;
 }): Metadata {
   const url = abs(opts.path);
-  /* `v` is bumped whenever app/opengraph-image.tsx changes: WhatsApp, Instagram and
-     Facebook cache the picture by its URL, so a new URL is what makes them fetch it again. */
-  const image = opts.image ?? abs(`/opengraph-image?v=${OG_VERSION}`);
+  const image = opts.image ?? site.shareImage.url;
+  const size = opts.image ? { width: 1200, height: 630 } : { width: site.shareImage.width, height: site.shareImage.height };
   return {
     title: opts.absoluteTitle ? { absolute: opts.title } : opts.title,
     description: opts.description,
@@ -47,7 +43,7 @@ export function pageMeta(opts: {
       title: opts.title,
       description: opts.description,
       locale: site.locale,
-      images: [{ url: image, width: 1200, height: 630, alt: opts.imageAlt ?? opts.title }],
+      images: [{ url: image, ...size, alt: opts.imageAlt ?? opts.title }],
     },
     twitter: {
       card: "summary_large_image",

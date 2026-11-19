@@ -34,8 +34,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website", siteName: site.name, locale: site.locale, url: site.url,
     title: `${site.name} — ${site.tagline}`, description: site.description,
+    images: [{ ...site.shareImage, alt: `${site.name} — ${site.tagline}` }],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary_large_image", images: [site.shareImage.url] },
   icons: { icon: "/favicon.webp", apple: "/favicon.webp" },
   manifest: "/manifest.webmanifest",
 };

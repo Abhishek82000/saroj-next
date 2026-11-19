@@ -12,6 +12,9 @@ export const site = {
   api: (process.env.NEXT_PUBLIC_API_URL ?? "https://badmin.sarojtextile.com").replace(/\/$/, ""),
   /** The shop's logo, uploaded in the Laravel admin's settings. */
   get logo() { return `${this.api}/public/img/uploads/settings/1758459499.png`; },
+  /** The picture shown when a page is shared (WhatsApp, Instagram, Facebook…) and has none of its own.
+      Those apps cache it by URL: to change it, upload a new file rather than replacing this one. */
+  shareImage: { url: "https://badmin.sarojtextile.com/img/uploads/media/49691795108811.jpg", width: 1600, height: 686 },
   locale: "en_IN",
   currency: "INR",
   description:
