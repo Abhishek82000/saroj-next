@@ -25,7 +25,19 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            /* The Next.js storefront renders every page on its own server, so all
+               its calls come from one IP: per-IP limiting throttled every visitor
+               at once (pages stuck loading, then "not found"). Its calls carry
+               this shared secret (config/storefront.php ← STOREFRONT_API_KEY,
+               set in both apps' env) and aren't throttled. Route-level limits (OTP, pay now, offers/apply)
+               still apply on top. */
+            $key = (string) config('storefront.key', '');
+            if ($key !== '' && hash_equals($key, (string) $request->header('X-Storefront-Key', ''))) {
+                return Limit::none();
+            }
+            /* Browsers call the API directly too; in India many shoppers share
+               one mobile-carrier IP (CGNAT), so 60 a minute was too tight. */
+            return Limit::perMinute(300)->by($request->user()?->id ?: $request->ip());
         });
 
         $this->routes(function () {

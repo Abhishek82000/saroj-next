@@ -2,6 +2,7 @@ import { site } from "./site";
 import type { PageDataApiResponse } from "./types";
 import { fixImages } from "./img";
 import { adminMeta, type AdminMeta } from "./page-meta";
+import { apiFetch } from "./api";
 
 export interface StaticPage {
   name: string;
@@ -20,7 +21,7 @@ export interface StaticPage {
  */
 export async function getStaticPage(slug: string): Promise<StaticPage | null> {
   try {
-    const res = await fetch(`${site.api}/api/page-data/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/page-data/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json: PageDataApiResponse = fixImages(await res.json());
     // A page can 200 with a name but no body (e.g. Contact, which this app

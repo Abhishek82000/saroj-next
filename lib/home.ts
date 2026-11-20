@@ -8,6 +8,7 @@ import type {
 import { fixImages } from "./img";
 import { ApiUnavailableError } from "./product-api";
 import { cache } from "react";
+import { apiFetch } from "./api";
 
 export interface HomeData {
   /** `categories` — the fabric categories, drawn by Hero. */
@@ -69,7 +70,7 @@ let lastHomeData: HomeData | null = null;
 async function fetchHomeJson(): Promise<HomeApiResponse> {
   for (let attempt = 0; ; attempt++) {
     try {
-      const res = await fetch(`${site.api}/api/home`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(15000) });
+      const res = await apiFetch(`${site.api}/api/home`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(15000) });
       if (!res.ok) throw new ApiUnavailableError(`${res.status}: /api/home`);
       return await res.json();
     } catch (e) {
@@ -172,8 +173,8 @@ export type ProductsApiSort = "best_selling" | "new_arrival" | "high_low" | "low
     or neither, for every product on the counter. */
 type Listing = { category: string } | { tag: string } | { all: true };
 
-/** One listing page. The API rate-limits bursts (429) and has no page-size
-    option (always 24), so a 429 is retried after a short, growing pause. */
+/** One listing page (the API has no page-size option: always 24). apiFetch
+    handles the rate limit, timeouts and a short retry. */
 const fetchListingPage = async (by: Listing, page: number, sort: ProductsApiSort, seed?: number) => {
   const filter = "category" in by ? `category=${encodeURIComponent(by.category)}&`
     : "tag" in by ? `tag=${encodeURIComponent(by.tag)}&` : "";
@@ -181,11 +182,7 @@ const fetchListingPage = async (by: Listing, page: number, sort: ProductsApiSort
   /* Always cached: uncached listings cost the API several ORDER BY RAND()
      calls per visit. The per-refresh shuffle happens in the browser instead
      (ShopListing). */
-  for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (res.status !== 429 || attempt >= 3) return res;
-    await wait(1500 * (attempt + 1));
-  }
+  return apiFetch(url, { next: { revalidate: 300 } });
 };
 
 /** Runs `fn` over `items` a few at a time — the API rate-limits (429) a burst
@@ -264,10 +261,14 @@ async function fallbackFacets(sort: ProductsApiSort): Promise<SidebarFacets> {
  * first 24. Returns an empty list on any failure so the page can show its
  * "nothing here yet" state instead of breaking.
  */
-async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: ProductsApiResponse) => string): Promise<CategoryProducts> {
+async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: ProductsApiResponse) => string, strict = false): Promise<CategoryProducts> {
   try {
     const seed = newShuffleSeed();
     const first = await fetchListingPage(by, 1, sort, seed);
+    /* `strict` (the category page): only the API's own 404 means "no such
+       listing". A 429 / 5xx / timeout throws instead, so the visitor gets the
+       error page with Try again rather than an empty "nothing here" listing. */
+    if (!first.ok && strict && first.status !== 404) throw new ApiUnavailableError(`${first.status}: listing`);
     if (!first.ok) return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
     const firstJson: ProductsApiResponse = fixImages(await first.json());
     /* Kept even without an image (the tile falls back to a plain swatch). */
@@ -282,10 +283,14 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
       const rest = await pooled(Array.from({ length: lastPage - 1 }, (_, i) => i + 2), 2, async (page) => {
         try {
           const res = await fetchListingPage(by, page, sort, seed);
-          if (!res.ok) return [];
+          if (!res.ok) throw new ApiUnavailableError(`${res.status}: listing page ${page}`);
           const json: ProductsApiResponse = fixImages(await res.json());
           return json.data?.products ?? [];
-        } catch { return []; }
+        } catch (e) {
+          /* A strict listing never shows with pages silently missing. */
+          if (strict) throw e;
+          return [];
+        }
       });
       for (const list of rest) products.push(...list);
     }
@@ -324,13 +329,14 @@ async function getListingProducts(by: Listing, sort: ProductsApiSort, name: (j: 
       saleProducts: fallback?.saleProducts ?? saleProducts,
       fabricCategories: fallback?.fabricCategories ?? toCategories(firstJson.data?.categories),
     };
-  } catch {
+  } catch (e) {
+    if (strict) throw e;
     return { ...EMPTY_CATEGORY, ...(await fallbackFacets(sort)) };
   }
 }
 
-export function getCategoryProducts(slug: string, sort: ProductsApiSort = "new_arrival"): Promise<CategoryProducts> {
-  return getListingProducts({ category: slug }, sort, (j) => j.data?.category?.name ?? "");
+export function getCategoryProducts(slug: string, sort: ProductsApiSort = "new_arrival", strict = false): Promise<CategoryProducts> {
+  return getListingProducts({ category: slug }, sort, (j) => j.data?.category?.name ?? "", strict);
 }
 
 /** Every product on the counter, all 40-odd pages — the sitemap only (slow; cached hourly). */
@@ -367,8 +373,8 @@ export async function getProductsPage(sort: ProductsApiSort = "new_arrival", pag
 }
 
 /** A tag's own listing, for the sidebar's "Tags" links (e.g. Best Seller, New Arrivals). */
-export function getTagProducts(slug: string, sort: ProductsApiSort = "new_arrival"): Promise<CategoryProducts> {
-  return getListingProducts({ tag: slug }, sort, (j) => j.data?.tag?.name ?? "");
+export function getTagProducts(slug: string, sort: ProductsApiSort = "new_arrival", strict = false): Promise<CategoryProducts> {
+  return getListingProducts({ tag: slug }, sort, (j) => j.data?.tag?.name ?? "", strict);
 }
 
 /** Turns an /api/products "saleProducts" entry into a sidebar-ready pick. */
@@ -428,7 +434,7 @@ export interface ApiProductDetail {
  */
 export async function getProductDetail(slug: string): Promise<ApiProductDetail | null> {
   try {
-    const res = await fetch(`${site.api}/api/products/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/products/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json: ProductDetailApiResponse = fixImages(await res.json());
     const d = json.data?.product;

@@ -4,6 +4,7 @@ import { WHOLESALE_MIN_METRES, forMode, wholesaleCategoryHref } from "./wholesal
 import { attachWholesale } from "./wholesalePrices";
 import type { BannerSlide, HomeVideoProduct, Product, Reel, WholesaleApiCategory, WholesaleApiProduct, WholesalePageApiResponse } from "./types";
 import { fixImages } from "./img";
+import { apiFetch } from "./api";
 
 export type WholesaleSlide = BannerSlide;
 export interface WholesaleCollection { id: number; name: string; heading: string; slug: string; blurb: string; image: string; banner: string }
@@ -98,7 +99,7 @@ async function tagRails(d: WholesalePageApiResponse["data"]): Promise<WholesaleR
  */
 export async function getWholesalePage(): Promise<WholesalePage | null> {
   try {
-    const res = await fetch(`${site.api}/api/wholesale-page-data`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/wholesale-page-data`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const { data: d }: WholesalePageApiResponse = fixImages(await res.json());
     if (!d) return null;

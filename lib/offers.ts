@@ -19,6 +19,7 @@ import type { CartLine } from "./types";
 import { inr, site } from "./site";
 import { cartImage } from "./cart";
 import { fixImages } from "./img";
+import { apiFetch } from "./api";
 
 /** ar_promo_tiers.tier_reward_type */
 export const REWARD = { percent: 0, flat: 1, coupon: 2, product: 3 } as const;
@@ -142,7 +143,7 @@ export interface OffersFeed { offers: OfferCard[]; milestone: Milestone | null; 
 /** GET /api/offers from the server (home page), cached like the other home feeds. */
 export async function getOffersFeed(): Promise<OffersFeed | null> {
   try {
-    const res = await fetch(`${site.api}/api/offers`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/offers`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json = fixImages(await res.json()) as Partial<OffersFeed> & { status?: string };
     if (json.status === "error") return null;

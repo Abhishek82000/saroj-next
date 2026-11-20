@@ -24,9 +24,11 @@ function titleFromSlug(slug: string): string {
 /** /shop/<slug> is a category — or, when no category has that slug, a tag
     (/shop/best-seller), so tag pages live at the same short address. */
 async function resolveListing(slug: string, sort?: ProductsApiSort) {
-  const category = await getCategoryProducts(slug, sort);
+  /* strict: a busy or unreachable API throws (error page, Try again, not cached)
+     instead of coming back as an empty listing. */
+  const category = await getCategoryProducts(slug, sort, true);
   if (category.name) return { ...category, tag: false };
-  const tag = await getTagProducts(slug, sort);
+  const tag = await getTagProducts(slug, sort, true);
   return tag.name ? { ...tag, tag: true } : { ...category, tag: false };
 }
 

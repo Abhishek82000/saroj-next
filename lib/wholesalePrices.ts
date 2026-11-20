@@ -2,6 +2,7 @@ import { site } from "./site";
 import { WHOLESALE_MIN_METRES } from "./wholesale";
 import type { Product, WholesaleRate } from "./types";
 import { fixImages } from "./img";
+import { apiFetch } from "./api";
 
 /**
  * Wholesale rates for listing cards. The listing APIs (/api/products and its
@@ -25,7 +26,7 @@ export async function wholesaleRates(ids: number[]): Promise<Map<number, Wholesa
 
   await Promise.all(batches.map(async (batch) => {
     try {
-      const res = await fetch(`${site.api}/api/products/cards?wholesale=1&ids=${batch.join(",")}`, {
+      const res = await apiFetch(`${site.api}/api/products/cards?wholesale=1&ids=${batch.join(",")}`, {
         headers: { Accept: "application/json" },
         next: { revalidate: 300 },
       });

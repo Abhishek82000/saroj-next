@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getAllProducts } from "@/lib/home";
 import { categoryHref } from "@/lib/nav";
 import { site } from "@/lib/site";
+import { apiFetch } from "@/lib/api";
 
 /** Rebuilt at most hourly. */
 export const revalidate = 3600;
@@ -79,7 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 async function getSitemapData(): Promise<SitemapApi["data"] | null> {
   try {
-    const res = await fetch(`${site.api}/api/sitemap`, { next: { revalidate: 3600 } });
+    const res = await apiFetch(`${site.api}/api/sitemap`, { next: { revalidate: 3600 } });
     if (!res.ok) return null;
     const json: SitemapApi = await res.json();
     return json.success && json.data ? json.data : null;

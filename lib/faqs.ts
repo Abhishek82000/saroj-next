@@ -1,6 +1,7 @@
 import { site } from "./site";
 import type { FaqsApiResponse } from "./types";
 import { fixImages } from "./img";
+import { apiFetch } from "./api";
 
 export interface Faq {
   id: number;
@@ -19,7 +20,7 @@ function stripHtml(html: string): string {
     empty list on any failure so the page can show its own empty state. */
 export async function getFaqs(): Promise<Faq[]> {
   try {
-    const res = await fetch(`${site.api}/api/faqs`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/faqs`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const json: FaqsApiResponse = fixImages(await res.json());
     return (json.data?.faqs ?? [])

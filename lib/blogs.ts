@@ -4,6 +4,7 @@ import type {
 } from "./types";
 import { fixImages } from "./img";
 import { adminMeta, type AdminMeta } from "./page-meta";
+import { apiFetch } from "./api";
 
 const BLOG_IMG = (file: string | null) => (file ? `${site.api}/img/uploads/blogs/${file}` : "");
 
@@ -55,7 +56,7 @@ const EMPTY_LIST: BlogList = { posts: [], categories: [], activeCategory: null, 
 export async function getBlogList(page = 1, category?: string): Promise<BlogList> {
   try {
     const q = category ? `&category=${encodeURIComponent(category)}` : "";
-    const res = await fetch(`${site.api}/api/blogs?page=${page}${q}`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/blogs?page=${page}${q}`, { next: { revalidate: 300 } });
     if (!res.ok) return EMPTY_LIST;
     const json: BlogsListApiResponse = fixImages(await res.json());
     return {
@@ -104,7 +105,7 @@ function relatedToProduct(p: BlogApiRelatedProduct): Product {
     on any failure or unknown slug so the route can 404 instead of breaking. */
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
-    const res = await fetch(`${site.api}/api/blogs/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/blogs/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json: BlogDetailApiResponse = fixImages(await res.json());
     const b = json.data?.blog;

@@ -5,6 +5,7 @@ import type {
 import { fixUnit, site } from "./site";
 import { WHOLESALE_MIN_METRES } from "./wholesale";
 import { fixImages } from "./img";
+import { apiFetch } from "./api";
 
 /**
  * Talks to ProductApiDetailController.
@@ -199,24 +200,25 @@ export class ApiUnavailableError extends Error {}
 async function get<T>(path: string, strict = false): Promise<T | null> {
   let res: Response;
   try {
-    res = await fetch(base() + path, {
-      headers: { Accept: "application/json" },
-      next: { revalidate: REVALIDATE },
-    });
+    res = await apiFetch(base() + path, { next: { revalidate: REVALIDATE } });
   } catch {
     if (strict) throw new ApiUnavailableError(`unreachable: ${path}`);
     return null;
   }
-  if (strict && !res.ok && res.status !== 404) throw new ApiUnavailableError(`${res.status}: ${path}`);
-  try {
-    if (!res.ok) return null;
-    const json = fixImages(await res.json());
-    return json?.success ? (json.data as T) : null;
-  } catch {
-    // A storefront that 500s because the API blinked is worse than one that
-    // falls back to the static catalogue, so swallow and let the caller decide.
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    if (strict) throw new ApiUnavailableError(`${res.status}: ${path}`);
     return null;
   }
+  try {
+    const json = fixImages(await res.json());
+    if (json?.success) return json.data as T;
+  } catch { /* an HTML error page, or a body cut short */ }
+  /* Strict callers turn null into a 404 page, so anything short of a real 404
+     (an unreadable body, success: false) is "the API blinked" — the error page
+     with its Try again, never cached — not "this product doesn't exist". */
+  if (strict) throw new ApiUnavailableError(`bad response: ${path}`);
+  return null;
 }
 
 /**

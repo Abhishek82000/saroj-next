@@ -5,6 +5,7 @@ import { ApiUnavailableError } from "./product-api";
 import { site } from "./site";
 import type { BannerSlide, HomeApiSlide, Product, Reel, CommonFeaturedCategory, HomeApiProduct, HomeCategorySection, HomeHandiCategory, HomeTagSection, HomeVideoProduct } from "./types";
 import { fixImages } from "./img";
+import { apiFetch } from "./api";
 
 /** One `video_handicraft_products` row: a handicraft category and its clip. */
 export interface HandicraftApiVideoCategory {
@@ -145,7 +146,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function fetchHandicraftJson(): Promise<HandicraftApiResponse> {
   for (let attempt = 0; ; attempt++) {
     try {
-      const res = await fetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 30 }, signal: AbortSignal.timeout(15000) });
+      const res = await apiFetch(`${site.api}/api/handicraft-data`, { next: { revalidate: 30 }, signal: AbortSignal.timeout(15000) });
       if (!res.ok) throw new ApiUnavailableError(`${res.status}: /api/handicraft-data`);
       return await res.json();
     } catch (e) {

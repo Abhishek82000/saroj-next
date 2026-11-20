@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { pageMeta } from "./seo";
 import { site } from "./site";
+import { apiFetch } from "./api";
 
 /** Meta fields typed in the admin. Empty strings when unset. */
 export interface AdminMeta {
@@ -47,7 +48,7 @@ export function withAdminMeta(defaults: PageMetaOpts, admin: AdminMeta | null): 
  */
 export async function getAdminPageMeta(slug: string): Promise<AdminMeta | null> {
   try {
-    const res = await fetch(`${site.api}/api/meta-data/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${site.api}/api/meta-data/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json = await res.json() as {
       metaData?: { page_url?: string | null; page_meta_title?: string | null; page_meta_desc?: string | null;
@@ -65,7 +66,7 @@ export async function getAdminPageMeta(slug: string): Promise<AdminMeta | null> 
 /** The home page's meta: GET /api/home → data.meta (the ar_pages row with no page_url). */
 export async function getHomeMeta(): Promise<AdminMeta | null> {
   try {
-    const res = await fetch(`${site.api}/api/home`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(15000) });
+    const res = await apiFetch(`${site.api}/api/home`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(15000) });
     if (!res.ok) return null;
     const json = await res.json() as { data?: { meta?: { meta_title?: string; meta_keyword?: string; meta_description?: string } } };
     const m = json.data?.meta;
