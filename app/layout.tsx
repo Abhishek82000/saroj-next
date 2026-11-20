@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import JsonLd from "@/components/seo/JsonLd";
 import { PixelPageViews } from "@/components/seo/Tracking";
 import { GA_ID, GTM_ID, META_PIXEL_ID } from "@/lib/tracking";
-import { graph, organizationLd, websiteLd } from "@/lib/seo";
+import { graph, websiteLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -97,7 +97,7 @@ gtag('config', '${GA_ID}');` }} />
         <Suspense fallback={null}><PixelPageViews /></Suspense>
         <a href="#main" className="skip">Skip to content</a>
         <Shell>{children}</Shell>
-        <JsonLd data={graph([organizationLd(), websiteLd()])} />
+        <JsonLd data={graph([websiteLd()])} />
       </body>
     </html>
   );

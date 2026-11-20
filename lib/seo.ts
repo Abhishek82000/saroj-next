@@ -56,17 +56,16 @@ export function pageMeta(opts: {
 
 /* ---------- structured data ---------- */
 
+/** The business as an Organization — rendered on the home page only (app/page.tsx). */
 export const organizationLd = () => ({
-  "@type": "ClothingStore",
+  "@type": "Organization",
   "@id": abs("/#organization"),
   name: site.name,
-  url: site.url,
-  description: site.description,
-  telephone: site.phone,
+  url: abs("/"),
+  logo: { "@type": "ImageObject", url: site.logo },
+  description: "Saroj Textile offers a wide collection of traditional Indian printed cotton fabrics, Jaipuri cotton, Ajrakh, Kalamkari, rayon and other textile products.",
   email: site.email,
-  priceRange: "₹₹",
-  currenciesAccepted: site.currency,
-  paymentAccepted: "Cash, Credit Card, Debit Card, UPI, Net Banking",
+  telephone: site.phone,
   address: {
     "@type": "PostalAddress",
     streetAddress: site.address.street,
@@ -75,8 +74,7 @@ export const organizationLd = () => ({
     postalCode: site.address.postalCode,
     addressCountry: site.address.country,
   },
-  geo: { "@type": "GeoCoordinates", latitude: site.geo.lat, longitude: site.geo.lng },
-  sameAs: [...site.social],
+  sameAs: ["https://www.instagram.com/saroj_textile/"],
 });
 
 export const websiteLd = () => ({

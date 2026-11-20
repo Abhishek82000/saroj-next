@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import HomeSections from "@/components/home/HomeSections";
 import { getHomeMeta, withAdminMeta } from "@/lib/page-meta";
 import { site } from "@/lib/site";
+import JsonLd from "@/components/seo/JsonLd";
+import { graph, organizationLd } from "@/lib/seo";
 
 /* The admin's home meta (GET /api/home → meta) over these defaults. */
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,5 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function HomePage() {
-  return <HomeSections />;
+  return (
+    <>
+      <HomeSections />
+      <JsonLd data={graph([organizationLd()])} />
+    </>
+  );
 }
