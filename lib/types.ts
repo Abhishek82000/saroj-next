@@ -147,6 +147,8 @@ export interface LiveProduct {
   /** product_is_handicraft = 1. */
   isHandicraft?: boolean;
   stock: number;
+  /** product_shipping_free = 1: retail orders of it ship free. */
+  shippingFree?: boolean;
   rating: number;
   reviewCount: number;
   price: PriceBlock;

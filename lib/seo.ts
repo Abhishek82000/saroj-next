@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { site } from "./site";
-import { discount } from "./price";
 import { faq } from "./content";
-import type { Product } from "./types";
+import type { Product, ProductDetail } from "./types";
+import { productHref } from "./product-api";
+import { WHOLESALE_GST_RATE } from "./wholesale";
 
 export const abs = (path: string) =>
   path.startsWith("http") ? path : site.url.replace(/\/$/, "") + path;
@@ -101,53 +102,109 @@ export const breadcrumbLd = (trail: { name: string; path: string }[]) => ({
   })),
 });
 
-export const productLd = (p: Product) => {
-  const off = discount(p);
+const money = (n: number) => Math.round(n * 100) / 100;
+
+/** Returns + Exchanges (/return-policy): damaged or defective items only, reported
+    within 7 days of delivery, picked up (or posted back) at the shop's cost in India. */
+const returnPolicyLd = () => ({
+  "@type": "MerchantReturnPolicy",
+  applicableCountry: "IN",
+  returnPolicyCountry: "IN",
+  returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+  merchantReturnDays: 7,
+  returnMethod: "https://schema.org/ReturnByMail",
+  itemDefectReturnFees: "https://schema.org/FreeReturn",
+  merchantReturnLink: abs("/return-policy"),
+});
+
+/**
+ * Product + Offer for a product page, from the live API data. The retail page
+ * (/product/<slug>) and the wholesale page (/wholesale/product/<slug>) are both
+ * indexed with self-canonicals, so each gets its own node (@id = its own URL)
+ * describing the terms of that page:
+ *
+ * - Price: Google wants what the buyer pays, tax included. Retail prices
+ *   already include GST; wholesale prices are quoted before 5% GST, so the
+ *   wholesale offer adds it.
+ * - Minimum order: eligibleQuantity — the product's own minimum (the wholesale
+ *   API returns the trade minimum, e.g. 10 m or 5 pcs).
+ * - Shipping: stated only when it's known to be free (a retail product marked
+ *   product_shipping_free). Otherwise it's priced by weight at checkout, and
+ *   wholesale never ships free, so no rate is claimed rather than a wrong one.
+ * - MRP: a struck-through price on retail when the selling price is lower.
+ * - Enquiry-only pieces have no price, so no Offer.
+ */
+export const productLd = (p: Product, detail?: ProductDetail) => {
+  const live = detail?.live ?? p.live;
+  const wholesale = detail?.mode === "wholesale";
+  const url = abs(productHref(p.slug, wholesale));
+  const meter = (live?.cut.unit ?? p.unit) === "meter";
+  const unitCode = meter ? "MTR" : "H87"; // UN/CEFACT: metre, piece
+  const minQty = live?.cut.min ?? p.cut?.min ?? 1;
+  const base = live?.price.selling ?? p.price;
+  const mrp = live?.price.mrp ?? p.mrp;
+  const price = money(wholesale ? base * (1 + WHOLESALE_GST_RATE) : base);
+  const outOfStock = (live ? live.stock <= 0 : false) || p.stock === "out";
+  const enquiry = live?.cut.mode === "enquiry" || !(price > 0);
+  const reviews = detail?.reviews;
+  const unitPrice = (amount: number, strike = false) => ({
+    "@type": "UnitPriceSpecification",
+    ...(strike ? { priceType: "https://schema.org/StrikethroughPrice" } : {}),
+    price: amount,
+    priceCurrency: site.currency,
+    valueAddedTaxIncluded: true,
+  });
+
   return {
     "@type": "Product",
-    "@id": abs(`/product/${p.slug}#product`),
+    "@id": `${url}#product`,
     name: p.name,
-    description: p.description ?? site.description,
-    image: p.images.map((i) => i.src),
-    sku: p.slug,
-    material: p.material,
+    url,
+    image: [...new Set(p.images.map((i) => i.src).filter(Boolean))],
+    description: (p.description || live?.meta.description || p.name).slice(0, 5000),
+    sku: live?.sku || String(live?.id ?? p.slug),
     brand: { "@type": "Brand", name: site.name },
-    category: p.kind === "fabric" ? "Fabric by the meter" : "Handicraft",
-    ...(off ? { award: `${off}% off` } : {}),
-    offers: {
-      "@type": "Offer",
-      url: abs(`/product/${p.slug}`),
-      priceCurrency: site.currency,
-      price: p.price,
-      priceValidUntil: "2027-12-31",
-      itemCondition: "https://schema.org/NewCondition",
-      availability:
-        p.stock === "out"
-          ? "https://schema.org/OutOfStock"
-          : p.stock === "low"
-            ? "https://schema.org/LimitedAvailability"
-            : "https://schema.org/InStock",
-      seller: { "@id": abs("/#organization") },
-      ...(p.unit === "meter" ? { eligibleQuantity: { "@type": "QuantitativeValue", unitCode: "MTR", minValue: p.cut?.min ?? 1 } } : {}),
-      shippingDetails: {
-        "@type": "OfferShippingDetails",
-        shippingRate: { "@type": "MonetaryAmount", value: 0, currency: site.currency },
-        shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 2, unitCode: "DAY" },
-          transitTime: { "@type": "QuantitativeValue", minValue: 5, maxValue: 7, unitCode: "DAY" },
-        },
+    category: live?.isHandicraft || p.kind === "craft" ? "Handicraft" : "Fabric",
+    ...(p.material && p.material !== "—" ? { material: p.material } : {}),
+    ...(reviews && reviews.total > 0 && reviews.average > 0 ? {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: money(reviews.average),
+        reviewCount: reviews.total,
+        bestRating: 5,
+        worstRating: 1,
       },
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "IN",
-        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 7,
-        returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn",
+    } : {}),
+    ...(enquiry ? {} : {
+      offers: {
+        "@type": "Offer",
+        "@id": `${url}#offer`,
+        url,
+        price,
+        priceCurrency: site.currency,
+        priceSpecification: [
+          unitPrice(price),
+          ...(!wholesale && mrp > base ? [unitPrice(money(mrp), true)] : []),
+        ],
+        eligibleQuantity: { "@type": "QuantitativeValue", minValue: minQty, unitCode },
+        availability: outOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: { "@type": "Organization", "@id": abs("/#organization"), name: site.name, url: abs("/") },
+        ...(!wholesale && live?.shippingFree ? {
+          shippingDetails: {
+            "@type": "OfferShippingDetails",
+            shippingRate: { "@type": "MonetaryAmount", value: 0, currency: site.currency },
+            shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
+            deliveryTime: {
+              "@type": "ShippingDeliveryTime",
+              handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 2, unitCode: "DAY" },
+              transitTime: { "@type": "QuantitativeValue", minValue: 5, maxValue: 8, unitCode: "DAY" },
+            },
+          },
+        } : {}),
+        hasMerchantReturnPolicy: returnPolicyLd(),
       },
-    },
+    }),
   };
 };
 

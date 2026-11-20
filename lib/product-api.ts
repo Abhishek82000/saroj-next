@@ -40,6 +40,8 @@ interface RawProduct {
   gallery: { id: number; src: string; alt: string }[];
   short_description: string | null; description_html: string | null;
   type: number; style_type: number; stock: number; in_carts: number;
+  /** product_shipping_free = 1. Absent from older API builds (treated as not free). */
+  shipping_free?: boolean;
   /** product_is_handicraft: 1 for a handicraft piece. */
   is_handicraft?: number;
   rating: number; review_count: number;
@@ -102,6 +104,7 @@ function mapLive(raw: RawProduct): LiveProduct {
     styleType: raw.style_type,
     isHandicraft: Number(raw.is_handicraft) === 1,
     stock: raw.stock,
+    shippingFree: raw.shipping_free === true,
     rating: raw.rating,
     reviewCount: raw.review_count,
     price: raw.price,

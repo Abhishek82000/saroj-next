@@ -314,6 +314,7 @@ class ProductApiDetailController extends Controller
             'type'              => (int) $product->product_type,      // 0 simple, 1 variable
             'style_type'        => (int) $product->product_style_type,
             'stock'             => (int) $product->product_stock,
+            'shipping_free'     => (int) $product->product_shipping_free === 1,
             'in_carts'          => (int) ($product->has_many_cart_count ?? 0),
             'rating'            => (float) ($product->product_rating ?? 0),
             'review_count'      => (int) ($product->product_review ?? 0),

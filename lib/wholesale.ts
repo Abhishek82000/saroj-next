@@ -8,6 +8,9 @@ import type { Product, WholesaleRate } from "./types";
  */
 export const WHOLESALE_MIN_METRES = 10;
 
+/** GST added on top of wholesale prices at checkout (retail prices already include it). */
+export const WHOLESALE_GST_RATE = 0.05;
+
 /** The trade rate for a piece, or null when the wholesale feed gave none. */
 export const wholesaleRate = (p: Product): WholesaleRate | null => p.wholesale ?? null;
 

@@ -75,7 +75,7 @@ export default function ProductView({
       {detail && <HandicraftHouse categories={detail.handicraftCategories} />}
 
       <JsonLd data={graph([
-        productLd(p),
+        productLd(p, detail),
         breadcrumbLd([
           { name: "Home", path: "/" },
           { name: wholesale ? "Wholesale" : "Shop", path: wholesale ? WHOLESALE_BASE : "/shop" },
