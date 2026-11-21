@@ -5,6 +5,7 @@ import type {
 import { fixImages } from "./img";
 import { adminMeta, type AdminMeta } from "./page-meta";
 import { apiFetch } from "./api";
+import { ApiUnavailableError } from "./product-api";
 
 const BLOG_IMG = (file: string | null) => (file ? `${site.api}/img/uploads/blogs/${file}` : "");
 
@@ -73,6 +74,10 @@ export async function getBlogList(page = 1, category?: string): Promise<BlogList
 
 export interface BlogPost extends BlogSummary {
   html: string;
+  /** Last edit in the admin (updated_at), ISO — the schema's dateModified. */
+  updated?: string;
+  /** Admin keywords, comma-separated. */
+  keywords?: string;
   related: Product[];
   /** blog_meta_title / blog_meta_desc / blog_meta_keyword from the admin. */
   meta: AdminMeta;
@@ -102,21 +107,33 @@ function relatedToProduct(p: BlogApiRelatedProduct): Product {
 }
 
 /** A single post's full page, backed by GET /api/blogs/<slug>. Returns null
-    on any failure or unknown slug so the route can 404 instead of breaking. */
+    only for an unknown slug (the API answers 404), so the route can 404. A
+    busy or unreachable API throws ApiUnavailableError instead — the error
+    page with Try again, never cached — rather than a false "not found". */
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  const path = `/api/blogs/${encodeURIComponent(slug)}`;
+  let res: Response;
   try {
-    const res = await apiFetch(`${site.api}/api/blogs/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } });
-    if (!res.ok) return null;
-    const json: BlogDetailApiResponse = fixImages(await res.json());
-    const b = json.data?.blog;
-    if (!b) return null;
-    return {
-      ...toSummary(b),
-      html: b.blog_desc,
-      related: (json.data?.related_products ?? []).map(relatedToProduct),
-      meta: adminMeta(b.blog_meta_title, b.blog_meta_desc, b.blog_meta_keyword),
-    };
+    res = await apiFetch(`${site.api}${path}`, { next: { revalidate: 300 } });
   } catch {
-    return null;
+    throw new ApiUnavailableError(`unreachable: ${path}`);
   }
+  if (res.status === 404) return null;
+  if (!res.ok) throw new ApiUnavailableError(`${res.status}: ${path}`);
+  let json: BlogDetailApiResponse;
+  try {
+    json = fixImages(await res.json());
+  } catch {
+    throw new ApiUnavailableError(`bad response: ${path}`);
+  }
+  const b = json.data?.blog;
+  if (!b) return null;
+  return {
+    ...toSummary(b),
+    html: b.blog_desc,
+    updated: b.updated_at || undefined,
+    keywords: b.blog_meta_keyword || undefined,
+    related: (json.data?.related_products ?? []).map(relatedToProduct),
+    meta: adminMeta(b.blog_meta_title, b.blog_meta_desc, b.blog_meta_keyword),
+  };
 }

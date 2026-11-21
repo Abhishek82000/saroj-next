@@ -5,7 +5,7 @@ import Photo from "@/components/ui/Photo";
 import Rail from "@/components/product/Rail";
 import JsonLd from "@/components/seo/JsonLd";
 import { getBlogPost } from "@/lib/blogs";
-import { breadcrumbLd, graph } from "@/lib/seo";
+import { blogPostingLd, breadcrumbLd, graph } from "@/lib/seo";
 import { withAdminMeta } from "@/lib/page-meta";
 
 type Params = Promise<{ slug: string }>;
@@ -69,6 +69,7 @@ export default async function BlogPostPage({ params }: { params: Params }) {
       )}
 
       <JsonLd data={graph([
+        blogPostingLd(post),
         breadcrumbLd([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }, { name: post.name, path: `/blog/${slug}` }]),
       ])} />
     </main>

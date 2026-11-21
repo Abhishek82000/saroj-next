@@ -7,7 +7,8 @@ import JsonLd from "@/components/seo/JsonLd";
 import { attachWholesale } from "@/lib/wholesalePrices";
 import { WHOLESALE_SECTION } from "@/lib/wholesale";
 import { getCategoryProducts, getHomeData, getTagProducts, shuffled, type ProductsApiSort } from "@/lib/home";
-import { breadcrumbLd, graph, itemListLd } from "@/lib/seo";
+import { breadcrumbLd, collectionPageLd, graph } from "@/lib/seo";
+import { productHref } from "@/lib/product-api";
 import { adminMeta, withAdminMeta } from "@/lib/page-meta";
 
 type Params = Promise<{ slug: string }>;
@@ -60,17 +61,28 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
   const listing = await resolveListing(slug, sort);
   const { name, categories, tags, priceRange, saleProducts, fabricCategories } = listing;
   const subcategories = listing.subcategories ?? [];
+  const title = name || titleFromSlug(slug);
+  const base = wholesale ? WHOLESALE_SECTION : "/shop";
+  const path = `${base}/${slug}`;
+  /* Structured data: the same description the page's meta carries. */
+  const ld = (items: { name: string; path: string; image?: string }[]) => graph([
+    collectionPageLd({
+      name: title,
+      description: listing.meta?.description || listing.shortDesc
+        || `${title} at the Saroj Textile counter in Jaipur — hand block printed cotton and handicraft from six Jaipur lanes.`,
+      path,
+      image: listing.meta?.image || undefined,
+      items,
+    }),
+    breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path }]),
+  ]);
   /* A parent category (e.g. Tote Bags) opens on its subcategories, not a product list. */
   if (!listing.tag && subcategories.length > 0) {
-    const title = name || titleFromSlug(slug);
-    const base = wholesale ? WHOLESALE_SECTION : "/shop";
     return (
       <main id="main">
         <SubcategoryGrid title={title} lede={listing.shortDesc} subcategories={subcategories} wholesale={wholesale} />
         <CategoryAbout title={title} html={listing.description} />
-        <JsonLd data={graph([
-          breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path: `${base}/${slug}` }]),
-        ])} />
+        <JsonLd data={ld(subcategories.map((c) => ({ name: c.name, path: `${base}/${c.slug}`, image: c.image || undefined })))} />
       </main>
     );
   }
@@ -80,7 +92,6 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
   const products = wholesale ? await attachWholesale(listed) : listed;
   /* /api/products' `handcategories` has no cat_handi_type, which the rail's lanes need. */
   const { handicraftCats } = await getHomeData();
-  const title = name || titleFromSlug(slug);
 
   return (
     <main id="main">
@@ -100,10 +111,7 @@ export async function CategoryView({ params, searchParams, wholesale }: { params
 
       {!listing.tag && <CategoryAbout title={title} html={listing.description} />}
 
-      <JsonLd data={graph([
-        breadcrumbLd([{ name: "Home", path: "/" }, { name: title, path: `/shop/${slug}` }]),
-        itemListLd(products, `/shop/${slug}`),
-      ])} />
+      <JsonLd data={ld(products.map((p) => ({ name: p.name, path: productHref(p.slug, wholesale), image: p.images[0]?.src || undefined })))} />
     </main>
   );
 }

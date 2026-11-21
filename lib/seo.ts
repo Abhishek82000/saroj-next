@@ -94,6 +94,7 @@ export const websiteLd = () => ({
 
 export const breadcrumbLd = (trail: { name: string; path: string }[]) => ({
   "@type": "BreadcrumbList",
+  ...(trail.length ? { "@id": abs(trail[trail.length - 1].path) + "#breadcrumb" } : {}),
   itemListElement: trail.map((t, i) => ({
     "@type": "ListItem",
     position: i + 1,
@@ -219,6 +220,99 @@ export const itemListLd = (items: Product[], path: string) => ({
     name: p.name,
   })),
 });
+
+/**
+ * CollectionPage for a category, subcategory or tag listing (/shop/<slug>,
+ * /wholesale/<slug>), from the live API. Its mainEntity is an ItemList of what
+ * the page actually lists: the products (each linking to the retail or
+ * wholesale product page, matching the page), or — on a parent category — its
+ * subcategories. Capped at 50 entries to keep the HTML light; numberOfItems
+ * still states the full count. The breadcrumb is linked by @id.
+ */
+export const collectionPageLd = (opts: {
+  name: string;
+  description: string;
+  path: string;
+  image?: string;
+  items: { name: string; path: string; image?: string }[];
+}) => {
+  const url = abs(opts.path);
+  return {
+    "@type": "CollectionPage",
+    "@id": `${url}#collection`,
+    url,
+    name: opts.name,
+    description: opts.description,
+    ...(opts.image ? { primaryImageOfPage: { "@type": "ImageObject", url: opts.image } } : {}),
+    inLanguage: "en-IN",
+    isPartOf: { "@id": abs("/#website") },
+    breadcrumb: { "@id": `${url}#breadcrumb` },
+    mainEntity: {
+      "@type": "ItemList",
+      "@id": `${url}#list`,
+      numberOfItems: opts.items.length,
+      itemListOrder: "https://schema.org/ItemListUnordered",
+      itemListElement: opts.items.slice(0, 50).map((it, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: abs(it.path),
+        name: it.name,
+        ...(it.image ? { image: it.image } : {}),
+      })),
+    },
+  };
+};
+
+/** "2026-02-21" or an ISO timestamp -> ISO 8601; undefined if unparseable. */
+const isoDate = (d?: string) => {
+  if (!d) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return `${d}T00:00:00+05:30`; // a bare admin date is IST
+  const t = new Date(d);
+  return Number.isNaN(t.getTime()) ? undefined : t.toISOString();
+};
+
+/**
+ * BlogPosting for a journal post (/blog/<slug>), from the live API. The admin
+ * has no author field, so the shop itself is the author and publisher (Google
+ * accepts an Organization author). dateModified is the admin's last edit,
+ * never earlier than the publish date. Falls back to the site share image
+ * when the post has none — Google requires an image for article rich results.
+ */
+export const blogPostingLd = (post: {
+  slug: string; name: string; excerpt: string; image: string; date: string;
+  updated?: string; category?: string; keywords?: string; html: string;
+}) => {
+  const url = abs(`/blog/${post.slug}`);
+  const published = isoDate(post.date);
+  const updated = isoDate(post.updated);
+  const modified = published && updated && new Date(updated) > new Date(published) ? updated : published;
+  const text = post.html.replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/g, " ").replace(/\s+/g, " ").trim();
+  const org = {
+    "@type": "Organization",
+    "@id": abs("/#organization"),
+    name: site.name,
+    url: abs("/"),
+    logo: { "@type": "ImageObject", url: site.logo },
+  };
+
+  return {
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+    headline: post.name.slice(0, 110),
+    description: post.excerpt,
+    image: [post.image || site.shareImage.url],
+    ...(published ? { datePublished: published, dateModified: modified } : {}),
+    author: org,
+    publisher: org,
+    ...(post.category ? { articleSection: post.category } : {}),
+    ...(post.keywords ? { keywords: post.keywords } : {}),
+    ...(text ? { wordCount: text.split(" ").length } : {}),
+    inLanguage: "en-IN",
+    isPartOf: { "@type": "Blog", "@id": abs("/blog#blog"), name: `${site.name} Blog`, url: abs("/blog") },
+  };
+};
 
 /** Defaults to the static fallback list; /faq passes the live one instead. */
 export const faqLd = (items: [string, string][] = faq) => ({

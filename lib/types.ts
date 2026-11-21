@@ -467,6 +467,8 @@ export interface BlogApiPost {
   blog_image: string | null;
   blog_date: string;
   blog_featured: number;
+  created_at?: string | null;
+  updated_at?: string | null;
   categories?: BlogApiCategory;
 }
 
